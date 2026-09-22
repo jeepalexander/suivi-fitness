@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SUIVI FITNESS</title>
+
+  <!-- PWA Settings -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SUIVI FITNESS">
+  <link rel="apple-touch-icon" href="https://img.icons8.com/color/180/dumbbell.png">
+
+  <!-- Chart.js & Fonts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #121212;
+      --card-bg: #1e1e1e;
+      --accent-a: #1f77b4;
+      --accent-b: #ff7f0e;
+      --accent-c: #d62728;
+      --text: #ffffff;
+      --text-muted: #888888;
+      --border: #333333;
+      --success: #2ca02c;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg); color: var(--text); padding-bottom: 80px; }
+
+    header { background: var(--card-bg); padding: 12px 15px; text-align: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-size: 1.1rem; font-weight: 700; }
+    header p { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+    .timer-btn {
+      background: #2a2a2a;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: none; 
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .timer-btn.running {
+      background: var(--success);
+      border-color: var(--success);
+      color: white;
+    }
+    .timer-btn.finished {
+      background: var(--accent-c);
+      border-color: var(--accent-c);
+      color: white;
+      animation: pulse 0.8s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { opacity: 1; transform: scale(1); }
+      to { opacity: 0.7; transform: scale(1.05); }
+    }
+
+    nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); display: flex; border-top: 1px solid var(--border); z-index: 100; }
+    nav button { flex: 1; padding: 10px 0; background: none; border: none; color: var(--text-muted); font-size: 0.7rem; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    nav button.active { color: #1f77b4; font-weight: 600; }
+    nav button svg { width: 20px; height: 20px; fill: currentColor; }
+
+    .container { padding: 15px; max-width: 600px; margin: 0 auto; display: none; }
+    .container.active { display: block; }
+
+    .card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); }
+    .card-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+
+    .btn { background: #1f77b4; color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: 600; font-size: 0.9rem; cursor: pointer; margin-top: 10px; }
+    .btn:active { opacity: 0.8; }
+    .btn-secondary { background: #333333; margin-top: 8px; }
+
+    .watch-memo {
+      background: #ff7f0e22;
+      border: 1px solid var(--accent-b);
+      color: #ff9f43;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-align: center;
+      margin-top: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .exercise-item { border-bottom: 1px solid var(--border); padding: 12px 0; }
+    .exercise-item:last-child { border-bottom: none; }
+    .ex-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-weight: 600; font-size: 0.88rem; }
+    .ex-title { display: flex; align-items: center; gap: 10px; }
+    
+    .ex-icon-badge {
+      width: 32px;
+      height: 32px;
+      background: #121212;
+      border: 1px solid #333333;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .ex-icon-badge img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .sets-grid { display: flex; flex-direction: column; gap: 8px; }
+    .set-row { 
+      display: grid; 
+      grid-template-columns: 50px 1fr 1fr 42px; 
+      gap: 8px; 
+      align-items: center;
+      padding: 4px;
+      border-radius: 6px;
+      transition: background 0.2s ease;
+    }
+    .set-row.done {
+      background: #223a22;
+    }
+
+    .set-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
+    
+    .set-input { 
+      background: #222222; 
+      border: 1px solid var(--border); 
+      color: var(--text-muted); 
+      padding: 8px 4px; 
+      border-radius: 6px; 
+      font-size: 0.85rem; 
+      font-weight: 600;
+      text-align: center; 
+      width: 100%; 
+      transition: all 0.2s ease;
+    }
+    .set-input.active-input, .set-row.done .set-input { 
+      color: #ffffff !important; 
+      background: #2a2a2a;
+      border-color: #555555;
+    }
+
+    .btn-check-set {
+      background: #2a2a2a;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 6px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: bold;
+      transition: all 0.2s ease;
+    }
+    .set-row.done .btn-check-set {
+      background: var(--success);
+      border-color: var(--success);
+      color: white;
+    }
+
+    .workout-meta-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #222222;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .filter-group { display: flex; gap: 4px; }
+    .filter-btn { background: #2a2a2a; border: 1px solid var(--border); color: var(--text-muted); padding: 4px 8px; border-radius: 6px; font-size: 0.72rem; cursor: pointer; }
+    .filter-btn.active { background: #1f77b4; color: white; border-color: #1f77b4; }
+    select.filter-select { background: #2a2a2a; border: 1px solid var(--border); color: white; padding: 8px; border-radius: 6px; font-size: 0.82rem; width: 100%; margin-bottom: 8px; }
+
+    .history-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+    .badge-A { background: var(--accent-a); color: white; }
+    .badge-B { background: var(--accent-b); color: white; }
+    .badge-C { background: var(--accent-c); color: white; }
+
+    .program-ex-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #2a2a2a;
+      font-size: 0.85rem;
+    }
+    .program-ex-row:last-child { border-bottom: none; }
+
+    .danger-zone {
+      margin-top: 30px;
+      padding-top: 15px;
+      border-top: 1px dashed var(--border);
+      text-align: center;
+    }
+    .btn-danger-link {
+      background: none;
+      border: none;
+      color: #666666;
+      font-size: 0.75rem;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div style="text-align: left;">
+      <h1>SUIVI FITNESS</h1>
+      <p id="sub-header">Chargement du programme...</p>
+    </div>
+
+    <!-- BOUTON CHRONO REPOS -->
+    <button id="timer-btn" class="timer-btn" onclick="toggleRestTimer()">
+      ⏱️ <span id="timer-display">2:00</span>
+    </button>
+  </header>
+
+  <!-- TAB 0: PROGRAMME GLOBAL -->
+  <div id="tab-programme" class="container active">
+    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; text-align: center;">
+      🚣 <strong>Méthode d'échauffement :</strong> 1000m Rameur + 2 séries légères uniquement sur le 1er exercice de chaque séance.
+    </p>
+    <div id="program-overview"></div>
+  </div>
+
+  <!-- TAB 1: SÉANCE DU JOUR -->
+  <div id="tab-seance" class="container">
+    <div class="card">
+      <div class="card-title">
+        <span id="seance-type-title">Séance</span>
+        <span id="seance-badge" class="badge">A</span>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">
+        🚣 Échauffement : Rameur 1000m + 2 séries légères sur le 1er mouvement.
+      </p>
+
+      <div class="workout-meta-bar">
+        <span>⏱️ Durée : <strong id="workout-duration-display" style="color:var(--text); cursor:pointer;" onclick="toggleWorkoutTimer()">00:00</strong></span>
+        <span>Séries : <strong id="sets-progress-text" style="color: var(--text);">0 / 0</strong></span>
+      </div>
+
+      <form id="workout-form">
+        <div id="exercises-list"></div>
+
+        <div class="watch-memo">
+          ⌚ N'oublie pas d'arrêter le suivi de ta montre !
+        </div>
+
+        <button type="submit" class="btn">Valider & Enregistrer la séance</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- TAB 2: PROGRESSION & ANALYSE -->
+  <div id="tab-progression" class="container">
+    <div class="card">
+      <div class="card-title">
+        <span>Volume Total Séance (kg)</span>
+        <div class="filter-group">
+          <button class="filter-btn active" onclick="setVolumeFilter('all', this)">Séances</button>
+          <button class="filter-btn" onclick="setVolumeFilter('month', this)">Par Mois</button>
+        </div>
+      </div>
+      <canvas id="tonnageChart" height="200"></canvas>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Progression par Exercice</div>
+      <select id="exercise-filter" class="filter-select" onchange="renderExerciseChart()">
+      </select>
+      
+      <div class="filter-group" style="margin-bottom: 12px; justify-content: center;">
+        <button class="filter-btn active" id="btn-mode-max" onclick="setExMetricMode('max', this)">Charge Max (kg)</button>
+        <button class="filter-btn" id="btn-mode-vol" onclick="setExMetricMode('volume', this)">Volume Cumulé (kg)</button>
+      </div>
+
+      <canvas id="exerciseChart" height="180"></canvas>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Suivi du Poids Corporel</div>
+      <canvas id="weightChart" height="150"></canvas>
+      <div style="display: flex; gap: 8px; margin-top: 12px;">
+        <input type="number" step="0.1" id="new-weight" placeholder="Poids (kg)" style="flex:1; background:#2a2a2a; border:1px solid var(--border); color:white; padding:8px; border-radius:6px;">
+        <button onclick="addWeight()" class="btn" style="width: auto; margin:0; padding:8px 15px;">Ajouter</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: HISTORIQUE -->
+  <div id="tab-historique" class="container">
+    <div class="card">
+      <div class="card-title">Historique des Séances</div>
+      <div id="history-list"></div>
+      
+      <div style="margin-top: 15px;">
+        <button onclick="exportData()" class="btn btn-secondary">Exporter la sauvegarde (JSON)</button>
+        <button onclick="document.getElementById('import-file').click()" class="btn btn-secondary">Importer une sauvegarde</button>
+        <input type="file" id="import-file" style="display:none" onchange="importData(event)">
+      </div>
+
+      <div class="danger-zone">
+        <button onclick="resetData()" class="btn-danger-link">Réinitialiser les données d'origine</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVIGATION -->
+  <nav>
+    <button onclick="switchTab('programme')" id="nav-programme" class="active">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+      Programme
+    </button>
+    <button onclick="switchTab('seance')" id="nav-seance">
+      <svg viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 6.29 3.43 4.86 2 3.43 3.43 2 4.86 3.43 6.29 2 7.71 3.43 9.14 2 10.57 3.43 12 7 20.57 15.57 17 12 20.57z"/></svg>
+      Séance
+    </button>
+    <button onclick="switchTab('progression')" id="nav-progression">
+      <svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+      Graphiques
+    </button>
+    <button onclick="switchTab('historique')" id="nav-historique">
+      <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+      Historique
+    </button>
+  </nav>
+
+  <script>
+    // CORRESPONDANCE ALIGNÉE SUR TES FICHIERS (Tirets bas _)
+    const EXERCISE_ICONS = {
+      "Presse à cuisses": "icons/leg_press.png",
+      "Développé couché": "icons/bench_press.png",
+      "Tirage horizontal": "icons/seated_row.png",
+      "Développé militaire": "icons/overhead_press.png",
+      "Curl biceps": "icons/biceps_curl.png",
+      "Mollets": "icons/calf_raise.png",
+      "Soulevé de terre": "icons/deadlift.png",
+      "Développé incliné": "icons/incline_bench.png",
+      "Tirage vertical": "icons/lat_pulldown.png",
+      "Tractions": "icons/pull_up.png",
+      "Élévations latérales": "icons/lateral_raise.png",
+      "Extension triceps": "icons/triceps_extension.png",
+      "Leg Extension": "icons/leg_extension.png",
+      "Fentes marchées": "icons/walking_lunge.png",
+      "Dips": "icons/dips.png",
+      "Rowing unilatéral": "icons/dumbbell_row.png",
+      "Oiseau (Arrière d'épaule)": "icons/reverse_fly.png",
+      "Mollets / Finition": "icons/calf_raise.png",
+      "Leg Curl": "icons/leg_curl.png"
+    };
+
+    let restTimerInterval = null;
+    let restTimerSeconds = 120;
+    const REST_DURATION = 120;
+
+    function playBeep() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        for (let i = 0; i < 3; i++) {
+          setTimeout(() => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sine';
+            osc.frequency.value = 880;
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.15);
+          }, i * 250);
+        }
+      } catch (e) {
+        console.log("Audio non supporté");
+      }
+    }
+
+    function updateTimerDisplay() {
+      const display = document.getElementById('timer-display');
+      const m = Math.floor(restTimerSeconds / 60);
+      const s = restTimerSeconds % 60;
+      display.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    function toggleRestTimer() {
+      const btn = document.getElementById('timer-btn');
+      if (restTimerInterval) {
+        clearInterval(restTimerInterval);
+        restTimerInterval = null;
+        restTimerSeconds = REST_DURATION;
+        btn.className = 'timer-btn running';
+        updateTimerDisplay();
+      } else {
+        restTimerSeconds = REST_DURATION;
+        btn.className = 'timer-btn running';
+        updateTimerDisplay();
+
+        restTimerInterval = setInterval(() => {
+          restTimerSeconds--;
+          updateTimerDisplay();
+
+          if (restTimerSeconds <= 0) {
+            clearInterval(restTimerInterval);
+            restTimerInterval = null;
+            btn.className = 'timer-btn finished';
+            document.getElementById('timer-display').innerText = 'GO !';
+            playBeep();
+            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+          }
+        }, 1000);
+      }
+    }
+
+    let workoutTimerInterval = null;
+    let workoutSeconds = 0;
+
+    function startWorkoutTimer() {
+      if (!workoutTimerInterval) {
+        workoutTimerInterval = setInterval(() => {
+          workoutSeconds++;
+          const m = Math.floor(workoutSeconds / 60);
+          const s = workoutSeconds % 60;
+          document.getElementById('workout-duration-display').innerText = 
+            `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+        }, 1000);
+      }
+    }
+
+    function resetWorkoutTimer() {
+      if (workoutTimerInterval) {
+        clearInterval(workoutTimerInterval);
+        workoutTimerInterval = null;
+      }
+      workoutSeconds = 0;
+      document.getElementById('workout-duration-display').innerText = "00:00";
+    }
+
+    function toggleWorkoutTimer() {
+      if (workoutTimerInterval) {
+        clearInterval(workoutTimerInterval);
+        workoutTimerInterval = null;
+      } else {
+        startWorkoutTimer();
+      }
+    }
+
+    function getFormattedWorkoutDuration() {
+      const m = Math.floor(workoutSeconds / 60);
+      if (m === 0) return "< 1 min";
+      return `${m} min`;
+    }
+
+    const PRELOADED_HISTORY = [
+      { id: 1, date: "2026-07-27", type: "A", tonnage: 7154, duration: "48 min", exercises: [
+        { name: "Presse à cuisses", maxWeight: 86, totalVolume: 3440 }, { name: "Développé couché", maxWeight: 70, totalVolume: 2240 }, { name: "Tirage horizontal", maxWeight: 54, totalVolume: 2160 },
+        { name: "Développé militaire", maxWeight: 28, totalVolume: 840 }, { name: "Curl biceps", maxWeight: 24, totalVolume: 720 }, { name: "Mollets", maxWeight: 35, totalVolume: 1260 }
+      ]},
+      { id: 2, date: "2026-07-29", type: "B", tonnage: 7788, duration: "52 min", exercises: [
+        { name: "Soulevé de terre", maxWeight: 65, totalVolume: 2600 }, { name: "Développé incliné", maxWeight: 55, totalVolume: 2200 }, { name: "Tirage vertical", maxWeight: 45, totalVolume: 1800 },
+        { name: "Tractions", maxWeight: 78, totalVolume: 1872 }, { name: "Élévations latérales", maxWeight: 16, totalVolume: 576 }, { name: "Extension triceps", maxWeight: 22, totalVolume: 660 }, { name: "Leg Extension", maxWeight: 35, totalVolume: 1260 }
+      ]},
+      { id: 3, date: "2026-07-31", type: "C", tonnage: 7396, duration: "45 min", exercises: [
+        { name: "Fentes marchées", maxWeight: 20, totalVolume: 800 }, { name: "Dips", maxWeight: 75, totalVolume: 3000 }, { name: "Rowing unilatéral", maxWeight: 18, totalVolume: 648 },
+        { name: "Oiseau (Arrière d'épaule)", maxWeight: 16, totalVolume: 576 }, { name: "Mollets / Finition", maxWeight: 35, totalVolume: 1260 }, { name: "Leg Curl", maxWeight: 35, totalVolume: 1260 }
+      ]},
+      { id: 4, date: "2026-08-02", type: "A", tonnage: 6800, duration: "46 min", exercises: [
+        { name: "Presse à cuisses", maxWeight: 86, totalVolume: 3440 }, { name: "Développé couché", maxWeight: 70, totalVolume: 2240 }, { name: "Tirage horizontal", maxWeight: 54, totalVolume: 2160 },
+        { name: "Développé militaire", maxWeight: 28, totalVolume: 840 }, { name: "Curl biceps", maxWeight: 24, totalVolume: 720 }, { name: "Mollets", maxWeight: 35, totalVolume: 1260 }
+      ]},
+      { id: 5, date: "2026-08-04", type: "B", tonnage: 8610, duration: "55 min", exercises: [
+        { name: "Soulevé de terre", maxWeight: 68, totalVolume: 2720 }, { name: "Développé incliné", maxWeight: 58, totalVolume: 2320 }, { name: "Tirage vertical", maxWeight: 48, totalVolume: 1920 },
+        { name: "Tractions", maxWeight: 79, totalVolume: 1896 }, { name: "Élévations latérales", maxWeight: 18, totalVolume: 648 }, { name: "Extension triceps", maxWeight: 24, totalVolume: 720 }, { name: "Leg Extension", maxWeight: 38, totalVolume: 1368 }
+      ]},
+      { id: 6, date: "2026-08-06", type: "C", tonnage: 8484, duration: "50 min", exercises: [
+        { name: "Fentes marchées", maxWeight: 22, totalVolume: 880 }, { name: "Dips", maxWeight: 78, totalVolume: 3120 }, { name: "Rowing unilatéral", maxWeight: 20, totalVolume: 720 },
+        { name: "Oiseau (Arrière d'épaule)", maxWeight: 18, totalVolume: 648 }, { name: "Mollets / Finition", maxWeight: 38, totalVolume: 1368 }, { name: "Leg Curl", maxWeight: 38, totalVolume: 1368 }
+      ]},
+      { id: 7, date: "2026-08-09", type: "A", tonnage: 8567, duration: "49 min", exercises: [
+        { name: "Presse à cuisses", maxWeight: 89, totalVolume: 3560 }, { name: "Développé couché", maxWeight: 72.5, totalVolume: 2320 }, { name: "Tirage horizontal", maxWeight: 56.5, totalVolume: 2260 },
+        { name: "Développé militaire", maxWeight: 30, totalVolume: 900 }, { name: "Curl biceps", maxWeight: 26, totalVolume: 780 }, { name: "Mollets", maxWeight: 38, totalVolume: 1368 }
+      ]},
+      { id: 8, date: "2026-08-11", type: "B", tonnage: 9178, duration: "54 min", exercises: [
+        { name: "Soulevé de terre", maxWeight: 70, totalVolume: 2800 }, { name: "Développé incliné", maxWeight: 60, totalVolume: 2400 }, { name: "Tirage vertical", maxWeight: 50, totalVolume: 2000 },
+        { name: "Tractions", maxWeight: 80, totalVolume: 1920 }, { name: "Élévations latérales", maxWeight: 20, totalVolume: 720 }, { name: "Extension triceps", maxWeight: 25, totalVolume: 750 }, { name: "Leg Extension", maxWeight: 40, totalVolume: 1440 }
+      ]},
+      { id: 9, date: "2026-08-13", type: "C", tonnage: 7756, duration: "47 min", exercises: [
+        { name: "Fentes marchées", maxWeight: 22, totalVolume: 880 }, { name: "Dips", maxWeight: 80, totalVolume: 3200 }, { name: "Rowing unilatéral", maxWeight: 20, totalVolume: 720 },
+        { name: "Oiseau (Arrière d'épaule)", maxWeight: 18, totalVolume: 648 }, { name: "Mollets / Finition", maxWeight: 40, totalVolume: 1440 }, { name: "Leg Curl", maxWeight: 40, totalVolume: 1440 }
+      ]},
+      { id: 10, date: "2026-08-16", type: "A", tonnage: 12282, duration: "58 min", exercises: [
+        { name: "Presse à cuisses", maxWeight: 93, totalVolume: 3720 }, { name: "Développé couché", maxWeight: 75, totalVolume: 2400 }, { name: "Tirage horizontal", maxWeight: 59, totalVolume: 2360 },
+        { name: "Développé militaire", maxWeight: 32, totalVolume: 960 }, { name: "Curl biceps", maxWeight: 28, totalVolume: 840 }, { name: "Mollets", maxWeight: 40, totalVolume: 1440 }
+      ]},
+      { id: 11, date: "2026-08-18", type: "B", tonnage: 8396, duration: "51 min", exercises: [
+        { name: "Soulevé de terre", maxWeight: 70, totalVolume: 2800 }, { name: "Développé incliné", maxWeight: 60, totalVolume: 2400 }, { name: "Tirage vertical", maxWeight: 50, totalVolume: 2000 },
+        { name: "Tractions", maxWeight: 80, totalVolume: 1920 }, { name: "Élévations latérales", maxWeight: 20, totalVolume: 720 }, { name: "Extension triceps", maxWeight: 25, totalVolume: 750 }, { name: "Leg Extension", maxWeight: 40, totalVolume: 1440 }
+      ]},
+      { id: 12, date: "2026-08-20", type: "C", tonnage: 6456, duration: "42 min", exercises: [
+        { name: "Fentes marchées", maxWeight: 20, totalVolume: 800 }, { name: "Dips", maxWeight: 75, totalVolume: 3000 }, { name: "Rowing unilatéral", maxWeight: 18, totalVolume: 648 },
+        { name: "Oiseau (Arrière d'épaule)", maxWeight: 18, totalVolume: 648 }, { name: "Mollets / Finition", maxWeight: 38, totalVolume: 1368 }, { name: "Leg Curl", maxWeight: 38, totalVolume: 1368 }
+      ]},
+      { id: 13, date: "2026-08-24", type: "A", tonnage: 11845, duration: "56 min", exercises: [
+        { name: "Presse à cuisses", maxWeight: 93, totalVolume: 3720 }, { name: "Développé couché", maxWeight: 75, totalVolume: 2400 }, { name: "Tirage horizontal", maxWeight: 59, totalVolume: 2360 },
+        { name: "Développé militaire", maxWeight: 32, totalVolume: 960 }, { name: "Curl biceps", maxWeight: 28, totalVolume: 840 }, { name: "Mollets", maxWeight: 40, totalVolume: 1440 }
+      ]},
+      { id: 14, date: "2026-08-26", type: "B", tonnage: 10310, duration: "53 min", exercises: [
+        { name: "Soulevé de terre", maxWeight: 70, totalVolume: 2800 }, { name: "Développé incliné", maxWeight: 60, totalVolume: 2400 }, { name: "Tirage vertical", maxWeight: 50, totalVolume: 2000 },
+        { name: "Tractions", maxWeight: 80, totalVolume: 1920 }, { name: "Élévations latérales", maxWeight: 20, totalVolume: 720 }, { name: "Extension triceps", maxWeight: 27, totalVolume: 810 }, { name: "Leg Extension", maxWeight: 40, totalVolume: 1440 }
+      ]},
+      { id: 15, date: "2026-08-29", type: "C", tonnage: 7688, duration: "48 min", exercises: [
+        { name: "Fentes marchées", maxWeight: 25, totalVolume: 1000 }, { name: "Dips", maxWeight: 80, totalVolume: 3200 }, { name: "Rowing unilatéral", maxWeight: 20, totalVolume: 720 },
+        { name: "Oiseau (Arrière d'épaule)", maxWeight: 20, totalVolume: 720 }, { name: "Mollets / Finition", maxWeight: 40, totalVolume: 1440 }, { name: "Leg Curl", maxWeight: 40, totalVolume: 1440 }
+      ]},
+      { id: 16, date: "2026-08-31", type: "A", tonnage: 10340, duration: "50 min", exercises: [
+        { name: "Presse à cuisses", maxWeight: 93, totalVolume: 3720 }, { name: "Développé couché", maxWeight: 75, totalVolume: 2400 }, { name: "Tirage horizontal", maxWeight: 59, totalVolume: 2360 },
+        { name: "Développé militaire", maxWeight: 32, totalVolume: 960 }, { name: "Curl biceps", maxWeight: 28, totalVolume: 840 }, { name: "Mollets", maxWeight: 40, totalVolume: 1440 }
+      ]},
+      { id: 17, date: "2026-09-02", type: "B", tonnage: 8510, duration: "52 min", exercises: [
+        { name: "Soulevé de terre", maxWeight: 70, totalVolume: 2800 }, { name: "Développé incliné", maxWeight: 60, totalVolume: 2400 }, { name: "Tirage vertical", maxWeight: 50, totalVolume: 2000 },
+        { name: "Tractions", maxWeight: 80, totalVolume: 1920 }, { name: "Élévations latérales", maxWeight: 20, totalVolume: 720 }, { name: "Extension triceps", maxWeight: 27, totalVolume: 810 }, { name: "Leg Extension", maxWeight: 40, totalVolume: 1440 }
+      ]},
+      { id: 18, date: "2026-09-04", type: "C", tonnage: 7768, duration: "47 min", exercises: [
+        { name: "Fentes marchées", maxWeight: 25, totalVolume: 1000 }, { name: "Dips", maxWeight: 80, totalVolume: 3200 }, { name: "Rowing unilatéral", maxWeight: 20, totalVolume: 720 },
+        { name: "Oiseau (Arrière d'épaule)", maxWeight: 20, totalVolume: 720 }, { name: "Mollets / Finition", maxWeight: 40, totalVolume: 1440 }, { name: "Leg Curl", maxWeight: 40, totalVolume: 1440 }
+      ]},
+      { id: 19, date: "2026-09-06", type: "A", tonnage: 11750, duration: "55 min", exercises: [
+        { name: "Presse à cuisses", maxWeight: 93, totalVolume: 3720 }, { name: "Développé couché", maxWeight: 75, totalVolume: 2400 }, { name: "Tirage horizontal", maxWeight: 59, totalVolume: 2360 },
+        { name: "Développé militaire", maxWeight: 32, totalVolume: 960 }, { name: "Curl biceps", maxWeight: 28, totalVolume: 840 }, { name: "Mollets", maxWeight: 40, totalVolume: 1440 }
+      ]},
+      { id: 20, date: "2026-09-07", type: "B", tonnage: 7526, duration: "49 min", exercises: [
+        { name: "Soulevé de terre", maxWeight: 70, totalVolume: 2800 }, { name: "Développé incliné", maxWeight: 60, totalVolume: 2400 }, { name: "Tirage vertical", maxWeight: 50, totalVolume: 2000 },
+        { name: "Tractions", maxWeight: 80, totalVolume: 1920 }, { name: "Élévations latérales", maxWeight: 20, totalVolume: 720 }, { name: "Extension triceps", maxWeight: 27, totalVolume: 810 }, { name: "Leg Extension", maxWeight: 40, totalVolume: 1440 }
+      ]},
+      { id: 21, date: "2026-09-10", type: "C", tonnage: 7712, duration: "46 min", exercises: [
+        { name: "Fentes marchées", maxWeight: 25, totalVolume: 1000 }, { name: "Dips", maxWeight: 80, totalVolume: 3200 }, { name: "Rowing unilatéral", maxWeight: 20, totalVolume: 720 },
+        { name: "Oiseau (Arrière d'épaule)", maxWeight: 20, totalVolume: 720 }, { name: "Mollets / Finition", maxWeight: 40, totalVolume: 1440 }, { name: "Leg Curl", maxWeight: 40, totalVolume: 1440 }
+      ]},
+      { id: 22, date: "2026-09-12", type: "A", tonnage: 11450, duration: "54 min", exercises: [
+        { name: "Presse à cuisses", maxWeight: 93, totalVolume: 3720 }, { name: "Développé couché", maxWeight: 75, totalVolume: 2400 }, { name: "Tirage horizontal", maxWeight: 59, totalVolume: 2360 },
+        { name: "Développé militaire", maxWeight: 32, totalVolume: 960 }, { name: "Curl biceps", maxWeight: 28, totalVolume: 840 }, { name: "Mollets", maxWeight: 40, totalVolume: 1440 }
+      ]},
+      { id: 23, date: "2026-09-15", type: "B", tonnage: 10890, duration: "53 min", exercises: [
+        { name: "Soulevé de terre", maxWeight: 70, totalVolume: 2800 }, { name: "Développé incliné", maxWeight: 60, totalVolume: 2400 }, { name: "Tirage vertical", maxWeight: 50, totalVolume: 2000 },
+        { name: "Tractions", maxWeight: 80, totalVolume: 1920 }, { name: "Élévations latérales", maxWeight: 20, totalVolume: 720 }, { name: "Extension triceps", maxWeight: 27, totalVolume: 810 }, { name: "Leg Extension", maxWeight: 40, totalVolume: 1440 }
+      ]},
+      { id: 24, date: "2026-09-17", type: "C", tonnage: 8040, duration: "48 min", exercises: [
+        { name: "Fentes marchées", maxWeight: 25, totalVolume: 1000 }, { name: "Dips", maxWeight: 80, totalVolume: 3200 }, { name: "Rowing unilatéral", maxWeight: 20, totalVolume: 720 },
+        { name: "Oiseau (Arrière d'épaule)", maxWeight: 20, totalVolume: 720 }, { name: "Mollets / Finition", maxWeight: 40, totalVolume: 1440 }, { name: "Leg Curl", maxWeight: 40, totalVolume: 1440 }
+      ]}
+    ];
+
+    const PROGRAM = {
+      'A': {
+        title: "Séance A (Presse / Couché)",
+        badge: "badge-A",
+        exercises: [
+          { name: "Presse à cuisses", seriesCount: 4, defaultWeight: 93, defaultReps: 10 },
+          { name: "Développé couché", seriesCount: 4, defaultWeight: 75, defaultReps: 8 },
+          { name: "Tirage horizontal", seriesCount: 4, defaultWeight: 59, defaultReps: 10 },
+          { name: "Développé militaire", seriesCount: 3, defaultWeight: 32, defaultReps: 10 },
+          { name: "Curl biceps", seriesCount: 3, defaultWeight: 28, defaultReps: 10 },
+          { name: "Mollets", seriesCount: 3, defaultWeight: 40, defaultReps: 12 }
+        ]
+      },
+      'B': {
+        title: "Séance B (Soulevé / Incliné)",
+        badge: "badge-B",
+        exercises: [
+          { name: "Soulevé de terre", seriesCount: 4, defaultWeight: 70, defaultReps: 10 },
+          { name: "Développé incliné", seriesCount: 4, defaultWeight: 60, defaultReps: 10 },
+          { name: "Tirage vertical", seriesCount: 4, defaultWeight: 50, defaultReps: 10 },
+          { name: "Tractions", seriesCount: 3, defaultWeight: 80, defaultReps: 8 },
+          { name: "Élévations latérales", seriesCount: 3, defaultWeight: 20, defaultReps: 12 },
+          { name: "Extension triceps", seriesCount: 3, defaultWeight: 27, defaultReps: 10 },
+          { name: "Leg Extension", seriesCount: 3, defaultWeight: 40, defaultReps: 12 }
+        ]
+      },
+      'C': {
+        title: "Séance C (Fentes / Dips)",
+        badge: "badge-C",
+        exercises: [
+          { name: "Fentes marchées", seriesCount: 4, defaultWeight: 25, defaultReps: 10 },
+          { name: "Dips", seriesCount: 4, defaultWeight: 80, defaultReps: 10 },
+          { name: "Rowing unilatéral", seriesCount: 3, defaultWeight: 20, defaultReps: 12 },
+          { name: "Oiseau (Arrière d'épaule)", seriesCount: 3, defaultWeight: 20, defaultReps: 12 },
+          { name: "Mollets / Finition", seriesCount: 3, defaultWeight: 40, defaultReps: 12 },
+          { name: "Leg Curl", seriesCount: 3, defaultWeight: 40, defaultReps: 12 }
+        ]
+      }
+    };
+
+    let state = JSON.parse(localStorage.getItem('h49_state')) || {
+      nextType: 'A',
+      history: PRELOADED_HISTORY,
+      weights: [{ date: "2026-09-17", weight: 80.0 }],
+      lastWeights: {}
+    };
+
+    // MIGRATION AUTOMATIQUE
+    (function migrateState() {
+      let modified = false;
+      if (state.history) {
+        state.history.forEach(h => {
+          if (h.exercises) {
+            h.exercises.forEach(e => {
+              if (e.totalVolume === undefined) {
+                e.totalVolume = (e.maxWeight || 0) * (e.totalReps || 30);
+                modified = true;
+              }
+              if (e.name === "SDT / Hip Thrust") { e.name = "Soulevé de terre"; modified = true; }
+              if (e.name === "Tractions (PDC)") { e.name = "Tractions"; modified = true; }
+              if (e.name === "Leg Extension / Mollets" || e.name === "Leg Curl / Mollets") {
+                if (h.type === 'A') e.name = "Mollets";
+                else if (h.type === 'B') e.name = "Leg Extension";
+                else if (h.type === 'C') e.name = "Mollets / Finition";
+                modified = true;
+              }
+            });
+            if (h.type === 'C' && !h.exercises.find(ex => ex.name === "Leg Curl")) {
+              h.exercises.push({ name: "Leg Curl", maxWeight: 40, totalVolume: 1440 });
+              modified = true;
+            }
+          }
+        });
+      }
+      if (modified) {
+        saveState();
+      }
+    })();
+
+    let tonnageChart, exerciseChart, weightChart;
+    let currentVolumeFilter = 'all';
+    let currentExMetricMode = 'max';
+
+    function saveState() {
+      localStorage.setItem('h49_state', JSON.stringify(state));
+    }
+
+    function getIcon(exName) {
+      const path = EXERCISE_ICONS[exName] || "icons/bench_press.png";
+      return `<img src="${path}" alt="${exName}" onerror="this.src='icons/bench_press.png'">`;
+    }
+
+    function renderProgramOverview() {
+      const container = document.getElementById('program-overview');
+      container.innerHTML = '';
+
+      Object.keys(PROGRAM).forEach(type => {
+        const prog = PROGRAM[type];
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        let exListHtml = '';
+        prog.exercises.forEach((ex, idx) => {
+          const warmupBadge = idx === 0 ? '<span style="font-size:0.68rem; background:#ff7f0e33; color:#ff9f43; padding:2px 6px; border-radius:4px; margin-left:6px;">🔥 Échauffement</span>' : '';
+          exListHtml += `
+            <div class="program-ex-row">
+              <span class="ex-title">
+                <div class="ex-icon-badge">${getIcon(ex.name)}</div>
+                <strong>${ex.name}</strong>${warmupBadge}
+              </span>
+              <span style="color:var(--text-muted); font-size:0.8rem;">${ex.seriesCount} × ${ex.defaultReps} reps</span>
+            </div>
+          `;
+        });
+
+        card.innerHTML = `
+          <div class="card-title">
+            <span>${prog.title}</span>
+            <span class="badge ${prog.badge}">Séance ${type}</span>
+          </div>
+          <div style="margin-top:10px;">${exListHtml}</div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function getLastWeightForExercise(exName, fallbackDefault) {
+      if (state.lastWeights && state.lastWeights[exName]) {
+        return state.lastWeights[exName];
+      }
+      for (let i = state.history.length - 1; i >= 0; i--) {
+        const h = state.history[i];
+        if (h.exercises) {
+          const found = h.exercises.find(e => e.name === exName);
+          if (found && found.maxWeight) return found.maxWeight;
+        }
+      }
+      return fallbackDefault;
+    }
+
+    function toggleSetDone(btn) {
+      startWorkoutTimer();
+      const row = btn.closest('.set-row');
+      row.classList.toggle('done');
+      if (row.classList.contains('done')) {
+        btn.innerHTML = '✓';
+      } else {
+        btn.innerHTML = '○';
+      }
+      updateSetsProgress();
+    }
+
+    function markInputActive(input) {
+      startWorkoutTimer();
+      input.classList.add('active-input');
+    }
+
+    function updateSetsProgress() {
+      const totalRows = document.querySelectorAll('.set-row').length;
+      const doneRows = document.querySelectorAll('.set-row.done').length;
+      document.getElementById('sets-progress-text').innerText = `${doneRows} / ${totalRows}`;
+    }
+
+    function initWorkoutForm() {
+      resetWorkoutTimer();
+
+      const type = state.nextType;
+      const prog = PROGRAM[type];
+
+      document.getElementById('seance-type-title').innerText = prog.title;
+      const badge = document.getElementById('seance-badge');
+      badge.innerText = type;
+      badge.className = `badge ${prog.badge}`;
+
+      document.getElementById('sub-header').innerText = `Prochaine séance : ${type}`;
+
+      const container = document.getElementById('exercises-list');
+      container.innerHTML = '';
+
+      prog.exercises.forEach((ex) => {
+        const div = document.createElement('div');
+        div.className = 'exercise-item';
+
+        const suggestedWeight = getLastWeightForExercise(ex.name, ex.defaultWeight);
+
+        let rowsHtml = '';
+        for (let s = 1; s <= ex.seriesCount; s++) {
+          rowsHtml += `
+            <div class="set-row">
+              <span class="set-label">Série ${s}</span>
+              <input type="number" step="0.5" class="set-input weight-input" data-ex="${ex.name}" placeholder="kg" value="${suggestedWeight}" oninput="markInputActive(this)">
+              <input type="number" class="set-input reps-input" data-ex="${ex.name}" placeholder="reps" value="${ex.defaultReps}" oninput="markInputActive(this)">
+              <button type="button" class="btn-check-set" onclick="toggleSetDone(this)">○</button>
+            </div>
+          `;
+        }
+
+        div.innerHTML = `
+          <div class="ex-header">
+            <span class="ex-title">
+              <div class="ex-icon-badge">${getIcon(ex.name)}</div>
+              ${ex.name}
+            </span>
+            <span style="font-size:0.75rem; color:var(--text-muted);">${ex.seriesCount} séries</span>
+          </div>
+          <div class="sets-grid">${rowsHtml}</div>
+        `;
+        container.appendChild(div);
+      });
+
+      updateSetsProgress();
+    }
+
+    document.getElementById('workout-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      let totalTonnage = 0;
+      let exerciseLogs = [];
+
+      if (!state.lastWeights) state.lastWeights = {};
+
+      const weights = document.querySelectorAll('.weight-input');
+      const reps = document.querySelectorAll('.reps-input');
+
+      weights.forEach((wInput, idx) => {
+        const w = parseFloat(wInput.value) || 0;
+        const r = parseFloat(reps[idx].value) || 0;
+        const exName = wInput.dataset.ex;
+        const setVolume = w * r;
+
+        totalTonnage += setVolume;
+        
+        let exLog = exerciseLogs.find(e => e.name === exName);
+        if(!exLog) {
+          exLog = { name: exName, maxWeight: w, totalVolume: 0 };
+          exerciseLogs.push(exLog);
+        }
+        if(w > exLog.maxWeight) exLog.maxWeight = w;
+        exLog.totalVolume += setVolume;
+
+        state.lastWeights[exName] = w;
+      });
+
+      const sessionDuration = getFormattedWorkoutDuration();
+      const type = state.nextType;
+      const today = new Date().toISOString().slice(0,10);
+      const entry = {
+        id: Date.now(),
+        date: today,
+        type: type,
+        tonnage: Math.round(totalTonnage),
+        duration: sessionDuration,
+        exercises: exerciseLogs
+      };
+
+      state.history.push(entry);
+      state.nextType = type === 'A' ? 'B' : (type === 'B' ? 'C' : 'A');
+      saveState();
+
+      alert(`Séance enregistrée !\n• Temps : ${sessionDuration}\n• Tonnage : ${entry.tonnage.toLocaleString()} kg\n\n⌚ Pense à couper le suivi de ta montre !`);
+      initWorkoutForm();
+      renderHistory();
+      renderCharts();
+    });
+
+    function populateExerciseSelect() {
+      const select = document.getElementById('exercise-filter');
+      select.innerHTML = '';
+      
+      let allExercises = [];
+      Object.values(PROGRAM).forEach(p => {
+        p.exercises.forEach(e => {
+          if(!allExercises.find(x => x.name === e.name)) {
+            allExercises.push(e);
+          }
+        });
+      });
+
+      allExercises.forEach(ex => {
+        const opt = document.createElement('option');
+        opt.value = ex.name;
+        opt.innerText = ex.name;
+        select.appendChild(opt);
+      });
+    }
+
+    function setVolumeFilter(filter, btn) {
+      currentVolumeFilter = filter;
+      document.querySelectorAll('#tab-progression .filter-btn').forEach(b => {
+        if(b.id !== 'btn-mode-max' && b.id !== 'btn-mode-vol') b.classList.remove('active');
+      });
+      btn.classList.add('active');
+      renderTonnageChart();
+    }
+
+    function setExMetricMode(mode, btn) {
+      currentExMetricMode = mode;
+      document.getElementById('btn-mode-max').classList.remove('active');
+      document.getElementById('btn-mode-vol').classList.remove('active');
+      btn.classList.add('active');
+      renderExerciseChart();
+    }
+
+    function formatDate(dateStr) {
+      if(!dateStr) return '';
+      const parts = dateStr.split('-');
+      if(parts.length === 3) return `${parts[2]}/${parts[1]}`;
+      return dateStr;
+    }
+
+    function renderTonnageChart() {
+      const ctx1 = document.getElementById('tonnageChart').getContext('2d');
+      if (tonnageChart) tonnageChart.destroy();
+
+      let labels = [];
+      let data = [];
+
+      if (currentVolumeFilter === 'month') {
+        let monthlyData = {};
+        state.history.forEach(e => {
+          const monthKey = e.date.substring(0, 7);
+          if (!monthlyData[monthKey]) monthlyData[monthKey] = 0;
+          monthlyData[monthKey] += e.tonnage;
+        });
+        labels = Object.keys(monthlyData).map(m => {
+          const [y, mm] = m.split('-');
+          return `${mm}/${y.slice(2)}`;
+        });
+        data = Object.values(monthlyData);
+      } else {
+        labels = state.history.map(e => `${e.type} (${formatDate(e.date)})`);
+        data = state.history.map(e => e.tonnage);
+      }
+
+      tonnageChart = new Chart(ctx1, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Tonnage (kg)',
+            data: data,
+            borderColor: '#1f77b4',
+            backgroundColor: '#1f77b422',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.3,
+            pointBackgroundColor: '#1f77b4',
+            pointRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: '#a0a0a0', font: { size: 9 } } },
+            y: { ticks: { color: '#a0a0a0' } }
+          }
+        }
+      });
+    }
+
+    function renderExerciseChart() {
+      const ctx = document.getElementById('exerciseChart').getContext('2d');
+      if (exerciseChart) exerciseChart.destroy();
+
+      const selectedEx = document.getElementById('exercise-filter').value;
+      let labels = [];
+      let chartData = [];
+
+      state.history.forEach(h => {
+        if (h.exercises) {
+          const exData = h.exercises.find(e => e.name === selectedEx);
+          if (exData) {
+            labels.push(`${h.type} (${formatDate(h.date)})`);
+            if (currentExMetricMode === 'volume') {
+              chartData.push(exData.totalVolume || 0);
+            } else {
+              chartData.push(exData.maxWeight || 0);
+            }
+          }
+        }
+      });
+
+      const labelTitle = currentExMetricMode === 'volume' ? 'Volume Cumulé (kg)' : 'Charge Max (kg)';
+      const color = currentExMetricMode === 'volume' ? '#ff7f0e' : '#2ca02c';
+
+      exerciseChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels.length ? labels : ['Aucune donnée'],
+          datasets: [{
+            label: labelTitle,
+            data: chartData.length ? chartData : [0],
+            borderColor: color,
+            backgroundColor: `${color}22`,
+            fill: true,
+            tension: 0.2,
+            pointRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: '#a0a0a0', font: { size: 8 } } },
+            y: { ticks: { color: '#a0a0a0' } }
+          }
+        }
+      });
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('history-list');
+      container.innerHTML = '';
+
+      [...state.history].reverse().forEach(h => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        div.innerHTML = `
+          <div>
+            <span class="badge badge-${h.type}">Séance ${h.type}</span>
+            <span style="font-weight:600; margin-left:8px;">${formatDate(h.date)}</span>
+            <span style="font-size:0.75rem; color:var(--text-muted); margin-left:6px;">⏱️ ${h.duration || 'N/A'}</span>
+          </div>
+          <div style="font-weight:700; color:#1f77b4;">${h.tonnage.toLocaleString()} kg</div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function addWeight() {
+      const input = document.getElementById('new-weight');
+      const val = parseFloat(input.value);
+      if (val) {
+        state.weights.push({
+          date: new Date().toISOString().slice(0,10),
+          weight: val
+        });
+        saveState();
+        input.value = '';
+        renderCharts();
+      }
+    }
+
+    function renderCharts() {
+      renderTonnageChart();
+      renderExerciseChart();
+
+      const ctx2 = document.getElementById('weightChart').getContext('2d');
+      if (weightChart) weightChart.destroy();
+
+      weightChart = new Chart(ctx2, {
+        type: 'line',
+        data: {
+          labels: state.weights.map(w => formatDate(w.date)),
+          datasets: [{
+            label: 'Poids (kg)',
+            data: state.weights.map(w => w.weight),
+            borderColor: '#ff7f0e',
+            backgroundColor: '#ff7f0e22',
+            fill: true,
+            tension: 0.2
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: '#a0a0a0' } },
+            y: { ticks: { color: '#a0a0a0' } }
+          }
+        }
+      });
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+
+      document.getElementById(`tab-${tabName}`).classList.add('active');
+      document.getElementById(`nav-${tabName}`).classList.add('active');
+
+      const timerBtn = document.getElementById('timer-btn');
+      if (tabName === 'seance') {
+        timerBtn.style.display = 'flex';
+      } else {
+        timerBtn.style.display = 'none';
+      }
+
+      if (tabName === 'programme') renderProgramOverview();
+      if (tabName === 'progression') renderCharts();
+    }
+
+    function exportData() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `suivi_fitness_backup_${new Date().toISOString().slice(0, 10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const importedState = JSON.parse(e.target.result);
+          if (importedState.history && importedState.nextType) {
+            state = importedState;
+            saveState();
+            populateExerciseSelect();
+            initWorkoutForm();
+            renderHistory();
+            renderCharts();
+            alert("Sauvegarde importée avec succès !");
+          } else {
+            alert("Fichier de sauvegarde invalide.");
+          }
+        } catch (err) {
+          alert("Erreur lors de la lecture du fichier JSON.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function resetData() {
+      const confirm1 = confirm("⚠️ ATTENTION : Êtes-vous SÛR de vouloir effacer vos saisies récentes ?");
+      if (confirm1) {
+        const confirm2 = confirm("Dernière confirmation : Vos nouvelles séances seront remplacées par les 24 séances d'origine. Continuer ?");
+        if (confirm2) {
+          state = {
+            nextType: 'A',
+            history: PRELOADED_HISTORY,
+            weights: [{ date: "2026-09-17", weight: 80.0 }],
+            lastWeights: {}
+          };
+          saveState();
+          populateExerciseSelect();
+          initWorkoutForm();
+          renderHistory();
+          renderCharts();
+          alert("Données réinitialisées avec succès.");
+        }
+      }
+    }
+
+    // Initialisation
+    renderProgramOverview();
+    populateExerciseSelect();
+    initWorkoutForm();
+    renderHistory();
+  </script>
+</body>
+</html>
