@@ -70,6 +70,45 @@ let tonnageChart, exerciseChart, weightChart;
 let currentVolumeFilter = 'all';
 let currentExMetricMode = 'max';
 
+
+// Fonction pour recalculer automatiquement et mathématiquement tout l'historique
+function recalculateHistoryTonnages() {
+  if (!state || !state.history) return;
+
+  state.history.forEach(session => {
+    let sessionTonnage = 0;
+
+    if (session.exercises) {
+      session.exercises.forEach(ex => {
+        let exVolume = 0;
+        let maxW = 0;
+
+        if (ex.sets && Array.isArray(ex.sets)) {
+          ex.sets.forEach(set => {
+            const w = parseFloat(set.weight) || 0;
+            const r = parseFloat(set.reps) || 0;
+            const setVol = w * r;
+
+            exVolume += setVol;
+            if (w > maxW) maxW = w;
+          });
+        }
+
+        // Met à jour les valeurs réelles calculées pour l'exercice
+        ex.totalVolume = Math.round(exVolume * 10) / 10;
+        ex.maxWeight = maxW;
+        sessionTonnage += exVolume;
+      });
+    }
+
+    // Met à jour le tonnage global de la séance
+    session.tonnage = Math.round(sessionTonnage);
+  });
+
+  saveState();
+}
+
+
 async function initApp() {
   const saved = localStorage.getItem('h49_state');
   if (saved) {
@@ -78,12 +117,15 @@ async function initApp() {
     try {
       const response = await fetch('data.json');
       state = await response.json();
-      saveState();
     } catch (e) {
       console.error("Impossible de charger data.json", e);
       state = { nextType: 'A', history: [], weights: [], lastWeights: {} };
     }
   }
+
+  // CORRECTION AUTOMATIQUE : Recalcule tous les tonnages à la volée
+  recalculateHistoryTonnages();
+  saveState();
 
   renderProgramOverview();
   populateExerciseSelect();
