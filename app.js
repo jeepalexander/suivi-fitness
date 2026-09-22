@@ -135,18 +135,20 @@ function renderProgramOverview() {
   });
 }
 
-function getLastWeightForExercise(exName, fallbackDefault) {
-  if (state.lastWeights && state.lastWeights[exName]) {
-    return state.lastWeights[exName];
-  }
+function getSuggestedSetValues(exName, setIndex, fallbackWeight, fallbackReps) {
   for (let i = state.history.length - 1; i >= 0; i--) {
     const h = state.history[i];
     if (h.exercises) {
-      const found = h.exercises.find(e => e.name === exName);
-      if (found && found.maxWeight) return found.maxWeight;
+      const foundEx = h.exercises.find(e => e.name === exName);
+      if (foundEx && foundEx.sets && foundEx.sets[setIndex]) {
+        return foundEx.sets[setIndex];
+      }
     }
   }
-  return fallbackDefault;
+  if (state.lastWeights && state.lastWeights[exName]) {
+    return { weight: state.lastWeights[exName], reps: fallbackReps };
+  }
+  return { weight: fallbackWeight, reps: fallbackReps };
 }
 
 function playBeep() {
@@ -297,15 +299,14 @@ function initWorkoutForm() {
     const div = document.createElement('div');
     div.className = 'exercise-item';
 
-    const suggestedWeight = getLastWeightForExercise(ex.name, ex.defaultWeight);
-
     let rowsHtml = '';
     for (let s = 1; s <= ex.seriesCount; s++) {
+      const lastSet = getSuggestedSetValues(ex.name, s - 1, ex.defaultWeight, ex.defaultReps);
       rowsHtml += `
         <div class="set-row">
           <span class="set-label">Série ${s}</span>
-          <input type="number" step="0.5" class="set-input weight-input" data-ex="${ex.name}" placeholder="kg" value="${suggestedWeight}" oninput="markInputActive(this)">
-          <input type="number" class="set-input reps-input" data-ex="${ex.name}" placeholder="reps" value="${ex.defaultReps}" oninput="markInputActive(this)">
+          <input type="number" step="0.5" class="set-input weight-input" data-ex="${ex.name}" placeholder="kg" value="${lastSet.weight}" oninput="markInputActive(this)">
+          <input type="number" class="set-input reps-input" data-ex="${ex.name}" placeholder="reps" value="${lastSet.reps}" oninput="markInputActive(this)">
           <button type="button" class="btn-check-set" onclick="toggleSetDone(this)">○</button>
         </div>
       `;
@@ -348,11 +349,15 @@ document.addEventListener('submit', function(e) {
       
       let exLog = exerciseLogs.find(e => e.name === exName);
       if(!exLog) {
-        exLog = { name: exName, maxWeight: w, totalVolume: 0 };
+        exLog = { name: exName, sets: [], maxWeight: 0, totalVolume: 0 };
         exerciseLogs.push(exLog);
       }
-      if(w > exLog.maxWeight) exLog.maxWeight = w;
+      
+      exLog.sets.push({ weight: w, reps: r });
       exLog.totalVolume += setVolume;
+      if(w > exLog.maxWeight) {
+        exLog.maxWeight = w;
+      }
 
       state.lastWeights[exName] = w;
     });
@@ -373,7 +378,7 @@ document.addEventListener('submit', function(e) {
     state.nextType = type === 'A' ? 'B' : (type === 'B' ? 'C' : 'A');
     saveState();
 
-    alert(`Séance enregistrée !\n• Temps : ${sessionDuration}\n• Tonnage : ${entry.tonnage.toLocaleString()} kg\n\n⌚ Pense à couper le suivi de ta montre !`);
+    alert(`Séance enregistrée !\n• Temps : ${sessionDuration}\n• Tonnage réel : ${Math.round(totalTonnage).toLocaleString()} kg\n\n⌚ Pense à couper le suivi de ta montre !`);
     initWorkoutForm();
     renderHistory();
     renderCharts();
@@ -639,7 +644,6 @@ async function exportData() {
       }
     }
   } else {
-    // Fallback pour PC ou navigateurs non compatibles
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", URL.createObjectURL(blob));
     downloadAnchor.setAttribute("download", `sauvegarde_fitness_${new Date().toISOString().slice(0, 10)}.json`);
@@ -671,7 +675,6 @@ function importData(event) {
     } catch (err) {
       alert("Erreur lors de la lecture du fichier JSON.");
     } finally {
-      // Réinitialise l'input pour permettre de réimporter le même fichier si nécessaire
       event.target.value = '';
     }
   };
