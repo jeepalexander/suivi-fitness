@@ -624,13 +624,13 @@ function switchTab(tabName) {
 async function exportData() {
   const dataStr = JSON.stringify(state, null, 2);
   const blob = new Blob([dataStr], { type: 'application/json' });
-  const file = new File([blob], `suivi_fitness_backup_${new Date().toISOString().slice(0, 10)}.json`, { type: 'application/json' });
+  const file = new File([blob], `sauvegarde_fitness_${new Date().toISOString().slice(0, 10)}.json`, { type: 'application/json' });
 
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
       await navigator.share({
-        title: 'Sauvegarde Suivi Fitness',
-        text: 'Voici la sauvegarde de mes entraînements.',
+        title: 'Sauvegarde de vos entraînements',
+        text: 'Voici votre fichier de sauvegarde à stocker sur le Drive.',
         files: [file],
       });
     } catch (error) {
@@ -639,9 +639,10 @@ async function exportData() {
       }
     }
   } else {
+    // Fallback pour PC ou navigateurs non compatibles
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", URL.createObjectURL(blob));
-    downloadAnchor.setAttribute("download", `suivi_fitness_backup_${new Date().toISOString().slice(0, 10)}.json`);
+    downloadAnchor.setAttribute("download", `sauvegarde_fitness_${new Date().toISOString().slice(0, 10)}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
