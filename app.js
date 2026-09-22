@@ -666,10 +666,13 @@ function importData(event) {
         renderCharts();
         alert("Sauvegarde importée avec succès !");
       } else {
-        alert("Fichier de sauvegarde invalide.");
+        alert("Fichier de sauvegarde invalide (structure incorrecte).");
       }
     } catch (err) {
       alert("Erreur lors de la lecture du fichier JSON.");
+    } finally {
+      // Réinitialise l'input pour permettre de réimporter le même fichier si nécessaire
+      event.target.value = '';
     }
   };
   reader.readAsText(file);
