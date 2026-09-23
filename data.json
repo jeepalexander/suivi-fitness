@@ -1,6 +1,3339 @@
 {
   "nextType": "A",
-  "history": [],
-  "weights": [],
-  "lastWeights": {}
+  "history": [
+    {
+      "id": 1756134400000,
+      "date": "2025-07-27",
+      "type": "A",
+      "tonnage": 7154,
+      "exercises": [
+        {
+          "name": "Presse à cuisses",
+          "sets": [
+            {
+              "weight": 52.0,
+              "reps": 10
+            },
+            {
+              "weight": 66.0,
+              "reps": 10
+            },
+            {
+              "weight": 79.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 79.0,
+          "totalVolume": 1970.0
+        },
+        {
+          "name": "Développé couché",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            },
+            {
+              "weight": 70.0,
+              "reps": 8
+            }
+          ],
+          "maxWeight": 70.0,
+          "totalVolume": 1560.0
+        },
+        {
+          "name": "Tirage horizontal",
+          "sets": [
+            {
+              "weight": 45.0,
+              "reps": 10
+            },
+            {
+              "weight": 52.0,
+              "reps": 10
+            },
+            {
+              "weight": 59.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 59.0,
+          "totalVolume": 1560.0
+        },
+        {
+          "name": "Développé militaire",
+          "sets": [
+            {
+              "weight": 16.0,
+              "reps": 10
+            },
+            {
+              "weight": 24.0,
+              "reps": 12
+            },
+            {
+              "weight": 28.0,
+              "reps": 12
+            }
+          ],
+          "maxWeight": 28.0,
+          "totalVolume": 784.0
+        },
+        {
+          "name": "Curl biceps",
+          "sets": [
+            {
+              "weight": 24.0,
+              "reps": 20
+            },
+            {
+              "weight": 28.0,
+              "reps": 20
+            },
+            {
+              "weight": 24.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 28.0,
+          "totalVolume": 1280.0
+        }
+      ]
+    },
+    {
+      "id": 1756220800000,
+      "date": "2025-07-29",
+      "type": "B",
+      "tonnage": 7788,
+      "exercises": [
+        {
+          "name": "Soulevé de terre",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            },
+            {
+              "weight": 70.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 70.0,
+          "totalVolume": 1700.0
+        },
+        {
+          "name": "Développé incliné",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 50.0,
+              "reps": 10
+            },
+            {
+              "weight": 50.0,
+              "reps": 10
+            },
+            {
+              "weight": 50.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 50.0,
+          "totalVolume": 1900.0
+        },
+        {
+          "name": "Tirage vertical",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 12
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 100.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 100.0,
+          "totalVolume": 2280.0
+        },
+        {
+          "name": "Tractions",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 8
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 640.0
+        },
+        {
+          "name": "Élévations latérales",
+          "sets": [
+            {
+              "weight": 16.0,
+              "reps": 10
+            },
+            {
+              "weight": 16.0,
+              "reps": 10
+            },
+            {
+              "weight": 16.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 16.0,
+          "totalVolume": 480.0
+        },
+        {
+          "name": "Extension triceps",
+          "sets": [
+            {
+              "weight": 18.0,
+              "reps": 10
+            },
+            {
+              "weight": 32.0,
+              "reps": 10
+            },
+            {
+              "weight": 36.0,
+              "reps": 8
+            }
+          ],
+          "maxWeight": 36.0,
+          "totalVolume": 788.0
+        }
+      ]
+    },
+    {
+      "id": 1756307200000,
+      "date": "2025-07-31",
+      "type": "C",
+      "tonnage": 10620,
+      "exercises": [
+        {
+          "name": "Fentes marchées",
+          "sets": [
+            {
+              "weight": 105.0,
+              "reps": 11
+            },
+            {
+              "weight": 105.0,
+              "reps": 11
+            },
+            {
+              "weight": 105.0,
+              "reps": 11
+            },
+            {
+              "weight": 105.0,
+              "reps": 11
+            }
+          ],
+          "maxWeight": 105.0,
+          "totalVolume": 4620.0
+        },
+        {
+          "name": "Dips",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 3200.0
+        },
+        {
+          "name": "Rowing unilatéral",
+          "sets": [
+            {
+              "weight": 12.0,
+              "reps": 12
+            },
+            {
+              "weight": 14.0,
+              "reps": 12
+            },
+            {
+              "weight": 16.0,
+              "reps": 12
+            }
+          ],
+          "maxWeight": 16.0,
+          "totalVolume": 504.0
+        },
+        {
+          "name": "Oiseau (Arrière d'épaule)",
+          "sets": [
+            {
+              "weight": 8.0,
+              "reps": 12
+            },
+            {
+              "weight": 10.0,
+              "reps": 10
+            },
+            {
+              "weight": 10.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 10.0,
+          "totalVolume": 296.0
+        },
+        {
+          "name": "Mollets",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 2000.0
+        }
+      ]
+    },
+    {
+      "id": 1756393600000,
+      "date": "2025-08-02",
+      "type": "A",
+      "tonnage": 6800,
+      "exercises": [
+        {
+          "name": "Presse à cuisses",
+          "sets": [
+            {
+              "weight": 73.0,
+              "reps": 10
+            },
+            {
+              "weight": 79.0,
+              "reps": 10
+            },
+            {
+              "weight": 86.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 86.0,
+          "totalVolume": 2380.0
+        },
+        {
+          "name": "Développé couché",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            },
+            {
+              "weight": 70.0,
+              "reps": 6
+            }
+          ],
+          "maxWeight": 70.0,
+          "totalVolume": 1420.0
+        },
+        {
+          "name": "Tirage horizontal",
+          "sets": [
+            {
+              "weight": 45.0,
+              "reps": 10
+            },
+            {
+              "weight": 52.0,
+              "reps": 10
+            },
+            {
+              "weight": 59.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 59.0,
+          "totalVolume": 1560.0
+        },
+        {
+          "name": "Développé militaire",
+          "sets": [
+            {
+              "weight": 16.0,
+              "reps": 10
+            },
+            {
+              "weight": 24.0,
+              "reps": 10
+            },
+            {
+              "weight": 28.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 28.0,
+          "totalVolume": 680.0
+        },
+        {
+          "name": "Curl biceps",
+          "sets": [
+            {
+              "weight": 24.0,
+              "reps": 10
+            },
+            {
+              "weight": 28.0,
+              "reps": 10
+            },
+            {
+              "weight": 24.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 28.0,
+          "totalVolume": 760.0
+        }
+      ]
+    },
+    {
+      "id": 1756480000000,
+      "date": "2025-08-04",
+      "type": "B",
+      "tonnage": 8610,
+      "exercises": [
+        {
+          "name": "Soulevé de terre",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            },
+            {
+              "weight": 70.0,
+              "reps": 12
+            },
+            {
+              "weight": 70.0,
+              "reps": 12
+            }
+          ],
+          "maxWeight": 70.0,
+          "totalVolume": 2680.0
+        },
+        {
+          "name": "Développé incliné",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 50.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 8
+            },
+            {
+              "weight": 50.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 60.0,
+          "totalVolume": 1880.0
+        },
+        {
+          "name": "Tirage vertical",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 9
+            },
+            {
+              "weight": 100.0,
+              "reps": 9
+            }
+          ],
+          "maxWeight": 100.0,
+          "totalVolume": 2020.0
+        },
+        {
+          "name": "Tractions",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 8
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 640.0
+        },
+        {
+          "name": "Élévations latérales",
+          "sets": [
+            {
+              "weight": 16.0,
+              "reps": 10
+            },
+            {
+              "weight": 16.0,
+              "reps": 10
+            },
+            {
+              "weight": 16.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 16.0,
+          "totalVolume": 480.0
+        },
+        {
+          "name": "Extension triceps",
+          "sets": [
+            {
+              "weight": 27.0,
+              "reps": 10
+            },
+            {
+              "weight": 32.0,
+              "reps": 10
+            },
+            {
+              "weight": 32.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 32.0,
+          "totalVolume": 910.0
+        }
+      ]
+    },
+    {
+      "id": 1756566400000,
+      "date": "2025-08-06",
+      "type": "C",
+      "tonnage": 11444,
+      "exercises": [
+        {
+          "name": "Fentes marchées",
+          "sets": [
+            {
+              "weight": 105.0,
+              "reps": 10
+            },
+            {
+              "weight": 105.0,
+              "reps": 10
+            },
+            {
+              "weight": 105.0,
+              "reps": 10
+            },
+            {
+              "weight": 105.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 105.0,
+          "totalVolume": 4200.0
+        },
+        {
+          "name": "Dips",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 3200.0
+        },
+        {
+          "name": "Rowing unilatéral",
+          "sets": [
+            {
+              "weight": 12.0,
+              "reps": 12
+            },
+            {
+              "weight": 14.0,
+              "reps": 12
+            },
+            {
+              "weight": 16.0,
+              "reps": 12
+            }
+          ],
+          "maxWeight": 16.0,
+          "totalVolume": 504.0
+        },
+        {
+          "name": "Oiseau (Arrière d'épaule)",
+          "sets": [
+            {
+              "weight": 8.0,
+              "reps": 10
+            },
+            {
+              "weight": 10.0,
+              "reps": 8
+            },
+            {
+              "weight": 8.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 10.0,
+          "totalVolume": 240.0
+        },
+        {
+          "name": "Mollets",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 100.0,
+              "reps": 10
+            },
+            {
+              "weight": 110.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 110.0,
+          "totalVolume": 3300.0
+        }
+      ]
+    },
+    {
+      "id": 1756652800000,
+      "date": "2025-08-09",
+      "type": "A",
+      "tonnage": 10407,
+      "exercises": [
+        {
+          "name": "Presse à cuisses",
+          "sets": [
+            {
+              "weight": 73.0,
+              "reps": 10
+            },
+            {
+              "weight": 79.0,
+              "reps": 10
+            },
+            {
+              "weight": 86.0,
+              "reps": 10
+            },
+            {
+              "weight": 93.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 93.0,
+          "totalVolume": 3310.0
+        },
+        {
+          "name": "Développé couché",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            },
+            {
+              "weight": 70.0,
+              "reps": 10
+            },
+            {
+              "weight": 40.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 70.0,
+          "totalVolume": 2100.0
+        },
+        {
+          "name": "Tirage horizontal",
+          "sets": [
+            {
+              "weight": 45.0,
+              "reps": 10
+            },
+            {
+              "weight": 52.0,
+              "reps": 10
+            },
+            {
+              "weight": 59.0,
+              "reps": 9
+            }
+          ],
+          "maxWeight": 59.0,
+          "totalVolume": 1501.0
+        },
+        {
+          "name": "Développé militaire",
+          "sets": [
+            {
+              "weight": 20.0,
+              "reps": 10
+            },
+            {
+              "weight": 24.0,
+              "reps": 12
+            },
+            {
+              "weight": 28.0,
+              "reps": 12
+            }
+          ],
+          "maxWeight": 28.0,
+          "totalVolume": 824.0
+        },
+        {
+          "name": "Curl biceps",
+          "sets": [
+            {
+              "weight": 24.0,
+              "reps": 16
+            },
+            {
+              "weight": 28.0,
+              "reps": 8
+            },
+            {
+              "weight": 28.0,
+              "reps": 8
+            }
+          ],
+          "maxWeight": 28.0,
+          "totalVolume": 832.0
+        },
+        {
+          "name": "Mollets",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 1200.0
+        },
+        {
+          "name": "Tractions",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 8
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 640.0
+        }
+      ]
+    },
+    {
+      "id": 1756739200000,
+      "date": "2025-08-11",
+      "type": "B",
+      "tonnage": 9178,
+      "exercises": [
+        {
+          "name": "Soulevé de terre",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 60.0,
+          "totalVolume": 2200.0
+        },
+        {
+          "name": "Développé incliné",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 6
+            },
+            {
+              "weight": 50.0,
+              "reps": 8
+            }
+          ],
+          "maxWeight": 60.0,
+          "totalVolume": 1760.0
+        },
+        {
+          "name": "Tirage vertical",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 90.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 90.0,
+          "totalVolume": 2100.0
+        },
+        {
+          "name": "Tractions",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 8
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 640.0
+        },
+        {
+          "name": "Élévations latérales",
+          "sets": [
+            {
+              "weight": 16.0,
+              "reps": 10
+            },
+            {
+              "weight": 20.0,
+              "reps": 10
+            },
+            {
+              "weight": 20.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 20.0,
+          "totalVolume": 560.0
+        },
+        {
+          "name": "Extension triceps",
+          "sets": [
+            {
+              "weight": 27.0,
+              "reps": 10
+            },
+            {
+              "weight": 32.0,
+              "reps": 8
+            },
+            {
+              "weight": 32.0,
+              "reps": 6
+            }
+          ],
+          "maxWeight": 32.0,
+          "totalVolume": 718.0
+        },
+        {
+          "name": "Mollets",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 1200.0
+        }
+      ]
+    },
+    {
+      "id": 1756825600000,
+      "date": "2025-08-13",
+      "type": "C",
+      "tonnage": 11616,
+      "exercises": [
+        {
+          "name": "Fentes marchées",
+          "sets": [
+            {
+              "weight": 105.0,
+              "reps": 11
+            },
+            {
+              "weight": 105.0,
+              "reps": 11
+            },
+            {
+              "weight": 105.0,
+              "reps": 11
+            },
+            {
+              "weight": 105.0,
+              "reps": 11
+            }
+          ],
+          "maxWeight": 105.0,
+          "totalVolume": 4620.0
+        },
+        {
+          "name": "Dips",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 3200.0
+        },
+        {
+          "name": "Rowing unilatéral",
+          "sets": [
+            {
+              "weight": 14.0,
+              "reps": 12
+            },
+            {
+              "weight": 16.0,
+              "reps": 12
+            },
+            {
+              "weight": 18.0,
+              "reps": 12
+            }
+          ],
+          "maxWeight": 18.0,
+          "totalVolume": 576.0
+        },
+        {
+          "name": "Oiseau (Arrière d'épaule)",
+          "sets": [
+            {
+              "weight": 10.0,
+              "reps": 10
+            },
+            {
+              "weight": 10.0,
+              "reps": 10
+            },
+            {
+              "weight": 10.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 10.0,
+          "totalVolume": 300.0
+        },
+        {
+          "name": "Mollets",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 12
+            },
+            {
+              "weight": 90.0,
+              "reps": 10
+            },
+            {
+              "weight": 90.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 90.0,
+          "totalVolume": 2280.0
+        },
+        {
+          "name": "Tractions",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 8
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 640.0
+        }
+      ]
+    },
+    {
+      "id": 1756912000000,
+      "date": "2025-08-16",
+      "type": "A",
+      "tonnage": 12282,
+      "exercises": [
+        {
+          "name": "Presse à cuisses",
+          "sets": [
+            {
+              "weight": 79.0,
+              "reps": 10
+            },
+            {
+              "weight": 86.0,
+              "reps": 10
+            },
+            {
+              "weight": 93.0,
+              "reps": 8
+            },
+            {
+              "weight": 73.0,
+              "reps": 12
+            }
+          ],
+          "maxWeight": 93.0,
+          "totalVolume": 3270.0
+        },
+        {
+          "name": "Développé couché",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            },
+            {
+              "weight": 70.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 70.0,
+          "totalVolume": 2300.0
+        },
+        {
+          "name": "Tirage horizontal",
+          "sets": [
+            {
+              "weight": 45.0,
+              "reps": 10
+            },
+            {
+              "weight": 52.0,
+              "reps": 10
+            },
+            {
+              "weight": 59.0,
+              "reps": 10
+            },
+            {
+              "weight": 59.0,
+              "reps": 8
+            }
+          ],
+          "maxWeight": 59.0,
+          "totalVolume": 2032.0
+        },
+        {
+          "name": "Développé militaire",
+          "sets": [
+            {
+              "weight": 24.0,
+              "reps": 10
+            },
+            {
+              "weight": 28.0,
+              "reps": 10
+            },
+            {
+              "weight": 28.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 28.0,
+          "totalVolume": 800.0
+        },
+        {
+          "name": "Curl biceps",
+          "sets": [
+            {
+              "weight": 24.0,
+              "reps": 10
+            },
+            {
+              "weight": 28.0,
+              "reps": 10
+            },
+            {
+              "weight": 28.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 28.0,
+          "totalVolume": 800.0
+        },
+        {
+          "name": "Mollets",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 12
+            },
+            {
+              "weight": 80.0,
+              "reps": 12
+            },
+            {
+              "weight": 100.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 100.0,
+          "totalVolume": 2440.0
+        },
+        {
+          "name": "Tractions",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 8
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 640.0
+        }
+      ]
+    },
+    {
+      "id": 1756998400000,
+      "date": "2025-08-18",
+      "type": "B",
+      "tonnage": 8396,
+      "exercises": [
+        {
+          "name": "Soulevé de terre",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            },
+            {
+              "weight": 70.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 70.0,
+          "totalVolume": 1700.0
+        },
+        {
+          "name": "Développé incliné",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 50.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 7
+            },
+            {
+              "weight": 60.0,
+              "reps": 5
+            }
+          ],
+          "maxWeight": 60.0,
+          "totalVolume": 1620.0
+        },
+        {
+          "name": "Tirage vertical",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 100.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 100.0,
+          "totalVolume": 2200.0
+        },
+        {
+          "name": "Élévations latérales",
+          "sets": [
+            {
+              "weight": 16.0,
+              "reps": 10
+            },
+            {
+              "weight": 20.0,
+              "reps": 10
+            },
+            {
+              "weight": 24.0,
+              "reps": 8
+            }
+          ],
+          "maxWeight": 24.0,
+          "totalVolume": 552.0
+        },
+        {
+          "name": "Extension triceps",
+          "sets": [
+            {
+              "weight": 27.0,
+              "reps": 10
+            },
+            {
+              "weight": 32.0,
+              "reps": 7
+            },
+            {
+              "weight": 27.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 32.0,
+          "totalVolume": 764.0
+        },
+        {
+          "name": "Leg Extension",
+          "sets": [
+            {
+              "weight": 52.0,
+              "reps": 10
+            },
+            {
+              "weight": 52.0,
+              "reps": 10
+            },
+            {
+              "weight": 52.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 52.0,
+          "totalVolume": 1560.0
+        }
+      ]
+    },
+    {
+      "id": 1757084800000,
+      "date": "2025-08-20",
+      "type": "C",
+      "tonnage": 10056,
+      "exercises": [
+        {
+          "name": "Fentes marchées",
+          "sets": [
+            {
+              "weight": 105.0,
+              "reps": 10
+            },
+            {
+              "weight": 105.0,
+              "reps": 10
+            },
+            {
+              "weight": 105.0,
+              "reps": 10
+            },
+            {
+              "weight": 105.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 105.0,
+          "totalVolume": 4200.0
+        },
+        {
+          "name": "Dips",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 3200.0
+        },
+        {
+          "name": "Rowing unilatéral",
+          "sets": [
+            {
+              "weight": 14.0,
+              "reps": 12
+            },
+            {
+              "weight": 16.0,
+              "reps": 12
+            },
+            {
+              "weight": 18.0,
+              "reps": 12
+            }
+          ],
+          "maxWeight": 18.0,
+          "totalVolume": 576.0
+        },
+        {
+          "name": "Oiseau (Arrière d'épaule)",
+          "sets": [
+            {
+              "weight": 8.0,
+              "reps": 10
+            },
+            {
+              "weight": 8.0,
+              "reps": 10
+            },
+            {
+              "weight": 8.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 8.0,
+          "totalVolume": 240.0
+        },
+        {
+          "name": "Mollets",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 40.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 40.0,
+          "totalVolume": 1200.0
+        },
+        {
+          "name": "Tractions",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 8
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 640.0
+        }
+      ]
+    },
+    {
+      "id": 1757171200000,
+      "date": "2025-08-24",
+      "type": "A",
+      "tonnage": 11845,
+      "exercises": [
+        {
+          "name": "Presse à cuisses",
+          "sets": [
+            {
+              "weight": 73.0,
+              "reps": 10
+            },
+            {
+              "weight": 79.0,
+              "reps": 10
+            },
+            {
+              "weight": 86.0,
+              "reps": 10
+            },
+            {
+              "weight": 93.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 93.0,
+          "totalVolume": 3310.0
+        },
+        {
+          "name": "Développé couché",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            },
+            {
+              "weight": 70.0,
+              "reps": 10
+            },
+            {
+              "weight": 70.0,
+              "reps": 7
+            }
+          ],
+          "maxWeight": 70.0,
+          "totalVolume": 2190.0
+        },
+        {
+          "name": "Tirage horizontal",
+          "sets": [
+            {
+              "weight": 45.0,
+              "reps": 12
+            },
+            {
+              "weight": 50.0,
+              "reps": 12
+            },
+            {
+              "weight": 54.0,
+              "reps": 10
+            },
+            {
+              "weight": 59.0,
+              "reps": 9
+            }
+          ],
+          "maxWeight": 59.0,
+          "totalVolume": 2211.0
+        },
+        {
+          "name": "Développé militaire",
+          "sets": [
+            {
+              "weight": 32.0,
+              "reps": 8
+            },
+            {
+              "weight": 32.0,
+              "reps": 10
+            },
+            {
+              "weight": 24.0,
+              "reps": 12
+            }
+          ],
+          "maxWeight": 32.0,
+          "totalVolume": 864.0
+        },
+        {
+          "name": "Curl biceps",
+          "sets": [
+            {
+              "weight": 24.0,
+              "reps": 10
+            },
+            {
+              "weight": 24.0,
+              "reps": 10
+            },
+            {
+              "weight": 24.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 24.0,
+          "totalVolume": 720.0
+        },
+        {
+          "name": "Leg Extension",
+          "sets": [
+            {
+              "weight": 59.0,
+              "reps": 10
+            },
+            {
+              "weight": 66.0,
+              "reps": 10
+            },
+            {
+              "weight": 66.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 66.0,
+          "totalVolume": 1910.0
+        },
+        {
+          "name": "Tractions",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 8
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 640.0
+        }
+      ]
+    },
+    {
+      "id": 1757257600000,
+      "date": "2025-08-26",
+      "type": "B",
+      "tonnage": 10310,
+      "exercises": [
+        {
+          "name": "Soulevé de terre",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 12
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            },
+            {
+              "weight": 70.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 70.0,
+          "totalVolume": 2380.0
+        },
+        {
+          "name": "Développé incliné",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 50.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 8
+            },
+            {
+              "weight": 50.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 60.0,
+          "totalVolume": 1880.0
+        },
+        {
+          "name": "Tirage vertical",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 100.0,
+              "reps": 10
+            },
+            {
+              "weight": 100.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 100.0,
+          "totalVolume": 3200.0
+        },
+        {
+          "name": "Tractions",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 8
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 640.0
+        },
+        {
+          "name": "Élévations latérales",
+          "sets": [
+            {
+              "weight": 16.0,
+              "reps": 10
+            },
+            {
+              "weight": 16.0,
+              "reps": 10
+            },
+            {
+              "weight": 16.0,
+              "reps": 10
+            },
+            {
+              "weight": 16.0,
+              "reps": 15
+            }
+          ],
+          "maxWeight": 16.0,
+          "totalVolume": 720.0
+        },
+        {
+          "name": "Extension triceps",
+          "sets": [
+            {
+              "weight": 27.0,
+              "reps": 10
+            },
+            {
+              "weight": 27.0,
+              "reps": 10
+            },
+            {
+              "weight": 27.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 27.0,
+          "totalVolume": 810.0
+        },
+        {
+          "name": "Leg Curl",
+          "sets": [
+            {
+              "weight": 32.0,
+              "reps": 10
+            },
+            {
+              "weight": 36.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 36.0,
+          "totalVolume": 680.0
+        }
+      ]
+    },
+    {
+      "id": 1757344000000,
+      "date": "2025-08-29",
+      "type": "C",
+      "tonnage": 11912,
+      "exercises": [
+        {
+          "name": "Fentes marchées",
+          "sets": [
+            {
+              "weight": 105.0,
+              "reps": 12
+            },
+            {
+              "weight": 105.0,
+              "reps": 12
+            },
+            {
+              "weight": 105.0,
+              "reps": 12
+            },
+            {
+              "weight": 105.0,
+              "reps": 12
+            }
+          ],
+          "maxWeight": 105.0,
+          "totalVolume": 5040.0
+        },
+        {
+          "name": "Dips",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 3200.0
+        },
+        {
+          "name": "Rowing unilatéral",
+          "sets": [
+            {
+              "weight": 14.0,
+              "reps": 12
+            },
+            {
+              "weight": 16.0,
+              "reps": 12
+            },
+            {
+              "weight": 18.0,
+              "reps": 12
+            }
+          ],
+          "maxWeight": 18.0,
+          "totalVolume": 576.0
+        },
+        {
+          "name": "Oiseau (Arrière d'épaule)",
+          "sets": [
+            {
+              "weight": 8.0,
+              "reps": 10
+            },
+            {
+              "weight": 8.0,
+              "reps": 12
+            },
+            {
+              "weight": 8.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 8.0,
+          "totalVolume": 256.0
+        },
+        {
+          "name": "Mollets",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 100.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 100.0,
+          "totalVolume": 2200.0
+        },
+        {
+          "name": "Tractions",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 8
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 640.0
+        }
+      ]
+    },
+    {
+      "id": 1757430400000,
+      "date": "2025-08-31",
+      "type": "A",
+      "tonnage": 10340,
+      "exercises": [
+        {
+          "name": "Presse à cuisses",
+          "sets": [
+            {
+              "weight": 73.0,
+              "reps": 10
+            },
+            {
+              "weight": 79.0,
+              "reps": 10
+            },
+            {
+              "weight": 86.0,
+              "reps": 10
+            },
+            {
+              "weight": 93.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 93.0,
+          "totalVolume": 3310.0
+        },
+        {
+          "name": "Développé couché",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 12
+            },
+            {
+              "weight": 50.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            },
+            {
+              "weight": 65.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 65.0,
+          "totalVolume": 2230.0
+        },
+        {
+          "name": "Tirage horizontal",
+          "sets": [
+            {
+              "weight": 45.0,
+              "reps": 10
+            },
+            {
+              "weight": 50.0,
+              "reps": 10
+            },
+            {
+              "weight": 54.0,
+              "reps": 10
+            },
+            {
+              "weight": 59.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 59.0,
+          "totalVolume": 2080.0
+        },
+        {
+          "name": "Développé militaire",
+          "sets": [
+            {
+              "weight": 24.0,
+              "reps": 10
+            },
+            {
+              "weight": 28.0,
+              "reps": 10
+            },
+            {
+              "weight": 28.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 28.0,
+          "totalVolume": 800.0
+        },
+        {
+          "name": "Curl biceps",
+          "sets": [
+            {
+              "weight": 24.0,
+              "reps": 10
+            },
+            {
+              "weight": 24.0,
+              "reps": 10
+            },
+            {
+              "weight": 24.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 24.0,
+          "totalVolume": 720.0
+        },
+        {
+          "name": "Mollets",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 40.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 40.0,
+          "totalVolume": 1200.0
+        }
+      ]
+    },
+    {
+      "id": 1757516800000,
+      "date": "2025-09-02",
+      "type": "B",
+      "tonnage": 8510,
+      "exercises": [
+        {
+          "name": "Soulevé de terre",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 60.0,
+          "totalVolume": 1600.0
+        },
+        {
+          "name": "Développé incliné",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 8
+            }
+          ],
+          "maxWeight": 60.0,
+          "totalVolume": 1480.0
+        },
+        {
+          "name": "Tirage vertical",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 100.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 100.0,
+          "totalVolume": 2200.0
+        },
+        {
+          "name": "Tractions",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 8
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 640.0
+        },
+        {
+          "name": "Élévations latérales",
+          "sets": [
+            {
+              "weight": 16.0,
+              "reps": 10
+            },
+            {
+              "weight": 16.0,
+              "reps": 10
+            },
+            {
+              "weight": 16.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 16.0,
+          "totalVolume": 480.0
+        },
+        {
+          "name": "Extension triceps",
+          "sets": [
+            {
+              "weight": 27.0,
+              "reps": 10
+            },
+            {
+              "weight": 27.0,
+              "reps": 10
+            },
+            {
+              "weight": 27.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 27.0,
+          "totalVolume": 810.0
+        },
+        {
+          "name": "Mollets",
+          "sets": [
+            {
+              "weight": 50.0,
+              "reps": 12
+            },
+            {
+              "weight": 50.0,
+              "reps": 14
+            }
+          ],
+          "maxWeight": 50.0,
+          "totalVolume": 1300.0
+        }
+      ]
+    },
+    {
+      "id": 1757603200000,
+      "date": "2025-09-04",
+      "type": "C",
+      "tonnage": 11872,
+      "exercises": [
+        {
+          "name": "Fentes marchées",
+          "sets": [
+            {
+              "weight": 105.0,
+              "reps": 12
+            },
+            {
+              "weight": 105.0,
+              "reps": 12
+            },
+            {
+              "weight": 105.0,
+              "reps": 12
+            },
+            {
+              "weight": 105.0,
+              "reps": 12
+            }
+          ],
+          "maxWeight": 105.0,
+          "totalVolume": 5040.0
+        },
+        {
+          "name": "Dips",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 3200.0
+        },
+        {
+          "name": "Rowing unilatéral",
+          "sets": [
+            {
+              "weight": 14.0,
+              "reps": 12
+            },
+            {
+              "weight": 16.0,
+              "reps": 12
+            },
+            {
+              "weight": 18.0,
+              "reps": 12
+            }
+          ],
+          "maxWeight": 18.0,
+          "totalVolume": 576.0
+        },
+        {
+          "name": "Oiseau (Arrière d'épaule)",
+          "sets": [
+            {
+              "weight": 8.0,
+              "reps": 12
+            },
+            {
+              "weight": 10.0,
+              "reps": 12
+            },
+            {
+              "weight": 8.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 10.0,
+          "totalVolume": 296.0
+        },
+        {
+          "name": "Mollets",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 100.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 100.0,
+          "totalVolume": 2200.0
+        },
+        {
+          "name": "Tractions",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 7
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 560.0
+        }
+      ]
+    },
+    {
+      "id": 1757689600000,
+      "date": "2025-09-06",
+      "type": "A",
+      "tonnage": 11700,
+      "exercises": [
+        {
+          "name": "Presse à cuisses",
+          "sets": [
+            {
+              "weight": 73.0,
+              "reps": 10
+            },
+            {
+              "weight": 79.0,
+              "reps": 10
+            },
+            {
+              "weight": 86.0,
+              "reps": 10
+            },
+            {
+              "weight": 93.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 93.0,
+          "totalVolume": 3310.0
+        },
+        {
+          "name": "Développé couché",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            },
+            {
+              "weight": 70.0,
+              "reps": 10
+            },
+            {
+              "weight": 70.0,
+              "reps": 5
+            }
+          ],
+          "maxWeight": 70.0,
+          "totalVolume": 2050.0
+        },
+        {
+          "name": "Tirage horizontal",
+          "sets": [
+            {
+              "weight": 45.0,
+              "reps": 10
+            },
+            {
+              "weight": 52.0,
+              "reps": 10
+            },
+            {
+              "weight": 59.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 59.0,
+          "totalVolume": 1560.0
+        },
+        {
+          "name": "Développé militaire",
+          "sets": [
+            {
+              "weight": 24.0,
+              "reps": 10
+            },
+            {
+              "weight": 28.0,
+              "reps": 10
+            },
+            {
+              "weight": 32.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 32.0,
+          "totalVolume": 840.0
+        },
+        {
+          "name": "Curl biceps",
+          "sets": [
+            {
+              "weight": 26.0,
+              "reps": 10
+            },
+            {
+              "weight": 32.0,
+              "reps": 10
+            },
+            {
+              "weight": 32.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 32.0,
+          "totalVolume": 900.0
+        },
+        {
+          "name": "Mollets",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 12
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 100.0,
+              "reps": 12
+            }
+          ],
+          "maxWeight": 100.0,
+          "totalVolume": 2480.0
+        },
+        {
+          "name": "Tractions",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 7
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 560.0
+        }
+      ]
+    },
+    {
+      "id": 1757776000000,
+      "date": "2025-09-07",
+      "type": "B",
+      "tonnage": 7526,
+      "exercises": [
+        {
+          "name": "Soulevé de terre",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            },
+            {
+              "weight": 70.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 70.0,
+          "totalVolume": 1700.0
+        },
+        {
+          "name": "Développé incliné",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 8
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 60.0,
+          "totalVolume": 1480.0
+        },
+        {
+          "name": "Tirage vertical",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 12
+            },
+            {
+              "weight": 100.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 100.0,
+          "totalVolume": 2360.0
+        },
+        {
+          "name": "Élévations latérales",
+          "sets": [
+            {
+              "weight": 16.0,
+              "reps": 10
+            },
+            {
+              "weight": 20.0,
+              "reps": 10
+            },
+            {
+              "weight": 16.0,
+              "reps": 12
+            }
+          ],
+          "maxWeight": 20.0,
+          "totalVolume": 552.0
+        },
+        {
+          "name": "Extension triceps",
+          "sets": [
+            {
+              "weight": 27.0,
+              "reps": 10
+            },
+            {
+              "weight": 23.0,
+              "reps": 8
+            },
+            {
+              "weight": 18.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 27.0,
+          "totalVolume": 634.0
+        },
+        {
+          "name": "Mollets",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 40.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 40.0,
+          "totalVolume": 800.0
+        }
+      ]
+    },
+    {
+      "id": 1757862400000,
+      "date": "2025-09-10",
+      "type": "C",
+      "tonnage": 11764,
+      "exercises": [
+        {
+          "name": "Fentes marchées",
+          "sets": [
+            {
+              "weight": 105.0,
+              "reps": 12
+            },
+            {
+              "weight": 105.0,
+              "reps": 12
+            },
+            {
+              "weight": 105.0,
+              "reps": 12
+            },
+            {
+              "weight": 105.0,
+              "reps": 12
+            }
+          ],
+          "maxWeight": 105.0,
+          "totalVolume": 5040.0
+        },
+        {
+          "name": "Dips",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 3200.0
+        },
+        {
+          "name": "Rowing unilatéral",
+          "sets": [
+            {
+              "weight": 14.0,
+              "reps": 12
+            },
+            {
+              "weight": 16.0,
+              "reps": 12
+            },
+            {
+              "weight": 18.0,
+              "reps": 12
+            }
+          ],
+          "maxWeight": 18.0,
+          "totalVolume": 576.0
+        },
+        {
+          "name": "Oiseau (Arrière d'épaule)",
+          "sets": [
+            {
+              "weight": 12.0,
+              "reps": 6
+            },
+            {
+              "weight": 10.0,
+              "reps": 10
+            },
+            {
+              "weight": 8.0,
+              "reps": 12
+            }
+          ],
+          "maxWeight": 12.0,
+          "totalVolume": 268.0
+        },
+        {
+          "name": "Mollets",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 100.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 100.0,
+          "totalVolume": 2200.0
+        },
+        {
+          "name": "Tractions",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 6
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 480.0
+        }
+      ]
+    },
+    {
+      "id": 1757948800000,
+      "date": "2025-09-12",
+      "type": "A",
+      "tonnage": 11450,
+      "exercises": [
+        {
+          "name": "Presse à cuisses",
+          "sets": [
+            {
+              "weight": 73.0,
+              "reps": 10
+            },
+            {
+              "weight": 79.0,
+              "reps": 10
+            },
+            {
+              "weight": 86.0,
+              "reps": 10
+            },
+            {
+              "weight": 93.0,
+              "reps": 12
+            }
+          ],
+          "maxWeight": 93.0,
+          "totalVolume": 3496.0
+        },
+        {
+          "name": "Développé couché",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            },
+            {
+              "weight": 70.0,
+              "reps": 10
+            },
+            {
+              "weight": 75.0,
+              "reps": 7
+            }
+          ],
+          "maxWeight": 75.0,
+          "totalVolume": 2225.0
+        },
+        {
+          "name": "Tirage horizontal",
+          "sets": [
+            {
+              "weight": 45.0,
+              "reps": 10
+            },
+            {
+              "weight": 52.0,
+              "reps": 10
+            },
+            {
+              "weight": 59.0,
+              "reps": 10
+            },
+            {
+              "weight": 59.0,
+              "reps": 9
+            }
+          ],
+          "maxWeight": 59.0,
+          "totalVolume": 2091.0
+        },
+        {
+          "name": "Développé militaire",
+          "sets": [
+            {
+              "weight": 24.0,
+              "reps": 12
+            },
+            {
+              "weight": 28.0,
+              "reps": 10
+            },
+            {
+              "weight": 32.0,
+              "reps": 9
+            }
+          ],
+          "maxWeight": 32.0,
+          "totalVolume": 856.0
+        },
+        {
+          "name": "Curl biceps",
+          "sets": [
+            {
+              "weight": 24.0,
+              "reps": 10
+            },
+            {
+              "weight": 28.0,
+              "reps": 10
+            },
+            {
+              "weight": 28.0,
+              "reps": 9
+            }
+          ],
+          "maxWeight": 28.0,
+          "totalVolume": 772.0
+        },
+        {
+          "name": "Leg Extension",
+          "sets": [
+            {
+              "weight": 59.0,
+              "reps": 10
+            },
+            {
+              "weight": 39.0,
+              "reps": 10
+            },
+            {
+              "weight": 39.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 59.0,
+          "totalVolume": 1370.0
+        },
+        {
+          "name": "Tractions",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 8
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 640.0
+        }
+      ]
+    },
+    {
+      "id": 1758035200000,
+      "date": "2025-09-15",
+      "type": "B",
+      "tonnage": 10890,
+      "exercises": [
+        {
+          "name": "Soulevé de terre",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 12
+            },
+            {
+              "weight": 70.0,
+              "reps": 12
+            },
+            {
+              "weight": 70.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 70.0,
+          "totalVolume": 2660.0
+        },
+        {
+          "name": "Développé incliné",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 8
+            },
+            {
+              "weight": 60.0,
+              "reps": 4
+            }
+          ],
+          "maxWeight": 60.0,
+          "totalVolume": 1720.0
+        },
+        {
+          "name": "Tirage vertical",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 12
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 100.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 100.0,
+          "totalVolume": 2280.0
+        },
+        {
+          "name": "Tractions",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 8
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 640.0
+        },
+        {
+          "name": "Élévations latérales",
+          "sets": [
+            {
+              "weight": 16.0,
+              "reps": 10
+            },
+            {
+              "weight": 20.0,
+              "reps": 10
+            },
+            {
+              "weight": 20.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 20.0,
+          "totalVolume": 560.0
+        },
+        {
+          "name": "Extension triceps",
+          "sets": [
+            {
+              "weight": 23.0,
+              "reps": 10
+            },
+            {
+              "weight": 27.0,
+              "reps": 10
+            },
+            {
+              "weight": 23.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 27.0,
+          "totalVolume": 730.0
+        },
+        {
+          "name": "Leg Extension",
+          "sets": [
+            {
+              "weight": 39.0,
+              "reps": 10
+            },
+            {
+              "weight": 52.0,
+              "reps": 10
+            },
+            {
+              "weight": 66.0,
+              "reps": 10
+            },
+            {
+              "weight": 73.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 73.0,
+          "totalVolume": 2300.0
+        }
+      ]
+    },
+    {
+      "id": 1758121600000,
+      "date": "2025-09-17",
+      "type": "C",
+      "tonnage": 12120,
+      "exercises": [
+        {
+          "name": "Fentes marchées",
+          "sets": [
+            {
+              "weight": 105.0,
+              "reps": 12
+            },
+            {
+              "weight": 105.0,
+              "reps": 12
+            },
+            {
+              "weight": 105.0,
+              "reps": 12
+            },
+            {
+              "weight": 105.0,
+              "reps": 12
+            }
+          ],
+          "maxWeight": 105.0,
+          "totalVolume": 5040.0
+        },
+        {
+          "name": "Dips",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 3200.0
+        },
+        {
+          "name": "Rowing unilatéral",
+          "sets": [
+            {
+              "weight": 14.0,
+              "reps": 12
+            },
+            {
+              "weight": 16.0,
+              "reps": 12
+            },
+            {
+              "weight": 20.0,
+              "reps": 12
+            }
+          ],
+          "maxWeight": 20.0,
+          "totalVolume": 600.0
+        },
+        {
+          "name": "Oiseau (Arrière d'épaule)",
+          "sets": [
+            {
+              "weight": 12.0,
+              "reps": 10
+            },
+            {
+              "weight": 10.0,
+              "reps": 10
+            },
+            {
+              "weight": 10.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 12.0,
+          "totalVolume": 320.0
+        },
+        {
+          "name": "Mollets",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 2400.0
+        },
+        {
+          "name": "Tractions",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 7
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 560.0
+        }
+      ]
+    },
+    {
+      "id": 1758208000000,
+      "date": "2025-09-19",
+      "type": "A",
+      "tonnage": 12198,
+      "exercises": [
+        {
+          "name": "Presse à cuisses",
+          "sets": [
+            {
+              "weight": 73.0,
+              "reps": 10
+            },
+            {
+              "weight": 93.0,
+              "reps": 10
+            },
+            {
+              "weight": 93.0,
+              "reps": 10
+            },
+            {
+              "weight": 93.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 93.0,
+          "totalVolume": 3520.0
+        },
+        {
+          "name": "Développé couché",
+          "sets": [
+            {
+              "weight": 50.0,
+              "reps": 10
+            },
+            {
+              "weight": 70.0,
+              "reps": 10
+            },
+            {
+              "weight": 75.0,
+              "reps": 10
+            },
+            {
+              "weight": 75.0,
+              "reps": 8
+            }
+          ],
+          "maxWeight": 75.0,
+          "totalVolume": 2550.0
+        },
+        {
+          "name": "Tirage horizontal",
+          "sets": [
+            {
+              "weight": 59.0,
+              "reps": 10
+            },
+            {
+              "weight": 59.0,
+              "reps": 10
+            },
+            {
+              "weight": 45.0,
+              "reps": 10
+            },
+            {
+              "weight": 45.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 59.0,
+          "totalVolume": 2080.0
+        },
+        {
+          "name": "Développé militaire",
+          "sets": [
+            {
+              "weight": 24.0,
+              "reps": 12
+            },
+            {
+              "weight": 28.0,
+              "reps": 10
+            },
+            {
+              "weight": 36.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 36.0,
+          "totalVolume": 928.0
+        },
+        {
+          "name": "Curl biceps",
+          "sets": [
+            {
+              "weight": 24.0,
+              "reps": 10
+            },
+            {
+              "weight": 24.0,
+              "reps": 10
+            },
+            {
+              "weight": 24.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 24.0,
+          "totalVolume": 720.0
+        },
+        {
+          "name": "Mollets",
+          "sets": [
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            },
+            {
+              "weight": 80.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 80.0,
+          "totalVolume": 2400.0
+        }
+      ]
+    },
+    {
+      "id": 1758294400000,
+      "date": "2025-09-21",
+      "type": "B",
+      "tonnage": 3520,
+      "exercises": [
+        {
+          "name": "Soulevé de terre",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 40.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 40.0,
+          "totalVolume": 1600.0
+        },
+        {
+          "name": "Développé incliné",
+          "sets": [
+            {
+              "weight": 40.0,
+              "reps": 10
+            },
+            {
+              "weight": 60.0,
+              "reps": 10
+            },
+            {
+              "weight": 65.0,
+              "reps": 8
+            },
+            {
+              "weight": 40.0,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 65.0,
+          "totalVolume": 1920.0
+        },
+        {
+          "name": "Élévations latérales",
+          "sets": [
+            {
+              "weight": 0.0,
+              "reps": 0
+            },
+            {
+              "weight": 0.0,
+              "reps": 0
+            },
+            {
+              "weight": 0.0,
+              "reps": 0
+            }
+          ],
+          "maxWeight": 0,
+          "totalVolume": 0.0
+        },
+        {
+          "name": "Extension triceps",
+          "sets": [
+            {
+              "weight": 0.0,
+              "reps": 0
+            },
+            {
+              "weight": 0.0,
+              "reps": 0
+            },
+            {
+              "weight": 0.0,
+              "reps": 0
+            }
+          ],
+          "maxWeight": 0,
+          "totalVolume": 0.0
+        },
+        {
+          "name": "Mollets",
+          "sets": [
+            {
+              "weight": 0.0,
+              "reps": 0
+            },
+            {
+              "weight": 0.0,
+              "reps": 0
+            },
+            {
+              "weight": 0.0,
+              "reps": 0
+            }
+          ],
+          "maxWeight": 0,
+          "totalVolume": 0.0
+        }
+      ]
+    }
+  ],
+  "weights": [
+    {
+      "date": "2025-07-27",
+      "weight": 80.0
+    },
+    {
+      "date": "2025-08-10",
+      "weight": 80.0
+    },
+    {
+      "date": "2025-09-01",
+      "weight": 80.0
+    },
+    {
+      "date": "2025-09-21",
+      "weight": 80.0
+    }
+  ],
+  "lastWeights": {
+    "Presse à cuisses": 93.0,
+    "Développé couché": 75.0,
+    "Tirage horizontal": 59.0,
+    "Développé militaire": 36.0,
+    "Curl biceps": 24.0,
+    "Soulevé de terre": 40.0,
+    "Développé incliné": 65.0,
+    "Tirage vertical": 100.0,
+    "Tractions": 80.0,
+    "Élévations latérales": 0,
+    "Extension triceps": 0,
+    "Fentes marchées": 105.0,
+    "Dips": 80.0,
+    "Rowing unilatéral": 20.0,
+    "Oiseau (Arrière d'épaule)": 12.0,
+    "Mollets": 0,
+    "Leg Extension": 73.0,
+    "Leg Curl": 36.0
+  }
 }

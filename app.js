@@ -16,7 +16,6 @@ const EXERCISE_ICONS = {
   "Dips": "icons/dips.png",
   "Rowing unilatéral": "icons/dumbbell_row.png",
   "Oiseau (Arrière d'épaule)": "icons/reverse_fly.png",
-  "Mollets / Finition": "icons/calf_raise.png",
   "Leg Curl": "icons/leg_curl.png"
 };
 
@@ -54,7 +53,7 @@ const PROGRAM = {
       { name: "Dips", seriesCount: 4, defaultWeight: 80, defaultReps: 10 },
       { name: "Rowing unilatéral", seriesCount: 3, defaultWeight: 20, defaultReps: 12 },
       { name: "Oiseau (Arrière d'épaule)", seriesCount: 3, defaultWeight: 20, defaultReps: 12 },
-      { name: "Mollets / Finition", seriesCount: 3, defaultWeight: 40, defaultReps: 12 },
+      { name: "Mollets", seriesCount: 3, defaultWeight: 40, defaultReps: 12 },
       { name: "Leg Curl", seriesCount: 3, defaultWeight: 40, defaultReps: 12 }
     ]
   }
@@ -70,8 +69,6 @@ let tonnageChart, exerciseChart, weightChart;
 let currentVolumeFilter = 'all';
 let currentExMetricMode = 'max';
 
-
-// Fonction pour recalculer automatiquement et mathématiquement tout l'historique
 function recalculateHistoryTonnages() {
   if (!state || !state.history) return;
 
@@ -94,20 +91,17 @@ function recalculateHistoryTonnages() {
           });
         }
 
-        // Met à jour les valeurs réelles calculées pour l'exercice
         ex.totalVolume = Math.round(exVolume * 10) / 10;
         ex.maxWeight = maxW;
         sessionTonnage += exVolume;
       });
     }
 
-    // Met à jour le tonnage global de la séance
     session.tonnage = Math.round(sessionTonnage);
   });
 
   saveState();
 }
-
 
 async function initApp() {
   const saved = localStorage.getItem('h49_state');
@@ -123,7 +117,18 @@ async function initApp() {
     }
   }
 
-  // CORRECTION AUTOMATIQUE : Recalcule tous les tonnages à la volée
+  // Détermination automatique de nextType selon le type de la dernière séance de l'historique
+  if (state.history && state.history.length > 0) {
+    const lastSession = state.history[state.history.length - 1];
+    if (lastSession.type === 'A') {
+      state.nextType = 'B';
+    } else if (lastSession.type === 'B') {
+      state.nextType = 'C';
+    } else if (lastSession.type === 'C') {
+      state.nextType = 'A';
+    }
+  }
+
   recalculateHistoryTonnages();
   saveState();
 
@@ -435,16 +440,20 @@ function populateExerciseSelect() {
   let allExercises = [];
   Object.values(PROGRAM).forEach(p => {
     p.exercises.forEach(e => {
-      if(!allExercises.find(x => x.name === e.name)) {
-        allExercises.push(e);
+      let exName = e.name;
+      if (exName === "Mollets / Finition") {
+        exName = "Mollets";
+      }
+      if(!allExercises.find(x => x === exName)) {
+        allExercises.push(exName);
       }
     });
   });
 
-  allExercises.forEach(ex => {
+  allExercises.forEach(exName => {
     const opt = document.createElement('option');
-    opt.value = ex.name;
-    opt.innerText = ex.name;
+    opt.value = exName;
+    opt.innerText = exName;
     select.appendChild(opt);
   });
 }
@@ -539,7 +548,13 @@ function renderExerciseChart() {
 
   state.history.forEach(h => {
     if (h.exercises) {
-      const exData = h.exercises.find(e => e.name === selectedEx);
+      const exData = h.exercises.find(e => {
+        if (selectedEx === "Mollets") {
+          return e.name === "Mollets" || e.name === "Mollets / Finition";
+        }
+        return e.name === selectedEx;
+      });
+
       if (exData) {
         labels.push(`${h.type} (${formatDate(h.date)})`);
         if (currentExMetricMode === 'volume') {
