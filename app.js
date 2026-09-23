@@ -61,13 +61,17 @@ const PROGRAM = {
 
 let state = null;
 let restTimerInterval = null;
-let restTimerSeconds = 120;
 const REST_DURATION = 120;
 let workoutTimerInterval = null;
 let workoutSeconds = 0;
 let tonnageChart, exerciseChart, weightChart;
 let currentVolumeFilter = 'all';
 let currentExMetricMode = 'max';
+
+// Variables pour la modification de séance
+let selectedSessionIndex = null;
+let editingOriginalDate = null;
+let editingOriginalId = null;
 
 function recalculateHistoryTonnages() {
   if (!state || !state.history) return;
@@ -100,7 +104,23 @@ function recalculateHistoryTonnages() {
     session.tonnage = Math.round(sessionTonnage);
   });
 
+  state.history.sort((a, b) => new Date(a.date) - new Date(b.date));
   saveState();
+}
+
+function updateNextTypeFromHistory() {
+  if (state.history && state.history.length > 0) {
+    const lastSession = state.history[state.history.length - 1];
+    if (lastSession.type === 'A') {
+      state.nextType = 'B';
+    } else if (lastSession.type === 'B') {
+      state.nextType = 'C';
+    } else if (lastSession.type === 'C') {
+      state.nextType = 'A';
+    }
+  } else {
+    state.nextType = 'A';
+  }
 }
 
 async function initApp() {
@@ -117,28 +137,21 @@ async function initApp() {
     }
   }
 
-  // Détermination automatique de nextType selon le type de la dernière séance de l'historique
-  if (state.history && state.history.length > 0) {
-    const lastSession = state.history[state.history.length - 1];
-    if (lastSession.type === 'A') {
-      state.nextType = 'B';
-    } else if (lastSession.type === 'B') {
-      state.nextType = 'C';
-    } else if (lastSession.type === 'C') {
-      state.nextType = 'A';
-    }
-  }
-
   recalculateHistoryTonnages();
+  updateNextTypeFromHistory();
   saveState();
 
   renderProgramOverview();
   populateExerciseSelect();
   initWorkoutForm();
   renderHistory();
+  injectSessionModalHtml();
 }
 
 function saveState() {
+  if (state && state.history) {
+    state.history.sort((a, b) => new Date(a.date) - new Date(b.date));
+  }
   localStorage.setItem('h49_state', JSON.stringify(state));
 }
 
@@ -219,12 +232,37 @@ function playBeep() {
   }
 }
 
-function updateTimerDisplay() {
+function updateTimerDisplay(seconds) {
   const display = document.getElementById('timer-display');
   if(!display) return;
-  const m = Math.floor(restTimerSeconds / 60);
-  const s = restTimerSeconds % 60;
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
   display.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+}
+
+function runRestTimer(endTime) {
+  const btn = document.getElementById('timer-btn');
+  if (restTimerInterval) clearInterval(restTimerInterval);
+
+  if (btn) btn.className = 'timer-btn running';
+
+  restTimerInterval = setInterval(() => {
+    const now = Date.now();
+    const secondsRemaining = Math.max(0, Math.floor((endTime - now) / 1000));
+
+    updateTimerDisplay(secondsRemaining);
+
+    if (secondsRemaining <= 0) {
+      clearInterval(restTimerInterval);
+      restTimerInterval = null;
+      localStorage.removeItem('rest_end_time');
+      if (btn) btn.className = 'timer-btn finished';
+      const display = document.getElementById('timer-display');
+      if(display) display.innerText = 'GO !';
+      playBeep();
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    }
+  }, 1000);
 }
 
 function toggleRestTimer() {
@@ -232,34 +270,53 @@ function toggleRestTimer() {
   if (restTimerInterval) {
     clearInterval(restTimerInterval);
     restTimerInterval = null;
-    restTimerSeconds = REST_DURATION;
-    btn.className = 'timer-btn running';
-    updateTimerDisplay();
+    localStorage.removeItem('rest_end_time');
+    if (btn) btn.className = 'timer-btn running';
+    updateTimerDisplay(REST_DURATION);
   } else {
-    restTimerSeconds = REST_DURATION;
-    btn.className = 'timer-btn running';
-    updateTimerDisplay();
-
-    restTimerInterval = setInterval(() => {
-      restTimerSeconds--;
-      updateTimerDisplay();
-
-      if (restTimerSeconds <= 0) {
-        clearInterval(restTimerInterval);
-        restTimerInterval = null;
-        btn.className = 'timer-btn finished';
-        document.getElementById('timer-display').innerText = 'GO !';
-        playBeep();
-        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-      }
-    }, 1000);
+    const endTime = Date.now() + (REST_DURATION * 1000);
+    localStorage.setItem('rest_end_time', endTime);
+    runRestTimer(endTime);
   }
 }
 
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    const savedRestEnd = localStorage.getItem('rest_end_time');
+    if (savedRestEnd) {
+      const endTime = parseInt(savedRestEnd, 10);
+      const now = Date.now();
+      
+      if (now >= endTime) {
+        localStorage.removeItem('rest_end_time');
+        updateTimerDisplay(0);
+        const btn = document.getElementById('timer-btn');
+        if(btn) btn.className = 'timer-btn finished';
+        const display = document.getElementById('timer-display');
+        if(display) display.innerText = 'GO !';
+        playBeep();
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+      } else {
+        runRestTimer(endTime);
+      }
+    }
+  }
+});
+
 function startWorkoutTimer() {
   if (!workoutTimerInterval) {
+    let startTime = localStorage.getItem('workout_start_time');
+    if (!startTime) {
+      startTime = Date.now();
+      localStorage.setItem('workout_start_time', startTime);
+    } else {
+      startTime = parseInt(startTime, 10);
+    }
+
     workoutTimerInterval = setInterval(() => {
-      workoutSeconds++;
+      const now = Date.now();
+      workoutSeconds = Math.floor((now - startTime) / 1000);
+
       const m = Math.floor(workoutSeconds / 60);
       const s = workoutSeconds % 60;
       const el = document.getElementById('workout-duration-display');
@@ -276,6 +333,7 @@ function resetWorkoutTimer() {
     workoutTimerInterval = null;
   }
   workoutSeconds = 0;
+  localStorage.removeItem('workout_start_time');
   const el = document.getElementById('workout-duration-display');
   if(el) el.innerText = "00:00";
 }
@@ -319,11 +377,11 @@ function updateSetsProgress() {
   if(textEl) textEl.innerText = `${doneRows} / ${totalRows}`;
 }
 
-function initWorkoutForm() {
+function initWorkoutForm(customSession = null) {
   resetWorkoutTimer();
   if(!state) return;
 
-  const type = state.nextType;
+  const type = customSession ? customSession.type : state.nextType;
   const prog = PROGRAM[type];
 
   const titleEl = document.getElementById('seance-type-title');
@@ -336,7 +394,9 @@ function initWorkoutForm() {
   }
 
   const subHeader = document.getElementById('sub-header');
-  if(subHeader) subHeader.innerText = `Prochaine séance : ${type}`;
+  if(subHeader) {
+    subHeader.innerText = customSession ? `Modification de la séance du ${formatDate(customSession.date)}` : `Prochaine séance : ${type}`;
+  }
 
   const container = document.getElementById('exercises-list');
   if(!container) return;
@@ -346,14 +406,30 @@ function initWorkoutForm() {
     const div = document.createElement('div');
     div.className = 'exercise-item';
 
+    let existingEx = null;
+    if (customSession && customSession.exercises) {
+      existingEx = customSession.exercises.find(e => e.name === ex.name);
+    }
+
     let rowsHtml = '';
     for (let s = 1; s <= ex.seriesCount; s++) {
-      const lastSet = getSuggestedSetValues(ex.name, s - 1, ex.defaultWeight, ex.defaultReps);
+      let weightVal = ex.defaultWeight;
+      let repsVal = ex.defaultReps;
+
+      if (existingEx && existingEx.sets && existingEx.sets[s - 1]) {
+        weightVal = existingEx.sets[s - 1].weight;
+        repsVal = existingEx.sets[s - 1].reps;
+      } else {
+        const lastSet = getSuggestedSetValues(ex.name, s - 1, ex.defaultWeight, ex.defaultReps);
+        weightVal = lastSet.weight;
+        repsVal = lastSet.reps;
+      }
+
       rowsHtml += `
         <div class="set-row">
           <span class="set-label">Série ${s}</span>
-          <input type="number" step="0.5" class="set-input weight-input" data-ex="${ex.name}" placeholder="kg" value="${lastSet.weight}" oninput="markInputActive(this)">
-          <input type="number" class="set-input reps-input" data-ex="${ex.name}" placeholder="reps" value="${lastSet.reps}" oninput="markInputActive(this)">
+          <input type="number" step="0.5" class="set-input weight-input" data-ex="${ex.name}" placeholder="kg" value="${weightVal}" oninput="markInputActive(this)">
+          <input type="number" class="set-input reps-input" data-ex="${ex.name}" placeholder="reps" value="${repsVal}" oninput="markInputActive(this)">
           <button type="button" class="btn-check-set" onclick="toggleSetDone(this)">○</button>
         </div>
       `;
@@ -410,11 +486,15 @@ document.addEventListener('submit', function(e) {
     });
 
     const sessionDuration = getFormattedWorkoutDuration();
-    const type = state.nextType;
-    const today = new Date().toISOString().slice(0,10);
+    const typeBadgeEl = document.getElementById('seance-badge');
+    const type = typeBadgeEl ? typeBadgeEl.innerText : state.nextType;
+
+    const sessionDate = editingOriginalDate || new Date().toISOString().slice(0, 10);
+    const sessionId = editingOriginalId || Date.now();
+
     const entry = {
-      id: Date.now(),
-      date: today,
+      id: sessionId,
+      date: sessionDate,
       type: type,
       tonnage: Math.round(totalTonnage),
       duration: sessionDuration,
@@ -422,13 +502,22 @@ document.addEventListener('submit', function(e) {
     };
 
     state.history.push(entry);
-    state.nextType = type === 'A' ? 'B' : (type === 'B' ? 'C' : 'A');
+    state.history.sort((a, b) => new Date(a.date) - new Date(b.date));
+    updateNextTypeFromHistory();
+
+    editingOriginalDate = null;
+    editingOriginalId = null;
+    selectedSessionIndex = null;
+    localStorage.removeItem('workout_start_time');
+
     saveState();
 
-    alert(`Séance enregistrée !\n• Temps : ${sessionDuration}\n• Tonnage réel : ${Math.round(totalTonnage).toLocaleString()} kg\n\n⌚ Pense à couper le suivi de ta montre !`);
+    alert(`Séance enregistrée !\n• Temps : ${sessionDuration}\n• Tonnage réel : ${Math.round(totalTonnage).toLocaleString()} kg`);
+    
     initWorkoutForm();
     renderHistory();
     renderCharts();
+    switchTab('seance');
   }
 });
 
@@ -599,9 +688,15 @@ function renderHistory() {
   if(!container) return;
   container.innerHTML = '';
 
-  [...state.history].reverse().forEach(h => {
+  [...state.history].reverse().forEach((h, originalIndexReversed) => {
+    const realIndex = state.history.length - 1 - originalIndexReversed;
     const div = document.createElement('div');
     div.className = 'history-item';
+    div.style.cursor = 'pointer';
+    div.title = "Cliquez pour modifier cette séance";
+    
+    div.onclick = () => openSessionModal(realIndex);
+
     div.innerHTML = `
       <div>
         <span class="badge badge-${h.type}">Séance ${h.type}</span>
@@ -612,6 +707,62 @@ function renderHistory() {
     `;
     container.appendChild(div);
   });
+}
+
+function injectSessionModalHtml() {
+  if (document.getElementById('session-modal')) return;
+  const modalHtml = `
+    <div id="session-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:1000;">
+      <div style="background:#222; padding:20px; border-radius:8px; width:90%; max-width:300px; text-align:center; color:#fff; border: 1px solid #444;">
+        <h3 id="modal-session-title" style="margin-bottom: 15px; font-size: 1.1rem;">Séance</h3>
+        <button id="modal-edit-btn" style="background:#ff7f0e; border:none; color:white; padding:10px 20px; border-radius:5px; cursor:pointer; width:100%; font-size:1em; margin-bottom: 10px; font-weight:600;">Modifier la séance</button>
+        <button onclick="closeSessionModal()" style="background:#444; border:none; color:white; padding:8px 15px; border-radius:5px; cursor:pointer; width:100%;">Fermer</button>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+  document.getElementById('modal-edit-btn').addEventListener('click', () => {
+    if (selectedSessionIndex !== null) {
+      const sessionToEdit = state.history[selectedSessionIndex];
+      
+      editingOriginalDate = sessionToEdit.date;
+      editingOriginalId = sessionToEdit.id;
+      
+      initWorkoutForm(sessionToEdit);
+
+      state.history.splice(selectedSessionIndex, 1);
+      saveState();
+      
+      closeSessionModal();
+      renderHistory();
+      renderCharts();
+      switchTab('seance');
+
+      alert(`Séance ${sessionToEdit.type} du ${formatDate(sessionToEdit.date)} chargée dans le formulaire. Vous pouvez la corriger et valider.`);
+    }
+  });
+}
+
+function openSessionModal(index) {
+  selectedSessionIndex = index;
+  const session = state.history[index];
+  const titleEl = document.getElementById('modal-session-title');
+  if (titleEl) {
+    titleEl.innerText = `Séance ${session.type} du ${formatDate(session.date)}`;
+  }
+  const modal = document.getElementById('session-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+  }
+}
+
+function closeSessionModal() {
+  const modal = document.getElementById('session-modal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+  selectedSessionIndex = null;
 }
 
 function addWeight() {
