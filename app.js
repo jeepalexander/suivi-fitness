@@ -573,28 +573,52 @@ function formatDate(dateStr) {
 
 function renderTonnageChart() {
   const canvas = document.getElementById('tonnageChart');
-  if(!canvas) return;
+  if (!canvas) return;
   const ctx1 = canvas.getContext('2d');
   if (tonnageChart) tonnageChart.destroy();
 
   let labels = [];
   let data = [];
 
-  if (currentVolumeFilter === 'month') {
+  if (!state.history || state.history.length === 0) {
+    labels = ['Aucune donnée'];
+    data = [0];
+  } else if (currentVolumeFilter === 'month') {
+    // --- VUE PAR MOIS ---
     let monthlyData = {};
     state.history.forEach(e => {
-      const monthKey = e.date.substring(0, 7);
+      if (!e.date) return;
+      const monthKey = e.date.substring(0, 7); // Format 'AAAA-MM'
       if (!monthlyData[monthKey]) monthlyData[monthKey] = 0;
-      monthlyData[monthKey] += e.tonnage;
+      monthlyData[monthKey] += (parseFloat(e.tonnage) || 0);
     });
-    labels = Object.keys(monthlyData).map(m => {
+
+    // Tri chronologique strict des mois
+    const sortedMonths = Object.keys(monthlyData).sort((a, b) => a.localeCompare(b));
+
+    const monthNames = {
+      "01": "Janvier", "02": "Février", "03": "Mars", "04": "Avril",
+      "05": "Mai", "06": "Juin", "07": "Juillet", "08": "Août",
+      "09": "Septembre", "10": "Octobre", "11": "Novembre", "12": "Décembre"
+    };
+
+    sortedMonths.forEach(m => {
       const [y, mm] = m.split('-');
-      return `${mm}/${y.slice(2)}`;
+      const monthLabel = monthNames[mm] || mm;
+      labels.push(`${monthLabel} ${y}`);
+      data.push(monthlyData[m]);
     });
-    data = Object.values(monthlyData);
   } else {
-    labels = state.history.map(e => `${e.type} (${formatDate(e.date)})`);
-    data = state.history.map(e => e.tonnage);
+    // --- VUE PAR SÉANCE (Mode 'all' ou 'week') ---
+    const sortedHistory = [...state.history].sort((a, b) => new Date(a.date) - new Date(b.date));
+    let filteredHistory = sortedHistory;
+    
+    if (currentVolumeFilter === 'week') {
+      filteredHistory = sortedHistory.slice(-4);
+    }
+
+    labels = filteredHistory.map(e => `${e.type} (${formatDate(e.date)})`);
+    data = filteredHistory.map(e => parseFloat(e.tonnage) || 0);
   }
 
   tonnageChart = new Chart(ctx1, {
