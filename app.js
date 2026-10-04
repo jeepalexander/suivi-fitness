@@ -146,6 +146,9 @@ async function initApp() {
   initWorkoutForm();
   renderHistory();
   injectSessionModalHtml();
+
+  // Ajout de la vérification du déload au chargement
+  displayDeloadNotificationIfNeeded();
 }
 
 function saveState() {
@@ -195,22 +198,45 @@ function renderProgramOverview() {
   });
 }
 
+// ==========================================
+// SUGGESTION DES POIDS (AVEC EXCLUSION DU DÉLOAD)
+// ==========================================
 function getSuggestedSetValues(exName, setIndex, fallbackWeight, fallbackReps) {
+  let foundSet = null;
+  
+  // On parcourt l'historique du plus récent au plus ancien
   for (let i = state.history.length - 1; i >= 0; i--) {
     const h = state.history[i];
-    if (h.exercises) {
+    
+    // Détermine mathématiquement si cette séance historique était une séance de déload
+    const sessionNum = i + 1;
+    const wasDeload = (sessionNum % 12 === 0 || (sessionNum % 12 >= 10));
+    
+    // On ignore les séances de déload pour aller chercher la dernière vraie charge normale
+    if (!wasDeload && h.exercises) {
       const foundEx = h.exercises.find(e => e.name === exName);
       if (foundEx && foundEx.sets && foundEx.sets[setIndex]) {
-        return foundEx.sets[setIndex];
+        foundSet = { ...foundEx.sets[setIndex] };
+        break;
       }
     }
   }
-  if (state.lastWeights && state.lastWeights[exName]) {
-    return { weight: state.lastWeights[exName], reps: fallbackReps };
+  
+  if (!foundSet) {
+    if (state.lastWeights && state.lastWeights[exName]) {
+      foundSet = { weight: state.lastWeights[exName], reps: fallbackReps };
+    } else {
+      foundSet = { weight: fallbackWeight, reps: fallbackReps };
+    }
   }
-  return { weight: fallbackWeight, reps: fallbackReps };
+  
+  // Si le déload est actif pour la prochaine séance, on applique la réduction de 20%
+  if (isDeloadActive() && foundSet.weight) {
+    foundSet.weight = Math.round((foundSet.weight * 0.8) / 2.5) * 2.5; // Arrondi au palier de 2.5kg
+  }
+  
+  return foundSet;
 }
-
 function playBeep() {
   try {
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -377,33 +403,70 @@ function updateSetsProgress() {
   if(textEl) textEl.innerText = `${doneRows} / ${totalRows}`;
 }
 
-function initWorkoutForm(customSession = null) {
-  resetWorkoutTimer();
+// ==========================================
+// GESTION DU DÉLOAD (SEMAINE DE RELÂCHE)
+// ==========================================
+function checkDeloadStatus() {
+  if (!state || !state.history) return false;
+  // On se base sur le numéro de la PROCHAINE séance à venir
+  const nextSessionNumber = state.history.length + 1;
+  return nextSessionNumber > 0 && (nextSessionNumber % 12 === 0 || (nextSessionNumber % 12 >= 10));
+}
+
+function isDeloadActive() {
+  return checkDeloadStatus();
+}
+
+// Affiche une bannière d'alerte en haut de l'application si on est en semaine de déload
+function displayDeloadNotificationIfNeeded() {
+  // Supprimé ou vidé car la mention est maintenant intégrée directement au titre de la séance (seance-type-title)
+  const existingBanner = document.getElementById('deload-banner');
+  if (existingBanner) existingBanner.remove();
+}
+
+function initWorkoutForm(customSession = null) { 
+  resetWorkoutTimer(); 
   if(!state) return;
 
-  const type = customSession ? customSession.type : state.nextType;
+  const type = customSession ? customSession.type : state.nextType; 
   const prog = PROGRAM[type];
 
-  const titleEl = document.getElementById('seance-type-title');
-  if(titleEl) titleEl.innerText = prog.title;
-  
-  const badge = document.getElementById('seance-badge');
-  if(badge) {
-    badge.innerText = type;
-    badge.className = `badge ${prog.badge}`;
+  // Le titre principal reste simple (ex: "Séance A (Presse / Couché)")
+  const titleEl = document.getElementById('seance-type-title'); 
+  if(titleEl) {
+    titleEl.innerText = prog.title;
+    titleEl.style.color = ''; 
   }
 
-  const subHeader = document.getElementById('sub-header');
-  if(subHeader) {
-    subHeader.innerText = customSession ? `Modification de la séance du ${formatDate(customSession.date)}` : `Prochaine séance : ${type}`;
+  // --- GESTION DU SOUS-TITRE DELOAD ---
+  const deloadSubEl = document.getElementById('deload-subtitle');
+  if (deloadSubEl) {
+    if (isDeloadActive()) {
+      deloadSubEl.innerText = "⚡ SEMAINE DE DÉLOAD ACTIVE (-20% sur les charges)";
+      deloadSubEl.style.display = "block";
+    } else {
+      deloadSubEl.innerText = "";
+      deloadSubEl.style.display = "none";
+    }
   }
 
-  const container = document.getElementById('exercises-list');
-  if(!container) return;
+  const badge = document.getElementById('seance-badge'); 
+  if(badge) { 
+    badge.innerText = type; 
+    badge.className = `badge ${prog.badge}`; 
+  }
+
+  const subHeader = document.getElementById('sub-header'); 
+  if(subHeader) { 
+    subHeader.innerText = customSession ? `Modification de la séance du ${formatDate(customSession.date)}` : `Prochaine séance : ${type}`; 
+  }
+
+  const container = document.getElementById('exercises-list'); 
+  if(!container) return; 
   container.innerHTML = '';
 
-  prog.exercises.forEach((ex) => {
-    const div = document.createElement('div');
+  prog.exercises.forEach((ex) => { 
+    const div = document.createElement('div'); 
     div.className = 'exercise-item';
 
     let existingEx = null;
@@ -448,9 +511,8 @@ function initWorkoutForm(customSession = null) {
     container.appendChild(div);
   });
 
-  updateSetsProgress();
+  updateSetsProgress(); 
 }
-
 document.addEventListener('submit', function(e) {
   if(e.target && e.target.id === 'workout-form') {
     e.preventDefault();
@@ -496,6 +558,7 @@ document.addEventListener('submit', function(e) {
       id: sessionId,
       date: sessionDate,
       type: type,
+      isDeload: isDeloadActive(),
       tonnage: Math.round(totalTonnage),
       duration: sessionDuration,
       exercises: exerciseLogs
@@ -511,6 +574,9 @@ document.addEventListener('submit', function(e) {
     localStorage.removeItem('workout_start_time');
 
     saveState();
+
+    // Actualise la bannière de déload en temps réel
+    displayDeloadNotificationIfNeeded();
 
     alert(`Séance enregistrée !\n• Temps : ${sessionDuration}\n• Tonnage réel : ${Math.round(totalTonnage).toLocaleString()} kg`);
     
@@ -721,13 +787,18 @@ function renderHistory() {
     
     div.onclick = () => openSessionModal(realIndex);
 
+    // 1. Définition du badge de déload
+    const deloadBadgeHtml = h.isDeload ? `<span style="font-size:0.7rem; background:#ff980033; color:#ff9800; padding:2px 6px; border-radius:4px; margin-left:6px;"> Deload</span>` : '';
+
+    // 2. Injection du badge dans le HTML de la ligne
     div.innerHTML = `
       <div>
-        <span class="badge badge-${h.type}">Séance ${h.type}</span>
-        <span style="font-weight:600; margin-left:8px;">${formatDate(h.date)}</span>
-        <span style="font-size:0.75rem; color:var(--text-muted); margin-left:6px;">⏱️ ${h.duration || 'N/A'}</span>
+        <span class="badge badge-${h.type}">${h.type}</span>
+        <span style="font-weight:500; margin-left:8px;">${formatDate(h.date)}</span>
+        <span style="font-size:0.75rem; color:var(--text-muted); margin-left:6px;">⏱️️ ${h.duration || 'N/A'}</span>
+        ${deloadBadgeHtml}
       </div>
-      <div style="font-weight:700; color:#1f77b4;">${h.tonnage.toLocaleString()} kg</div>
+      <div style="font-weight:500; color:#1f77b4;">${h.tonnage.toLocaleString()} kg</div>
     `;
     container.appendChild(div);
   });
