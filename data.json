@@ -1,11 +1,13 @@
 {
-  "nextType": "A",
+  "nextType": "B",
   "history": [
     {
       "id": 1756134400000,
       "date": "2026-07-27",
       "type": "A",
-      "tonnage": 7154,
+      "isDeload": false,
+      "tonnage": 6594,
+      "duration": "1 min",
       "exercises": [
         {
           "name": "Presse à cuisses",
@@ -21,6 +23,10 @@
             {
               "weight": 79,
               "reps": 10
+            },
+            {
+              "weight": 0,
+              "reps": 0
             }
           ],
           "maxWeight": 79,
@@ -40,6 +46,10 @@
             {
               "weight": 70,
               "reps": 8
+            },
+            {
+              "weight": 0,
+              "reps": 0
             }
           ],
           "maxWeight": 70,
@@ -58,6 +68,10 @@
             },
             {
               "weight": 59,
+              "reps": 10
+            },
+            {
+              "weight": 0,
               "reps": 10
             }
           ],
@@ -88,19 +102,38 @@
           "sets": [
             {
               "weight": 24,
-              "reps": 20
+              "reps": 10
             },
             {
-              "weight": 28,
-              "reps": 20
+              "weight": 24,
+              "reps": 10
             },
             {
               "weight": 24,
               "reps": 10
             }
           ],
-          "maxWeight": 28,
-          "totalVolume": 1280
+          "maxWeight": 24,
+          "totalVolume": 720
+        },
+        {
+          "name": "Mollets",
+          "sets": [
+            {
+              "weight": 0,
+              "reps": 12
+            },
+            {
+              "weight": 0,
+              "reps": 12
+            },
+            {
+              "weight": 0,
+              "reps": 12
+            }
+          ],
+          "maxWeight": 0,
+          "totalVolume": 0
         }
       ]
     },
@@ -3847,6 +3880,142 @@
           "totalVolume": 1152
         }
       ]
+    },
+    {
+      "id": 1791185850997,
+      "date": "2026-10-05",
+      "type": "A",
+      "isDeload": false,
+      "tonnage": 12542,
+      "duration": "62 min",
+      "exercises": [
+        {
+          "name": "Presse à cuisses",
+          "sets": [
+            {
+              "weight": 73,
+              "reps": 12
+            },
+            {
+              "weight": 79,
+              "reps": 12
+            },
+            {
+              "weight": 86,
+              "reps": 12
+            },
+            {
+              "weight": 86,
+              "reps": 12
+            }
+          ],
+          "maxWeight": 86,
+          "totalVolume": 3888
+        },
+        {
+          "name": "Développé couché",
+          "sets": [
+            {
+              "weight": 40,
+              "reps": 10
+            },
+            {
+              "weight": 60,
+              "reps": 10
+            },
+            {
+              "weight": 70,
+              "reps": 10
+            },
+            {
+              "weight": 70,
+              "reps": 8
+            }
+          ],
+          "maxWeight": 70,
+          "totalVolume": 2260
+        },
+        {
+          "name": "Tirage horizontal",
+          "sets": [
+            {
+              "weight": 45,
+              "reps": 12
+            },
+            {
+              "weight": 45,
+              "reps": 10
+            },
+            {
+              "weight": 45,
+              "reps": 10
+            },
+            {
+              "weight": 45,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 45,
+          "totalVolume": 1890
+        },
+        {
+          "name": "Développé militaire",
+          "sets": [
+            {
+              "weight": 28,
+              "reps": 14
+            },
+            {
+              "weight": 32,
+              "reps": 8
+            },
+            {
+              "weight": 32,
+              "reps": 8
+            }
+          ],
+          "maxWeight": 32,
+          "totalVolume": 904
+        },
+        {
+          "name": "Curl biceps",
+          "sets": [
+            {
+              "weight": 24,
+              "reps": 10
+            },
+            {
+              "weight": 24,
+              "reps": 10
+            },
+            {
+              "weight": 24,
+              "reps": 10
+            }
+          ],
+          "maxWeight": 24,
+          "totalVolume": 720
+        },
+        {
+          "name": "Mollets",
+          "sets": [
+            {
+              "weight": 80,
+              "reps": 12
+            },
+            {
+              "weight": 80,
+              "reps": 12
+            },
+            {
+              "weight": 80,
+              "reps": 12
+            }
+          ],
+          "maxWeight": 80,
+          "totalVolume": 2880
+        }
+      ]
     }
   ],
   "weights": [
@@ -3868,9 +4037,9 @@
     }
   ],
   "lastWeights": {
-    "Presse à cuisses": 100,
-    "Développé couché": 75,
-    "Tirage horizontal": 59,
+    "Presse à cuisses": 0,
+    "Développé couché": 0,
+    "Tirage horizontal": 0,
     "Développé militaire": 28,
     "Curl biceps": 24,
     "Soulevé de terre": 40,
@@ -3883,7 +4052,7 @@
     "Dips": 80,
     "Rowing unilatéral": 20,
     "Oiseau (Arrière d'épaule)": 12,
-    "Mollets": 80,
+    "Mollets": 0,
     "Leg Extension": 66,
     "Leg Curl": 36
   }
