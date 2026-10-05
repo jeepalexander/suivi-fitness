@@ -21,8 +21,8 @@ const EXERCISE_ICONS = {
 
 const PROGRAM = {
   'A': {
-    title: "Séance A (Presse / Couché)",
     badge: "badge-A",
+    title: "Presse/Développé",
     exercises: [
       { name: "Presse à cuisses", seriesCount: 4, defaultWeight: 93, defaultReps: 10 },
       { name: "Développé couché", seriesCount: 4, defaultWeight: 75, defaultReps: 8 },
@@ -33,8 +33,8 @@ const PROGRAM = {
     ]
   },
   'B': {
-    title: "Séance B (Soulevé / Incliné)",
     badge: "badge-B",
+    title: "Soulevé/Développé",
     exercises: [
       { name: "Soulevé de terre", seriesCount: 4, defaultWeight: 70, defaultReps: 10 },
       { name: "Développé incliné", seriesCount: 4, defaultWeight: 60, defaultReps: 10 },
@@ -46,8 +46,8 @@ const PROGRAM = {
     ]
   },
   'C': {
-    title: "Séance C (Fentes / Dips)",
     badge: "badge-C",
+    title: "Fentes/Dips",
     exercises: [
       { name: "Fentes marchées", seriesCount: 4, defaultWeight: 25, defaultReps: 10 },
       { name: "Dips", seriesCount: 4, defaultWeight: 80, defaultReps: 10 },
@@ -174,25 +174,23 @@ function renderProgramOverview() {
     card.className = 'card';
 
     let exListHtml = '';
-    prog.exercises.forEach((ex, idx) => {
-      const warmupBadge = idx === 0 ? '<span style="font-size:0.68rem; background:#ff7f0e33; color:#ff9f43; padding:2px 6px; border-radius:4px; margin-left:6px;">🔥 Échauffement</span>' : '';
+    prog.exercises.forEach((ex) => {
       exListHtml += `
-        <div class="program-ex-row">
-          <span class="ex-title">
-            <div class="ex-icon-badge">${getIcon(ex.name)}</div>
-            <strong>${ex.name}</strong>${warmupBadge}
-          </span>
-          <span style="color:var(--text-muted); font-size:0.8rem;">${ex.seriesCount} × ${ex.defaultReps} reps</span>
+        <div class="program-ex-item" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 12px 8px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid var(--border);">
+          <div class="ex-icon-badge" style="margin-bottom: 8px;">${getIcon(ex.name)}</div>
+          <strong style="font-size: 0.8rem; line-height: 1.2;">${ex.name}</strong>
         </div>
       `;
     });
 
     card.innerHTML = `
-      <div class="card-title">
-        <span>${prog.title}</span>
+      <div class="card-title" style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
         <span class="badge ${prog.badge}">Séance ${type}</span>
+        <span style="font-size: 1rem; font-weight: bold;">${prog.title}</span>
       </div>
-      <div style="margin-top:10px;">${exListHtml}</div>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+        ${exListHtml}
+      </div>
     `;
     container.appendChild(card);
   });
@@ -452,7 +450,7 @@ function initWorkoutForm(customSession = null) {
 
   const badge = document.getElementById('seance-badge'); 
   if(badge) { 
-    badge.innerText = type; 
+    badge.innerText = `SÉANCE ${type}`; 
     badge.className = `badge ${prog.badge}`; 
   }
 
@@ -513,6 +511,7 @@ function initWorkoutForm(customSession = null) {
 
   updateSetsProgress(); 
 }
+
 document.addEventListener('submit', function(e) {
   if(e.target && e.target.id === 'workout-form') {
     e.preventDefault();
@@ -789,6 +788,9 @@ function renderHistory() {
 
     // 1. Définition du badge de déload
     const deloadBadgeHtml = h.isDeload ? `<span style="font-size:0.7rem; background:#ff980033; color:#ff9800; padding:2px 6px; border-radius:4px; margin-left:6px;"> Deload</span>` : '';
+    
+    // Conversion du tonnage en Tonnes (division par 1000) et formatage
+    const tonnageInTonnes = (parseFloat(h.tonnage || 0) / 1000).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1});
 
     // 2. Injection du badge dans le HTML de la ligne
     div.innerHTML = `
@@ -798,7 +800,7 @@ function renderHistory() {
         <span style="font-size:0.75rem; color:var(--text-muted); margin-left:6px;">⏱️️ ${h.duration || 'N/A'}</span>
         ${deloadBadgeHtml}
       </div>
-      <div style="font-weight:500; color:#1f77b4;">${h.tonnage.toLocaleString()} kg</div>
+      <div style="font-weight:500; color:#1f77b4;"><strong>${tonnageInTonnes} T</strong></div>
     `;
     container.appendChild(div);
   });
