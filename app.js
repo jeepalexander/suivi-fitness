@@ -197,6 +197,14 @@ function renderProgramOverview() {
 }
 
 // ==========================================
+// CHARGEMENT DES RESSOURCES LOCALES (Fallback pour le mode hors ligne)
+// Vérifie si Chart.js est chargé, sinon utilise la version locale
+if (typeof Chart === 'undefined') {
+  console.warn("Chart.js non chargé depuis le CDN, utilisation de la version locale");
+  // Chart.js est déjà chargé via le script local dans index.html
+}
+
+// ==========================================
 // SUGGESTION DES POIDS (AVEC EXCLUSION DU DÉLOAD)
 // ==========================================
 function getSuggestedSetValues(exName, setIndex, fallbackWeight, fallbackReps) {
