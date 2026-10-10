@@ -548,7 +548,7 @@ document.addEventListener('submit', function(e) {
 
     const sessionDuration = getFormattedWorkoutDuration();
     const typeBadgeEl = document.getElementById('seance-badge');
-    const type = typeBadgeEl ? typeBadgeEl.innerText : state.nextType;
+    const type = typeBadgeEl ? typeBadgeEl.innerText.trim().slice(-1) : state.nextType;
 
     const sessionDate = editingOriginalDate || new Date().toISOString().slice(0, 10);
     const sessionId = editingOriginalId || Date.now();
