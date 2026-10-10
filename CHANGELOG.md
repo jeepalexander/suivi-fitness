@@ -27,6 +27,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Calcul automatique du tonnage total par séance.
 
 ---
+---
+
+## [1.0.1] - 2026-10-10
+### 🐛 Corrections
+- Correction de l'affichage des séances dans l'historique : les badges affichent maintenant uniquement la lettre (A, B, C) au lieu de "SÉANCE A", "SÉANCE B", etc.
+
 ## [0.9.0] - 2024-09-15 *(Version de développement)*
 ### ✨ Ajouts
 - Structure de base HTML/CSS/JS.
