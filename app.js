@@ -450,7 +450,7 @@ function initWorkoutForm(customSession = null) {
 
   const badge = document.getElementById('seance-badge'); 
   if(badge) { 
-    badge.innerText = `SÉANCE ${type}`; 
+    badge.innerText = type; 
     badge.className = `badge ${prog.badge}`; 
   }
 
