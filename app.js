@@ -346,6 +346,9 @@ document.addEventListener('visibilitychange', () => {
 });
 
 function startWorkoutTimer() {
+  // En modification d'une séance passée, le chrono ne démarre pas :
+  // la durée enregistrée est conservée telle quelle.
+  if (editingOriginalId !== null) return;
   if (!workoutTimerInterval) {
     let startTime = localStorage.getItem('workout_start_time');
     if (!startTime) {
@@ -480,6 +483,23 @@ function initWorkoutForm(customSession = null) {
   if (cancelBtn) cancelBtn.style.display = isEditing ? 'block' : 'none';
   const submitBtn = document.getElementById('submit-workout-btn');
   if (submitBtn) submitBtn.innerText = isEditing ? 'Enregistrer les modifications' : 'Valider & Enregistrer la séance';
+
+  // Compteur de durée : en modification, on affiche la durée enregistrée de la séance
+  // (et non un 00:00 trompeur) ; en création, on retrouve le chrono classique.
+  const durationLabel = document.getElementById('workout-duration-label');
+  const durationDisplay = document.getElementById('workout-duration-display');
+  if (durationLabel) durationLabel.innerText = isEditing ? 'Durée enregistrée :' : 'Durée :';
+  if (durationDisplay) {
+    if (isEditing) {
+      durationDisplay.innerText = editingOriginalDuration || 'N/A';
+      durationDisplay.style.cursor = 'default';
+      durationDisplay.title = "Durée d'origine conservée (le chrono est désactivé en modification)";
+    } else {
+      durationDisplay.innerText = '00:00';
+      durationDisplay.style.cursor = 'pointer';
+      durationDisplay.title = '';
+    }
+  }
 
   const subHeader = document.getElementById('sub-header'); 
   if(subHeader) { 
