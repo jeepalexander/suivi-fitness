@@ -72,6 +72,16 @@ let currentExMetricMode = 'max';
 let selectedSessionIndex = null;
 let editingOriginalDate = null;
 let editingOriginalId = null;
+let editingOriginalDuration = null;
+let editingOriginalIsDeload = false;
+
+function clearEditState() {
+  editingOriginalDate = null;
+  editingOriginalId = null;
+  editingOriginalDuration = null;
+  editingOriginalIsDeload = false;
+  selectedSessionIndex = null;
+}
 
 function recalculateHistoryTonnages() {
   if (!state || !state.history) return;
@@ -420,6 +430,8 @@ function checkDeloadStatus() {
 }
 
 function isDeloadActive() {
+  // En modification, on conserve le statut de déload d'origine de la séance
+  if (editingOriginalId !== null) return !!editingOriginalIsDeload;
   return checkDeloadStatus();
 }
 
@@ -456,11 +468,18 @@ function initWorkoutForm(customSession = null) {
     }
   }
 
-  const badge = document.getElementById('seance-badge'); 
-  if(badge) { 
-    badge.innerText = type; 
-    badge.className = `badge ${prog.badge}`; 
+  const badge = document.getElementById('seance-badge');
+  if(badge) {
+    badge.innerText = type;
+    badge.className = `badge ${prog.badge}`;
   }
+
+  // Bouton Annuler + libellé du bouton de validation selon le mode (création / modification)
+  const isEditing = editingOriginalId !== null;
+  const cancelBtn = document.getElementById('cancel-edit-btn');
+  if (cancelBtn) cancelBtn.style.display = isEditing ? 'block' : 'none';
+  const submitBtn = document.getElementById('submit-workout-btn');
+  if (submitBtn) submitBtn.innerText = isEditing ? 'Enregistrer les modifications' : 'Valider & Enregistrer la séance';
 
   const subHeader = document.getElementById('sub-header'); 
   if(subHeader) { 
@@ -527,6 +546,7 @@ document.addEventListener('submit', function(e) {
     let exerciseLogs = [];
 
     if (!state.lastWeights) state.lastWeights = {};
+    const isEditing = editingOriginalId !== null;
 
     const weights = document.querySelectorAll('.weight-input');
     const reps = document.querySelectorAll('.reps-input');
@@ -551,10 +571,15 @@ document.addEventListener('submit', function(e) {
         exLog.maxWeight = w;
       }
 
-      state.lastWeights[exName] = w;
+      // On ne touche pas aux dernières charges quand on corrige une ancienne séance
+      if (!isEditing) state.lastWeights[exName] = w;
     });
 
-    const sessionDuration = getFormattedWorkoutDuration();
+    // En modification sans chrono lancé, on garde la durée d'origine (même si elle n'était pas renseignée)
+    const keepOriginalDuration = isEditing && workoutSeconds === 0;
+    const sessionDuration = keepOriginalDuration
+      ? (editingOriginalDuration || undefined)
+      : getFormattedWorkoutDuration();
     const typeBadgeEl = document.getElementById('seance-badge');
     const type = typeBadgeEl ? typeBadgeEl.innerText.trim().slice(-1) : state.nextType;
 
@@ -571,13 +596,17 @@ document.addEventListener('submit', function(e) {
       exercises: exerciseLogs
     };
 
+    // En modification, la séance d'origine est encore dans l'historique : on la remplace
+    if (isEditing) {
+      const originalIdx = state.history.findIndex(h => h.id === editingOriginalId);
+      if (originalIdx !== -1) state.history.splice(originalIdx, 1);
+    }
+
     state.history.push(entry);
     state.history.sort((a, b) => new Date(a.date) - new Date(b.date));
     updateNextTypeFromHistory();
 
-    editingOriginalDate = null;
-    editingOriginalId = null;
-    selectedSessionIndex = null;
+    clearEditState();
     localStorage.removeItem('workout_start_time');
 
     saveState();
@@ -585,7 +614,7 @@ document.addEventListener('submit', function(e) {
     // Actualise la bannière de déload en temps réel
     displayDeloadNotificationIfNeeded();
 
-    alert(`Séance enregistrée !\n• Temps : ${sessionDuration}\n• Tonnage réel : ${Math.round(totalTonnage).toLocaleString()} kg`);
+    alert(`${isEditing ? 'Séance modifiée' : 'Séance enregistrée'} !\n• Temps : ${sessionDuration || 'N/A'}\n• Tonnage réel : ${Math.round(totalTonnage).toLocaleString()} kg`);
     
     initWorkoutForm();
     renderHistory();
@@ -831,22 +860,27 @@ function injectSessionModalHtml() {
     if (selectedSessionIndex !== null) {
       const sessionToEdit = state.history[selectedSessionIndex];
       
+      // La séance reste dans l'historique tant que la modification n'est pas validée :
+      // rien n'est perdu si on quitte ou si on annule.
       editingOriginalDate = sessionToEdit.date;
       editingOriginalId = sessionToEdit.id;
-      
+      editingOriginalDuration = sessionToEdit.duration || null;
+      editingOriginalIsDeload = !!sessionToEdit.isDeload;
+
       initWorkoutForm(sessionToEdit);
 
-      state.history.splice(selectedSessionIndex, 1);
-      saveState();
-      
       closeSessionModal();
-      renderHistory();
-      renderCharts();
       switchTab('seance');
 
-      alert(`Séance ${sessionToEdit.type} du ${formatDate(sessionToEdit.date)} chargée dans le formulaire. Vous pouvez la corriger et valider.`);
+      alert(`Séance ${sessionToEdit.type} du ${formatDate(sessionToEdit.date)} chargée dans le formulaire. Corrigez-la puis validez, ou annulez : l'originale reste intacte tant que vous n'avez pas validé.`);
     }
   });
+}
+
+function cancelEditSession() {
+  clearEditState();
+  initWorkoutForm();
+  switchTab('historique');
 }
 
 function openSessionModal(index) {
@@ -976,6 +1010,7 @@ function importData(event) {
       const importedState = JSON.parse(e.target.result);
       if (importedState.history && importedState.nextType) {
         state = importedState;
+        clearEditState();
         saveState();
         populateExerciseSelect();
         initWorkoutForm();
@@ -999,6 +1034,7 @@ function resetData() {
   if (confirm1) {
     fetch('data.json').then(res => res.json()).then(defaultData => {
       state = defaultData;
+      clearEditState();
       saveState();
       populateExerciseSelect();
       initWorkoutForm();

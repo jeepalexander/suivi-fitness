@@ -7,13 +7,25 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.0.2] - 2026-10-17
+### 🐛 Corrections
+- Modification d'une séance : l'originale n'est plus supprimée de l'historique dès l'ouverture du formulaire. Elle n'est remplacée qu'à la validation, ce qui évite toute perte de données si l'on quitte l'application en cours de modification.
+- La durée et le statut de déload d'origine sont conservés lors de la modification d'une séance.
+- La modification d'une ancienne séance ne change plus les dernières charges utilisées pour les suggestions.
+- Correction de la date de la version 1.0.0 dans ce changelog (11/10/2024 → 31/10/2025, date du premier dépôt).
+
+### 🪶 Ajouts
+- Bouton « Annuler la modification » dans l'onglet Séance pour abandonner une modification sans rien perdre.
+
+---
+
 ## [1.0.1] - 2026-10-10
 ### 🐛 Corrections
 - Correction de l'affichage des séances dans l'historique : les badges affichent maintenant uniquement la lettre (A, B, C) au lieu de "SÉANCE A", "SÉANCE B", etc.
 
 ---
 
-## [1.0.0] - 2024-10-11
+## [1.0.0] - 2025-10-31
 ### 🪶 Ajouts
 - Version initiale complète de l'application.
 - Programme d'entraînement A/B/C avec 17 exercices personnalisés.
