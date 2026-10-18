@@ -1320,15 +1320,6 @@ function analyzeMonthlyProgress() {
   // 6. Conseils personnalisés
   const advice = [];
 
-  // Trouver le pire exercice en palier
-  if (plateaus.length > 0) {
-    const worstPlateau = plateaus[0]; // trié : le palier le plus long en premier
-    advice.push({
-      type: 'warning',
-      text: `${worstPlateau.exercise} en palier depuis ${worstPlateau.sessionsCount} séances (${worstPlateau.currentMax} kg)`
-    });
-  }
-
   // Détecter déséquilibre entre séances A/B/C
   if (currentMonthData.sessionTypes.A > 0 || currentMonthData.sessionTypes.B > 0 || currentMonthData.sessionTypes.C > 0) {
     const totalSessions = currentMonthData.sessionTypes.A + currentMonthData.sessionTypes.B + currentMonthData.sessionTypes.C;
