@@ -7,6 +7,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.1.5] - 2026-10-18
+### 🐛 Corrections
+- Onglet Séance : le bouton « + » d'un exercice ajoute enfin une série. La nouvelle ligne n'était jamais insérée dans la grille (le code ajoutait le blanc situé avant la balise au lieu de la ligne elle-même), si bien que rien ne s'affichait. La série ajoutée reprend les valeurs de la précédente, est numérotée correctement, est comptée dans « Séries » et est bien enregistrée avec la séance.
+
+---
+
 ## [1.1.4] - 2026-10-18
 ### 🪶 Ajouts
 - La version de l'application est affichée dans le titre de l'écran d'accueil (« SUIVI FITNESS X.X.X »), lue automatiquement depuis `manifest.json`.

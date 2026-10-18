@@ -478,16 +478,16 @@ function addSet(btn) {
     repsVal = suggested.reps;
   }
 
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = `
+  // insertAdjacentHTML insère directement l'élément : avec un conteneur temporaire,
+  // firstChild renvoyait le texte blanc précédant la balise et aucune ligne n'apparaissait.
+  grid.insertAdjacentHTML('beforeend', `
     <div class="set-row">
       <span class="set-label">Série ${rows.length + 1}</span>
       <input type="number" step="0.5" class="set-input weight-input" data-ex="${exName}" placeholder="kg" value="${weightVal}" oninput="markInputActive(this)">
       <input type="number" class="set-input reps-input" data-ex="${exName}" placeholder="reps" value="${repsVal}" oninput="markInputActive(this)">
       <button type="button" class="btn-check-set" onclick="toggleSetDone(this)">○</button>
     </div>
-  `;
-  grid.appendChild(wrapper.firstChild);
+  `);
   updateSetsProgress();
 }
 
