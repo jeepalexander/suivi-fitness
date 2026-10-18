@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.1.8] - 2026-10-18
+### 🐛 Corrections
+- **Plantage de l'application sur DEV** : `app.js` contenait une erreur de syntaxe (reste de l'ancienne
+  fonction `renderProgressAnalysis()` laissé après la nouvelle version, introduit en 1.1.7), ce qui empêchait
+  tout le script de se charger. Code orphelin supprimé.
+
+---
+
 ## [1.1.7] - 2026-10-18
 ### 📊 Améliorations
 - **Analyse mensuelle de progression** dans l'onglet Graphiques :
