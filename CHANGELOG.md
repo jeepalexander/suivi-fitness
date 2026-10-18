@@ -7,6 +7,17 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.1.6] - 2026-10-18
+### 📊 Ajouts
+- **Analyse mensuelle de progression** dans l'onglet Graphiques :
+  - Résumé mensuel avec tonnage total et nombre de séances par mois.
+  - Détection automatique des **records battus** par exercice avec amélioration en kg.
+  - Détection des **paliers** (exercices sans progression depuis 2+ mois).
+  - Statistiques globales de progression vs mois précédent.
+  - Conseils personnalisés basés sur les données (volume, fréquence, paliers).
+
+---
+
 ## [1.1.5] - 2026-10-18
 ### 🐛 Corrections
 - Onglet Séance : le bouton « + » d'un exercice ajoute enfin une série. La nouvelle ligne n'était jamais insérée dans la grille (le code ajoutait le blanc situé avant la balise au lieu de la ligne elle-même), si bien que rien ne s'affichait. La série ajoutée reprend les valeurs de la précédente, est numérotée correctement, est comptée dans « Séries » et est bien enregistrée avec la séance.
