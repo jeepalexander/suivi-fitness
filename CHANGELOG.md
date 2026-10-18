@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.1.11] - 2026-10-18
+### 📊 Améliorations
+- **Paliers détectés** : la détection se fait désormais **par exercice, sur ses 4 dernières séances réalisées**
+  (indépendamment des mois). Il y a palier quand aucune des 3 séances suivantes ne dépasse la plus ancienne des 4,
+  ni en charge max ni en volume. La série est prolongée tant que c'est vrai (« depuis le JJ/MM (N séances) »).
+  Remplace le calcul basé sur les mois (1.1.10).
+- Conseil « palier » : affiche le palier le plus long, en nombre de séances.
+
+---
+
 ## [1.1.10] - 2026-10-18
 ### 📊 Améliorations
 - **Analyse mensuelle (onglet Graphiques)** :

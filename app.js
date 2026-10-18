@@ -1206,49 +1206,62 @@ function analyzeMonthlyProgress() {
     });
   }
 
-  // 4. Détecter les paliers : sur les 2 derniers mois COMPLETS, charge max ET volume mensuel non en hausse.
-  // Le mois en cours (incomplet) est exclu ; l'exercice doit avoir été pratiqué le mois dernier.
-  const plateaus = [];
-  const noProgress = (current, previous) =>
-    current.maxWeight <= previous.maxWeight && current.totalVolume <= previous.totalVolume;
+  // 4. Détecter les paliers : pour chaque exercice, sur ses 4 dernières séances réalisées
+  // (indépendamment des mois). Il y a palier quand aucune des 3 séances suivantes ne dépasse la plus
+  // ancienne des 4, ni en charge max ni en volume. La série est prolongée tant que c'est vrai.
+  const PLATEAU_WINDOW = 4;
+  const exerciseSessions = {};
 
-  allExercises.forEach(exName => {
-    const series = [];
-    sortedMonths.forEach(monthKey => {
-      if (monthKey >= realMonthKey) return;
-      const exData = monthlyData[monthKey].exercises[exName];
-      if (!exData) return;
-      series.push({
-        monthKey: monthKey,
-        maxWeight: exData.maxWeights.length > 0 ? Math.max(...exData.maxWeights) : 0,
-        totalVolume: exData.volumes.reduce((a, b) => a + b, 0)
+  state.history
+    .filter(session => session.date && session.exercises)
+    .slice()
+    .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : (a.id || 0) - (b.id || 0)))
+    .forEach(session => {
+      const perExercise = {};
+      session.exercises.forEach(ex => {
+        const maxWeight = parseFloat(ex.maxWeight) || 0;
+        if (!ex.name || maxWeight <= 0) return; // exercice non réalisé
+        if (!perExercise[ex.name]) {
+          perExercise[ex.name] = { date: session.date, maxWeight: 0, totalVolume: 0 };
+        }
+        perExercise[ex.name].maxWeight = Math.max(perExercise[ex.name].maxWeight, maxWeight);
+        perExercise[ex.name].totalVolume += parseFloat(ex.totalVolume) || 0;
+      });
+      Object.keys(perExercise).forEach(name => {
+        if (!exerciseSessions[name]) exerciseSessions[name] = [];
+        exerciseSessions[name].push(perExercise[name]);
       });
     });
 
-    if (series.length < 2) return;
-    const last = series[series.length - 1];
-    if (last.monthKey !== monthKeyFromOffset(1) || last.maxWeight <= 0) return;
+  const plateaus = [];
+  Object.keys(exerciseSessions).forEach(exName => {
+    const sessions = exerciseSessions[exName];
+    const total = sessions.length;
+    if (total < PLATEAU_WINDOW) return;
 
-    // Nombre de mois consécutifs (en remontant) sans progression
-    let streak = 0;
-    for (let i = series.length - 1; i >= 1; i--) {
-      if (noProgress(series[i], series[i - 1])) {
-        streak++;
-      } else {
-        break;
-      }
-    }
-    if (streak === 0) return;
+    // La plus ancienne des `length` dernières séances n'est battue par aucune des suivantes
+    const holdsOver = length => {
+      const recent = sessions.slice(total - length);
+      const reference = recent[0];
+      return recent.slice(1).every(s =>
+        s.maxWeight <= reference.maxWeight && s.totalVolume <= reference.totalVolume
+      );
+    };
+    if (!holdsOver(PLATEAU_WINDOW)) return;
 
-    const sinceData = monthlyData[series[series.length - 1 - streak].monthKey];
+    let length = PLATEAU_WINDOW;
+    while (length < total && holdsOver(length + 1)) length++;
+
+    const latest = sessions[total - 1];
     plateaus.push({
       exercise: exName,
-      currentMax: last.maxWeight,
-      currentVolume: last.totalVolume,
-      stableSince: `${sinceData.monthName} ${sinceData.year}`,
-      monthsStable: streak + 1
+      currentMax: latest.maxWeight,
+      currentVolume: latest.totalVolume,
+      sinceDate: sessions[total - length].date,
+      sessionsCount: length
     });
   });
+  plateaus.sort((a, b) => b.sessionsCount - a.sessionsCount);
 
   // 5. Progression
   // 5a. Mois dernier vs mois précédent (mois calendaires ; le mois en cours, incomplet, est exclu)
@@ -1309,12 +1322,10 @@ function analyzeMonthlyProgress() {
 
   // Trouver le pire exercice en palier
   if (plateaus.length > 0) {
-    const worstPlateau = plateaus.reduce((worst, current) => 
-      current.monthsStable > worst.monthsStable ? current : worst
-    );
+    const worstPlateau = plateaus[0]; // trié : le palier le plus long en premier
     advice.push({
       type: 'warning',
-      text: `${worstPlateau.exercise} en palier depuis ${worstPlateau.monthsStable} mois (${worstPlateau.currentMax} kg)`
+      text: `${worstPlateau.exercise} en palier depuis ${worstPlateau.sessionsCount} séances (${worstPlateau.currentMax} kg)`
     });
   }
 
@@ -1430,7 +1441,7 @@ function renderProgressAnalysis() {
         <div class="plateau-item">
           <span class="plateau-exercise">${plateau.exercise}</span>
           <span class="plateau-value">${plateau.currentMax} kg</span>
-          <span class="plateau-duration">sans progression depuis ${plateau.stableSince}</span>
+          <span class="plateau-duration">sans progression depuis le ${plateau.sinceDate.substring(8, 10)}/${plateau.sinceDate.substring(5, 7)} (${plateau.sessionsCount} séances)</span>
         </div>
       `;
     });
