@@ -84,6 +84,7 @@
         <div class="filter-group">
           <button class="filter-btn active" onclick="setVolumeFilter('all', this)">Séances</button>
           <button class="filter-btn" onclick="setVolumeFilter('month', this)">Par Mois</button>
+          <button class="filter-btn" id="btn-vol-type" onclick="cycleSessionTypeFilter(this)" title="Appuyer pour afficher successivement la séance A, B puis C">A / B / C</button>
         </div>
       </div>
       <canvas id="tonnageChart" height="200"></canvas>

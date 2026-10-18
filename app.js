@@ -65,7 +65,10 @@ const REST_DURATION = 120;
 let workoutTimerInterval = null;
 let workoutSeconds = 0;
 let tonnageChart, exerciseChart, weightChart;
-let currentVolumeFilter = 'all';
+let currentVolumeFilter = 'all'; // 'all' (séances), 'month' (par mois) ou 'type' (séance A/B/C)
+const SESSION_TYPES = ['A', 'B', 'C'];
+const SESSION_TYPE_COLORS = { A: '#1f77b4', B: '#ff7f0e', C: '#d62728' };
+let currentSessionTypeFilter = SESSION_TYPES[0];
 let currentExMetricMode = 'max';
 
 // Variables pour la modification de séance
@@ -217,9 +220,15 @@ if (typeof Chart === 'undefined') {
 // ==========================================
 // SUGGESTION DES POIDS (AVEC EXCLUSION DU DÉLOAD)
 // ==========================================
+// Une série est considérée comme réellement effectuée si elle a une charge ET des répétitions.
+// Les séries à 0 kg / 0 rép. correspondent à des séries (ou exercices) non faits.
+function isPerformedSet(set) {
+  return !!set && (parseFloat(set.weight) || 0) > 0 && (parseFloat(set.reps) || 0) > 0;
+}
+
 function getSuggestedSetValues(exName, setIndex, fallbackWeight, fallbackReps) {
   let foundSet = null;
-  
+
   // On parcourt l'historique du plus récent au plus ancien
   for (let i = state.history.length - 1; i >= 0; i--) {
     const h = state.history[i];
@@ -231,7 +240,9 @@ function getSuggestedSetValues(exName, setIndex, fallbackWeight, fallbackReps) {
     // On ignore les séances de déload pour aller chercher la dernière vraie charge normale
     if (!wasDeload && h.exercises) {
       const foundEx = h.exercises.find(e => e.name === exName);
-      if (foundEx && foundEx.sets && foundEx.sets[setIndex]) {
+      // On ne reprend qu'une série réellement faite : les séries non faites sont ignorées
+      // et on remonte à la dernière séance où cette série a vraiment été réalisée.
+      if (foundEx && foundEx.sets && isPerformedSet(foundEx.sets[setIndex])) {
         foundSet = { ...foundEx.sets[setIndex] };
         break;
       }
@@ -592,7 +603,8 @@ document.addEventListener('submit', function(e) {
       }
 
       // On ne touche pas aux dernières charges quand on corrige une ancienne séance
-      if (!isEditing) state.lastWeights[exName] = w;
+      // et on ne mémorise pas les séries non faites (0 kg / 0 rép.)
+      if (!isEditing && w > 0 && r > 0) state.lastWeights[exName] = w;
     });
 
     // En modification sans chrono lancé, on garde la durée d'origine (même si elle n'était pas renseignée)
@@ -669,12 +681,41 @@ function populateExerciseSelect() {
   });
 }
 
-function setVolumeFilter(filter, btn) {
-  currentVolumeFilter = filter;
+// Met en surbrillance le bouton choisi parmi les filtres du graphique de volume
+// (les boutons du graphique par exercice ne sont pas concernés)
+function highlightVolumeButton(btn) {
   document.querySelectorAll('#tab-progression .filter-btn').forEach(b => {
     if(b.id !== 'btn-mode-max' && b.id !== 'btn-mode-vol') b.classList.remove('active');
   });
-  btn.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+// Le bouton "par séance" affiche "A / B / C" au repos, puis la séance affichée (Séance A, B ou C)
+function updateSessionTypeButton() {
+  const typeBtn = document.getElementById('btn-vol-type');
+  if (!typeBtn) return;
+  typeBtn.innerText = currentVolumeFilter === 'type' ? `Séance ${currentSessionTypeFilter}` : 'A / B / C';
+}
+
+function setVolumeFilter(filter, btn) {
+  currentVolumeFilter = filter;
+  highlightVolumeButton(btn);
+  updateSessionTypeButton();
+  renderTonnageChart();
+}
+
+// Chaque appui fait défiler les séances : A, puis B, puis C, puis A...
+// (le premier appui, depuis un autre filtre, démarre toujours sur A)
+function cycleSessionTypeFilter(btn) {
+  if (currentVolumeFilter === 'type') {
+    const idx = SESSION_TYPES.indexOf(currentSessionTypeFilter);
+    currentSessionTypeFilter = SESSION_TYPES[(idx + 1) % SESSION_TYPES.length];
+  } else {
+    currentVolumeFilter = 'type';
+    currentSessionTypeFilter = SESSION_TYPES[0];
+  }
+  highlightVolumeButton(btn);
+  updateSessionTypeButton();
   renderTonnageChart();
 }
 
@@ -730,32 +771,46 @@ function renderTonnageChart() {
       labels.push(`${monthLabel} ${y}`);
       data.push(monthlyData[m]);
     });
-  } else {
-    // --- VUE PAR SÉANCE (Mode 'all' ou 'week') ---
-    const sortedHistory = [...state.history].sort((a, b) => new Date(a.date) - new Date(b.date));
-    let filteredHistory = sortedHistory;
-    
-    if (currentVolumeFilter === 'week') {
-      filteredHistory = sortedHistory.slice(-4);
-    }
+  } else if (currentVolumeFilter === 'type') {
+    // --- VUE PAR TYPE DE SÉANCE (A, B ou C) ---
+    const typedHistory = [...state.history]
+      .filter(e => e.type === currentSessionTypeFilter)
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    labels = filteredHistory.map(e => `${e.type} (${formatDate(e.date)})`);
-    data = filteredHistory.map(e => parseFloat(e.tonnage) || 0);
+    if (typedHistory.length === 0) {
+      labels = ['Aucune donnée'];
+      data = [0];
+    } else {
+      labels = typedHistory.map(e => `${e.type} (${formatDate(e.date)})`);
+      data = typedHistory.map(e => parseFloat(e.tonnage) || 0);
+    }
+  } else {
+    // --- VUE PAR SÉANCE (toutes les séances) ---
+    const sortedHistory = [...state.history].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    labels = sortedHistory.map(e => `${e.type} (${formatDate(e.date)})`);
+    data = sortedHistory.map(e => parseFloat(e.tonnage) || 0);
   }
+
+  // Couleur : celle de la séance affichée en mode A/B/C, bleu sinon
+  const lineColor = currentVolumeFilter === 'type'
+    ? (SESSION_TYPE_COLORS[currentSessionTypeFilter] || '#1f77b4')
+    : '#1f77b4';
+  const lineLabel = currentVolumeFilter === 'type' ? `Tonnage séance ${currentSessionTypeFilter} (kg)` : 'Tonnage (kg)';
 
   tonnageChart = new Chart(ctx1, {
     type: 'line',
     data: {
       labels: labels,
       datasets: [{
-        label: 'Tonnage (kg)',
+        label: lineLabel,
         data: data,
-        borderColor: '#1f77b4',
-        backgroundColor: '#1f77b422',
+        borderColor: lineColor,
+        backgroundColor: `${lineColor}22`,
         borderWidth: 2,
         fill: true,
         tension: 0.3,
-        pointBackgroundColor: '#1f77b4',
+        pointBackgroundColor: lineColor,
         pointRadius: 4
       }]
     },
@@ -790,12 +845,20 @@ function renderExerciseChart() {
         return e.name === selectedEx;
       });
 
-      if (exData) {
+      // On ignore les séances où l'exercice n'a pas été réellement fait (séries à 0 kg / 0 rép.)
+      // pour ne pas tracer de faux creux à 0 dans la progression.
+      const performedSets = (exData && Array.isArray(exData.sets)) ? exData.sets.filter(isPerformedSet) : null;
+      const wasPerformed = performedSets ? performedSets.length > 0 : !!(exData && (exData.maxWeight || 0) > 0);
+
+      if (exData && wasPerformed) {
         labels.push(`${h.type} (${formatDate(h.date)})`);
         if (currentExMetricMode === 'volume') {
           chartData.push(exData.totalVolume || 0);
         } else {
-          chartData.push(exData.maxWeight || 0);
+          // Charge max calculée sur les séries réellement faites uniquement
+          chartData.push(performedSets
+            ? Math.max(...performedSets.map(s => parseFloat(s.weight) || 0))
+            : (exData.maxWeight || 0));
         }
       }
     }
