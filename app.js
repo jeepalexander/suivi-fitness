@@ -1150,26 +1150,30 @@ function analyzeMonthlyProgress() {
   const last4Months = sortedMonths.slice(-4);
   const last4MonthlyData = last4Months.map(key => monthlyData[key]);
 
-  // 3. Détecter les records du mois en cours (uniquement le dernier record par exercice)
-  const currentMonthKey = sortedMonths[sortedMonths.length - 1];
-  const currentMonthData = monthlyData[currentMonthKey];
+  // 3. Records battus ce mois-ci (mois calendaire réel, comparés à tout l'historique antérieur)
+  const now = new Date();
+  const realMonthKey = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+  const lastDataMonthKey = sortedMonths[sortedMonths.length - 1];
+  // Dernier mois ayant des séances (sert aux conseils ci-dessous)
+  const currentMonthData = monthlyData[lastDataMonthKey];
+  const thisMonthData = monthlyData[realMonthKey];
   const currentMonthRecords = [];
 
-  allExercises.forEach(exName => {
-    if (currentMonthData.exercises[exName] && currentMonthData.exercises[exName].maxWeights.length > 0) {
-      const currentMax = Math.max(...currentMonthData.exercises[exName].maxWeights);
-      
-      // Trouver le précédent record pour cet exercice (avant le mois en cours)
+  if (thisMonthData) {
+    const earlierMonths = sortedMonths.filter(key => key < realMonthKey);
+    allExercises.forEach(exName => {
+      const thisEx = thisMonthData.exercises[exName];
+      if (!thisEx || thisEx.maxWeights.length === 0) return;
+      const currentMax = Math.max(...thisEx.maxWeights);
+
+      // Meilleure charge avant ce mois-ci pour cet exercice
       let previousMax = 0;
-      for (let i = sortedMonths.length - 2; i >= 0; i--) {
-        const prevMonthKey = sortedMonths[i];
-        if (monthlyData[prevMonthKey].exercises[exName] && monthlyData[prevMonthKey].exercises[exName].maxWeights.length > 0) {
-          const prevMax = Math.max(...monthlyData[prevMonthKey].exercises[exName].maxWeights);
-          if (prevMax > previousMax) {
-            previousMax = prevMax;
-          }
+      earlierMonths.forEach(key => {
+        const prevEx = monthlyData[key].exercises[exName];
+        if (prevEx && prevEx.maxWeights.length > 0) {
+          previousMax = Math.max(previousMax, ...prevEx.maxWeights);
         }
-      }
+      });
 
       if (currentMax > previousMax) {
         currentMonthRecords.push({
@@ -1178,8 +1182,8 @@ function analyzeMonthlyProgress() {
           improvement: currentMax - previousMax
         });
       }
-    }
-  });
+    });
+  }
 
   // 4. Détecter les paliers (pas de progression en poids OU volume depuis 2+ mois)
   const plateaus = [];
@@ -1232,39 +1236,58 @@ function analyzeMonthlyProgress() {
     }
   });
 
-  // 5. Statistiques globales (comparaison mois dernier vs mois précédent)
-  let overallStats = null;
-  const completeMonths = sortedMonths.filter(m => m !== currentMonthKey);
-  
-  if (completeMonths.length >= 2) {
-    const lastCompleteMonthKey = completeMonths[completeMonths.length - 1];
-    const prevCompleteMonthKey = completeMonths[completeMonths.length - 2];
-    
-    const lastComplete = monthlyData[lastCompleteMonthKey];
-    const prevComplete = monthlyData[prevCompleteMonthKey];
-    
-    const tonnageDiff = lastComplete.totalTonnage - prevComplete.totalTonnage;
-    const tonnageDiffPercent = prevComplete.totalTonnage > 0 
-      ? Math.round((tonnageDiff / prevComplete.totalTonnage) * 100) 
-      : 0;
+  // 5. Progression
+  // 5a. Mois dernier vs mois précédent (le mois en cours, incomplet, est exclu)
+  let lastVsPreviousDiffPercent = null;
+  const completeMonths = sortedMonths.filter(m => m !== realMonthKey);
 
-    // Calculer l'indice de progression global (sur tous les mois complets)
-    let globalProgressIndex = 0;
-    if (completeMonths.length >= 2) {
-      const firstComplete = monthlyData[completeMonths[0]];
-      const lastCompleteTonnage = monthlyData[completeMonths[completeMonths.length - 1]].totalTonnage;
-      if (firstComplete.totalTonnage > 0) {
-        globalProgressIndex = Math.round(
-          ((lastCompleteTonnage - firstComplete.totalTonnage) / firstComplete.totalTonnage) * 100
-        );
+  if (completeMonths.length >= 2) {
+    const lastComplete = monthlyData[completeMonths[completeMonths.length - 1]];
+    const prevComplete = monthlyData[completeMonths[completeMonths.length - 2]];
+    lastVsPreviousDiffPercent = prevComplete.totalTonnage > 0
+      ? Math.round(((lastComplete.totalTonnage - prevComplete.totalTonnage) / prevComplete.totalTonnage) * 100)
+      : 0;
+  }
+
+  // 5b. Progression par séance (A/B/C) sur l'ensemble de l'historique, sans tenir compte des mois :
+  // médiane du tonnage des (jusqu'à) 3 dernières séances vs les 3 premières, séances de décharge exclues.
+  const median = values => {
+    const sorted = values.slice().sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+  };
+
+  const sessionProgress = {};
+  const typePercents = [];
+  ['A', 'B', 'C'].forEach(type => {
+    const tonnages = state.history
+      .filter(session => session.date && session.type === type && !session.isDeload && (parseFloat(session.tonnage) || 0) > 0)
+      .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : (a.id || 0) - (b.id || 0)))
+      .map(session => parseFloat(session.tonnage));
+
+    let percent = null;
+    if (tonnages.length >= 2) {
+      const n = Math.min(3, Math.floor(tonnages.length / 2));
+      const first = median(tonnages.slice(0, n));
+      const last = median(tonnages.slice(-n));
+      if (first > 0) {
+        percent = Math.round(((last - first) / first) * 100);
+        typePercents.push(percent);
       }
     }
+    sessionProgress[type] = { percent: percent, sessions: tonnages.length };
+  });
 
-    overallStats = {
-      lastVsPreviousDiffPercent: tonnageDiffPercent,
-      globalProgressIndex: globalProgressIndex
-    };
-  }
+  // 5c. Indice de progression global : moyenne des progressions A, B et C disponibles
+  const globalProgressIndex = typePercents.length > 0
+    ? Math.round(typePercents.reduce((sum, value) => sum + value, 0) / typePercents.length)
+    : null;
+
+  const overallStats = {
+    lastVsPreviousDiffPercent: lastVsPreviousDiffPercent,
+    globalProgressIndex: globalProgressIndex,
+    sessionProgress: sessionProgress
+  };
 
   // 6. Conseils personnalisés
   const advice = [];
@@ -1309,7 +1332,7 @@ function analyzeMonthlyProgress() {
 
   return {
     monthlyData: last4MonthlyData,
-    currentMonthKey: currentMonthKey,
+    currentMonthKey: realMonthKey,
     currentMonthRecords: currentMonthRecords,
     plateaus: plateaus,
     overallStats: overallStats,
@@ -1339,30 +1362,32 @@ function renderProgressAnalysis() {
   }
 
   // 1. Résumé mensuel (4 derniers mois max)
+  html += `<div class="analysis-section">`;
+  html += `<h3 class="analysis-section-title">4 derniers mois</h3>`;
   html += `<div class="monthly-summary">`;
 
   analysis.monthlyData.forEach(month => {
     const tonnageInTonnes = (month.totalTonnage / 1000).toFixed(1);
     const isCurrentMonth = month.year + '-' + month.month === analysis.currentMonthKey;
-    const inProgressText = isCurrentMonth ? '<span class="in-progress-badge">en cours</span>' : '';
-    
+    const monthLabel = isCurrentMonth ? 'Ce mois-ci' : `${month.monthName} ${month.year}`;
+
     html += `
       <div class="month-card">
         <div class="month-header">
-          <span class="month-name">${month.monthName} ${month.year}</span>
+          <span class="month-name">${monthLabel}</span>
           <span class="month-sessions">${month.sessionCount} séance${month.sessionCount > 1 ? 's' : ''}</span>
         </div>
         <div class="month-tonnage">${tonnageInTonnes} T</div>
-        ${inProgressText}
       </div>
     `;
   });
 
-  html += `</div>`;
+  html += `</div></div>`;
 
-  // 2. Records battus (uniquement ceux du mois en cours)
+  // 2. Records battus ce mois-ci
   if (analysis.currentMonthRecords.length > 0) {
     html += `<div class="analysis-section">`;
+    html += `<h3 class="analysis-section-title">Records battus ce mois-ci</h3>`;
     html += `<div class="records-list">`;
 
     analysis.currentMonthRecords.forEach(record => {
@@ -1396,30 +1421,33 @@ function renderProgressAnalysis() {
     html += `</div></div>`;
   }
 
-  // 4. Statistiques globales
-  if (analysis.overallStats) {
-    html += `<div class="analysis-section">`;
-    html += `<div class="overall-stats">`;
-
-    const diffClass = analysis.overallStats.lastVsPreviousDiffPercent >= 0 ? 'positive' : 'negative';
-    const diffSymbol = analysis.overallStats.lastVsPreviousDiffPercent >= 0 ? '\u25b2' : '\u25bc';
-
-    html += `
+  // 4. Progression
+  const stats = analysis.overallStats;
+  const progressItem = (label, percent) => {
+    if (percent === null || percent === undefined) return '';
+    const cls = percent >= 0 ? 'positive' : 'negative';
+    const symbol = percent >= 0 ? '\u25b2' : '\u25bc';
+    return `
       <div class="stat-item">
-        <span class="stat-label">Mois dernier vs précédent</span>
-        <span class="stat-value ${diffClass}">
-          ${diffSymbol} ${Math.abs(analysis.overallStats.lastVsPreviousDiffPercent)}%
-        </span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Progression globale</span>
-        <span class="stat-value ${analysis.overallStats.globalProgressIndex >= 0 ? 'positive' : 'negative'}">
-          ${analysis.overallStats.globalProgressIndex >= 0 ? '\u25b2' : '\u25bc'} ${Math.abs(analysis.overallStats.globalProgressIndex)}%
-        </span>
+        <span class="stat-label">${label}</span>
+        <span class="stat-value ${cls}">${symbol} ${Math.abs(percent)}%</span>
       </div>
     `;
+  };
 
-    html += `</div></div>`;
+  if (stats) {
+    const items =
+      progressItem('Mois dernier vs précédent', stats.lastVsPreviousDiffPercent) +
+      progressItem('Indice de progression global', stats.globalProgressIndex) +
+      ['A', 'B', 'C'].map(type => progressItem(`Séance ${type}`, stats.sessionProgress[type].percent)).join('');
+
+    if (items.trim() !== '') {
+      html += `<div class="analysis-section">`;
+      html += `<h3 class="analysis-section-title">Progression</h3>`;
+      html += `<div class="overall-stats">${items}</div>`;
+      html += `<p class="analysis-note">Indice global et séances : tonnage médian des 3 dernières séances vs les 3 premières, sur tout l'historique (sans tenir compte des mois). L'indice global est la moyenne des séances A, B et C.</p>`;
+      html += `</div>`;
+    }
   }
 
   // 5. Conseils

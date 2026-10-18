@@ -7,6 +7,19 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.1.9] - 2026-10-18
+### 📊 Améliorations
+- **Analyse mensuelle (onglet Graphiques)** :
+  - Titre de section « 4 derniers mois » ; le bloc du mois en cours s'intitule « Ce mois-ci » (badge « en cours » supprimé).
+  - Titre « Records battus ce mois-ci » (records calculés sur le mois calendaire réel).
+  - Nouvelle section « Progression » :
+    - conservation du calcul mois dernier vs mois précédent ;
+    - **indice de progression global** sur l'ensemble des séances, sans tenir compte des mois (moyenne des progressions A, B et C), qui remplace l'ancien calcul basé sur le premier mois complet ;
+    - **pourcentage de progression par séance** (A, B, C) : tonnage médian des 3 dernières séances vs les 3 premières, séances de décharge exclues.
+  - Le mois en cours est désormais déterminé par la date du jour (et non plus par le dernier mois contenant des séances).
+
+---
+
 ## [1.1.8] - 2026-10-18
 ### 🐛 Corrections
 - **Plantage de l'application sur DEV** : `app.js` contenait une erreur de syntaxe (reste de l'ancienne
