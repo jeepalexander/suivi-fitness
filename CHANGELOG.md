@@ -7,6 +7,19 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.1.7] - 2026-10-18
+### 📊 Améliorations
+- **Analyse mensuelle de progression** dans l'onglet Graphiques :
+  - Résumé mensuel limité aux 4 derniers mois (mois en cours inclus).
+  - Badge "en cours" pour le mois actuel.
+  - Records battus : uniquement ceux du mois en cours (dernier record par exercice).
+  - Paliers détectés : prend en compte à la fois le poids ET le volume (pas de palier si le volume augmente).
+  - Statistiques globales : comparaison mois dernier vs mois précédent (exclut le mois en cours).
+  - Indice de progression global sur l'ensemble des mois complets.
+  - Conseils : pire exercice en palier identifié, déséquilibre A/B/C détecté.
+
+---
+
 ## [1.1.6] - 2026-10-18
 ### 📊 Ajouts
 - **Analyse mensuelle de progression** dans l'onglet Graphiques :
