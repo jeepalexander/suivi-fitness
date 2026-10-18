@@ -1146,13 +1146,34 @@ function analyzeMonthlyProgress() {
   const sortedMonths = Object.keys(monthlyData).sort();
   const monthlyArray = sortedMonths.map(key => monthlyData[key]);
 
-  // 2. Filtrer pour garder seulement les 4 derniers mois
-  const last4Months = sortedMonths.slice(-4);
-  const last4MonthlyData = last4Months.map(key => monthlyData[key]);
+  // 2. Les 4 derniers mois calendaires (mois en cours inclus), même sans séance.
+  // On ne remonte pas avant le premier mois contenant des séances.
+  const now = new Date();
+  const monthKeyFromOffset = offset => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+  const realMonthKey = monthKeyFromOffset(0);
+  const firstMonthKey = sortedMonths[0];
+
+  const last4MonthlyData = [];
+  for (let offset = 3; offset >= 0; offset--) {
+    const key = monthKeyFromOffset(offset);
+    if (key < firstMonthKey) continue;
+    const [year, month] = key.split('-');
+    last4MonthlyData.push(monthlyData[key] || {
+      year: year,
+      month: month,
+      monthName: monthNames[month] || month,
+      totalTonnage: 0,
+      sessionCount: 0,
+      sessions: [],
+      exercises: {},
+      sessionTypes: { A: 0, B: 0, C: 0 }
+    });
+  }
 
   // 3. Records battus ce mois-ci (mois calendaire réel, comparés à tout l'historique antérieur)
-  const now = new Date();
-  const realMonthKey = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
   const lastDataMonthKey = sortedMonths[sortedMonths.length - 1];
   // Dernier mois ayant des séances (sert aux conseils ci-dessous)
   const currentMonthData = monthlyData[lastDataMonthKey];
@@ -1237,16 +1258,17 @@ function analyzeMonthlyProgress() {
   });
 
   // 5. Progression
-  // 5a. Mois dernier vs mois précédent (le mois en cours, incomplet, est exclu)
+  // 5a. Mois dernier vs mois précédent (mois calendaires ; le mois en cours, incomplet, est exclu)
   let lastVsPreviousDiffPercent = null;
-  const completeMonths = sortedMonths.filter(m => m !== realMonthKey);
+  const lastMonthKey = monthKeyFromOffset(1);
+  const previousMonthKey = monthKeyFromOffset(2);
 
-  if (completeMonths.length >= 2) {
-    const lastComplete = monthlyData[completeMonths[completeMonths.length - 1]];
-    const prevComplete = monthlyData[completeMonths[completeMonths.length - 2]];
-    lastVsPreviousDiffPercent = prevComplete.totalTonnage > 0
-      ? Math.round(((lastComplete.totalTonnage - prevComplete.totalTonnage) / prevComplete.totalTonnage) * 100)
-      : 0;
+  if (previousMonthKey >= firstMonthKey) {
+    const lastTonnage = monthlyData[lastMonthKey] ? monthlyData[lastMonthKey].totalTonnage : 0;
+    const previousTonnage = monthlyData[previousMonthKey] ? monthlyData[previousMonthKey].totalTonnage : 0;
+    if (previousTonnage > 0) {
+      lastVsPreviousDiffPercent = Math.round(((lastTonnage - previousTonnage) / previousTonnage) * 100);
+    }
   }
 
   // 5b. Progression par séance (A/B/C) sur l'ensemble de l'historique, sans tenir compte des mois :
@@ -1404,8 +1426,10 @@ function renderProgressAnalysis() {
   }
 
   // 3. Paliers détectés
+  html += `<div class="analysis-section">`;
+  html += `<h3 class="analysis-section-title">Paliers détectés</h3>`;
+
   if (analysis.plateaus.length > 0) {
-    html += `<div class="analysis-section">`;
     html += `<div class="plateaus-list">`;
 
     analysis.plateaus.forEach(plateau => {
@@ -1418,8 +1442,12 @@ function renderProgressAnalysis() {
       `;
     });
 
-    html += `</div></div>`;
+    html += `</div>`;
+  } else {
+    html += `<p class="analysis-none">Aucun palier détecté</p>`;
   }
+
+  html += `</div>`;
 
   // 4. Progression
   const stats = analysis.overallStats;

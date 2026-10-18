@@ -7,6 +7,17 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.1.10] - 2026-10-18
+### 📊 Améliorations
+- **Analyse mensuelle (onglet Graphiques)** :
+  - Les « 4 derniers mois » sont désormais des mois calendaires : le dernier bloc est toujours « Ce mois-ci »,
+    même sans séance (0 séance, 0,0 T), et un mois sans séance est affiché à 0 au lieu d'être sauté.
+    On ne remonte pas avant le premier mois contenant des séances.
+  - « Mois dernier vs précédent » se base aussi sur les mois calendaires.
+  - Nouvelle section « Paliers détectés » (avec le message « Aucun palier détecté » quand il n'y en a pas).
+
+---
+
 ## [1.1.9] - 2026-10-18
 ### 📊 Améliorations
 - **Analyse mensuelle (onglet Graphiques)** :
