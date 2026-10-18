@@ -1206,55 +1206,48 @@ function analyzeMonthlyProgress() {
     });
   }
 
-  // 4. Détecter les paliers (pas de progression en poids OU volume depuis 2+ mois)
+  // 4. Détecter les paliers : sur les 2 derniers mois COMPLETS, charge max ET volume mensuel non en hausse.
+  // Le mois en cours (incomplet) est exclu ; l'exercice doit avoir été pratiqué le mois dernier.
   const plateaus = [];
+  const noProgress = (current, previous) =>
+    current.maxWeight <= previous.maxWeight && current.totalVolume <= previous.totalVolume;
+
   allExercises.forEach(exName => {
-    // Collecter les données mensuelles pour cet exercice
-    const exerciseMonthlyData = [];
+    const series = [];
     sortedMonths.forEach(monthKey => {
-      if (monthlyData[monthKey].exercises[exName]) {
-        const maxWeight = monthlyData[monthKey].exercises[exName].maxWeights.length > 0 
-          ? Math.max(...monthlyData[monthKey].exercises[exName].maxWeights) : 0;
-        const totalVolume = monthlyData[monthKey].exercises[exName].volumes.length > 0 
-          ? monthlyData[monthKey].exercises[exName].volumes.reduce((a, b) => a + b, 0) : 0;
-        exerciseMonthlyData.push({ monthKey, maxWeight, totalVolume });
-      }
+      if (monthKey >= realMonthKey) return;
+      const exData = monthlyData[monthKey].exercises[exName];
+      if (!exData) return;
+      series.push({
+        monthKey: monthKey,
+        maxWeight: exData.maxWeights.length > 0 ? Math.max(...exData.maxWeights) : 0,
+        totalVolume: exData.volumes.reduce((a, b) => a + b, 0)
+      });
     });
 
-    if (exerciseMonthlyData.length >= 2) {
-      // Vérifier si les 2 derniers mois ont la même charge max ET le même volume
-      const last2 = exerciseMonthlyData.slice(-2);
-      const last = last2[1];
-      const secondLast = last2[0];
+    if (series.length < 2) return;
+    const last = series[series.length - 1];
+    if (last.monthKey !== monthKeyFromOffset(1) || last.maxWeight <= 0) return;
 
-      if (last.maxWeight === secondLast.maxWeight && 
-          last.totalVolume === secondLast.totalVolume && 
-          last.maxWeight > 0) {
-        
-        // Vérifier depuis combien de mois c'est stable
-        let stableCount = 2;
-        for (let i = exerciseMonthlyData.length - 3; i >= 0; i--) {
-          const prev = exerciseMonthlyData[i];
-          if (prev.maxWeight === last.maxWeight && prev.totalVolume === last.totalVolume) {
-            stableCount++;
-          } else {
-            break;
-          }
-        }
-
-        if (stableCount >= 2) {
-          const stableSince = exerciseMonthlyData[exerciseMonthlyData.length - stableCount].monthKey;
-          const stableSinceData = monthlyData[stableSince];
-          plateaus.push({
-            exercise: exName,
-            currentMax: last.maxWeight,
-            currentVolume: last.totalVolume,
-            stableSince: `${stableSinceData.monthName} ${stableSinceData.year}`,
-            monthsStable: stableCount
-          });
-        }
+    // Nombre de mois consécutifs (en remontant) sans progression
+    let streak = 0;
+    for (let i = series.length - 1; i >= 1; i--) {
+      if (noProgress(series[i], series[i - 1])) {
+        streak++;
+      } else {
+        break;
       }
     }
+    if (streak === 0) return;
+
+    const sinceData = monthlyData[series[series.length - 1 - streak].monthKey];
+    plateaus.push({
+      exercise: exName,
+      currentMax: last.maxWeight,
+      currentVolume: last.totalVolume,
+      stableSince: `${sinceData.monthName} ${sinceData.year}`,
+      monthsStable: streak + 1
+    });
   });
 
   // 5. Progression
@@ -1321,7 +1314,7 @@ function analyzeMonthlyProgress() {
     );
     advice.push({
       type: 'warning',
-      text: `⚠️ ${worstPlateau.exercise} en palier depuis ${worstPlateau.monthsStable} mois (${worstPlateau.currentMax} kg)`
+      text: `${worstPlateau.exercise} en palier depuis ${worstPlateau.monthsStable} mois (${worstPlateau.currentMax} kg)`
     });
   }
 
@@ -1437,7 +1430,7 @@ function renderProgressAnalysis() {
         <div class="plateau-item">
           <span class="plateau-exercise">${plateau.exercise}</span>
           <span class="plateau-value">${plateau.currentMax} kg</span>
-          <span class="plateau-duration">stable depuis ${plateau.stableSince}</span>
+          <span class="plateau-duration">sans progression depuis ${plateau.stableSince}</span>
         </div>
       `;
     });

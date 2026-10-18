@@ -15,6 +15,11 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
     On ne remonte pas avant le premier mois contenant des séances.
   - « Mois dernier vs précédent » se base aussi sur les mois calendaires.
   - Nouvelle section « Paliers détectés » (avec le message « Aucun palier détecté » quand il n'y en a pas).
+  - **Détection des paliers corrigée** : l'ancien calcul exigeait un volume mensuel strictement identique d'un mois
+    à l'autre (donc ne se déclenchait quasiment jamais). Un exercice est désormais en palier si, sur les 2 derniers
+    mois complets, sa charge max ET son volume mensuel ne progressent pas (mois en cours exclu, exercice pratiqué le
+    mois dernier). Affichage « sans progression depuis … ».
+  - Conseil « palier » : suppression de l'icône ⚠️ en double.
 
 ---
 
