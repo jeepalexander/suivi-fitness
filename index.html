@@ -119,10 +119,10 @@
       <div class="card-title">Historique des Séances</div>
       <div id="history-list"></div>
       
-      <div style="margin-top: 15px;">
-        <button onclick="exportData()" class="btn btn-secondary">Sauvegarder / Partager (Drive)</button>
-        <button onclick="document.getElementById('import-file').click()" class="btn btn-secondary">Importer une sauvegarde</button>
-        <input type="file" id="import-file" style="display:none" onchange="importData(event)">
+      <input type="file" id="import-file" style="display:none" onchange="importData(event)">
+      <div class="save-bar">
+        <button onclick="exportData()" class="btn btn-secondary" style="margin:0;">💾 Sauvegarder</button>
+        <button onclick="document.getElementById('import-file').click()" class="btn btn-secondary" style="margin:0;">📂 Restaurer une sauvegarde</button>
       </div>
 
       <div class="danger-zone">

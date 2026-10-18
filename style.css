@@ -204,3 +204,19 @@ select.filter-select { background: #2a2a2a; border: 1px solid var(--border); col
   text-decoration: underline;
   cursor: pointer;
 }
+/* Barre de sauvegarde fixe (visible dans l'onglet Historique) */
+.save-bar {
+  position: fixed;
+  bottom: 62px;
+  left: 0;
+  right: 0;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 8px 15px;
+  display: flex;
+  gap: 8px;
+  background: var(--card-bg);
+  border-top: 1px solid var(--border);
+  z-index: 90;
+}
+.save-bar .btn { width: 50%; padding: 10px 6px; font-size: 0.8rem; }

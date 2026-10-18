@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.1.3] - 2026-10-18
+### 🪶 Ajouts
+- Les boutons de sauvegarde et de restauration sont désormais fixés en bas de l'écran (au-dessus de la navigation) dans l'onglet Historique : ils restent accessibles sans faire défiler la liste des séances.
+
+### 🐛 Corrections
+- Le fichier de sauvegarde est nommé `AAAA-MM-JJ.json` (au lieu de `sauvegarde_fitness_AAAA-MM-JJ.json`), plus court dans la feuille de partage.
+- Libellé du bouton d'export simplifié en « Sauvegarder » ; le bouton d'import devient « Restaurer une sauvegarde » pour lever l'ambiguïté avec les termes « Importer » affichés par les applications cibles (Drive, etc.).
+
+---
+
 ## [1.1.2] - 2026-10-18
 ### 🪶 Ajouts
 - Service worker (`sw.js`) : l'application est désormais réellement utilisable hors ligne (mise en cache de l'interface, des scripts, des styles, des icônes et de `data.json`). Le nom du cache est dérivé automatiquement de la version du `manifest.json` : incrémenter la version suffit à forcer la mise à jour du cache chez tous les utilisateurs.
