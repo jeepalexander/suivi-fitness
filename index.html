@@ -153,5 +153,16 @@
 
   <!-- Liaison Script externe -->
   <script src="app.js"></script>
+
+  <!-- Enregistrement du Service Worker (mode hors-ligne) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch((err) => {
+          console.warn("Échec de l'enregistrement du service worker :", err);
+        });
+      });
+    }
+  </script>
 </body>
 </html>

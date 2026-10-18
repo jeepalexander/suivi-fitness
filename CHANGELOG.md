@@ -7,6 +7,18 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.1.2] - 2026-10-18
+### 🪶 Ajouts
+- Service worker (`sw.js`) : l'application est désormais réellement utilisable hors ligne (mise en cache de l'interface, des scripts, des styles, des icônes et de `data.json`). Incrémenter `CACHE_NAME` à chaque déploiement pour forcer la mise à jour du cache.
+
+### 🐛 Corrections
+- Une sauvegarde locale corrompue ne bloque plus le démarrage : `localStorage` est réinitialisé proprement au lieu de lever une exception non gérée.
+
+### 🧹 Nettoyage
+- Suppression du bloc de code mort « vérification Chart.js » (le garde-fou `typeof Chart === 'undefined'` ne pouvait jamais se déclencher depuis que la bibliothèque locale est chargée).
+
+---
+
 ## [1.1.1] - 2026-10-18
 ### 🐛 Corrections
 - Les graphiques (Volume Total, Progression par Exercice, Poids Corporel) s'affichent de nouveau. Le fichier local `js/chart.umd.min.js`, introduit avec le mode hors-ligne, n'était pas la vraie bibliothèque Chart.js mais un substitut de 5 Ko contenant une erreur de syntaxe : le navigateur le rejetait, `Chart` n'existait pas et tous les graphiques restaient vides. Il est remplacé par la vraie bibliothèque Chart.js 4.4.1 (build UMD officiel, MIT), toujours servie en local pour le mode hors-ligne.

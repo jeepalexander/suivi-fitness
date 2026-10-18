@@ -139,7 +139,13 @@ function updateNextTypeFromHistory() {
 async function initApp() {
   const saved = localStorage.getItem('h49_state');
   if (saved) {
-    state = JSON.parse(saved);
+    try {
+      state = JSON.parse(saved);
+    } catch (e) {
+      console.error("Sauvegarde locale corrompue, réinitialisation.", e);
+      localStorage.removeItem('h49_state');
+      state = { nextType: 'A', history: [], weights: [], lastWeights: {} };
+    }
   } else {
     try {
       const response = await fetch('data.json');
@@ -207,14 +213,6 @@ function renderProgramOverview() {
     `;
     container.appendChild(card);
   });
-}
-
-// ==========================================
-// CHARGEMENT DES RESSOURCES LOCALES (Fallback pour le mode hors ligne)
-// Vérifie si Chart.js est chargé, sinon utilise la version locale
-if (typeof Chart === 'undefined') {
-  console.warn("Chart.js non chargé depuis le CDN, utilisation de la version locale");
-  // Chart.js est déjà chargé via le script local dans index.html
 }
 
 // ==========================================
