@@ -65,7 +65,10 @@ const REST_DURATION = 120;
 let workoutTimerInterval = null;
 let workoutSeconds = 0;
 let tonnageChart, exerciseChart, weightChart;
-let currentVolumeFilter = 'all';
+let currentVolumeFilter = 'all'; // 'all' (séances), 'month' (par mois) ou 'type' (séance A/B/C)
+const SESSION_TYPES = ['A', 'B', 'C'];
+const SESSION_TYPE_COLORS = { A: '#1f77b4', B: '#ff7f0e', C: '#d62728' };
+let currentSessionTypeFilter = SESSION_TYPES[0];
 let currentExMetricMode = 'max';
 
 // Variables pour la modification de séance
@@ -136,7 +139,13 @@ function updateNextTypeFromHistory() {
 async function initApp() {
   const saved = localStorage.getItem('h49_state');
   if (saved) {
-    state = JSON.parse(saved);
+    try {
+      state = JSON.parse(saved);
+    } catch (e) {
+      console.error("Sauvegarde locale corrompue, réinitialisation.", e);
+      localStorage.removeItem('h49_state');
+      state = { nextType: 'A', history: [], weights: [], lastWeights: {} };
+    }
   } else {
     try {
       const response = await fetch('data.json');
@@ -150,6 +159,12 @@ async function initApp() {
   recalculateHistoryTonnages();
   updateNextTypeFromHistory();
   saveState();
+
+  // Affichage de la version de l'application dans le titre
+  fetch('manifest.json').then(r => r.json()).then(m => {
+    const titleEl = document.getElementById('app-title');
+    if (titleEl && m.version) titleEl.innerText = 'SUIVI FITNESS ' + m.version;
+  }).catch(() => {});
 
   renderProgramOverview();
   populateExerciseSelect();
@@ -209,9 +224,15 @@ function renderProgramOverview() {
 // ==========================================
 // SUGGESTION DES POIDS (AVEC EXCLUSION DU DÉLOAD)
 // ==========================================
+// Une série est considérée comme réellement effectuée si elle a une charge ET des répétitions.
+// Les séries à 0 kg / 0 rép. correspondent à des séries (ou exercices) non faits.
+function isPerformedSet(set) {
+  return !!set && (parseFloat(set.weight) || 0) > 0 && (parseFloat(set.reps) || 0) > 0;
+}
+
 function getSuggestedSetValues(exName, setIndex, fallbackWeight, fallbackReps) {
   let foundSet = null;
-  
+
   // On parcourt l'historique du plus récent au plus ancien
   for (let i = state.history.length - 1; i >= 0; i--) {
     const h = state.history[i];
@@ -223,7 +244,9 @@ function getSuggestedSetValues(exName, setIndex, fallbackWeight, fallbackReps) {
     // On ignore les séances de déload pour aller chercher la dernière vraie charge normale
     if (!wasDeload && h.exercises) {
       const foundEx = h.exercises.find(e => e.name === exName);
-      if (foundEx && foundEx.sets && foundEx.sets[setIndex]) {
+      // On ne reprend qu'une série réellement faite : les séries non faites sont ignorées
+      // et on remonte à la dernière séance où cette série a vraiment été réalisée.
+      if (foundEx && foundEx.sets && isPerformedSet(foundEx.sets[setIndex])) {
         foundSet = { ...foundEx.sets[setIndex] };
         break;
       }
@@ -299,14 +322,25 @@ function runRestTimer(endTime) {
   }, 1000);
 }
 
+// Retour à l'état initial du timer de repos (affichage « PAUSE »)
+function resetRestTimerUi() {
+  const btn = document.getElementById('timer-btn');
+  const display = document.getElementById('timer-display');
+  if (btn) btn.className = 'timer-btn';
+  if (display) display.innerText = 'PAUSE';
+}
+
 function toggleRestTimer() {
   const btn = document.getElementById('timer-btn');
   if (restTimerInterval) {
+    // En cours : arrêt et retour à l'état initial
     clearInterval(restTimerInterval);
     restTimerInterval = null;
     localStorage.removeItem('rest_end_time');
-    if (btn) btn.className = 'timer-btn running';
-    updateTimerDisplay(REST_DURATION);
+    resetRestTimerUi();
+  } else if (btn && btn.classList.contains('finished')) {
+    // Terminé (« GO ! ») : retour à l'état initial SANS relancer le chrono
+    resetRestTimerUi();
   } else {
     const endTime = Date.now() + (REST_DURATION * 1000);
     localStorage.setItem('rest_end_time', endTime);
@@ -338,6 +372,9 @@ document.addEventListener('visibilitychange', () => {
 });
 
 function startWorkoutTimer() {
+  // En modification d'une séance passée, le chrono ne démarre pas :
+  // la durée enregistrée est conservée telle quelle.
+  if (editingOriginalId !== null) return;
   if (!workoutTimerInterval) {
     let startTime = localStorage.getItem('workout_start_time');
     if (!startTime) {
@@ -402,6 +439,65 @@ function toggleSetDone(btn) {
 function markInputActive(input) {
   startWorkoutTimer();
   input.classList.add('active-input');
+}
+
+// ==========================================
+// AJOUT / SUPPRESSION DE SÉRIES (ONGLET SÉANCE)
+// ==========================================
+function findProgramExercise(name) {
+  for (const t of Object.keys(PROGRAM)) {
+    const found = PROGRAM[t].exercises.find(e => e.name === name);
+    if (found) return found;
+  }
+  return null;
+}
+
+function renumberSets(grid) {
+  grid.querySelectorAll('.set-row').forEach((row, i) => {
+    const label = row.querySelector('.set-label');
+    if (label) label.innerText = 'Série ' + (i + 1);
+  });
+}
+
+function addSet(btn) {
+  const grid = btn.closest('.exercise-item').querySelector('.sets-grid');
+  const rows = grid.querySelectorAll('.set-row');
+  const last = rows[rows.length - 1];
+  const exName = grid.dataset.ex || (last ? last.querySelector('.weight-input').dataset.ex : '');
+
+  // La nouvelle série reprend les valeurs de la dernière ;
+  // à défaut (aucune série), on utilise la suggestion du programme.
+  let weightVal, repsVal;
+  if (last) {
+    weightVal = last.querySelector('.weight-input').value;
+    repsVal = last.querySelector('.reps-input').value;
+  } else {
+    const progEx = findProgramExercise(exName);
+    const suggested = getSuggestedSetValues(exName, 0, progEx ? progEx.defaultWeight : 0, progEx ? progEx.defaultReps : 0);
+    weightVal = suggested.weight;
+    repsVal = suggested.reps;
+  }
+
+  // insertAdjacentHTML insère directement l'élément : avec un conteneur temporaire,
+  // firstChild renvoyait le texte blanc précédant la balise et aucune ligne n'apparaissait.
+  grid.insertAdjacentHTML('beforeend', `
+    <div class="set-row">
+      <span class="set-label">Série ${rows.length + 1}</span>
+      <input type="number" step="0.5" class="set-input weight-input" data-ex="${exName}" placeholder="kg" value="${weightVal}" oninput="markInputActive(this)">
+      <input type="number" class="set-input reps-input" data-ex="${exName}" placeholder="reps" value="${repsVal}" oninput="markInputActive(this)">
+      <button type="button" class="btn-check-set" onclick="toggleSetDone(this)">○</button>
+    </div>
+  `);
+  updateSetsProgress();
+}
+
+function removeSet(btn) {
+  const grid = btn.closest('.exercise-item').querySelector('.sets-grid');
+  const rows = grid.querySelectorAll('.set-row');
+  if (rows.length <= 1) return; // toujours au moins une série
+  rows[rows.length - 1].remove();
+  renumberSets(grid);
+  updateSetsProgress();
 }
 
 function updateSetsProgress() {
@@ -473,6 +569,23 @@ function initWorkoutForm(customSession = null) {
   const submitBtn = document.getElementById('submit-workout-btn');
   if (submitBtn) submitBtn.innerText = isEditing ? 'Enregistrer les modifications' : 'Valider & Enregistrer la séance';
 
+  // Compteur de durée : en modification, on affiche la durée enregistrée de la séance
+  // (et non un 00:00 trompeur) ; en création, on retrouve le chrono classique.
+  const durationLabel = document.getElementById('workout-duration-label');
+  const durationDisplay = document.getElementById('workout-duration-display');
+  if (durationLabel) durationLabel.innerText = isEditing ? 'Durée enregistrée :' : 'Durée :';
+  if (durationDisplay) {
+    if (isEditing) {
+      durationDisplay.innerText = editingOriginalDuration || 'N/A';
+      durationDisplay.style.cursor = 'default';
+      durationDisplay.title = "Durée d'origine conservée (le chrono est désactivé en modification)";
+    } else {
+      durationDisplay.innerText = '00:00';
+      durationDisplay.style.cursor = 'pointer';
+      durationDisplay.title = '';
+    }
+  }
+
   const subHeader = document.getElementById('sub-header'); 
   if(subHeader) { 
     subHeader.innerText = customSession ? `Modification de la séance du ${formatDate(customSession.date)}` : `Prochaine séance : ${type}`; 
@@ -521,9 +634,12 @@ function initWorkoutForm(customSession = null) {
           <div class="ex-icon-badge">${getIcon(ex.name)}</div>
           ${ex.name}
         </span>
-        <span style="font-size:0.75rem; color:var(--text-muted);">${ex.seriesCount} séries</span>
+        <span class="ex-controls">
+          <button type="button" class="btn-set-count" onclick="removeSet(this)" title="Supprimer la dernière série">−</button>
+          <button type="button" class="btn-set-count" onclick="addSet(this)" title="Ajouter une série">+</button>
+        </span>
       </div>
-      <div class="sets-grid">${rowsHtml}</div>
+      <div class="sets-grid" data-ex="${ex.name}">${rowsHtml}</div>
     `;
     container.appendChild(div);
   });
@@ -564,7 +680,8 @@ document.addEventListener('submit', function(e) {
       }
 
       // On ne touche pas aux dernières charges quand on corrige une ancienne séance
-      if (!isEditing) state.lastWeights[exName] = w;
+      // et on ne mémorise pas les séries non faites (0 kg / 0 rép.)
+      if (!isEditing && w > 0 && r > 0) state.lastWeights[exName] = w;
     });
 
     // En modification sans chrono lancé, on garde la durée d'origine (même si elle n'était pas renseignée)
@@ -641,12 +758,41 @@ function populateExerciseSelect() {
   });
 }
 
-function setVolumeFilter(filter, btn) {
-  currentVolumeFilter = filter;
+// Met en surbrillance le bouton choisi parmi les filtres du graphique de volume
+// (les boutons du graphique par exercice ne sont pas concernés)
+function highlightVolumeButton(btn) {
   document.querySelectorAll('#tab-progression .filter-btn').forEach(b => {
     if(b.id !== 'btn-mode-max' && b.id !== 'btn-mode-vol') b.classList.remove('active');
   });
-  btn.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+// Le bouton "par séance" affiche "A / B / C" au repos, puis la séance affichée (Séance A, B ou C)
+function updateSessionTypeButton() {
+  const typeBtn = document.getElementById('btn-vol-type');
+  if (!typeBtn) return;
+  typeBtn.innerText = currentVolumeFilter === 'type' ? `Séance ${currentSessionTypeFilter}` : 'A / B / C';
+}
+
+function setVolumeFilter(filter, btn) {
+  currentVolumeFilter = filter;
+  highlightVolumeButton(btn);
+  updateSessionTypeButton();
+  renderTonnageChart();
+}
+
+// Chaque appui fait défiler les séances : A, puis B, puis C, puis A...
+// (le premier appui, depuis un autre filtre, démarre toujours sur A)
+function cycleSessionTypeFilter(btn) {
+  if (currentVolumeFilter === 'type') {
+    const idx = SESSION_TYPES.indexOf(currentSessionTypeFilter);
+    currentSessionTypeFilter = SESSION_TYPES[(idx + 1) % SESSION_TYPES.length];
+  } else {
+    currentVolumeFilter = 'type';
+    currentSessionTypeFilter = SESSION_TYPES[0];
+  }
+  highlightVolumeButton(btn);
+  updateSessionTypeButton();
   renderTonnageChart();
 }
 
@@ -702,32 +848,46 @@ function renderTonnageChart() {
       labels.push(`${monthLabel} ${y}`);
       data.push(monthlyData[m]);
     });
-  } else {
-    // --- VUE PAR SÉANCE (Mode 'all' ou 'week') ---
-    const sortedHistory = [...state.history].sort((a, b) => new Date(a.date) - new Date(b.date));
-    let filteredHistory = sortedHistory;
-    
-    if (currentVolumeFilter === 'week') {
-      filteredHistory = sortedHistory.slice(-4);
-    }
+  } else if (currentVolumeFilter === 'type') {
+    // --- VUE PAR TYPE DE SÉANCE (A, B ou C) ---
+    const typedHistory = [...state.history]
+      .filter(e => e.type === currentSessionTypeFilter)
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    labels = filteredHistory.map(e => `${e.type} (${formatDate(e.date)})`);
-    data = filteredHistory.map(e => parseFloat(e.tonnage) || 0);
+    if (typedHistory.length === 0) {
+      labels = ['Aucune donnée'];
+      data = [0];
+    } else {
+      labels = typedHistory.map(e => `${e.type} (${formatDate(e.date)})`);
+      data = typedHistory.map(e => parseFloat(e.tonnage) || 0);
+    }
+  } else {
+    // --- VUE PAR SÉANCE (toutes les séances) ---
+    const sortedHistory = [...state.history].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    labels = sortedHistory.map(e => `${e.type} (${formatDate(e.date)})`);
+    data = sortedHistory.map(e => parseFloat(e.tonnage) || 0);
   }
+
+  // Couleur : celle de la séance affichée en mode A/B/C, bleu sinon
+  const lineColor = currentVolumeFilter === 'type'
+    ? (SESSION_TYPE_COLORS[currentSessionTypeFilter] || '#1f77b4')
+    : '#1f77b4';
+  const lineLabel = currentVolumeFilter === 'type' ? `Tonnage séance ${currentSessionTypeFilter} (kg)` : 'Tonnage (kg)';
 
   tonnageChart = new Chart(ctx1, {
     type: 'line',
     data: {
       labels: labels,
       datasets: [{
-        label: 'Tonnage (kg)',
+        label: lineLabel,
         data: data,
-        borderColor: '#1f77b4',
-        backgroundColor: '#1f77b422',
+        borderColor: lineColor,
+        backgroundColor: `${lineColor}22`,
         borderWidth: 2,
         fill: true,
         tension: 0.3,
-        pointBackgroundColor: '#1f77b4',
+        pointBackgroundColor: lineColor,
         pointRadius: 4
       }]
     },
@@ -762,12 +922,20 @@ function renderExerciseChart() {
         return e.name === selectedEx;
       });
 
-      if (exData) {
+      // On ignore les séances où l'exercice n'a pas été réellement fait (séries à 0 kg / 0 rép.)
+      // pour ne pas tracer de faux creux à 0 dans la progression.
+      const performedSets = (exData && Array.isArray(exData.sets)) ? exData.sets.filter(isPerformedSet) : null;
+      const wasPerformed = performedSets ? performedSets.length > 0 : !!(exData && (exData.maxWeight || 0) > 0);
+
+      if (exData && wasPerformed) {
         labels.push(`${h.type} (${formatDate(h.date)})`);
         if (currentExMetricMode === 'volume') {
           chartData.push(exData.totalVolume || 0);
         } else {
-          chartData.push(exData.maxWeight || 0);
+          // Charge max calculée sur les séries réellement faites uniquement
+          chartData.push(performedSets
+            ? Math.max(...performedSets.map(s => parseFloat(s.weight) || 0))
+            : (exData.maxWeight || 0));
         }
       }
     }
@@ -968,13 +1136,13 @@ function switchTab(tabName) {
 async function exportData() {
   const dataStr = JSON.stringify(state, null, 2);
   const blob = new Blob([dataStr], { type: 'application/json' });
-  const file = new File([blob], `sauvegarde_fitness_${new Date().toISOString().slice(0, 10)}.json`, { type: 'application/json' });
+  const file = new File([blob], `${new Date().toISOString().slice(0, 10)}.json`, { type: 'application/json' });
 
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
       await navigator.share({
-        title: 'Sauvegarde de vos entraînements',
-        text: 'Voici votre fichier de sauvegarde à stocker sur le Drive.',
+        title: 'Sauvegarde Suivi Fitness',
+        text: 'Sauvegarde du ' + new Date().toLocaleDateString('fr-FR') + '.',
         files: [file],
       });
     } catch (error) {
@@ -985,7 +1153,7 @@ async function exportData() {
   } else {
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", URL.createObjectURL(blob));
-    downloadAnchor.setAttribute("download", `sauvegarde_fitness_${new Date().toISOString().slice(0, 10)}.json`);
+    downloadAnchor.setAttribute("download", `${new Date().toISOString().slice(0, 10)}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();

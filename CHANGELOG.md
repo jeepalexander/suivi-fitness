@@ -7,12 +7,81 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.1.5] - 2026-10-18
+### 🐛 Corrections
+- Onglet Séance : le bouton « + » d'un exercice ajoute enfin une série. La nouvelle ligne n'était jamais insérée dans la grille (le code ajoutait le blanc situé avant la balise au lieu de la ligne elle-même), si bien que rien ne s'affichait. La série ajoutée reprend les valeurs de la précédente, est numérotée correctement, est comptée dans « Séries » et est bien enregistrée avec la séance.
+
+---
+
+## [1.1.4] - 2026-10-18
+### 🪶 Ajouts
+- La version de l'application est affichée dans le titre de l'écran d'accueil (« SUIVI FITNESS X.X.X »), lue automatiquement depuis `manifest.json`.
+- Onglet Séance : le compteur fixe de séries est remplacé par des boutons « − » / « + » permettant d'ajouter ou de supprimer une série pour chaque exercice (une série minimum ; la nouvelle série reprend les valeurs de la dernière).
+
+### 🐛 Corrections
+- Timer de repos : affichage de « PAUSE » à l'état initial (au lieu de « 2:00 »). Après « GO ! », un appui ramène le timer à l'état « PAUSE » sans relancer immédiatement le chrono ; un appui pendant le décompte l'arrête et le réinitialise.
+- Historique : marge de défilement ajoutée sous la liste pour que la barre de sauvegarde fixe ne masque plus les dernières séances.
+
+### 🛠️ Notes techniques
+- `sw.js` : le nom du cache intègre désormais une constante `APP_VERSION` à incrémenter à chaque release en même temps que `manifest.json` (le navigateur ne réinstalle un service worker que si son fichier change — voir le commentaire dans `sw.js`).
+
+---
+
+## [1.1.3] - 2026-10-18
+### 🪶 Ajouts
+- Les boutons de sauvegarde et de restauration sont désormais fixés en bas de l'écran (au-dessus de la navigation) dans l'onglet Historique : ils restent accessibles sans faire défiler la liste des séances.
+
+### 🐛 Corrections
+- Le fichier de sauvegarde est nommé `AAAA-MM-JJ.json` (au lieu de `sauvegarde_fitness_AAAA-MM-JJ.json`), plus court dans la feuille de partage.
+- Libellé du bouton d'export simplifié en « Sauvegarder » ; le bouton d'import devient « Restaurer une sauvegarde » pour lever l'ambiguïté avec les termes « Importer » affichés par les applications cibles (Drive, etc.).
+
+---
+
+## [1.1.2] - 2026-10-18
+### 🪶 Ajouts
+- Service worker (`sw.js`) : l'application est désormais réellement utilisable hors ligne (mise en cache de l'interface, des scripts, des styles, des icônes et de `data.json`). Le nom du cache est dérivé automatiquement de la version du `manifest.json` : incrémenter la version suffit à forcer la mise à jour du cache chez tous les utilisateurs.
+
+### 🐛 Corrections
+- Une sauvegarde locale corrompue ne bloque plus le démarrage : `localStorage` est réinitialisé proprement au lieu de lever une exception non gérée.
+
+### 🧹 Nettoyage
+- Suppression du bloc de code mort « vérification Chart.js » (le garde-fou `typeof Chart === 'undefined'` ne pouvait jamais se déclencher depuis que la bibliothèque locale est chargée).
+
+---
+
+## [1.1.1] - 2026-10-18
+### 🐛 Corrections
+- Les graphiques (Volume Total, Progression par Exercice, Poids Corporel) s'affichent de nouveau. Le fichier local `js/chart.umd.min.js`, introduit avec le mode hors-ligne, n'était pas la vraie bibliothèque Chart.js mais un substitut de 5 Ko contenant une erreur de syntaxe : le navigateur le rejetait, `Chart` n'existait pas et tous les graphiques restaient vides. Il est remplacé par la vraie bibliothèque Chart.js 4.4.1 (build UMD officiel, MIT), toujours servie en local pour le mode hors-ligne.
+
+---
+
+## [1.1.0] - 2026-10-18
+### 🪶 Ajouts
+- Nouveau filtre « A / B / C » sur le graphique « Volume Total Séance » : à chaque appui, il affiche successivement la progression du tonnage de la séance A, puis B, puis C, puis de nouveau A, et ainsi de suite. Le bouton indique la séance affichée (« Séance A », « Séance B »…) et la courbe prend la couleur de cette séance. Depuis un autre filtre, le premier appui démarre sur la séance A.
+
+### 🐛 Corrections
+- Les séries non effectuées (0 kg / 0 rép.) ne faussent plus les suggestions de charges : l'application remonte à la dernière séance où la série a réellement été faite, ou reprend la valeur par défaut du programme. Plus de proposition à « 0 kg × 0 rép. » ni de répétitions à 0 sur les Tractions.
+- Les dernières charges mémorisées (`lastWeights`) ne retiennent plus les séries non effectuées.
+- Le graphique « Progression par Exercice » ignore les séances où l'exercice n'a pas été fait, au lieu de tracer de faux creux à 0, et la charge max ne tient compte que des séries réellement effectuées.
+
+### 🧹 Nettoyage
+- Suppression du filtre « 4 dernières séances » (`week`), présent dans le code mais jamais accessible depuis l'interface.
+
+---
+
+## [1.0.3] - 2026-10-17
+### 🐛 Corrections
+- Modification d'une séance : le compteur de durée n'affiche plus un « 00:00 » trompeur. Il indique désormais la durée enregistrée de la séance (libellé « Durée enregistrée »), ou « N/A » si elle n'était pas renseignée.
+- Le chrono ne démarre plus tout seul lors de la saisie d'une série pendant une modification, ce qui évite d'écraser la durée d'origine par « < 1 min ».
+
+---
+
 ## [1.0.2] - 2026-10-17
 ### 🐛 Corrections
 - Modification d'une séance : l'originale n'est plus supprimée de l'historique dès l'ouverture du formulaire. Elle n'est remplacée qu'à la validation, ce qui évite toute perte de données si l'on quitte l'application en cours de modification.
 - La durée et le statut de déload d'origine sont conservés lors de la modification d'une séance.
 - La modification d'une ancienne séance ne change plus les dernières charges utilisées pour les suggestions.
-- Correction de la date de la version 1.0.0 dans ce changelog (2024 → 2025).
+- Correction de la date de la version 1.0.0 dans ce changelog (11/10/2024 → 31/10/2025, date du premier dépôt).
 
 ### 🪶 Ajouts
 - Bouton « Annuler la modification » dans l'onglet Séance pour abandonner une modification sans rien perdre.
@@ -25,7 +94,7 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
-## [1.0.0] - 2025-10-11
+## [1.0.0] - 2025-10-31
 ### 🪶 Ajouts
 - Version initiale complète de l'application.
 - Programme d'entraînement A/B/C avec 17 exercices personnalisés.

@@ -1,0 +1,34 @@
+/*
+ * Inter Font CSS for offline use
+ * Original: https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap
+ */
+
+/* Fallback font definitions for offline use */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local(Inter), local('Inter Regular'), local('Inter-Regular'), url('fonts/Inter-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local(Inter), local('Inter SemiBold'), local('Inter-SemiBold'), url('fonts/Inter-SemiBold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local(Inter), local('Inter Bold'), local('Inter-Bold'), url('fonts/Inter-Bold.woff2') format('woff2');
+}
+
+/* Apply Inter font to the entire app */
+* {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}

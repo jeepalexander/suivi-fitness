@@ -11,11 +11,11 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="SUIVI FITNESS">
   
-  <link rel="apple-touch-icon" href="https://img.icons8.com/color/180/dumbbell.png">
+  <link rel="apple-touch-icon" href="icons/calf_raise.png">
 
-  <!-- Chart.js & Fonts -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Chart.js & Fonts (Local for offline use) -->
+  <script src="js/chart.umd.min.js"></script>
+  <link href="css/inter.css" rel="stylesheet">
 
   <!-- Liaison CSS externe -->
   <link rel="stylesheet" href="style.css">
@@ -25,13 +25,13 @@
 
   <header>
     <div style="text-align: left;">
-      <h1>SUIVI FITNESS</h1>
+      <h1 id="app-title">SUIVI FITNESS</h1>
       <p id="sub-header">Chargement du programme...</p>
     </div>
 
     <!-- BOUTON CHRONO REPOS -->
     <button id="timer-btn" class="timer-btn" onclick="toggleRestTimer()">
-      ⏱️ <span id="timer-display">2:00</span>
+      ⏱️ <span id="timer-display">PAUSE</span>
     </button>
   </header>
 
@@ -59,7 +59,7 @@
       </p>
 
       <div class="workout-meta-bar">
-        <span>⏱️ Durée : <strong id="workout-duration-display" style="color:var(--text); cursor:pointer;" onclick="toggleWorkoutTimer()">00:00</strong></span>
+        <span>⏱️ <span id="workout-duration-label">Durée :</span> <strong id="workout-duration-display" style="color:var(--text); cursor:pointer;" onclick="toggleWorkoutTimer()">00:00</strong></span>
         <span>Séries : <strong id="sets-progress-text" style="color: var(--text);">0 / 0</strong></span>
       </div>
 
@@ -84,6 +84,7 @@
         <div class="filter-group">
           <button class="filter-btn active" onclick="setVolumeFilter('all', this)">Séances</button>
           <button class="filter-btn" onclick="setVolumeFilter('month', this)">Par Mois</button>
+          <button class="filter-btn" id="btn-vol-type" onclick="cycleSessionTypeFilter(this)" title="Appuyer pour afficher successivement la séance A, B puis C">A / B / C</button>
         </div>
       </div>
       <canvas id="tonnageChart" height="200"></canvas>
@@ -118,10 +119,10 @@
       <div class="card-title">Historique des Séances</div>
       <div id="history-list"></div>
       
-      <div style="margin-top: 15px;">
-        <button onclick="exportData()" class="btn btn-secondary">Sauvegarder / Partager (Drive)</button>
-        <button onclick="document.getElementById('import-file').click()" class="btn btn-secondary">Importer une sauvegarde</button>
-        <input type="file" id="import-file" style="display:none" onchange="importData(event)">
+      <input type="file" id="import-file" style="display:none" onchange="importData(event)">
+      <div class="save-bar">
+        <button onclick="exportData()" class="btn btn-secondary" style="margin:0;">💾 Sauvegarder</button>
+        <button onclick="document.getElementById('import-file').click()" class="btn btn-secondary" style="margin:0;">📂 Restaurer une sauvegarde</button>
       </div>
 
       <div class="danger-zone">
@@ -152,5 +153,16 @@
 
   <!-- Liaison Script externe -->
   <script src="app.js"></script>
+
+  <!-- Enregistrement du Service Worker (mode hors-ligne) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch((err) => {
+          console.warn("Échec de l'enregistrement du service worker :", err);
+        });
+      });
+    }
+  </script>
 </body>
 </html>
