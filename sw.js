@@ -1,8 +1,10 @@
 // Service Worker - Suivi Fitness
 // Cache-first pour le mode hors-ligne complet de la PWA.
-// Le nom du cache est dérivé de la version du manifest.json : incrémenter
-// "version" dans manifest.json suffit à invalider le cache chez tous les
-// utilisateurs — aucune modification manuelle de ce fichier n'est requise.
+// APP_VERSION doit être incrémenté à chaque release (en même temps que
+// manifest.json) : le navigateur ne réinstalle le service worker que si
+// le contenu de ce fichier change.
+const APP_VERSION = '1.1.4';
+const CACHE_NAME = 'suivi-fitness-' + APP_VERSION;
 const ASSETS = [
   './',
   './index.html',
@@ -15,18 +17,9 @@ const ASSETS = [
   './icons/calf_raise.png'
 ];
 
-let CACHE_NAME = 'suivi-fitness-v1';
-
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    // cache:'reload' contourne le cache HTTP pour lire la version à jour
-    fetch('./manifest.json', { cache: 'reload' })
-      .then((res) => res.json())
-      .then((manifest) => {
-        CACHE_NAME = 'suivi-fitness-' + (manifest.version || 'v1');
-        return caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS));
-      })
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
   );
 });
 

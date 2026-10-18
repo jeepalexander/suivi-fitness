@@ -160,6 +160,12 @@ async function initApp() {
   updateNextTypeFromHistory();
   saveState();
 
+  // Affichage de la version de l'application dans le titre
+  fetch('manifest.json').then(r => r.json()).then(m => {
+    const titleEl = document.getElementById('app-title');
+    if (titleEl && m.version) titleEl.innerText = 'SUIVI FITNESS ' + m.version;
+  }).catch(() => {});
+
   renderProgramOverview();
   populateExerciseSelect();
   initWorkoutForm();
@@ -316,14 +322,25 @@ function runRestTimer(endTime) {
   }, 1000);
 }
 
+// Retour à l'état initial du timer de repos (affichage « PAUSE »)
+function resetRestTimerUi() {
+  const btn = document.getElementById('timer-btn');
+  const display = document.getElementById('timer-display');
+  if (btn) btn.className = 'timer-btn';
+  if (display) display.innerText = 'PAUSE';
+}
+
 function toggleRestTimer() {
   const btn = document.getElementById('timer-btn');
   if (restTimerInterval) {
+    // En cours : arrêt et retour à l'état initial
     clearInterval(restTimerInterval);
     restTimerInterval = null;
     localStorage.removeItem('rest_end_time');
-    if (btn) btn.className = 'timer-btn running';
-    updateTimerDisplay(REST_DURATION);
+    resetRestTimerUi();
+  } else if (btn && btn.classList.contains('finished')) {
+    // Terminé (« GO ! ») : retour à l'état initial SANS relancer le chrono
+    resetRestTimerUi();
   } else {
     const endTime = Date.now() + (REST_DURATION * 1000);
     localStorage.setItem('rest_end_time', endTime);
@@ -422,6 +439,65 @@ function toggleSetDone(btn) {
 function markInputActive(input) {
   startWorkoutTimer();
   input.classList.add('active-input');
+}
+
+// ==========================================
+// AJOUT / SUPPRESSION DE SÉRIES (ONGLET SÉANCE)
+// ==========================================
+function findProgramExercise(name) {
+  for (const t of Object.keys(PROGRAM)) {
+    const found = PROGRAM[t].exercises.find(e => e.name === name);
+    if (found) return found;
+  }
+  return null;
+}
+
+function renumberSets(grid) {
+  grid.querySelectorAll('.set-row').forEach((row, i) => {
+    const label = row.querySelector('.set-label');
+    if (label) label.innerText = 'Série ' + (i + 1);
+  });
+}
+
+function addSet(btn) {
+  const grid = btn.closest('.exercise-item').querySelector('.sets-grid');
+  const rows = grid.querySelectorAll('.set-row');
+  const last = rows[rows.length - 1];
+  const exName = grid.dataset.ex || (last ? last.querySelector('.weight-input').dataset.ex : '');
+
+  // La nouvelle série reprend les valeurs de la dernière ;
+  // à défaut (aucune série), on utilise la suggestion du programme.
+  let weightVal, repsVal;
+  if (last) {
+    weightVal = last.querySelector('.weight-input').value;
+    repsVal = last.querySelector('.reps-input').value;
+  } else {
+    const progEx = findProgramExercise(exName);
+    const suggested = getSuggestedSetValues(exName, 0, progEx ? progEx.defaultWeight : 0, progEx ? progEx.defaultReps : 0);
+    weightVal = suggested.weight;
+    repsVal = suggested.reps;
+  }
+
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = `
+    <div class="set-row">
+      <span class="set-label">Série ${rows.length + 1}</span>
+      <input type="number" step="0.5" class="set-input weight-input" data-ex="${exName}" placeholder="kg" value="${weightVal}" oninput="markInputActive(this)">
+      <input type="number" class="set-input reps-input" data-ex="${exName}" placeholder="reps" value="${repsVal}" oninput="markInputActive(this)">
+      <button type="button" class="btn-check-set" onclick="toggleSetDone(this)">○</button>
+    </div>
+  `;
+  grid.appendChild(wrapper.firstChild);
+  updateSetsProgress();
+}
+
+function removeSet(btn) {
+  const grid = btn.closest('.exercise-item').querySelector('.sets-grid');
+  const rows = grid.querySelectorAll('.set-row');
+  if (rows.length <= 1) return; // toujours au moins une série
+  rows[rows.length - 1].remove();
+  renumberSets(grid);
+  updateSetsProgress();
 }
 
 function updateSetsProgress() {
@@ -558,9 +634,12 @@ function initWorkoutForm(customSession = null) {
           <div class="ex-icon-badge">${getIcon(ex.name)}</div>
           ${ex.name}
         </span>
-        <span style="font-size:0.75rem; color:var(--text-muted);">${ex.seriesCount} séries</span>
+        <span class="ex-controls">
+          <button type="button" class="btn-set-count" onclick="removeSet(this)" title="Supprimer la dernière série">−</button>
+          <button type="button" class="btn-set-count" onclick="addSet(this)" title="Ajouter une série">+</button>
+        </span>
       </div>
-      <div class="sets-grid">${rowsHtml}</div>
+      <div class="sets-grid" data-ex="${ex.name}">${rowsHtml}</div>
     `;
     container.appendChild(div);
   });

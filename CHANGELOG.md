@@ -7,6 +7,20 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.1.4] - 2026-10-18
+### 🪶 Ajouts
+- La version de l'application est affichée dans le titre de l'écran d'accueil (« SUIVI FITNESS X.X.X »), lue automatiquement depuis `manifest.json`.
+- Onglet Séance : le compteur fixe de séries est remplacé par des boutons « − » / « + » permettant d'ajouter ou de supprimer une série pour chaque exercice (une série minimum ; la nouvelle série reprend les valeurs de la dernière).
+
+### 🐛 Corrections
+- Timer de repos : affichage de « PAUSE » à l'état initial (au lieu de « 2:00 »). Après « GO ! », un appui ramène le timer à l'état « PAUSE » sans relancer immédiatement le chrono ; un appui pendant le décompte l'arrête et le réinitialise.
+- Historique : marge de défilement ajoutée sous la liste pour que la barre de sauvegarde fixe ne masque plus les dernières séances.
+
+### 🛠️ Notes techniques
+- `sw.js` : le nom du cache intègre désormais une constante `APP_VERSION` à incrémenter à chaque release en même temps que `manifest.json` (le navigateur ne réinstalle un service worker que si son fichier change — voir le commentaire dans `sw.js`).
+
+---
+
 ## [1.1.3] - 2026-10-18
 ### 🪶 Ajouts
 - Les boutons de sauvegarde et de restauration sont désormais fixés en bas de l'écran (au-dessus de la navigation) dans l'onglet Historique : ils restent accessibles sans faire défiler la liste des séances.
