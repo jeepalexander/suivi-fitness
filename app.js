@@ -1078,9 +1078,491 @@ function addWeight() {
   }
 }
 
+// ============================================
+// ANALYSE MENSUELLE DE PROGRESSION
+// ============================================
+
+function analyzeMonthlyProgress() {
+  if (!state.history || state.history.length === 0) {
+    return {
+      monthlyData: [],
+      currentMonthRecords: [],
+      plateaus: [],
+      overallStats: null,
+      advice: []
+    };
+  }
+
+  const monthNames = {
+    "01": "Janvier", "02": "Février", "03": "Mars", "04": "Avril",
+    "05": "Mai", "06": "Juin", "07": "Juillet", "08": "Août",
+    "09": "Septembre", "10": "Octobre", "11": "Novembre", "12": "Décembre"
+  };
+
+  // 1. Regrouper les données par mois
+  const monthlyData = {};
+  const allExercises = new Set();
+
+  state.history.forEach(session => {
+    if (!session.date) return;
+    const monthKey = session.date.substring(0, 7);
+    if (!monthlyData[monthKey]) {
+      monthlyData[monthKey] = {
+        year: session.date.substring(0, 4),
+        month: session.date.substring(5, 7),
+        monthName: monthNames[session.date.substring(5, 7)] || session.date.substring(5, 7),
+        totalTonnage: 0,
+        sessionCount: 0,
+        sessions: [],
+        exercises: {},
+        sessionTypes: { A: 0, B: 0, C: 0 }
+      };
+    }
+    monthlyData[monthKey].totalTonnage += parseFloat(session.tonnage) || 0;
+    monthlyData[monthKey].sessionCount++;
+    monthlyData[monthKey].sessions.push(session);
+    if (session.type && ['A', 'B', 'C'].includes(session.type)) {
+      monthlyData[monthKey].sessionTypes[session.type]++;
+    }
+
+    if (session.exercises) {
+      session.exercises.forEach(ex => {
+        if (ex.name) {
+          allExercises.add(ex.name);
+          if (!monthlyData[monthKey].exercises[ex.name]) {
+            monthlyData[monthKey].exercises[ex.name] = { maxWeights: [], volumes: [] };
+          }
+          if (ex.maxWeight) {
+            monthlyData[monthKey].exercises[ex.name].maxWeights.push(parseFloat(ex.maxWeight) || 0);
+          }
+          if (ex.totalVolume) {
+            monthlyData[monthKey].exercises[ex.name].volumes.push(parseFloat(ex.totalVolume) || 0);
+          }
+        }
+      });
+    }
+  });
+
+  const sortedMonths = Object.keys(monthlyData).sort();
+  const monthlyArray = sortedMonths.map(key => monthlyData[key]);
+
+  // 2. Filtrer pour garder seulement les 4 derniers mois
+  const last4Months = sortedMonths.slice(-4);
+  const last4MonthlyData = last4Months.map(key => monthlyData[key]);
+
+  // 3. Détecter les records du mois en cours (uniquement le dernier record par exercice)
+  const currentMonthKey = sortedMonths[sortedMonths.length - 1];
+  const currentMonthData = monthlyData[currentMonthKey];
+  const currentMonthRecords = [];
+
+  allExercises.forEach(exName => {
+    if (currentMonthData.exercises[exName] && currentMonthData.exercises[exName].maxWeights.length > 0) {
+      const currentMax = Math.max(...currentMonthData.exercises[exName].maxWeights);
+      
+      // Trouver le précédent record pour cet exercice (avant le mois en cours)
+      let previousMax = 0;
+      for (let i = sortedMonths.length - 2; i >= 0; i--) {
+        const prevMonthKey = sortedMonths[i];
+        if (monthlyData[prevMonthKey].exercises[exName] && monthlyData[prevMonthKey].exercises[exName].maxWeights.length > 0) {
+          const prevMax = Math.max(...monthlyData[prevMonthKey].exercises[exName].maxWeights);
+          if (prevMax > previousMax) {
+            previousMax = prevMax;
+          }
+        }
+      }
+
+      if (currentMax > previousMax) {
+        currentMonthRecords.push({
+          exercise: exName,
+          newMax: currentMax,
+          improvement: currentMax - previousMax
+        });
+      }
+    }
+  });
+
+  // 4. Détecter les paliers (pas de progression en poids OU volume depuis 2+ mois)
+  const plateaus = [];
+  allExercises.forEach(exName => {
+    // Collecter les données mensuelles pour cet exercice
+    const exerciseMonthlyData = [];
+    sortedMonths.forEach(monthKey => {
+      if (monthlyData[monthKey].exercises[exName]) {
+        const maxWeight = monthlyData[monthKey].exercises[exName].maxWeights.length > 0 
+          ? Math.max(...monthlyData[monthKey].exercises[exName].maxWeights) : 0;
+        const totalVolume = monthlyData[monthKey].exercises[exName].volumes.length > 0 
+          ? monthlyData[monthKey].exercises[exName].volumes.reduce((a, b) => a + b, 0) : 0;
+        exerciseMonthlyData.push({ monthKey, maxWeight, totalVolume });
+      }
+    });
+
+    if (exerciseMonthlyData.length >= 2) {
+      // Vérifier si les 2 derniers mois ont la même charge max ET le même volume
+      const last2 = exerciseMonthlyData.slice(-2);
+      const last = last2[1];
+      const secondLast = last2[0];
+
+      if (last.maxWeight === secondLast.maxWeight && 
+          last.totalVolume === secondLast.totalVolume && 
+          last.maxWeight > 0) {
+        
+        // Vérifier depuis combien de mois c'est stable
+        let stableCount = 2;
+        for (let i = exerciseMonthlyData.length - 3; i >= 0; i--) {
+          const prev = exerciseMonthlyData[i];
+          if (prev.maxWeight === last.maxWeight && prev.totalVolume === last.totalVolume) {
+            stableCount++;
+          } else {
+            break;
+          }
+        }
+
+        if (stableCount >= 2) {
+          const stableSince = exerciseMonthlyData[exerciseMonthlyData.length - stableCount].monthKey;
+          const stableSinceData = monthlyData[stableSince];
+          plateaus.push({
+            exercise: exName,
+            currentMax: last.maxWeight,
+            currentVolume: last.totalVolume,
+            stableSince: `${stableSinceData.monthName} ${stableSinceData.year}`,
+            monthsStable: stableCount
+          });
+        }
+      }
+    }
+  });
+
+  // 5. Statistiques globales (comparaison mois dernier vs mois précédent)
+  let overallStats = null;
+  const completeMonths = sortedMonths.filter(m => m !== currentMonthKey);
+  
+  if (completeMonths.length >= 2) {
+    const lastCompleteMonthKey = completeMonths[completeMonths.length - 1];
+    const prevCompleteMonthKey = completeMonths[completeMonths.length - 2];
+    
+    const lastComplete = monthlyData[lastCompleteMonthKey];
+    const prevComplete = monthlyData[prevCompleteMonthKey];
+    
+    const tonnageDiff = lastComplete.totalTonnage - prevComplete.totalTonnage;
+    const tonnageDiffPercent = prevComplete.totalTonnage > 0 
+      ? Math.round((tonnageDiff / prevComplete.totalTonnage) * 100) 
+      : 0;
+
+    // Calculer l'indice de progression global (sur tous les mois complets)
+    let globalProgressIndex = 0;
+    if (completeMonths.length >= 2) {
+      const firstComplete = monthlyData[completeMonths[0]];
+      const lastCompleteTonnage = monthlyData[completeMonths[completeMonths.length - 1]].totalTonnage;
+      if (firstComplete.totalTonnage > 0) {
+        globalProgressIndex = Math.round(
+          ((lastCompleteTonnage - firstComplete.totalTonnage) / firstComplete.totalTonnage) * 100
+        );
+      }
+    }
+
+    overallStats = {
+      lastVsPreviousDiffPercent: tonnageDiffPercent,
+      globalProgressIndex: globalProgressIndex
+    };
+  }
+
+  // 6. Conseils personnalisés
+  const advice = [];
+
+  // Trouver le pire exercice en palier
+  if (plateaus.length > 0) {
+    const worstPlateau = plateaus.reduce((worst, current) => 
+      current.monthsStable > worst.monthsStable ? current : worst
+    );
+    advice.push({
+      type: 'warning',
+      text: `⚠️ ${worstPlateau.exercise} en palier depuis ${worstPlateau.monthsStable} mois (${worstPlateau.currentMax} kg)`
+    });
+  }
+
+  // Détecter déséquilibre entre séances A/B/C
+  if (currentMonthData.sessionTypes.A > 0 || currentMonthData.sessionTypes.B > 0 || currentMonthData.sessionTypes.C > 0) {
+    const totalSessions = currentMonthData.sessionTypes.A + currentMonthData.sessionTypes.B + currentMonthData.sessionTypes.C;
+    if (totalSessions >= 3) {
+      const avg = totalSessions / 3;
+      const maxType = Math.max(currentMonthData.sessionTypes.A, currentMonthData.sessionTypes.B, currentMonthData.sessionTypes.C);
+      const minType = Math.min(currentMonthData.sessionTypes.A, currentMonthData.sessionTypes.B, currentMonthData.sessionTypes.C);
+      
+      if (maxType > avg * 1.5) {
+        const maxTypeName = currentMonthData.sessionTypes.A === maxType ? 'A' : 
+                           currentMonthData.sessionTypes.B === maxType ? 'B' : 'C';
+        advice.push({
+          type: 'info',
+          text: `Déséquilibre : Tu fais plus de séances ${maxTypeName} (${maxType}) que des autres`
+        });
+      }
+    }
+  }
+
+  // Si pas de données
+  if (last4MonthlyData.length === 0) {
+    advice.push({
+      type: 'info',
+      text: 'Aucune donnée disponible. Commence par enregistrer quelques séances !'
+    });
+  }
+
+  return {
+    monthlyData: last4MonthlyData,
+    currentMonthKey: currentMonthKey,
+    currentMonthRecords: currentMonthRecords,
+    plateaus: plateaus,
+    overallStats: overallStats,
+    advice: advice
+  };
+}
+
+function renderProgressAnalysis() {
+  const container = document.getElementById('monthly-analysis');
+  if (!container) return;
+
+  const analysis = analyzeMonthlyProgress();
+  let html = '';
+
+  // Si pas de données
+  if (analysis.monthlyData.length === 0) {
+    html = `
+      <div class="analysis-empty">
+        <p>\ud83d\udcca Aucune donnée disponible.</p>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">
+          Enregistre des séances pour voir ta progression !
+        </p>
+      </div>
+    `;
+    container.innerHTML = html;
+    return;
+  }
+
+  // 1. Résumé mensuel (4 derniers mois max)
+  html += `<div class="monthly-summary">`;
+
+  analysis.monthlyData.forEach(month => {
+    const tonnageInTonnes = (month.totalTonnage / 1000).toFixed(1);
+    const isCurrentMonth = month.year + '-' + month.month === analysis.currentMonthKey;
+    const inProgressText = isCurrentMonth ? '<span class="in-progress-badge">en cours</span>' : '';
+    
+    html += `
+      <div class="month-card">
+        <div class="month-header">
+          <span class="month-name">${month.monthName} ${month.year}</span>
+          <span class="month-sessions">${month.sessionCount} séance${month.sessionCount > 1 ? 's' : ''}</span>
+        </div>
+        <div class="month-tonnage">${tonnageInTonnes} T</div>
+        ${inProgressText}
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+
+  // 2. Records battus (uniquement ceux du mois en cours)
+  if (analysis.currentMonthRecords.length > 0) {
+    html += `<div class="analysis-section">`;
+    html += `<div class="records-list">`;
+
+    analysis.currentMonthRecords.forEach(record => {
+      html += `
+        <div class="record-item">
+          <span class="record-exercise">${record.exercise}</span>
+          <span class="record-value">${record.newMax} kg</span>
+          <span class="record-improvement">+${record.improvement} kg</span>
+        </div>
+      `;
+    });
+
+    html += `</div></div>`;
+  }
+
+  // 3. Paliers détectés
+  if (analysis.plateaus.length > 0) {
+    html += `<div class="analysis-section">`;
+    html += `<div class="plateaus-list">`;
+
+    analysis.plateaus.forEach(plateau => {
+      html += `
+        <div class="plateau-item">
+          <span class="plateau-exercise">${plateau.exercise}</span>
+          <span class="plateau-value">${plateau.currentMax} kg</span>
+          <span class="plateau-duration">stable depuis ${plateau.stableSince}</span>
+        </div>
+      `;
+    });
+
+    html += `</div></div>`;
+  }
+
+  // 4. Statistiques globales
+  if (analysis.overallStats) {
+    html += `<div class="analysis-section">`;
+    html += `<div class="overall-stats">`;
+
+    const diffClass = analysis.overallStats.lastVsPreviousDiffPercent >= 0 ? 'positive' : 'negative';
+    const diffSymbol = analysis.overallStats.lastVsPreviousDiffPercent >= 0 ? '\u25b2' : '\u25bc';
+
+    html += `
+      <div class="stat-item">
+        <span class="stat-label">Mois dernier vs précédent</span>
+        <span class="stat-value ${diffClass}">
+          ${diffSymbol} ${Math.abs(analysis.overallStats.lastVsPreviousDiffPercent)}%
+        </span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Progression globale</span>
+        <span class="stat-value ${analysis.overallStats.globalProgressIndex >= 0 ? 'positive' : 'negative'}">
+          ${analysis.overallStats.globalProgressIndex >= 0 ? '\u25b2' : '\u25bc'} ${Math.abs(analysis.overallStats.globalProgressIndex)}%
+        </span>
+      </div>
+    `;
+
+    html += `</div></div>`;
+  }
+
+  // 5. Conseils
+  if (analysis.advice.length > 0) {
+    html += `<div class="advice-list">`;
+
+    analysis.advice.forEach(adviceItem => {
+      const icon = adviceItem.type === 'success' ? '\u2705' : 
+                   adviceItem.type === 'warning' ? '\u26a0\ufe0f' : 
+                   adviceItem.type === 'info' ? '\u2139\ufe0f' : '\ud83d\udcad';
+      html += `
+        <div class="advice-item advice-${adviceItem.type}">
+          <span class="advice-icon">${icon}</span>
+          <span class="advice-text">${adviceItem.text}</span>
+        </div>
+      `;
+    });
+
+    html += `</div>`;
+  }
+
+  container.innerHTML = html;
+}    return;
+  }
+
+  // 1. Résumé mensuel
+  html += `<div class="analysis-section">`;
+  html += `<h3 class="analysis-section-title">📅 Résumé Mensuel</h3>`;
+  html += `<div class="monthly-summary">`;
+
+  analysis.monthlyData.forEach(month => {
+    const tonnageInTonnes = (month.totalTonnage / 1000).toFixed(1);
+    html += `
+      <div class="month-card">
+        <div class="month-header">
+          <span class="month-name">${month.monthName} ${month.year}</span>
+          <span class="month-sessions">${month.sessionCount} séance${month.sessionCount > 1 ? 's' : ''}</span>
+        </div>
+        <div class="month-tonnage">${tonnageInTonnes} T</div>
+      </div>
+    `;
+  });
+
+  html += `</div></div>`;
+
+  // 2. Records battus
+  if (analysis.records.length > 0) {
+    html += `<div class="analysis-section">`;
+    html += `<h3 class="analysis-section-title">🔥 Records Battus</h3>`;
+    html += `<div class="records-list">`;
+
+    analysis.records.forEach(record => {
+      html += `
+        <div class="record-item">
+          <span class="record-exercise">${record.exercise}</span>
+          <span class="record-value">${record.newMax} kg</span>
+          <span class="record-improvement">+${record.improvement} kg vs ${record.month}</span>
+        </div>
+      `;
+    });
+
+    html += `</div></div>`;
+  }
+
+  // 3. Paliers détectés
+  if (analysis.plateaus.length > 0) {
+    html += `<div class="analysis-section">`;
+    html += `<h3 class="analysis-section-title">⚠️ Paliers Détectés</h3>`;
+    html += `<div class="plateaus-list">`;
+
+    analysis.plateaus.forEach(plateau => {
+      html += `
+        <div class="plateau-item">
+          <span class="plateau-exercise">${plateau.exercise}</span>
+          <span class="plateau-value">${plateau.currentMax} kg</span>
+          <span class="plateau-duration">stable depuis ${plateau.stableSince}</span>
+        </div>
+      `;
+    });
+
+    html += `</div></div>`;
+  }
+
+  // 4. Statistiques globales
+  if (analysis.overallStats) {
+    html += `<div class="analysis-section">`;
+    html += `<h3 class="analysis-section-title">📈 Progression Globale</h3>`;
+    html += `<div class="overall-stats">`;
+
+    const diffClass = analysis.overallStats.tonnageDiff >= 0 ? 'positive' : 'negative';
+    const diffSymbol = analysis.overallStats.tonnageDiff >= 0 ? '▲' : '▼';
+    const diffText = analysis.overallStats.tonnageDiff >= 0 
+      ? `+${analysis.overallStats.tonnageDiffPercent}%` 
+      : `${analysis.overallStats.tonnageDiffPercent}%`;
+
+    html += `
+      <div class="stat-item">
+        <span class="stat-label">Ce mois vs mois dernier</span>
+        <span class="stat-value ${diffClass}">
+          ${diffSymbol} ${Math.abs(analysis.overallStats.tonnageDiffPercent)}%
+        </span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Séances ce mois</span>
+        <span class="stat-value">${analysis.overallStats.currentSessions}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Tonnage ce mois</span>
+        <span class="stat-value">${(analysis.overallStats.currentTonnage / 1000).toFixed(1)} T</span>
+      </div>
+    `;
+
+    html += `</div></div>`;
+  }
+
+  // 5. Conseils
+  if (analysis.advice.length > 0) {
+    html += `<div class="analysis-section">`;
+    html += `<h3 class="analysis-section-title">💡 Conseils</h3>`;
+    html += `<div class="advice-list">`;
+
+    analysis.advice.forEach(adviceItem => {
+      const icon = adviceItem.type === 'success' ? '✅' : 
+                   adviceItem.type === 'warning' ? '⚠️' : 
+                   adviceItem.type === 'info' ? 'ℹ️' : '💭';
+      html += `
+        <div class="advice-item advice-${adviceItem.type}">
+          <span class="advice-icon">${icon}</span>
+          <span class="advice-text">${adviceItem.text}</span>
+        </div>
+      `;
+    });
+
+    html += `</div></div>`;
+  }
+
+  container.innerHTML = html;
+}
+
 function renderCharts() {
   renderTonnageChart();
   renderExerciseChart();
+  renderProgressAnalysis();
 
   const canvas = document.getElementById('weightChart');
   if(!canvas) return;
@@ -1131,6 +1613,7 @@ function switchTab(tabName) {
 
   if (tabName === 'programme') renderProgramOverview();
   if (tabName === 'progression') renderCharts();
+  if (tabName === 'progression') renderProgressAnalysis();
 }
 
 async function exportData() {

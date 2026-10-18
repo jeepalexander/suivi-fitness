@@ -234,3 +234,226 @@ select.filter-select { background: #2a2a2a; border: 1px solid var(--border); col
 
 /* Marge sous l'historique pour ne pas passer sous la barre de sauvegarde fixe */
 #tab-historique .card { padding-bottom: 80px; }
+
+/* ============================================
+   ANALYSE MENSUELLE - STYLES
+   ============================================ */
+
+.progress-analysis {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.analysis-empty {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-muted);
+}
+
+.analysis-section {
+  margin-bottom: 16px;
+}
+
+.analysis-section-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+
+/* Résumé mensuel */
+.monthly-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.month-card {
+  background: #2a2a2a;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  min-width: 120px;
+  flex: 1;
+  font-size: 0.8rem;
+}
+
+.month-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.month-name {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.month-sessions {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.month-tonnage {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent-b);
+}
+
+.in-progress-badge {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* Records */
+.records-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.record-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #223a22;
+  border: 1px solid var(--success);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+}
+
+.record-exercise {
+  font-weight: 600;
+  color: var(--success);
+}
+
+.record-value {
+  font-weight: 700;
+  color: white;
+}
+
+.record-improvement {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+/* Paliers */
+.plateaus-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.plateau-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #3a2a22;
+  border: 1px solid var(--accent-c);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+}
+
+.plateau-exercise {
+  font-weight: 600;
+  color: var(--accent-c);
+}
+
+.plateau-value {
+  font-weight: 700;
+  color: white;
+}
+
+.plateau-duration {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+/* Statistiques globales */
+.overall-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2a2a2a;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+}
+
+.stat-label {
+  color: var(--text-muted);
+}
+
+.stat-value {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.stat-value.positive {
+  color: var(--success);
+}
+
+.stat-value.negative {
+  color: var(--accent-c);
+}
+
+/* Conseils */
+.advice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.advice-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.advice-success {
+  background: #223a22;
+  border: 1px solid var(--success);
+  color: var(--success);
+}
+
+.advice-warning {
+  background: #3a2a22;
+  border: 1px solid var(--accent-c);
+  color: var(--accent-c);
+}
+
+.advice-info {
+  background: #2a2a3a;
+  border: 1px solid var(--accent-a);
+  color: var(--accent-a);
+}
+
+.advice-icon {
+  font-size: 1.1rem;
+  min-width: 24px;
+  text-align: center;
+}
+
+.advice-text {
+  flex: 1;
+  line-height: 1.4;
+}
