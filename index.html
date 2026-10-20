@@ -8,14 +8,15 @@
   <!-- PWA Settings -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#F2F4F7">
   <meta name="apple-mobile-web-app-title" content="SUIVI FITNESS">
   
   <link rel="apple-touch-icon" href="icons/calf_raise.png">
 
   <!-- Chart.js & Fonts (Local for offline use) -->
   <script src="js/chart.umd.min.js"></script>
-  <link href="css/inter.css" rel="stylesheet">
+  <link href="css/fonts.css" rel="stylesheet">
 
   <!-- Liaison CSS externe -->
   <link rel="stylesheet" href="style.css">
@@ -52,7 +53,7 @@
       </div>
 
       <!-- AJOUT DE CET ÉLÉMENT SOUS LE TITRE -->
-    <div id="deload-subtitle" style="display: none; font-size: 0.85rem; font-weight: bold; color: #ff9800; margin-bottom: 6px;"></div>
+    <div id="deload-subtitle" style="display: none; font-size: 0.85rem; font-weight: bold; color: var(--warn); margin-bottom: 6px;"></div>
     
       <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">
         🚣 Échauffement : Rameur 1000m + 2 séries légères sur le 1er mouvement.
@@ -111,7 +112,7 @@
       <div class="card-title">Suivi du Poids Corporel</div>
       <canvas id="weightChart" height="150"></canvas>
       <div style="display: flex; gap: 8px; margin-top: 12px;">
-        <input type="number" step="0.1" id="new-weight" placeholder="Poids (kg)" style="flex:1; background:#2a2a2a; border:1px solid var(--border); color:white; padding:8px; border-radius:6px;">
+        <input type="number" step="0.1" id="new-weight" placeholder="Poids (kg)" style="flex:1; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:8px; border-radius:6px;">
         <button onclick="addWeight()" class="btn" style="width: auto; margin:0; padding:8px 15px;">Ajouter</button>
       </div>
     </div>

@@ -7,6 +7,18 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.1.12] - 2026-10-20
+### 🎨 Nouveau design - étape 1/7 : polices et thème clair
+- Thème clair indigo (fond clair, cartes blanches, couleur principale indigo) appliqué à toute l'application,
+  via des variables CSS (jetons de design) réutilisables pour les étapes suivantes.
+- Nouvelles polices embarquées en local (fonctionnent hors-ligne) : Bricolage Grotesque (titres et chiffres)
+  et Figtree (texte). Remplace Inter.
+- Couleurs des séances A/B/C et des graphiques mises à jour (contraste renforcé).
+- Fenêtre de séance, badge de déload, tuiles du programme et barre d'état du téléphone adaptés au thème clair.
+- Aucun changement de fonctionnement.
+
+---
+
 ## [1.1.11] - 2026-10-18
 ### 📊 Améliorations
 - **Paliers détectés** : la détection se fait désormais **par exercice, sur ses 4 dernières séances réalisées**

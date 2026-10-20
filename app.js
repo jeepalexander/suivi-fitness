@@ -67,7 +67,13 @@ let workoutSeconds = 0;
 let tonnageChart, exerciseChart, weightChart;
 let currentVolumeFilter = 'all'; // 'all' (séances), 'month' (par mois) ou 'type' (séance A/B/C)
 const SESSION_TYPES = ['A', 'B', 'C'];
-const SESSION_TYPE_COLORS = { A: '#1f77b4', B: '#ff7f0e', C: '#d62728' };
+const SESSION_TYPE_COLORS = { A: '#1B6FD8', B: '#C2570C', C: '#C62B35' };
+// Couleurs des graphiques (jetons du thème clair, voir style.css)
+const CHART_COLORS = { primary: '#3730E3', success: '#0B7A43', volume: '#C2570C', tick: '#5B6577' };
+if (typeof Chart !== 'undefined') {
+  Chart.defaults.font.family = "'Figtree', system-ui, sans-serif";
+  Chart.defaults.color = CHART_COLORS.tick;
+}
 let currentSessionTypeFilter = SESSION_TYPES[0];
 let currentExMetricMode = 'max';
 
@@ -201,7 +207,7 @@ function renderProgramOverview() {
     let exListHtml = '';
     prog.exercises.forEach((ex) => {
       exListHtml += `
-        <div class="program-ex-item" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 12px 8px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid var(--border);">
+        <div class="program-ex-item" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 12px 8px; background: var(--bg); border-radius: 14px; border: 1px solid var(--line);">
           <div class="ex-icon-badge" style="margin-bottom: 8px;">${getIcon(ex.name)}</div>
           <strong style="font-size: 0.8rem; line-height: 1.2;">${ex.name}</strong>
         </div>
@@ -871,8 +877,8 @@ function renderTonnageChart() {
 
   // Couleur : celle de la séance affichée en mode A/B/C, bleu sinon
   const lineColor = currentVolumeFilter === 'type'
-    ? (SESSION_TYPE_COLORS[currentSessionTypeFilter] || '#1f77b4')
-    : '#1f77b4';
+    ? (SESSION_TYPE_COLORS[currentSessionTypeFilter] || CHART_COLORS.primary)
+    : CHART_COLORS.primary;
   const lineLabel = currentVolumeFilter === 'type' ? `Tonnage séance ${currentSessionTypeFilter} (kg)` : 'Tonnage (kg)';
 
   tonnageChart = new Chart(ctx1, {
@@ -895,8 +901,8 @@ function renderTonnageChart() {
       responsive: true,
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: '#a0a0a0', font: { size: 9 } } },
-        y: { ticks: { color: '#a0a0a0' } }
+        x: { ticks: { color: CHART_COLORS.tick, font: { size: 9 } } },
+        y: { ticks: { color: CHART_COLORS.tick } }
       }
     }
   });
@@ -942,7 +948,7 @@ function renderExerciseChart() {
   });
 
   const labelTitle = currentExMetricMode === 'volume' ? 'Volume Cumulé (kg)' : 'Charge Max (kg)';
-  const color = currentExMetricMode === 'volume' ? '#ff7f0e' : '#2ca02c';
+  const color = currentExMetricMode === 'volume' ? CHART_COLORS.volume : CHART_COLORS.success;
 
   exerciseChart = new Chart(ctx, {
     type: 'line',
@@ -962,8 +968,8 @@ function renderExerciseChart() {
       responsive: true,
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: '#a0a0a0', font: { size: 8 } } },
-        y: { ticks: { color: '#a0a0a0' } }
+        x: { ticks: { color: CHART_COLORS.tick, font: { size: 8 } } },
+        y: { ticks: { color: CHART_COLORS.tick } }
       }
     }
   });
@@ -984,7 +990,7 @@ function renderHistory() {
     div.onclick = () => openSessionModal(realIndex);
 
     // 1. Définition du badge de déload
-    const deloadBadgeHtml = h.isDeload ? `<span style="font-size:0.7rem; background:#ff980033; color:#ff9800; padding:2px 6px; border-radius:4px; margin-left:6px;"> Deload</span>` : '';
+    const deloadBadgeHtml = h.isDeload ? `<span style="font-size:0.7rem; background:var(--warn-tint); color:var(--warn); padding:2px 8px; border-radius:8px; margin-left:6px;"> Deload</span>` : '';
     
     // Conversion du tonnage en Tonnes (division par 1000) et formatage
     const tonnageInTonnes = (parseFloat(h.tonnage || 0) / 1000).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1});
@@ -997,7 +1003,7 @@ function renderHistory() {
         <span style="font-size:0.75rem; color:var(--text-muted); margin-left:6px;">⏱️️ ${h.duration || 'N/A'}</span>
         ${deloadBadgeHtml}
       </div>
-      <div style="font-weight:500; color:#1f77b4;"><strong>${tonnageInTonnes} T</strong></div>
+      <div style="font-family:var(--font-display); font-weight:700; color:var(--primary);"><strong>${tonnageInTonnes} T</strong></div>
     `;
     container.appendChild(div);
   });
@@ -1006,11 +1012,11 @@ function renderHistory() {
 function injectSessionModalHtml() {
   if (document.getElementById('session-modal')) return;
   const modalHtml = `
-    <div id="session-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:1000;">
-      <div style="background:#222; padding:20px; border-radius:8px; width:90%; max-width:300px; text-align:center; color:#fff; border: 1px solid #444;">
+    <div id="session-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.5); justify-content:center; align-items:center; z-index:1000;">
+      <div style="background:var(--card-bg); padding:20px; border-radius:20px; width:90%; max-width:320px; text-align:center; color:var(--text); border: 1px solid var(--border); box-shadow: 0 12px 32px rgba(15,23,42,0.18);">
         <h3 id="modal-session-title" style="margin-bottom: 15px; font-size: 1.1rem;">Séance</h3>
-        <button id="modal-edit-btn" style="background:#ff7f0e; border:none; color:white; padding:10px 20px; border-radius:5px; cursor:pointer; width:100%; font-size:1em; margin-bottom: 10px; font-weight:600;">Modifier la séance</button>
-        <button onclick="closeSessionModal()" style="background:#444; border:none; color:white; padding:8px 15px; border-radius:5px; cursor:pointer; width:100%;">Fermer</button>
+        <button id="modal-edit-btn" style="background:var(--primary); border:none; color:white; padding:12px 20px; border-radius:14px; cursor:pointer; width:100%; font-size:1em; margin-bottom: 10px; font-weight:600;">Modifier la séance</button>
+        <button onclick="closeSessionModal()" style="background:var(--bg); border:1px solid var(--border); color:var(--text); padding:12px 15px; border-radius:14px; cursor:pointer; width:100%;">Fermer</button>
       </div>
     </div>
   `;
@@ -1512,8 +1518,8 @@ function renderCharts() {
       datasets: [{
         label: 'Poids (kg)',
         data: state.weights.map(w => w.weight),
-        borderColor: '#ff7f0e',
-        backgroundColor: '#ff7f0e22',
+        borderColor: CHART_COLORS.success,
+        backgroundColor: CHART_COLORS.success + '22',
         fill: true,
         tension: 0.2
       }]
@@ -1522,8 +1528,8 @@ function renderCharts() {
       responsive: true,
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: '#a0a0a0' } },
-        y: { ticks: { color: '#a0a0a0' } }
+        x: { ticks: { color: CHART_COLORS.tick } },
+        y: { ticks: { color: CHART_COLORS.tick } }
       }
     }
   });

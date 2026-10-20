@@ -3,7 +3,7 @@
 // APP_VERSION doit être incrémenté à chaque release (en même temps que
 // manifest.json) : le navigateur ne réinstalle le service worker que si
 // le contenu de ce fichier change.
-const APP_VERSION = '1.1.11';
+const APP_VERSION = '1.1.12';
 const CACHE_NAME = 'suivi-fitness-' + APP_VERSION;
 const ASSETS = [
   './',
@@ -13,7 +13,12 @@ const ASSETS = [
   './manifest.json',
   './data.json',
   './js/chart.umd.min.js',
-  './css/inter.css',
+  './css/fonts.css',
+  './fonts/bricolage-grotesque-latin-600-normal.woff2',
+  './fonts/bricolage-grotesque-latin-700-normal.woff2',
+  './fonts/figtree-latin-400-normal.woff2',
+  './fonts/figtree-latin-500-normal.woff2',
+  './fonts/figtree-latin-600-normal.woff2',
   './icons/calf_raise.png'
 ];
 
