@@ -194,44 +194,79 @@ function getIcon(exName) {
   return `<img src="${path}" alt="${exName}" onerror="this.src='icons/bench_press.png'">`;
 }
 
+function programTilesHtml(prog) {
+  return prog.exercises.map(ex => `
+    <div class="ex-tile">
+      <div class="ex-icon-badge">${getIcon(ex.name)}</div>
+      <span>${ex.name}</span>
+    </div>
+  `).join('');
+}
+
+const SESSION_ORDER = ['A', 'B', 'C'];
+const CHEVRON_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+
 function renderProgramOverview() {
   const container = document.getElementById('program-overview');
   if (!container) return;
-  container.innerHTML = '';
 
-  Object.keys(PROGRAM).forEach(type => {
-    const prog = PROGRAM[type];
-    const card = document.createElement('div');
-    card.className = 'card';
+  const nextType = PROGRAM[state.nextType] ? state.nextType : 'A';
+  const next = PROGRAM[nextType];
+  const startIdx = SESSION_ORDER.indexOf(nextType);
+  const others = [1, 2].map(i => SESSION_ORDER[(startIdx + i) % SESSION_ORDER.length]);
 
-    let exListHtml = '';
-    prog.exercises.forEach((ex) => {
-      exListHtml += `
-        <div class="program-ex-item" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 12px 8px; background: var(--bg); border-radius: 14px; border: 1px solid var(--line);">
-          <div class="ex-icon-badge" style="margin-bottom: 8px;">${getIcon(ex.name)}</div>
-          <strong style="font-size: 0.8rem; line-height: 1.2;">${ex.name}</strong>
+  const deloadHtml = checkDeloadStatus()
+    ? `<span class="deload-pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>Déload actif · −20 %</span>`
+    : '';
+
+  const othersHtml = others.map(type => `
+    <div class="next-row-wrap">
+      <button type="button" class="next-row" aria-expanded="false" onclick="toggleProgramRow(this)">
+        <span class="type-pill type-pill-${type} small">${type}</span>
+        <span class="next-row-name">${PROGRAM[type].title.replace('/', ' / ')}</span>
+        <span class="next-row-chevron">${CHEVRON_SVG}</span>
+      </button>
+      <div class="tile-grid next-row-panel" hidden>${programTilesHtml(PROGRAM[type])}</div>
+    </div>
+  `).join('');
+
+  container.innerHTML = `
+    <div class="card next-card">
+      <div class="session-head">
+        <span class="type-pill type-pill-${nextType}">${nextType}</span>
+        <div class="session-head-text">
+          <span class="overline">Prochaine séance</span>
+          <span class="session-name">${next.title.replace('/', ' / ')}</span>
         </div>
-      `;
-    });
+      </div>
+      ${deloadHtml}
+      <button type="button" class="btn btn-start" onclick="switchTab('seance')">
+        Démarrer la séance
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+      <p class="warmup-note">🚣 Échauffement : Rameur 1000 m + 2 séries légères uniquement sur le 1er exercice.</p>
+    </div>
 
-    card.innerHTML = `
-      <div class="card-title" style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-        <span class="badge ${prog.badge}">Séance ${type}</span>
-        <span style="font-size: 1rem; font-weight: bold;">${prog.title}</span>
-      </div>
-      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
-        ${exListHtml}
-      </div>
-    `;
-    container.appendChild(card);
-  });
+    <div class="section-block">
+      <h2 class="section-label">Au programme · ${next.exercises.length} exercices</h2>
+      <div class="tile-grid">${programTilesHtml(next)}</div>
+    </div>
+
+    <div class="section-block">
+      <h2 class="section-label">Ensuite</h2>
+      ${othersHtml}
+    </div>
+  `;
 }
 
-// ==========================================
-// SUGGESTION DES POIDS (AVEC EXCLUSION DU DÉLOAD)
-// ==========================================
-// Une série est considérée comme réellement effectuée si elle a une charge ET des répétitions.
-// Les séries à 0 kg / 0 rép. correspondent à des séries (ou exercices) non faits.
+// Déplie / replie la liste des exercices d'une séance dans « Ensuite »
+function toggleProgramRow(btn) {
+  const panel = btn.nextElementSibling;
+  const open = btn.getAttribute('aria-expanded') === 'true';
+  btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+  if (panel) panel.hidden = open;
+}
+
 function isPerformedSet(set) {
   return !!set && (parseFloat(set.weight) || 0) > 0 && (parseFloat(set.reps) || 0) > 0;
 }

@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.1.14] - 2026-10-21
+### 🎨 Nouveau design - étape 3/7 : écran Programme
+- **Carte « Prochaine séance »** : pastille de la séance (A/B/C), nom, pastille « Déload actif » si besoin,
+  gros bouton « Démarrer la séance » (ouvre l'onglet Séance) et rappel d'échauffement.
+- **« Au programme »** : exercices de la prochaine séance en grille de 3 colonnes (icône + nom).
+- **« Ensuite »** : les deux autres séances sur une ligne chacune ; un appui déplie la liste de leurs exercices.
+- Le rappel d'échauffement du haut de page est intégré à la carte.
+
+---
+
 ## [1.1.13] - 2026-10-21
 ### 🎨 Nouveau design - étape 2/7 : en-tête et navigation
 - **Navigation flottante** : barre blanche arrondie, détachée des bords et du bas de l'écran, avec icônes
