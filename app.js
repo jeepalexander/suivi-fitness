@@ -1535,6 +1535,9 @@ function renderCharts() {
   });
 }
 
+// Titre affiché en haut de chaque onglet
+const PAGE_TITLES = { programme: 'Programme', seance: 'Séance', progression: 'Graphiques', historique: 'Historique' };
+
 function switchTab(tabName) {
   document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
@@ -1552,6 +1555,9 @@ function switchTab(tabName) {
       timerBtn.style.display = 'none';
     }
   }
+
+  const pageTitle = document.getElementById('page-title');
+  if (pageTitle) pageTitle.innerText = PAGE_TITLES[tabName] || '';
 
   if (tabName === 'programme') renderProgramOverview();
   if (tabName === 'progression') renderCharts();

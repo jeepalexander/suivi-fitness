@@ -43,13 +43,20 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-body); -webkit-tap-highlight-color: transparent; }
-body { background-color: var(--bg); color: var(--text); padding-bottom: 80px; }
+body { background-color: var(--bg); color: var(--text); padding-bottom: 112px; }
 
-header { background: var(--card-bg); padding: 12px 15px; text-align: center; border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
-header h1 { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; }
-header p { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+header { padding: 22px 20px 6px 20px; max-width: 600px; margin: 0 auto; text-align: left; }
+.page-header { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.app-kicker { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
+header h1 { font-family: var(--font-display); font-size: 2.25rem; font-weight: 700; line-height: 1.05; }
+header p#sub-header { font-size: 0.9rem; color: var(--text-muted); margin-top: 2px; }
 
 .timer-btn {
+  position: fixed;
+  top: 14px;
+  right: 16px;
+  z-index: 110;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
   background: var(--card-bg);
   border: 1px solid var(--border);
   color: var(--primary);
@@ -81,10 +88,28 @@ header p { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
   to { opacity: 0.7; transform: scale(1.05); }
 }
 
-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); display: flex; border-top: 1px solid var(--line); z-index: 100; }
-nav button { flex: 1; padding: 10px 0; background: none; border: none; color: var(--text-muted); font-size: 0.72rem; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
-nav button.active { color: var(--primary); font-weight: 600; }
-nav button svg { width: 20px; height: 20px; fill: currentColor; }
+nav {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  max-width: 568px;
+  margin: 0 auto;
+  height: 68px;
+  padding: 6px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  background: var(--card-bg);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.10);
+  z-index: 100;
+}
+nav button { padding: 0; background: none; border: none; border-radius: 18px; color: var(--text-muted); font-size: 0.6875rem; font-weight: 500; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; transition: background 0.15s ease, color 0.15s ease; }
+nav button.active { background: var(--primary-tint); color: var(--primary); font-weight: 600; }
+nav button svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+nav button.active svg { stroke-width: 1.95; }
 
 .container { padding: 15px; max-width: 600px; margin: 0 auto; display: none; }
 .container.active { display: block; }
@@ -245,16 +270,18 @@ select.filter-select { background: var(--bg); border: 1px solid var(--border); c
 /* Barre de sauvegarde fixe (visible dans l'onglet Historique) */
 .save-bar {
   position: fixed;
-  bottom: 62px;
-  left: 0;
-  right: 0;
-  max-width: 600px;
+  bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  left: 16px;
+  right: 16px;
+  max-width: 568px;
   margin: 0 auto;
-  padding: 8px 15px;
+  padding: 8px;
   display: flex;
   gap: 8px;
   background: var(--card-bg);
-  border-top: 1px solid var(--line);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.10);
   z-index: 90;
 }
 .save-bar .btn { width: 50%; padding: 10px 6px; font-size: 0.82rem; }
@@ -271,7 +298,7 @@ select.filter-select { background: var(--bg); border: 1px solid var(--border); c
 .btn-set-count:active { opacity: 0.7; }
 
 /* Marge sous l'historique pour ne pas passer sous la barre de sauvegarde fixe */
-#tab-historique .card { padding-bottom: 80px; }
+#tab-historique .card { padding-bottom: 90px; }
 
 /* ============================================
    ANALYSE MENSUELLE - STYLES

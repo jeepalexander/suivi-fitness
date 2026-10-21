@@ -7,6 +7,18 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.1.13] - 2026-10-21
+### 🎨 Nouveau design - étape 2/7 : en-tête et navigation
+- **Navigation flottante** : barre blanche arrondie, détachée des bords et du bas de l'écran, avec icônes
+  fines ; l'onglet actif est sur fond indigo clair.
+- **En-tête de page** : grand titre de l'onglet (Programme, Séance, Graphiques, Historique) avec, au-dessus,
+  le nom de l'application et sa version, et en dessous le contexte (ex. « Prochaine séance : A »).
+- **Chrono de repos** : devient une puce flottante en haut à droite, toujours accessible pendant la séance.
+- Barre de sauvegarde de l'onglet Historique repositionnée au-dessus de la navigation.
+- Aucun changement de fonctionnement.
+
+---
+
 ## [1.1.12] - 2026-10-20
 ### 🎨 Nouveau design - étape 1/7 : polices et thème clair
 - Thème clair indigo (fond clair, cartes blanches, couleur principale indigo) appliqué à toute l'application,
