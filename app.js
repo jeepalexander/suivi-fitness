@@ -69,7 +69,7 @@ let currentVolumeFilter = 'all'; // 'all' (séances), 'month' (par mois) ou 'typ
 const SESSION_TYPES = ['A', 'B', 'C'];
 const SESSION_TYPE_COLORS = { A: '#1B6FD8', B: '#C2570C', C: '#C62B35' };
 // Couleurs des graphiques (jetons du thème clair, voir style.css)
-const CHART_COLORS = { primary: '#3730E3', success: '#0B7A43', volume: '#C2570C', tick: '#5B6577' };
+const CHART_COLORS = { primary: '#3730E3', success: '#0B7A43', volume: '#C2570C', tick: '#5B6577', grid: '#E3E7ED', band: 'rgba(246, 213, 139, 0.45)' };
 if (typeof Chart !== 'undefined') {
   Chart.defaults.font.family = "'Figtree', system-ui, sans-serif";
   Chart.defaults.color = CHART_COLORS.tick;
@@ -1024,11 +1024,9 @@ function renderTonnageChart() {
     data = sortedHistory.map(e => parseFloat(e.tonnage) || 0);
   }
 
-  // Couleur : celle de la séance affichée en mode A/B/C, bleu sinon
-  const lineColor = currentVolumeFilter === 'type'
-    ? (SESSION_TYPE_COLORS[currentSessionTypeFilter] || CHART_COLORS.primary)
-    : CHART_COLORS.primary;
+  // Courbe blanche sur le bloc héros indigo
   const lineLabel = currentVolumeFilter === 'type' ? `Tonnage séance ${currentSessionTypeFilter} (kg)` : 'Tonnage (kg)';
+  const onHero = 'rgba(255, 255, 255, 0.8)';
 
   tonnageChart = new Chart(ctx1, {
     type: 'line',
@@ -1037,21 +1035,21 @@ function renderTonnageChart() {
       datasets: [{
         label: lineLabel,
         data: data,
-        borderColor: lineColor,
-        backgroundColor: `${lineColor}22`,
-        borderWidth: 2,
+        borderColor: '#fff',
+        backgroundColor: 'rgba(255, 255, 255, 0.18)',
+        borderWidth: 2.5,
         fill: true,
         tension: 0.3,
-        pointBackgroundColor: lineColor,
-        pointRadius: 4
+        pointBackgroundColor: '#fff',
+        pointRadius: 3
       }]
     },
     options: {
       responsive: true,
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: CHART_COLORS.tick, font: { size: 9 } } },
-        y: { ticks: { color: CHART_COLORS.tick } }
+        x: { ticks: { color: onHero, font: { size: 9 }, maxTicksLimit: 6 }, grid: { display: false }, border: { display: false } },
+        y: { ticks: { color: onHero, maxTicksLimit: 5 }, grid: { color: 'rgba(255, 255, 255, 0.15)' }, border: { display: false } }
       }
     }
   });
@@ -1065,17 +1063,16 @@ function renderExerciseChart() {
 
   const selectEl = document.getElementById('exercise-filter');
   const selectedEx = selectEl ? selectEl.value : '';
+  const isSelected = name => selectedEx === "Mollets"
+    ? (name === "Mollets" || name === "Mollets / Finition")
+    : name === selectedEx;
   let labels = [];
   let chartData = [];
+  let dates = [];
 
   state.history.forEach(h => {
     if (h.exercises) {
-      const exData = h.exercises.find(e => {
-        if (selectedEx === "Mollets") {
-          return e.name === "Mollets" || e.name === "Mollets / Finition";
-        }
-        return e.name === selectedEx;
-      });
+      const exData = h.exercises.find(e => isSelected(e.name));
 
       // On ignore les séances où l'exercice n'a pas été réellement fait (séries à 0 kg / 0 rép.)
       // pour ne pas tracer de faux creux à 0 dans la progression.
@@ -1084,6 +1081,7 @@ function renderExerciseChart() {
 
       if (exData && wasPerformed) {
         labels.push(`${h.type} (${formatDate(h.date)})`);
+        dates.push(h.date);
         if (currentExMetricMode === 'volume') {
           chartData.push(exData.totalVolume || 0);
         } else {
@@ -1096,8 +1094,31 @@ function renderExerciseChart() {
     }
   });
 
+  // Bande ambre : séances du palier en cours pour cet exercice (règle des 4 dernières séances)
+  let plateauStart = -1;
+  try {
+    const plateau = analyzeMonthlyProgress().plateaus.find(p => isSelected(p.exercise));
+    if (plateau) plateauStart = dates.findIndex(d => d >= plateau.sinceDate);
+  } catch (e) { plateauStart = -1; }
+  const note = document.getElementById('exercise-plateau-note');
+  if (note) note.hidden = plateauStart < 0;
+
+  const bandPlugin = {
+    id: 'plateauBand',
+    beforeDatasetsDraw(chart) {
+      if (plateauStart < 0 || chartData.length === 0) return;
+      const { ctx: c, chartArea, scales } = chart;
+      const step = chartData.length > 1 ? (scales.x.getPixelForValue(1) - scales.x.getPixelForValue(0)) : 0;
+      const left = Math.max(chartArea.left, scales.x.getPixelForValue(plateauStart) - step / 2);
+      c.save();
+      c.fillStyle = CHART_COLORS.band;
+      c.fillRect(left, chartArea.top, chartArea.right - left, chartArea.bottom - chartArea.top);
+      c.restore();
+    }
+  };
+
   const labelTitle = currentExMetricMode === 'volume' ? 'Volume Cumulé (kg)' : 'Charge Max (kg)';
-  const color = currentExMetricMode === 'volume' ? CHART_COLORS.volume : CHART_COLORS.success;
+  const color = currentExMetricMode === 'volume' ? CHART_COLORS.volume : CHART_COLORS.primary;
 
   exerciseChart = new Chart(ctx, {
     type: 'line',
@@ -1108,19 +1129,21 @@ function renderExerciseChart() {
         data: chartData.length ? chartData : [0],
         borderColor: color,
         backgroundColor: `${color}22`,
+        borderWidth: 2.5,
         fill: true,
         tension: 0.2,
-        pointRadius: 4
+        pointRadius: 3
       }]
     },
     options: {
       responsive: true,
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: CHART_COLORS.tick, font: { size: 8 } } },
-        y: { ticks: { color: CHART_COLORS.tick } }
+        x: { ticks: { color: CHART_COLORS.tick, font: { size: 9 }, maxTicksLimit: 6 }, grid: { display: false } },
+        y: { ticks: { color: CHART_COLORS.tick, maxTicksLimit: 5 }, grid: { color: CHART_COLORS.grid }, border: { display: false } }
       }
-    }
+    },
+    plugins: [bandPlugin]
   });
 }
 
@@ -1512,139 +1535,131 @@ function analyzeMonthlyProgress() {
   };
 }
 
+// Bloc héros : indice de progression global + pastille « X % vs mois précédent »
+function renderHero(stats) {
+  const idx = document.getElementById('hero-index');
+  const pill = document.getElementById('hero-pill');
+  if (idx) {
+    const g = stats ? stats.globalProgressIndex : null;
+    idx.textContent = (g === null || g === undefined) ? '–' : `${g > 0 ? '+' : ''}${g} %`;
+  }
+  if (pill) {
+    const d = stats ? stats.lastVsPreviousDiffPercent : null;
+    if (d === null || d === undefined) {
+      pill.hidden = true;
+    } else {
+      pill.hidden = false;
+      pill.textContent = `${d > 0 ? '▲ +' : d < 0 ? '▼ ' : ''}${d} % vs mois précédent`;
+    }
+  }
+}
+
 function renderProgressAnalysis() {
   const container = document.getElementById('monthly-analysis');
   if (!container) return;
 
   const analysis = analyzeMonthlyProgress();
+  const stats = analysis.overallStats;
+  renderHero(stats);
   let html = '';
 
   // Si pas de données
   if (analysis.monthlyData.length === 0) {
-    html = `
-      <div class="analysis-empty">
+    container.innerHTML = `
+      <div class="card analysis-empty">
         <p>\ud83d\udcca Aucune donnée disponible.</p>
-        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">
-          Enregistre des séances pour voir ta progression !
-        </p>
-      </div>
-    `;
-    container.innerHTML = html;
+        <p style="font-size: 0.85rem; margin-top: 8px;">Enregistre des séances pour voir ta progression !</p>
+      </div>`;
     return;
   }
 
-  // 1. Résumé mensuel (4 derniers mois max)
-  html += `<div class="analysis-section">`;
-  html += `<h3 class="analysis-section-title">4 derniers mois</h3>`;
-  html += `<div class="monthly-summary">`;
-
+  // 1. 4 derniers mois : barres horizontales (le mois courant en indigo)
+  const maxTonnage = Math.max(...analysis.monthlyData.map(m => m.totalTonnage), 1);
+  html += `<div class="card"><h3 class="analysis-section-title">4 derniers mois</h3><div class="bar-list">`;
   analysis.monthlyData.forEach(month => {
     const tonnageInTonnes = (month.totalTonnage / 1000).toFixed(1);
     const isCurrentMonth = month.year + '-' + month.month === analysis.currentMonthKey;
     const monthLabel = isCurrentMonth ? 'Ce mois-ci' : `${month.monthName} ${month.year}`;
-
+    const width = Math.round((month.totalTonnage / maxTonnage) * 100);
     html += `
-      <div class="month-card">
-        <div class="month-header">
-          <span class="month-name">${monthLabel}</span>
-          <span class="month-sessions">${month.sessionCount} séance${month.sessionCount > 1 ? 's' : ''}</span>
+      <div>
+        <div class="bar-row-head">
+          <span><span class="bar-label">${monthLabel}</span> <span class="bar-meta">· ${month.sessionCount} séance${month.sessionCount > 1 ? 's' : ''}</span></span>
+          <span class="bar-value">${tonnageInTonnes} T</span>
         </div>
-        <div class="month-tonnage">${tonnageInTonnes} T</div>
-      </div>
-    `;
+        <div class="bar-track"><div class="bar-fill${isCurrentMonth ? ' current' : ''}" style="width:${width}%"></div></div>
+      </div>`;
   });
-
   html += `</div></div>`;
 
   // 2. Records battus ce mois-ci
   if (analysis.currentMonthRecords.length > 0) {
-    html += `<div class="analysis-section">`;
-    html += `<h3 class="analysis-section-title">Records battus ce mois-ci</h3>`;
-    html += `<div class="records-list">`;
-
+    html += `<div class="card"><h3 class="analysis-section-title">Records battus ce mois-ci</h3><div class="records-list">`;
     analysis.currentMonthRecords.forEach(record => {
       html += `
         <div class="record-item">
           <span class="record-exercise">${record.exercise}</span>
           <span class="record-value">${record.newMax} kg</span>
           <span class="record-improvement">+${record.improvement} kg</span>
-        </div>
-      `;
+        </div>`;
     });
-
     html += `</div></div>`;
   }
 
   // 3. Paliers détectés
-  html += `<div class="analysis-section">`;
-  html += `<h3 class="analysis-section-title">Paliers détectés</h3>`;
-
+  html += `<div class="card"><h3 class="analysis-section-title">Paliers détectés</h3>`;
   if (analysis.plateaus.length > 0) {
     html += `<div class="plateaus-list">`;
-
     analysis.plateaus.forEach(plateau => {
       html += `
         <div class="plateau-item">
           <span class="plateau-exercise">${plateau.exercise}</span>
           <span class="plateau-value">${plateau.currentMax} kg</span>
           <span class="plateau-duration">sans progression depuis le ${plateau.sinceDate.substring(8, 10)}/${plateau.sinceDate.substring(5, 7)} (${plateau.sessionsCount} séances)</span>
-        </div>
-      `;
+        </div>`;
     });
-
     html += `</div>`;
   } else {
     html += `<p class="analysis-none">Aucun palier détecté</p>`;
   }
-
   html += `</div>`;
 
-  // 4. Progression
-  const stats = analysis.overallStats;
-  const progressItem = (label, percent) => {
-    if (percent === null || percent === undefined) return '';
-    const cls = percent >= 0 ? 'positive' : 'negative';
-    const symbol = percent >= 0 ? '\u25b2' : '\u25bc';
-    return `
-      <div class="stat-item">
-        <span class="stat-label">${label}</span>
-        <span class="stat-value ${cls}">${symbol} ${Math.abs(percent)}%</span>
-      </div>
-    `;
-  };
-
+  // 4. Progression par séance (A/B/C), sur tout l'historique
   if (stats) {
-    const items =
-      progressItem('Mois dernier vs précédent', stats.lastVsPreviousDiffPercent) +
-      progressItem('Indice de progression global', stats.globalProgressIndex) +
-      ['A', 'B', 'C'].map(type => progressItem(`Séance ${type}`, stats.sessionProgress[type].percent)).join('');
-
-    if (items.trim() !== '') {
-      html += `<div class="analysis-section">`;
-      html += `<h3 class="analysis-section-title">Progression</h3>`;
-      html += `<div class="overall-stats">${items}</div>`;
-      html += `<p class="analysis-note">Indice global et séances : tonnage médian des 3 dernières séances vs les 3 premières, sur tout l'historique (sans tenir compte des mois). L'indice global est la moyenne des séances A, B et C.</p>`;
-      html += `</div>`;
+    const types = ['A', 'B', 'C'].filter(t => stats.sessionProgress[t].percent !== null && stats.sessionProgress[t].percent !== undefined);
+    if (types.length > 0) {
+      const maxAbs = Math.max(...types.map(t => Math.abs(stats.sessionProgress[t].percent)), 1);
+      html += `<div class="card"><h3 class="analysis-section-title">Progression par séance</h3>`;
+      types.forEach(t => {
+        const percent = stats.sessionProgress[t].percent;
+        const cls = percent >= 0 ? 'positive' : 'negative';
+        const symbol = percent >= 0 ? '\u25b2' : '\u25bc';
+        const width = Math.max(3, Math.round((Math.abs(percent) / maxAbs) * 100));
+        html += `
+          <div class="progress-row">
+            <span class="type-pill type-pill-${t} small">${t}</span>
+            <div class="bar-track"><div class="bar-fill type-${t}" style="width:${width}%"></div></div>
+            <span class="stat-value ${cls}">${symbol} ${Math.abs(percent)} %</span>
+          </div>`;
+      });
+      html += `<p class="analysis-note">Tonnage médian des 3 dernières séances vs les 3 premières, sur tout l'historique (sans tenir compte des mois). L'indice global est la moyenne des séances A, B et C.</p></div>`;
     }
   }
 
   // 5. Conseils
   if (analysis.advice.length > 0) {
-    html += `<div class="advice-list">`;
-
+    html += `<div class="card"><div class="advice-list">`;
     analysis.advice.forEach(adviceItem => {
-      const icon = adviceItem.type === 'success' ? '\u2705' : 
-                   adviceItem.type === 'warning' ? '\u26a0\ufe0f' : 
+      const icon = adviceItem.type === 'success' ? '\u2705' :
+                   adviceItem.type === 'warning' ? '\u26a0\ufe0f' :
                    adviceItem.type === 'info' ? '\u2139\ufe0f' : '\ud83d\udcad';
       html += `
         <div class="advice-item advice-${adviceItem.type}">
           <span class="advice-icon">${icon}</span>
           <span class="advice-text">${adviceItem.text}</span>
-        </div>
-      `;
+        </div>`;
     });
-
-    html += `</div>`;
+    html += `</div></div>`;
   }
 
   container.innerHTML = html;
@@ -1660,6 +1675,12 @@ function renderCharts() {
   const ctx2 = canvas.getContext('2d');
   if (weightChart) weightChart.destroy();
 
+  const wcur = document.getElementById('weight-current');
+  if (wcur) {
+    const last = state.weights && state.weights.length ? state.weights[state.weights.length - 1].weight : null;
+    wcur.textContent = last === null ? '–' : last;
+  }
+
   weightChart = new Chart(ctx2, {
     type: 'line',
     data: {
@@ -1669,6 +1690,8 @@ function renderCharts() {
         data: state.weights.map(w => w.weight),
         borderColor: CHART_COLORS.success,
         backgroundColor: CHART_COLORS.success + '22',
+        borderWidth: 2.5,
+        pointRadius: 3,
         fill: true,
         tension: 0.2
       }]
@@ -1677,8 +1700,8 @@ function renderCharts() {
       responsive: true,
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: CHART_COLORS.tick } },
-        y: { ticks: { color: CHART_COLORS.tick } }
+        x: { ticks: { color: CHART_COLORS.tick, maxTicksLimit: 6 }, grid: { display: false } },
+        y: { ticks: { color: CHART_COLORS.tick, maxTicksLimit: 5 }, grid: { color: CHART_COLORS.grid }, border: { display: false } }
       }
     }
   });

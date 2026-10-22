@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.1.16] - 2026-10-22
+### 🎨 Nouveau design - étape 5/7 : Graphiques et analyse
+- **Bloc héros indigo** : indice de progression global en grand, pastille « X % vs mois précédent », filtres Séances / Par mois / A·B·C et courbe de volume blanche.
+- **4 derniers mois** en barres horizontales (le mois courant en indigo, libellé « Ce mois-ci »).
+- **Records**, **paliers** et **progression par séance** (A/B/C en barres colorées) présentés en cartes séparées.
+- **Progression par exercice** : bascule Charge max / Volume cumulé et bande ambre sur les séances du palier en cours.
+- **Poids corporel** : valeur actuelle en grand, courbe et champ d'ajout restylés.
+
+---
+
 ## [1.1.15] - 2026-10-22
 ### 🎨 Nouveau design - étape 4/7 : écran Séance
 - **En-tête de séance** : pastille A/B/C, nom de la séance, pastille « Déload actif » et barre de progression des séries avec durée.

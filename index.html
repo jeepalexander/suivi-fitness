@@ -79,41 +79,44 @@
 
   <!-- TAB 2: PROGRESSION & ANALYSE -->
   <div id="tab-progression" class="container">
-    <div class="card">
-      <div id="monthly-analysis" class="progress-analysis"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">
-        <span>Volume Total Séance (kg)</span>
-        <div class="filter-group">
-          <button class="filter-btn active" onclick="setVolumeFilter('all', this)">Séances</button>
-          <button class="filter-btn" onclick="setVolumeFilter('month', this)">Par Mois</button>
-          <button class="filter-btn" id="btn-vol-type" onclick="cycleSessionTypeFilter(this)" title="Appuyer pour afficher successivement la séance A, B puis C">A / B / C</button>
-        </div>
+    <div class="hero-card">
+      <div class="hero-label">Indice de progression global</div>
+      <div class="hero-row">
+        <span id="hero-index" class="hero-index">–</span>
+        <span id="hero-pill" class="hero-pill" hidden></span>
       </div>
-      <canvas id="tonnageChart" height="200"></canvas>
+      <div class="hero-sub">Volume total par séance (kg)</div>
+      <div class="filter-group">
+        <button class="filter-btn active" onclick="setVolumeFilter('all', this)">Séances</button>
+        <button class="filter-btn" onclick="setVolumeFilter('month', this)">Par mois</button>
+        <button class="filter-btn" id="btn-vol-type" onclick="cycleSessionTypeFilter(this)" title="Appuyer pour afficher successivement la séance A, B puis C">A / B / C</button>
+      </div>
+      <div class="hero-chart"><canvas id="tonnageChart" height="200"></canvas></div>
     </div>
 
+    <div id="monthly-analysis" class="progress-analysis"></div>
+
     <div class="card">
-      <div class="card-title">Progression par Exercice</div>
+      <h3 class="analysis-section-title">Progression par exercice</h3>
       <select id="exercise-filter" class="filter-select" onchange="renderExerciseChart()">
       </select>
-      
-      <div class="filter-group" style="margin-bottom: 12px; justify-content: center;">
-        <button class="filter-btn active" id="btn-mode-max" onclick="setExMetricMode('max', this)">Charge Max (kg)</button>
-        <button class="filter-btn" id="btn-mode-vol" onclick="setExMetricMode('volume', this)">Volume Cumulé (kg)</button>
+
+      <div class="filter-group seg-group">
+        <button class="filter-btn active" id="btn-mode-max" onclick="setExMetricMode('max', this)">Charge max</button>
+        <button class="filter-btn" id="btn-mode-vol" onclick="setExMetricMode('volume', this)">Volume cumulé</button>
       </div>
 
       <canvas id="exerciseChart" height="180"></canvas>
+      <p id="exercise-plateau-note" class="analysis-note" hidden>La bande ambre marque les séances sans progression (palier).</p>
     </div>
 
     <div class="card">
-      <div class="card-title">Suivi du Poids Corporel</div>
+      <h3 class="analysis-section-title">Poids corporel</h3>
+      <div class="weight-current"><span id="weight-current" class="weight-value">–</span><span class="weight-unit">kg</span></div>
       <canvas id="weightChart" height="150"></canvas>
-      <div style="display: flex; gap: 8px; margin-top: 12px;">
-        <input type="number" step="0.1" id="new-weight" placeholder="Poids (kg)" style="flex:1; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:8px; border-radius:6px;">
-        <button onclick="addWeight()" class="btn" style="width: auto; margin:0; padding:8px 15px;">Ajouter</button>
+      <div class="weight-form">
+        <input type="number" step="0.1" id="new-weight" placeholder="Poids (kg)" class="weight-field">
+        <button onclick="addWeight()" class="btn weight-add">Ajouter</button>
       </div>
     </div>
   </div>
