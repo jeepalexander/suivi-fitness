@@ -123,19 +123,18 @@
 
   <!-- TAB 3: HISTORIQUE -->
   <div id="tab-historique" class="container">
-    <div class="card">
-      <div class="card-title">Historique des Séances</div>
-      <div id="history-list"></div>
-      
-      <input type="file" id="import-file" style="display:none" onchange="importData(event)">
-      <div class="save-bar">
-        <button onclick="exportData()" class="btn btn-secondary" style="margin:0;">💾 Sauvegarder</button>
-        <button onclick="document.getElementById('import-file').click()" class="btn btn-secondary" style="margin:0;">📂 Restaurer une sauvegarde</button>
-      </div>
+    <p id="history-count" class="history-count"></p>
 
-      <div class="danger-zone">
-        <button onclick="resetData()" class="btn-danger-link">Réinitialiser les données d'origine</button>
-      </div>
+    <div class="card backup-card">
+      <input type="file" id="import-file" style="display:none" onchange="importData(event)">
+      <button onclick="exportData()" class="btn">Sauvegarder</button>
+      <button onclick="document.getElementById('import-file').click()" class="btn btn-secondary">Restaurer</button>
+    </div>
+
+    <div id="history-list"></div>
+
+    <div class="danger-zone">
+      <button onclick="resetData()" class="btn-danger-link">Réinitialiser les données d'origine</button>
     </div>
   </div>
 

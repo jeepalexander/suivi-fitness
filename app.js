@@ -1147,48 +1147,90 @@ function renderExerciseChart() {
   });
 }
 
+const HISTORY_MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const HISTORY_DAYS = ['Dim.','Lun.','Mar.','Mer.','Jeu.','Ven.','Sam.'];
+const HISTORY_MONTHS_SHORT = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+
+// « Sam. 10 oct. »
+function formatHistoryDate(dateStr) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr || '');
+  if (!m) return dateStr || '';
+  const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  return `${HISTORY_DAYS[d.getUTCDay()]} ${+m[3]} ${HISTORY_MONTHS_SHORT[+m[2] - 1]}`;
+}
+
+function historyTonnes(kg) {
+  return (parseFloat(kg || 0) / 1000).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+}
+
 function renderHistory() {
   const container = document.getElementById('history-list');
   if(!container) return;
   container.innerHTML = '';
 
-  [...state.history].reverse().forEach((h, originalIndexReversed) => {
-    const realIndex = state.history.length - 1 - originalIndexReversed;
-    const div = document.createElement('div');
-    div.className = 'history-item';
-    div.style.cursor = 'pointer';
-    div.title = "Cliquez pour modifier cette séance";
-    
-    div.onclick = () => openSessionModal(realIndex);
+  const history = state.history || [];
+  const countEl = document.getElementById('history-count');
+  if (countEl) countEl.textContent = `${history.length} séance${history.length > 1 ? 's' : ''} enregistrée${history.length > 1 ? 's' : ''}`;
 
-    // 1. Définition du badge de déload
-    const deloadBadgeHtml = h.isDeload ? `<span style="font-size:0.7rem; background:var(--warn-tint); color:var(--warn); padding:2px 8px; border-radius:8px; margin-left:6px;"> Deload</span>` : '';
-    
-    // Conversion du tonnage en Tonnes (division par 1000) et formatage
-    const tonnageInTonnes = (parseFloat(h.tonnage || 0) / 1000).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1});
+  // Index réels triés du plus récent au plus ancien, regroupés par mois
+  const order = history.map((h, i) => i).sort((x, y) => {
+    const a = history[x], b = history[y];
+    return a.date < b.date ? 1 : a.date > b.date ? -1 : (b.id || 0) - (a.id || 0);
+  });
+  const groups = [];
+  order.forEach(i => {
+    const key = (history[i].date || '').substring(0, 7);
+    let g = groups[groups.length - 1];
+    if (!g || g.key !== key) { g = { key, items: [], tonnage: 0 }; groups.push(g); }
+    g.items.push(i);
+    g.tonnage += parseFloat(history[i].tonnage) || 0;
+  });
 
-    // 2. Injection du badge dans le HTML de la ligne
-    div.innerHTML = `
-      <div>
-        <span class="badge badge-${h.type}">${h.type}</span>
-        <span style="font-weight:500; margin-left:8px;">${formatDate(h.date)}</span>
-        <span style="font-size:0.75rem; color:var(--text-muted); margin-left:6px;">⏱️️ ${h.duration || 'N/A'}</span>
-        ${deloadBadgeHtml}
-      </div>
-      <div style="font-family:var(--font-display); font-weight:700; color:var(--primary);"><strong>${tonnageInTonnes} T</strong></div>
-    `;
-    container.appendChild(div);
+  groups.forEach(g => {
+    const [y, mm] = g.key.split('-');
+    const section = document.createElement('section');
+    section.className = 'history-month';
+    section.innerHTML = `
+      <div class="history-month-head">
+        <h3 class="history-month-title">${HISTORY_MONTHS[(+mm || 1) - 1]} ${y}</h3>
+        <span class="history-month-meta">${g.items.length} séance${g.items.length > 1 ? 's' : ''} · ${historyTonnes(g.tonnage)} T</span>
+      </div>`;
+    const card = document.createElement('div');
+    card.className = 'card history-card';
+
+    g.items.forEach(realIndex => {
+      const h = history[realIndex];
+      const hasDuration = h.duration && h.duration !== 'N/A';
+      const row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'history-item';
+      row.setAttribute('aria-label', `Séance ${h.type} du ${formatDate(h.date)} : modifier`);
+      row.onclick = () => openSessionModal(realIndex);
+      row.innerHTML = `
+        <span class="type-pill type-pill-${h.type} small">${h.type}</span>
+        <span class="history-main">
+          <span class="history-date">${formatHistoryDate(h.date)}${h.isDeload ? ' <span class="deload-tag">Déload</span>' : ''}</span>
+          <span class="history-duration">${hasDuration ? h.duration : 'Durée non enregistrée'}</span>
+        </span>
+        <span class="history-tonnage">${historyTonnes(h.tonnage)} T</span>
+        <span class="history-chevron">${CHEVRON_SVG}</span>`;
+      card.appendChild(row);
+    });
+    section.appendChild(card);
+    container.appendChild(section);
   });
 }
 
 function injectSessionModalHtml() {
   if (document.getElementById('session-modal')) return;
   const modalHtml = `
-    <div id="session-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.5); justify-content:center; align-items:center; z-index:1000;">
-      <div style="background:var(--card-bg); padding:20px; border-radius:20px; width:90%; max-width:320px; text-align:center; color:var(--text); border: 1px solid var(--border); box-shadow: 0 12px 32px rgba(15,23,42,0.18);">
-        <h3 id="modal-session-title" style="margin-bottom: 15px; font-size: 1.1rem;">Séance</h3>
-        <button id="modal-edit-btn" style="background:var(--primary); border:none; color:white; padding:12px 20px; border-radius:14px; cursor:pointer; width:100%; font-size:1em; margin-bottom: 10px; font-weight:600;">Modifier la séance</button>
-        <button onclick="closeSessionModal()" style="background:var(--bg); border:1px solid var(--border); color:var(--text); padding:12px 15px; border-radius:14px; cursor:pointer; width:100%;">Fermer</button>
+    <div id="session-modal" class="modal-overlay" style="display:none;" onclick="if(event.target===this) closeSessionModal()">
+      <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="modal-session-title">
+        <div id="modal-session-pill"></div>
+        <h3 id="modal-session-title" class="modal-title">Séance</h3>
+        <p id="modal-session-meta" class="modal-meta"></p>
+        <button id="modal-edit-btn" class="btn">Modifier la séance</button>
+        <button onclick="closeSessionModal()" class="btn btn-secondary">Fermer</button>
       </div>
     </div>
   `;
@@ -1227,6 +1269,13 @@ function openSessionModal(index) {
   const titleEl = document.getElementById('modal-session-title');
   if (titleEl) {
     titleEl.innerText = `Séance ${session.type} du ${formatDate(session.date)}`;
+  }
+  const pillEl = document.getElementById('modal-session-pill');
+  if (pillEl) pillEl.innerHTML = `<span class="type-pill type-pill-${session.type}">${session.type}</span>`;
+  const metaEl = document.getElementById('modal-session-meta');
+  if (metaEl) {
+    const hasDuration = session.duration && session.duration !== 'N/A';
+    metaEl.textContent = `${formatHistoryDate(session.date)} · ${historyTonnes(session.tonnage)} T · ${hasDuration ? session.duration : 'durée non enregistrée'}`;
   }
   const modal = document.getElementById('session-modal');
   if (modal) {
