@@ -696,7 +696,7 @@ function initWorkoutForm(customSession = null) {
     titleEl.innerText = prog.title.replace('/', ' / ');
   }
   const overlineEl = document.getElementById('seance-overline');
-  if (overlineEl) overlineEl.innerText = customSession ? 'Modification' : 'Séance du jour';
+  if (overlineEl) overlineEl.innerText = customSession ? `Modification · ${formatDate(customSession.date)}` : 'Séance du jour';
 
   // --- GESTION DU SOUS-TITRE DELOAD ---
   const deloadSubEl = document.getElementById('deload-subtitle');
@@ -738,11 +738,6 @@ function initWorkoutForm(customSession = null) {
       durationDisplay.style.cursor = 'pointer';
       durationDisplay.title = '';
     }
-  }
-
-  const subHeader = document.getElementById('sub-header'); 
-  if(subHeader) { 
-    subHeader.innerText = customSession ? `Modification de la séance du ${formatDate(customSession.date)}` : `Prochaine séance : ${type}`; 
   }
 
   const container = document.getElementById('exercises-list'); 
@@ -1756,6 +1751,24 @@ function renderCharts() {
   });
 }
 
+// Hauteurs de l'en-tête et du bloc fixe de l'onglet Séance (positionnement collant + marge de défilement)
+function updateStickyOffsets() {
+  const header = document.querySelector('header');
+  const sticky = document.getElementById('seance-sticky');
+  if (!header || !sticky) return;
+  const hh = header.offsetHeight;
+  const root = document.documentElement.style;
+  root.setProperty('--header-h', hh + 'px');
+  root.setProperty('--sticky-total', (hh + sticky.offsetHeight) + 'px');
+}
+window.addEventListener('resize', updateStickyOffsets);
+if (typeof ResizeObserver !== 'undefined') {
+  const stickyObserver = new ResizeObserver(updateStickyOffsets);
+  const h0 = document.querySelector('header'), s0 = document.getElementById('seance-sticky');
+  if (h0) stickyObserver.observe(h0);
+  if (s0) stickyObserver.observe(s0);
+}
+
 // Titre affiché en haut de chaque onglet
 const PAGE_TITLES = { programme: 'Programme', seance: 'Séance', progression: 'Graphiques', historique: 'Historique' };
 
@@ -1778,6 +1791,7 @@ function switchTab(tabName) {
   }
 
   document.body.dataset.tab = tabName;
+  updateStickyOffsets();
   const pageTitle = document.getElementById('page-title');
   if (pageTitle) pageTitle.innerText = PAGE_TITLES[tabName] || '';
 

@@ -29,7 +29,6 @@
     <div class="page-header">
       <p id="app-title" class="app-kicker">SUIVI FITNESS</p>
       <h1 id="page-title">Programme</h1>
-      <p id="sub-header">Chargement du programme...</p>
     </div>
 
     <!-- BOUTON CHRONO REPOS (flottant, visible sur l'onglet Séance) -->
@@ -46,6 +45,7 @@
 
   <!-- TAB 1: SÉANCE DU JOUR -->
   <div id="tab-seance" class="container">
+    <div id="seance-sticky" class="seance-sticky">
     <div class="session-head">
       <span id="seance-badge" class="type-pill type-pill-A">A</span>
       <div class="session-head-text">
@@ -62,6 +62,7 @@
         <span><span id="workout-duration-label">Durée :</span> <strong id="workout-duration-display" onclick="toggleWorkoutTimer()">00:00</strong></span>
       </div>
       <div class="progress-track"><div id="sets-progress-bar" class="progress-fill"></div></div>
+    </div>
     </div>
 
     <p class="warmup-note">🚣 Échauffement : Rameur 1000 m + 2 séries légères sur le 1er mouvement.</p>

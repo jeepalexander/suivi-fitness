@@ -49,11 +49,9 @@ header { padding: 22px 20px 6px 20px; max-width: 600px; margin: 0 auto; text-ali
 .page-header { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .app-kicker { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
 header h1 { font-family: var(--font-display); font-size: 2.25rem; font-weight: 700; line-height: 1.05; }
-header p#sub-header { display: none; font-size: 0.9rem; color: var(--text-muted); margin-top: 2px; }
-body[data-tab="seance"] header p#sub-header { display: block; }
 
 .timer-btn {
-  position: fixed;
+  position: absolute;
   top: 14px;
   right: 16px;
   z-index: 110;
@@ -141,7 +139,7 @@ nav button.active svg { stroke-width: 1.95; }
 /* --- Séance : exercices en accordéon (étape 4) --- */
 .exercise-item {
   background: var(--card-bg); border: 1px solid var(--line); border-radius: 20px;
-  padding: 10px 14px 10px 10px; margin-bottom: 10px; scroll-margin-top: 64px;
+  padding: 10px 14px 10px 10px; margin-bottom: 10px; scroll-margin-top: calc(var(--sticky-total, 230px) + 8px);
 }
 .exercise-item.open { border-radius: 24px; padding: 16px; box-shadow: var(--shadow-card); }
 .ex-header { display: flex; align-items: center; gap: 8px; }
@@ -510,3 +508,11 @@ select.filter-select { background: var(--bg); border: 1px solid var(--border); c
 .modal-title { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; margin: 10px 0 4px; }
 .modal-meta { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px; }
 #modal-session-pill { display: flex; justify-content: center; }
+
+
+/* Séance : en-tête + progression fixes à l'écran pendant le défilement */
+body[data-tab="seance"] header { position: sticky; top: 0; z-index: 100; background: var(--bg); }
+.seance-sticky { position: sticky; top: var(--header-h, 85px); z-index: 99; background: var(--bg); margin: 0 -15px 6px; padding: 6px 15px 8px; box-shadow: 0 6px 10px -8px rgba(15, 23, 42, 0.25); }
+.seance-sticky .workout-progress { margin-bottom: 0; }
+.seance-sticky #deload-subtitle { margin-bottom: 10px; }
+.seance-sticky .session-head { margin-bottom: 10px; }

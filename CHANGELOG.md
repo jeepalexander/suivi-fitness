@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.2.1] - 2026-10-22
+### 🔧 Écran Séance
+- **En-tête fixe** : le titre, le chrono de pause, la pastille de séance, le déload et la progression (« n / total séries », durée, barre) restent à l'écran pendant le défilement des exercices. Le chrono n'en recouvre plus le contenu.
+- Suppression de la ligne « Prochaine séance : X » sous le titre (redondante) ; en modification, la date est indiquée dans l'étiquette « Modification · jj/mm ».
+
+---
+
 ## [1.2.0] - 2026-10-22
 ### 🎨 Nouveau design - étape 7/7 : finition (design terminé)
 - **Ligne de contexte** sous le titre (« Prochaine séance : A ») affichée uniquement sur l'onglet Séance.
