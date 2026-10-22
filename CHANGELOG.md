@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.2.0] - 2026-10-22
+### 🎨 Nouveau design - étape 7/7 : finition (design terminé)
+- **Ligne de contexte** sous le titre (« Prochaine séance : A ») affichée uniquement sur l'onglet Séance.
+- **Mode hors-ligne** : toutes les icônes d'exercices sont désormais préchargées par le service worker (testé en coupant le réseau : 4 onglets et images OK).
+- Contrôle de cohérence : les couleurs restantes écrites en dur sont volontaires (blanc sur le bloc indigo, ombres, fond de fenêtre, couleurs A/B/C nécessaires aux graphiques).
+
+---
+
 ## [1.1.17] - 2026-10-22
 ### 🎨 Nouveau design - étape 6/7 : Historique
 - **En-tête** : compteur « N séances enregistrées » ; boutons Sauvegarder / Restaurer en haut de page (plus de barre fixe au-dessus de la navigation).

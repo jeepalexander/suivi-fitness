@@ -1777,6 +1777,7 @@ function switchTab(tabName) {
     }
   }
 
+  document.body.dataset.tab = tabName;
   const pageTitle = document.getElementById('page-title');
   if (pageTitle) pageTitle.innerText = PAGE_TITLES[tabName] || '';
 
