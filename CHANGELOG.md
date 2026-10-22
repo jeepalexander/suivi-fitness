@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.1.15] - 2026-10-22
+### 🎨 Nouveau design - étape 4/7 : écran Séance
+- **En-tête de séance** : pastille A/B/C, nom de la séance, pastille « Déload actif » et barre de progression des séries avec durée.
+- **Exercices en accordéon** : un seul exercice ouvert à la fois (le suivant s'ouvre quand l'exercice est terminé), résumé « N séries · charges » sur les exercices fermés.
+- **Exercice ouvert** : ligne « Dernière fois · N kg max » (calculée depuis l'historique), boutons − / + pour le nombre de séries, grandes cases Kg / Réps et validation par coche.
+- **Chrono** : puce flottante avec icône horloge, qui ne masque plus l'exercice ouvert.
+
+---
+
 ## [1.1.14] - 2026-10-21
 ### 🎨 Nouveau design - étape 3/7 : écran Programme
 - **Carte « Prochaine séance »** : pastille de la séance (A/B/C), nom, pastille « Déload actif » si besoin,

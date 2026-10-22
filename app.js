@@ -189,9 +189,9 @@ function saveState() {
   localStorage.setItem('h49_state', JSON.stringify(state));
 }
 
-function getIcon(exName) {
+function getIcon(exName, decorative = false) {
   const path = EXERCISE_ICONS[exName] || "icons/bench_press.png";
-  return `<img src="${path}" alt="${exName}" onerror="this.src='icons/bench_press.png'">`;
+  return `<img src="${path}" alt="${decorative ? '' : exName}" onerror="this.src='icons/bench_press.png'">`;
 }
 
 function programTilesHtml(prog) {
@@ -465,14 +465,34 @@ function getFormattedWorkoutDuration() {
   return `${m} min`;
 }
 
+const CHECK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const MINUS_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"/></svg>';
+const PLUS_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>';
+
+// Exercice ouvert à la main : undefined = automatique (premier exercice non terminé),
+// un index = ouvert par l'utilisateur, -1 = tout replié.
+let manualOpenExercise;
+let scrollOnNextRefresh = false;
+let lastOpenExerciseIdx = null;
+
+function isExerciseComplete(item) {
+  const rows = item.querySelectorAll('.set-row');
+  return rows.length > 0 && Array.from(rows).every(r => r.classList.contains('done'));
+}
+
 function toggleSetDone(btn) {
   startWorkoutTimer();
   const row = btn.closest('.set-row');
   row.classList.toggle('done');
-  if (row.classList.contains('done')) {
-    btn.innerHTML = '✓';
-  } else {
-    btn.innerHTML = '○';
+  const done = row.classList.contains('done');
+  btn.setAttribute('aria-pressed', done ? 'true' : 'false');
+
+  // Exercice ouvert à la main et terminé : on repasse en automatique (passage au suivant)
+  if (done) {
+    const items = Array.from(document.querySelectorAll('#exercises-list .exercise-item'));
+    const item = row.closest('.exercise-item');
+    if (manualOpenExercise === items.indexOf(item) && isExerciseComplete(item)) manualOpenExercise = undefined;
+    scrollOnNextRefresh = true;
   }
   updateSetsProgress();
 }
@@ -496,8 +516,20 @@ function findProgramExercise(name) {
 function renumberSets(grid) {
   grid.querySelectorAll('.set-row').forEach((row, i) => {
     const label = row.querySelector('.set-label');
-    if (label) label.innerText = 'Série ' + (i + 1);
+    if (label) label.innerText = String(i + 1);
   });
+}
+
+// Gabarit d'une ligne de série (utilisé à la création du formulaire et par le bouton +)
+function setRowHtml(exName, number, weightVal, repsVal) {
+  return `
+    <div class="set-row">
+      <span class="set-label">${number}</span>
+      <input type="number" step="0.5" inputmode="decimal" class="set-input weight-input" data-ex="${exName}" aria-label="Série ${number}, poids en kg" placeholder="kg" value="${weightVal}" oninput="markInputActive(this)">
+      <input type="number" inputmode="numeric" class="set-input reps-input" data-ex="${exName}" aria-label="Série ${number}, répétitions" placeholder="reps" value="${repsVal}" oninput="markInputActive(this)">
+      <button type="button" class="btn-check-set" aria-pressed="false" aria-label="Valider la série ${number}" onclick="toggleSetDone(this)">${CHECK_SVG}</button>
+    </div>
+  `;
 }
 
 function addSet(btn) {
@@ -521,14 +553,7 @@ function addSet(btn) {
 
   // insertAdjacentHTML insère directement l'élément : avec un conteneur temporaire,
   // firstChild renvoyait le texte blanc précédant la balise et aucune ligne n'apparaissait.
-  grid.insertAdjacentHTML('beforeend', `
-    <div class="set-row">
-      <span class="set-label">Série ${rows.length + 1}</span>
-      <input type="number" step="0.5" class="set-input weight-input" data-ex="${exName}" placeholder="kg" value="${weightVal}" oninput="markInputActive(this)">
-      <input type="number" class="set-input reps-input" data-ex="${exName}" placeholder="reps" value="${repsVal}" oninput="markInputActive(this)">
-      <button type="button" class="btn-check-set" onclick="toggleSetDone(this)">○</button>
-    </div>
-  `);
+  grid.insertAdjacentHTML('beforeend', setRowHtml(exName, rows.length + 1, weightVal, repsVal));
   updateSetsProgress();
 }
 
@@ -546,6 +571,89 @@ function updateSetsProgress() {
   const doneRows = document.querySelectorAll('.set-row.done').length;
   const textEl = document.getElementById('sets-progress-text');
   if(textEl) textEl.innerText = `${doneRows} / ${totalRows}`;
+  const barEl = document.getElementById('sets-progress-bar');
+  if (barEl) barEl.style.width = totalRows ? `${Math.round((doneRows / totalRows) * 100)}%` : '0%';
+  refreshExerciseStates();
+}
+
+// Texte de la ligne repliée : « 4 séries · 32.5 → 55 kg · 2/4 faites » (ou « Terminé · 4 séries »)
+function exerciseSummaryText(item) {
+  const rows = Array.from(item.querySelectorAll('.set-row'));
+  const n = rows.length;
+  const plural = n > 1 ? 'séries' : 'série';
+  if (isExerciseComplete(item)) return `Terminé · ${n} ${plural}`;
+  const weights = rows.map(r => r.querySelector('.weight-input').value).filter(v => v !== '');
+  let range = '';
+  if (weights.length) {
+    const first = weights[0], last = weights[weights.length - 1];
+    range = first === last ? ` · ${first} kg` : ` · ${first} → ${last} kg`;
+  }
+  const done = rows.filter(r => r.classList.contains('done')).length;
+  return `${n} ${plural}${range}${done > 0 ? ` · ${done}/${n} faites` : ''}`;
+}
+
+// Ligne de l'exercice ouvert : « Dernière fois · 86 kg max » (charge max de la dernière séance où il a été fait)
+function exerciseLastTimeText(exName) {
+  const history = (state && state.history) ? state.history : [];
+  for (let i = history.length - 1; i >= 0; i--) {
+    const h = history[i];
+    if (editingOriginalId !== null && h.id === editingOriginalId) continue; // pas la séance en cours de modification
+    const ex = (h.exercises || []).find(e => e.name === exName);
+    const performed = ex && Array.isArray(ex.sets) ? ex.sets.filter(isPerformedSet) : [];
+    if (performed.length > 0) {
+      const max = Math.max(...performed.map(s => parseFloat(s.weight) || 0));
+      return `Dernière fois · ${max} kg max`;
+    }
+  }
+  return 'Première fois';
+}
+
+// Ouvre un seul exercice à la fois, met en évidence la série en cours et met à jour les libellés
+function refreshExerciseStates() {
+  const items = Array.from(document.querySelectorAll('#exercises-list .exercise-item'));
+  if (!items.length) return;
+
+  let openIdx;
+  if (manualOpenExercise === undefined) {
+    openIdx = items.findIndex(it => !isExerciseComplete(it)); // -1 si tout est terminé
+  } else {
+    openIdx = items[manualOpenExercise] ? manualOpenExercise : -1;
+  }
+
+  items.forEach((item, i) => {
+    const open = i === openIdx;
+    const rows = Array.from(item.querySelectorAll('.set-row'));
+    item.classList.toggle('open', open);
+    item.classList.toggle('complete', isExerciseComplete(item));
+    item.querySelector('.ex-toggle').setAttribute('aria-expanded', open ? 'true' : 'false');
+    item.querySelector('.ex-body').hidden = !open;
+    item.querySelector('.ex-controls').hidden = !open;
+
+    rows.forEach(r => r.classList.remove('current'));
+    if (open) {
+      const current = rows.find(r => !r.classList.contains('done'));
+      if (current) current.classList.add('current');
+    }
+    item.querySelector('.ex-sub').textContent = open ? exerciseLastTimeText(item.dataset.ex) : exerciseSummaryText(item);
+  });
+
+  // Passage automatique à l'exercice suivant : on le ramène dans l'écran
+  if (scrollOnNextRefresh && openIdx !== -1 && openIdx !== lastOpenExerciseIdx) {
+    items[openIdx].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  scrollOnNextRefresh = false;
+  lastOpenExerciseIdx = openIdx;
+}
+
+// Appui sur l'en-tête d'un exercice : l'ouvre (en repliant l'autre) ou le replie
+function toggleExercise(btn) {
+  const items = Array.from(document.querySelectorAll('#exercises-list .exercise-item'));
+  const item = btn.closest('.exercise-item');
+  const idx = items.indexOf(item);
+  const wasOpen = item.classList.contains('open');
+  manualOpenExercise = wasOpen ? -1 : idx;
+  refreshExerciseStates();
+  if (!wasOpen) item.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ==========================================
@@ -579,20 +687,25 @@ function initWorkoutForm(customSession = null) {
   const prog = PROGRAM[type];
 
   // Le titre principal reste simple (ex: "Séance A (Presse / Couché)")
+  manualOpenExercise = undefined;
+  lastOpenExerciseIdx = null;
+  scrollOnNextRefresh = false;
+
   const titleEl = document.getElementById('seance-type-title'); 
   if(titleEl) {
-    titleEl.innerText = prog.title;
-    titleEl.style.color = ''; 
+    titleEl.innerText = prog.title.replace('/', ' / ');
   }
+  const overlineEl = document.getElementById('seance-overline');
+  if (overlineEl) overlineEl.innerText = customSession ? 'Modification' : 'Séance du jour';
 
   // --- GESTION DU SOUS-TITRE DELOAD ---
   const deloadSubEl = document.getElementById('deload-subtitle');
   if (deloadSubEl) {
     if (isDeloadActive()) {
-      deloadSubEl.innerText = "⚡ SEMAINE DE DÉLOAD ACTIVE (-20% sur les charges)";
-      deloadSubEl.style.display = "block";
+      deloadSubEl.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>Déload actif · −20 % sur les charges';
+      deloadSubEl.style.display = "inline-flex";
     } else {
-      deloadSubEl.innerText = "";
+      deloadSubEl.innerHTML = "";
       deloadSubEl.style.display = "none";
     }
   }
@@ -600,7 +713,7 @@ function initWorkoutForm(customSession = null) {
   const badge = document.getElementById('seance-badge');
   if(badge) {
     badge.innerText = type;
-    badge.className = `badge ${prog.badge}`;
+    badge.className = `type-pill type-pill-${type}`;
   }
 
   // Bouton Annuler + libellé du bouton de validation selon le mode (création / modification)
@@ -659,28 +772,29 @@ function initWorkoutForm(customSession = null) {
         repsVal = lastSet.reps;
       }
 
-      rowsHtml += `
-        <div class="set-row">
-          <span class="set-label">Série ${s}</span>
-          <input type="number" step="0.5" class="set-input weight-input" data-ex="${ex.name}" placeholder="kg" value="${weightVal}" oninput="markInputActive(this)">
-          <input type="number" class="set-input reps-input" data-ex="${ex.name}" placeholder="reps" value="${repsVal}" oninput="markInputActive(this)">
-          <button type="button" class="btn-check-set" onclick="toggleSetDone(this)">○</button>
-        </div>
-      `;
+      rowsHtml += setRowHtml(ex.name, s, weightVal, repsVal);
     }
 
+    div.dataset.ex = ex.name;
     div.innerHTML = `
       <div class="ex-header">
-        <span class="ex-title">
-          <div class="ex-icon-badge">${getIcon(ex.name)}</div>
-          ${ex.name}
-        </span>
-        <span class="ex-controls">
-          <button type="button" class="btn-set-count" onclick="removeSet(this)" title="Supprimer la dernière série">−</button>
-          <button type="button" class="btn-set-count" onclick="addSet(this)" title="Ajouter une série">+</button>
+        <button type="button" class="ex-toggle" aria-expanded="false" onclick="toggleExercise(this)">
+          <span class="ex-icon-badge">${getIcon(ex.name, true)}</span>
+          <span class="ex-text">
+            <span class="ex-name">${ex.name}</span>
+            <span class="ex-sub"></span>
+          </span>
+          <span class="ex-chevron">${CHEVRON_SVG}</span>
+        </button>
+        <span class="ex-controls" hidden>
+          <button type="button" class="btn-set-count" onclick="removeSet(this)" aria-label="Supprimer la dernière série" title="Supprimer la dernière série">${MINUS_SVG}</button>
+          <button type="button" class="btn-set-count" onclick="addSet(this)" aria-label="Ajouter une série" title="Ajouter une série">${PLUS_SVG}</button>
         </span>
       </div>
-      <div class="sets-grid" data-ex="${ex.name}">${rowsHtml}</div>
+      <div class="ex-body" hidden>
+        <div class="sets-head" aria-hidden="true"><span>Série</span><span>Kg</span><span>Réps</span><span></span></div>
+        <div class="sets-grid" data-ex="${ex.name}">${rowsHtml}</div>
+      </div>
     `;
     container.appendChild(div);
   });

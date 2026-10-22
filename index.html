@@ -33,7 +33,8 @@
 
     <!-- BOUTON CHRONO REPOS (flottant, visible sur l'onglet Séance) -->
     <button id="timer-btn" class="timer-btn" onclick="toggleRestTimer()">
-      ⏱️ <span id="timer-display">PAUSE</span>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5M9 3h6"/></svg>
+      <span id="timer-display">PAUSE</span>
     </button>
   </header>
 
@@ -44,35 +45,36 @@
 
   <!-- TAB 1: SÉANCE DU JOUR -->
   <div id="tab-seance" class="container">
-    <div class="card">
-      <div class="card-title">
-        <span id="seance-badge" class="badge">A</span>
-        <span id="seance-type-title">Séance</span>
+    <div class="session-head">
+      <span id="seance-badge" class="type-pill type-pill-A">A</span>
+      <div class="session-head-text">
+        <span id="seance-overline" class="overline">Séance du jour</span>
+        <span id="seance-type-title" class="session-name">Séance</span>
       </div>
-
-      <!-- AJOUT DE CET ÉLÉMENT SOUS LE TITRE -->
-    <div id="deload-subtitle" style="display: none; font-size: 0.85rem; font-weight: bold; color: var(--warn); margin-bottom: 6px;"></div>
-    
-      <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">
-        🚣 Échauffement : Rameur 1000m + 2 séries légères sur le 1er mouvement.
-      </p>
-
-      <div class="workout-meta-bar">
-        <span>⏱️ <span id="workout-duration-label">Durée :</span> <strong id="workout-duration-display" style="color:var(--text); cursor:pointer;" onclick="toggleWorkoutTimer()">00:00</strong></span>
-        <span>Séries : <strong id="sets-progress-text" style="color: var(--text);">0 / 0</strong></span>
-      </div>
-
-      <form id="workout-form">
-        <div id="exercises-list"></div>
-
-        <div class="watch-memo">
-          ⌚ N'oublie pas d'arrêter le suivi de ta montre !
-        </div>
-
-        <button type="submit" id="submit-workout-btn" class="btn">Valider & Enregistrer la séance</button>
-        <button type="button" id="cancel-edit-btn" class="btn btn-secondary" style="display: none;" onclick="cancelEditSession()">Annuler la modification</button>
-      </form>
     </div>
+
+    <span id="deload-subtitle" class="deload-pill" style="display: none;"></span>
+
+    <div class="workout-progress">
+      <div class="workout-progress-row">
+        <span><strong id="sets-progress-text">0 / 0</strong> séries</span>
+        <span><span id="workout-duration-label">Durée :</span> <strong id="workout-duration-display" onclick="toggleWorkoutTimer()">00:00</strong></span>
+      </div>
+      <div class="progress-track"><div id="sets-progress-bar" class="progress-fill"></div></div>
+    </div>
+
+    <p class="warmup-note">🚣 Échauffement : Rameur 1000 m + 2 séries légères sur le 1er mouvement.</p>
+
+    <form id="workout-form">
+      <div id="exercises-list"></div>
+
+      <div class="watch-memo">
+        ⌚ N'oublie pas d'arrêter le suivi de ta montre !
+      </div>
+
+      <button type="submit" id="submit-workout-btn" class="btn">Valider & Enregistrer la séance</button>
+      <button type="button" id="cancel-edit-btn" class="btn btn-secondary" style="display: none;" onclick="cancelEditSession()">Annuler la modification</button>
+    </form>
   </div>
 
   <!-- TAB 2: PROGRESSION & ANALYSE -->
