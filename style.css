@@ -39,7 +39,7 @@
 
   /* Polices */
   --font-body: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-display: 'Bricolage Grotesque', 'Figtree', system-ui, sans-serif;
+  --font-display: 'Chakra Petch', 'Figtree', system-ui, sans-serif;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-body); -webkit-tap-highlight-color: transparent; }

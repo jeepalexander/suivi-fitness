@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.3.0] - 2026-10-28
+### 🔤 Nouvelle police : Chakra Petch
+- **Titres et chiffres** (titres d'écran, poids des séries, indice de progression, tonnages, chrono) passent de Bricolage Grotesque à **Chakra Petch** (600 / 700), plus sportive et technique. Le texte courant reste en Figtree.
+- Police embarquée en local (licence SIL OFL 1.1) et préchargée par le service worker : fonctionne hors-ligne. Les fichiers Bricolage Grotesque sont supprimés.
+- Contrôle en thème clair à 360 px et 390 px : aucun débordement sur les 4 onglets.
+
+---
+
 ## [1.2.1] - 2026-10-22
 ### 🔧 Écran Séance
 - **En-tête fixe** : le titre, le chrono de pause, la pastille de séance, le déload et la progression (« n / total séries », durée, barre) restent à l'écran pendant le défilement des exercices. Le chrono n'en recouvre plus le contenu.
