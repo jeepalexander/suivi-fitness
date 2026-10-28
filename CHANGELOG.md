@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.3.2] - 2026-10-28
+### 🖼️ Icônes d'exercices sans fond
+- Les 18 icônes sont **détourées** (PNG transparents) et recadrées au plus juste : plus de fond gris propre à chaque image, ni de tuile arrondie derrière. Elles se posent directement sur le fond de la carte, en thème clair comme en thème sombre.
+- Emplacements légèrement agrandis (tuiles du Programme 64 px, ligne d'exercice 48 px, exercice ouvert 60 px) et affichage sans recadrage (`object-fit: contain`).
+- Images redimensionnées en 192×192 : ≈ 490 Ko au total (≈ 690 Ko avant).
+- L'icône d'écran d'accueil (manifest et `apple-touch-icon`) garde l'image d'origine dans `icons/app-icon.png` (une icône transparente s'afficherait sur fond noir) ; ajoutée à `ASSETS` du service worker.
+
+---
+
 ## [1.3.1] - 2026-10-28
 ### 🌙 Thème sombre
 - **Nouvelle carte « Apparence »** en haut de l'onglet Historique (sous Sauvegarder / Restaurer) : **Clair / Sombre / Auto**. « Auto » suit le réglage du téléphone, y compris quand il change en cours d'utilisation. **Clair par défaut.**

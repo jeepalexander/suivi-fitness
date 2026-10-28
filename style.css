@@ -219,17 +219,15 @@ nav button.active svg { stroke-width: 1.95; }
 .ex-chevron { display: flex; color: var(--text-muted); }
 .ex-chevron svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .exercise-item.open .ex-chevron { display: none; }
-.exercise-item .ex-icon-badge { width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0; }
-.exercise-item.open .ex-icon-badge { width: 52px; height: 52px; border-radius: 14px; }
+.exercise-item .ex-icon-badge { width: 48px; height: 48px; flex-shrink: 0; }
+.exercise-item.open .ex-icon-badge { width: 60px; height: 60px; }
 .ex-body { margin-top: 14px; }
 .ex-body[hidden], .ex-controls[hidden] { display: none; }
 
 .ex-icon-badge {
+  /* Icônes détourées (PNG transparents) : posées directement sur le fond de la carte, sans tuile */
   width: 32px;
   height: 32px;
-  background: var(--line);
-  border: 1px solid var(--line);
-  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -238,7 +236,7 @@ nav button.active svg { stroke-width: 1.95; }
 .ex-icon-badge img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .sets-head {
@@ -506,7 +504,7 @@ select.filter-select { background: var(--bg); border: 1px solid var(--border); c
   padding: 10px 6px 12px; display: flex; flex-direction: column; align-items: center; gap: 8px;
   text-align: center; font-size: 0.8rem; font-weight: 600; line-height: 1.2;
 }
-.ex-tile .ex-icon-badge { width: 52px; height: 52px; border-radius: 14px; }
+.ex-tile .ex-icon-badge { width: 64px; height: 64px; }
 
 .next-row-wrap { display: flex; flex-direction: column; gap: 10px; }
 .next-row {
