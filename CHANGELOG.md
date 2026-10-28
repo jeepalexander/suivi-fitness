@@ -7,6 +7,17 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.3.1] - 2026-10-28
+### 🌙 Thème sombre
+- **Nouvelle carte « Apparence »** en haut de l'onglet Historique (sous Sauvegarder / Restaurer) : **Clair / Sombre / Auto**. « Auto » suit le réglage du téléphone, y compris quand il change en cours d'utilisation. **Clair par défaut.**
+- Le choix est mémorisé sur l'appareil (`h49_theme`) et n'est pas inclus dans la sauvegarde des séances.
+- Palette sombre « ardoise bleutée » : fond `#0B0F1A`, cartes `#151B2B`, texte `#E8ECF5`. Primaire éclairci pour le texte et les icônes, boutons en indigo `#4F46E5`, vert/ambre éclaircis pour les états. Le bloc héros indigo, les pastilles A/B/C et les icônes d'exercices sont inchangés.
+- **Pas de flash blanc** au lancement : le thème est appliqué par un petit script avant le premier affichage. La couleur de la barre du navigateur (`theme-color`) suit le thème. Barre d'état iOS laissée en `default`.
+- **Graphiques** : couleurs lues depuis les variables CSS (`--chart-*`) et redessinées au changement de thème.
+- Design : nouveaux jetons (`--primary-strong`, `--hero-bg`, `--on-success`, `--danger`, ombres et voile de fenêtre) ; le thème clair reste visuellement identique.
+
+---
+
 ## [1.3.0] - 2026-10-28
 ### 🔤 Nouvelle police : Chakra Petch
 - **Titres et chiffres** (titres d'écran, poids des séries, indice de progression, tonnages, chrono) passent de Bricolage Grotesque à **Chakra Petch** (600 / 700), plus sportive et technique. Le texte courant reste en Figtree.

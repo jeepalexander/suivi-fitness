@@ -68,11 +68,77 @@ let tonnageChart, exerciseChart, weightChart;
 let currentVolumeFilter = 'all'; // 'all' (séances), 'month' (par mois) ou 'type' (séance A/B/C)
 const SESSION_TYPES = ['A', 'B', 'C'];
 const SESSION_TYPE_COLORS = { A: '#1B6FD8', B: '#C2570C', C: '#C62B35' };
-// Couleurs des graphiques (jetons du thème clair, voir style.css)
+// Couleurs des graphiques : valeurs de repli (thème clair). Elles sont relues depuis
+// les variables --chart-* de style.css à chaque changement de thème (voir readChartColors).
 const CHART_COLORS = { primary: '#3730E3', success: '#0B7A43', volume: '#C2570C', tick: '#5B6577', grid: '#E3E7ED', band: 'rgba(246, 213, 139, 0.45)' };
 if (typeof Chart !== 'undefined') {
   Chart.defaults.font.family = "'Figtree', system-ui, sans-serif";
   Chart.defaults.color = CHART_COLORS.tick;
+}
+
+// --- Thème clair / sombre / auto ---
+// La préférence est stockée sur l'appareil (h49_theme), hors de l'état exporté.
+// Clair par défaut. Le script de index.html pose data-theme avant le premier affichage.
+const THEME_KEY = 'h49_theme';
+const THEME_BAR_COLORS = { light: '#F2F4F7', dark: '#0B0F1A' };
+let themeMediaQuery = null;
+
+function getThemePreference() {
+  try {
+    const v = localStorage.getItem(THEME_KEY);
+    if (v === 'light' || v === 'dark' || v === 'auto') return v;
+  } catch (e) {}
+  return 'light';
+}
+
+function resolveTheme(pref) {
+  if (pref === 'auto') {
+    return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  }
+  return pref === 'dark' ? 'dark' : 'light';
+}
+
+function readChartColors() {
+  const cs = getComputedStyle(document.documentElement);
+  const read = (name, fallback) => cs.getPropertyValue(name).trim() || fallback;
+  CHART_COLORS.primary = read('--chart-primary', CHART_COLORS.primary);
+  CHART_COLORS.success = read('--chart-success', CHART_COLORS.success);
+  CHART_COLORS.volume = read('--chart-volume', CHART_COLORS.volume);
+  CHART_COLORS.tick = read('--chart-tick', CHART_COLORS.tick);
+  CHART_COLORS.grid = read('--chart-grid', CHART_COLORS.grid);
+  CHART_COLORS.band = read('--chart-band', CHART_COLORS.band);
+  if (typeof Chart !== 'undefined') Chart.defaults.color = CHART_COLORS.tick;
+}
+
+function applyTheme() {
+  const pref = getThemePreference();
+  const theme = resolveTheme(pref);
+  document.documentElement.setAttribute('data-theme', theme);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', THEME_BAR_COLORS[theme]);
+  document.querySelectorAll('#theme-choice [data-theme-choice]').forEach(btn => {
+    const on = btn.dataset.themeChoice === pref;
+    btn.classList.toggle('active', on);
+    btn.setAttribute('aria-checked', on ? 'true' : 'false');
+  });
+  readChartColors();
+  // Les graphiques sont déjà construits avec les anciennes couleurs : on les redessine.
+  if (typeof state !== 'undefined' && state && document.body.dataset.tab === 'progression') renderCharts();
+}
+
+function setThemePreference(pref) {
+  try { localStorage.setItem(THEME_KEY, pref); } catch (e) {}
+  applyTheme();
+}
+
+function initTheme() {
+  applyTheme();
+  if (window.matchMedia) {
+    themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = () => { if (getThemePreference() === 'auto') applyTheme(); };
+    if (themeMediaQuery.addEventListener) themeMediaQuery.addEventListener('change', onChange);
+    else if (themeMediaQuery.addListener) themeMediaQuery.addListener(onChange);
+  }
 }
 let currentSessionTypeFilter = SESSION_TYPES[0];
 let currentExMetricMode = 'max';
@@ -143,6 +209,7 @@ function updateNextTypeFromHistory() {
 }
 
 async function initApp() {
+  initTheme();
   const saved = localStorage.getItem('h49_state');
   if (saved) {
     try {

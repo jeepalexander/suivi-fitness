@@ -12,6 +12,19 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#F2F4F7">
   <meta name="apple-mobile-web-app-title" content="SUIVI FITNESS">
+
+  <!-- Thème : résolu avant le premier affichage pour éviter tout flash (clair par défaut) -->
+  <script>
+    (function () {
+      try {
+        var p = localStorage.getItem('h49_theme');
+        var dark = p === 'dark' || (p === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', dark ? '#0B0F1A' : '#F2F4F7');
+      } catch (e) {}
+    })();
+  </script>
   
   <link rel="apple-touch-icon" href="icons/calf_raise.png">
 
@@ -131,6 +144,16 @@
       <input type="file" id="import-file" style="display:none" onchange="importData(event)">
       <button onclick="exportData()" class="btn">Sauvegarder</button>
       <button onclick="document.getElementById('import-file').click()" class="btn btn-secondary">Restaurer</button>
+    </div>
+
+    <div class="card theme-card">
+      <div class="card-title">Apparence</div>
+      <div class="filter-group seg-group" id="theme-choice" role="radiogroup" aria-label="Thème de l'application">
+        <button type="button" class="filter-btn" role="radio" data-theme-choice="light" onclick="setThemePreference('light')">Clair</button>
+        <button type="button" class="filter-btn" role="radio" data-theme-choice="dark" onclick="setThemePreference('dark')">Sombre</button>
+        <button type="button" class="filter-btn" role="radio" data-theme-choice="auto" onclick="setThemePreference('auto')">Auto</button>
+      </div>
+      <p class="theme-hint">« Auto » suit le réglage clair/sombre du téléphone. Ce choix est propre à cet appareil et n'est pas inclus dans la sauvegarde.</p>
     </div>
 
     <div id="history-list"></div>

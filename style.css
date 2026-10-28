@@ -1,8 +1,12 @@
 /* ============================================
-   JETONS DE DESIGN - thème clair indigo
+   JETONS DE DESIGN - thèmes clair (défaut) et sombre
    (voir « Direction artistique » dans le projet)
+   Le thème est posé sur <html data-theme="light|dark"> par le script
+   de index.html (avant le premier affichage) puis par app.js.
    ============================================ */
 :root {
+  color-scheme: light;
+
   /* Surfaces */
   --bg: #F2F4F7;
   --card-bg: #FFFFFF;
@@ -17,15 +21,19 @@
   --primary: #3730E3;
   --primary-tint: #E6E5FB;
   --primary-soft: #EEF0FF;
+  --primary-strong: #3730E3;   /* fond des boutons (texte blanc dessus) */
+  --hero-bg: #3730E3;          /* bloc héros : identique dans les deux thèmes */
 
   /* États */
   --success: #0B7A43;
   --success-tint: #DDF3E6;
   --success-border: #A8DCC0;
+  --on-success: #FFFFFF;       /* texte posé sur un fond --success */
   --warn: #92400E;
   --warn-tint: #FEF3C7;
   --warn-border: #F6D58B;
   --neutral: #7C869B;
+  --danger: #C62B35;           /* texte d'évolution négative */
 
   /* Séances */
   --accent-a: #1B6FD8;
@@ -36,10 +44,65 @@
   --radius-card: 20px;
   --radius-field: 14px;
   --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-float: 0 6px 18px rgba(15, 23, 42, 0.12);
+  --shadow-nav: 0 8px 24px rgba(15, 23, 42, 0.10);
+  --shadow-sheet: 0 12px 32px rgba(15, 23, 42, 0.18);
+  --shadow-sticky: 0 6px 10px -8px rgba(15, 23, 42, 0.25);
+  --overlay: rgba(15, 23, 42, 0.5);
+
+  /* Graphiques (lus par app.js, Chart.js ne comprend pas les variables CSS) */
+  --chart-primary: #3730E3;
+  --chart-success: #0B7A43;
+  --chart-volume: #C2570C;
+  --chart-tick: #5B6577;
+  --chart-grid: #E3E7ED;
+  --chart-band: rgba(246, 213, 139, 0.45);
 
   /* Polices */
   --font-body: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-display: 'Chakra Petch', 'Figtree', system-ui, sans-serif;
+}
+
+/* Thème sombre : ardoise bleutée */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #0B0F1A;
+  --card-bg: #151B2B;
+  --line: #232B3E;
+  --border: #2E3750;
+
+  --text: #E8ECF5;
+  --text-muted: #9AA5BC;
+
+  --primary: #9AA1FF;
+  --primary-tint: #23275A;
+  --primary-soft: #1B2145;
+  --primary-strong: #4F46E5;
+
+  --success: #3DD68C;
+  --success-tint: #0F2A1F;
+  --success-border: #1F5A3D;
+  --on-success: #06210F;
+  --warn: #F6C26B;
+  --warn-tint: #2B2210;
+  --warn-border: #6B4E16;
+  --neutral: #7F8AA3;
+  --danger: #FF7A82;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-float: 0 6px 18px rgba(0, 0, 0, 0.5);
+  --shadow-nav: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-sheet: 0 12px 32px rgba(0, 0, 0, 0.6);
+  --shadow-sticky: 0 6px 10px -8px rgba(0, 0, 0, 0.6);
+  --overlay: rgba(0, 0, 0, 0.65);
+
+  --chart-primary: #9AA1FF;
+  --chart-success: #3DD68C;
+  --chart-volume: #F0894A;
+  --chart-tick: #9AA5BC;
+  --chart-grid: #232B3E;
+  --chart-band: rgba(246, 194, 107, 0.20);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-body); -webkit-tap-highlight-color: transparent; }
@@ -55,7 +118,7 @@ header h1 { font-family: var(--font-display); font-size: 2.25rem; font-weight: 7
   top: 14px;
   right: 16px;
   z-index: 110;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+  box-shadow: var(--shadow-float);
   background: var(--card-bg);
   border: 1px solid var(--border);
   color: var(--primary);
@@ -73,7 +136,7 @@ header h1 { font-family: var(--font-display); font-size: 2.25rem; font-weight: 7
 .timer-btn.running {
   background: var(--success);
   border-color: var(--success);
-  color: white;
+  color: var(--on-success);
 }
 .timer-btn.finished {
   background: var(--accent-c);
@@ -102,7 +165,7 @@ nav {
   background: var(--card-bg);
   border: 1px solid var(--line);
   border-radius: 24px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.10);
+  box-shadow: var(--shadow-nav);
   z-index: 100;
 }
 nav button { padding: 0; background: none; border: none; border-radius: 18px; color: var(--text-muted); font-size: 0.6875rem; font-weight: 500; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; transition: background 0.15s ease, color 0.15s ease; }
@@ -116,7 +179,7 @@ nav button.active svg { stroke-width: 1.95; }
 .card { background: var(--card-bg); border-radius: var(--radius-card); padding: 15px; margin-bottom: 15px; border: 1px solid var(--line); box-shadow: var(--shadow-card); }
 .card-title { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
 
-.btn { background: var(--primary); color: white; border: none; padding: 12px; border-radius: var(--radius-field); width: 100%; font-weight: 600; font-size: 0.95rem; cursor: pointer; margin-top: 10px; }
+.btn { background: var(--primary-strong); color: white; border: none; padding: 12px; border-radius: var(--radius-field); width: 100%; font-weight: 600; font-size: 0.95rem; cursor: pointer; margin-top: 10px; }
 .btn:active { opacity: 0.8; }
 .btn-secondary { background: var(--card-bg); color: var(--text); border: 1px solid var(--border); margin-top: 8px; }
 
@@ -243,7 +306,7 @@ nav button.active svg { stroke-width: 1.95; }
 .set-row.done .btn-check-set {
   background: var(--success);
   border-color: var(--success);
-  color: white;
+  color: var(--on-success);
 }
 
 .workout-meta-bar {
@@ -321,7 +384,7 @@ select.filter-select { background: var(--bg); border: 1px solid var(--border); c
 
 /* Bloc héros indigo */
 .hero-card {
-  background: var(--primary);
+  background: var(--hero-bg);
   color: #fff;
   border-radius: var(--radius-card);
   padding: 20px 16px 12px;
@@ -334,7 +397,7 @@ select.filter-select { background: var(--bg); border: 1px solid var(--border); c
 .hero-pill { background: rgba(255,255,255,.18); border-radius: 999px; padding: 5px 12px; font-size: 0.82rem; font-weight: 600; }
 .hero-sub { font-size: 0.88rem; opacity: 0.85; margin: 10px 0 8px; }
 .hero-card .filter-btn { background: rgba(255,255,255,.14); border-color: transparent; color: #fff; padding: 7px 12px; }
-.hero-card .filter-btn.active { background: #fff; color: var(--primary); border-color: #fff; }
+.hero-card .filter-btn.active { background: #fff; color: var(--hero-bg); border-color: #fff; }
 .hero-chart { margin-top: 10px; }
 
 /* Cartes de section */
@@ -372,7 +435,7 @@ select.filter-select { background: var(--bg); border: 1px solid var(--border); c
 .progress-row + .progress-row { margin-top: 14px; }
 .stat-value { font-family: var(--font-display); font-weight: 700; color: var(--text); white-space: nowrap; font-size: 0.95rem; }
 .stat-value.positive { color: var(--success); }
-.stat-value.negative { color: var(--accent-c); }
+.stat-value.negative { color: var(--danger); }
 .bar-fill.type-A { background: var(--accent-a); }
 .bar-fill.type-B { background: var(--accent-b); }
 .bar-fill.type-C { background: var(--accent-c); }
@@ -503,8 +566,8 @@ select.filter-select { background: var(--bg); border: 1px solid var(--border); c
 .history-chevron svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 
 /* Fenêtre de modification d'une séance */
-.modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); justify-content: center; align-items: center; z-index: 1000; }
-.modal-sheet { background: var(--card-bg); padding: 24px 20px 20px; border-radius: var(--radius-card); width: 90%; max-width: 340px; text-align: center; color: var(--text); border: 1px solid var(--border); box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18); }
+.modal-overlay { position: fixed; inset: 0; background: var(--overlay); justify-content: center; align-items: center; z-index: 1000; }
+.modal-sheet { background: var(--card-bg); padding: 24px 20px 20px; border-radius: var(--radius-card); width: 90%; max-width: 340px; text-align: center; color: var(--text); border: 1px solid var(--border); box-shadow: var(--shadow-sheet); }
 .modal-title { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; margin: 10px 0 4px; }
 .modal-meta { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px; }
 #modal-session-pill { display: flex; justify-content: center; }
@@ -512,7 +575,12 @@ select.filter-select { background: var(--bg); border: 1px solid var(--border); c
 
 /* Séance : en-tête + progression fixes à l'écran pendant le défilement */
 body[data-tab="seance"] header { position: sticky; top: 0; z-index: 100; background: var(--bg); }
-.seance-sticky { position: sticky; top: var(--header-h, 85px); z-index: 99; background: var(--bg); margin: 0 -15px 6px; padding: 6px 15px 8px; box-shadow: 0 6px 10px -8px rgba(15, 23, 42, 0.25); }
+.seance-sticky { position: sticky; top: var(--header-h, 85px); z-index: 99; background: var(--bg); margin: 0 -15px 6px; padding: 6px 15px 8px; box-shadow: var(--shadow-sticky); }
 .seance-sticky .workout-progress { margin-bottom: 0; }
 .seance-sticky #deload-subtitle { margin-bottom: 10px; }
 .seance-sticky .session-head { margin-bottom: 10px; }
+
+/* Carte « Apparence » (onglet Historique) */
+.theme-card .card-title { margin-bottom: 12px; }
+.theme-card .seg-group { margin-bottom: 0; }
+.theme-hint { margin-top: 10px; font-size: 0.78rem; color: var(--text-muted); line-height: 1.35; }
