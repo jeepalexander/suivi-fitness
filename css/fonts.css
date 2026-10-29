@@ -1,24 +1,24 @@
 /*
  * Polices locales (mode hors-ligne). Licence SIL Open Font License 1.1.
- * - Chakra Petch 600/700 : titres et chiffres
+ * - Saira Semi Condensed 600/700 : titres et chiffres
  * - Figtree 400/500/600 : texte courant
- * Fichiers issus des paquets npm @fontsource/chakra-petch et @fontsource/figtree (sous-ensemble latin).
+ * Fichiers issus des paquets npm @fontsource/saira-semi-condensed et @fontsource/figtree (sous-ensemble latin).
  */
 
 @font-face {
-  font-family: 'Chakra Petch';
+  font-family: 'Saira Semi Condensed';
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url('../fonts/chakra-petch-latin-600-normal.woff2') format('woff2');
+  src: url('../fonts/saira-semi-condensed-latin-600-normal.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: 'Chakra Petch';
+  font-family: 'Saira Semi Condensed';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url('../fonts/chakra-petch-latin-700-normal.woff2') format('woff2');
+  src: url('../fonts/saira-semi-condensed-latin-700-normal.woff2') format('woff2');
 }
 
 @font-face {

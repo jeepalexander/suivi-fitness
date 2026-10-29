@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.3.3] - 2026-10-29
+### 🔤 Police des titres : Saira Semi Condensed
+- **Titres et chiffres** passent de Chakra Petch à **Saira Semi Condensed** (600 / 700) : sportive et technique, plus discrète et plus étroite. Le texte courant reste en Figtree.
+- Police embarquée en local (licence SIL OFL 1.1) et préchargée par le service worker : fonctionne hors-ligne. Les fichiers Chakra Petch sont supprimés.
+
+---
+
 ## [1.3.2] - 2026-10-28
 ### 🖼️ Icônes d'exercices sans fond
 - Les 18 icônes sont **détourées** (PNG transparents) et recadrées au plus juste : plus de fond gris propre à chaque image, ni de tuile arrondie derrière. Elles se posent directement sur le fond de la carte, en thème clair comme en thème sombre.
