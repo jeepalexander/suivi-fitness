@@ -73,6 +73,7 @@ const SESSION_TYPE_COLORS = { A: '#1B6FD8', B: '#C2570C', C: '#C62B35' };
 const CHART_COLORS = { primary: '#3730E3', success: '#0B7A43', volume: '#C2570C', tick: '#5B6577', grid: '#E3E7ED', band: 'rgba(246, 213, 139, 0.45)' };
 if (typeof Chart !== 'undefined') {
   Chart.defaults.font.family = "'Figtree', system-ui, sans-serif";
+  Chart.defaults.font.size = 13; // 12 par défaut, +1 comme le reste de l'interface
   Chart.defaults.color = CHART_COLORS.tick;
 }
 
@@ -1216,7 +1217,7 @@ function renderTonnageChart() {
       responsive: true,
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: onHero, font: { size: 9 }, maxTicksLimit: 6 }, grid: { display: false }, border: { display: false } },
+        x: { ticks: { color: onHero, font: { size: 10 }, maxTicksLimit: 6, maxRotation: 0, minRotation: 0, autoSkip: true }, grid: { display: false }, border: { display: false } },
         y: { ticks: { color: onHero, maxTicksLimit: 5 }, grid: { color: 'rgba(255, 255, 255, 0.15)' }, border: { display: false } }
       }
     }
@@ -1307,7 +1308,7 @@ function renderExerciseChart() {
       responsive: true,
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: CHART_COLORS.tick, font: { size: 9 }, maxTicksLimit: 6 }, grid: { display: false } },
+        x: { ticks: { color: CHART_COLORS.tick, font: { size: 10 }, maxTicksLimit: 6, maxRotation: 0, minRotation: 0, autoSkip: true }, grid: { display: false } },
         y: { ticks: { color: CHART_COLORS.tick, maxTicksLimit: 5 }, grid: { color: CHART_COLORS.grid }, border: { display: false } }
       }
     },
@@ -1785,7 +1786,7 @@ function renderProgressAnalysis() {
     container.innerHTML = `
       <div class="card analysis-empty">
         <p>\ud83d\udcca Aucune donnée disponible.</p>
-        <p style="font-size: 0.85rem; margin-top: 8px;">Enregistre des séances pour voir ta progression !</p>
+        <p style="font-size: 0.9125rem; margin-top: 8px;">Enregistre des séances pour voir ta progression !</p>
       </div>`;
     return;
   }
@@ -1917,7 +1918,7 @@ function renderCharts() {
       responsive: true,
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: CHART_COLORS.tick, maxTicksLimit: 6 }, grid: { display: false } },
+        x: { ticks: { color: CHART_COLORS.tick, maxTicksLimit: 6, maxRotation: 0, minRotation: 0, autoSkip: true }, grid: { display: false } },
         y: { ticks: { color: CHART_COLORS.tick, maxTicksLimit: 5 }, grid: { color: CHART_COLORS.grid }, border: { display: false } }
       }
     }

@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.3.5] - 2026-10-29
+### 🔠 Polices +1 px
+- **Toutes les tailles de police augmentent d'1 px** (59 règles CSS : titres, chiffres, libellés, boutons, navigation, pastilles ; texte de base 17 px) ainsi que les textes des **graphiques** (légendes 13 px, dates de l'axe 10 px).
+- Contrôle automatisé à 360 px et 390 px, thèmes clair et sombre, sur les 4 onglets (exercices ouverts, chrono lancé, fenêtre de modification, valeurs à 3 chiffres) : **aucun texte rogné, aucun débordement, pas de défilement horizontal**.
+- Ajustements pour que rien ne se dégrade : dates de l'axe des graphiques toujours à l'horizontale (certaines sont sautées plutôt qu'inclinées) ; sur écran étroit (≤ 380 px), icône de l'exercice ouvert et boutons − / + légèrement réduits (44 px et 40 px) pour que « Presse à cuisses » reste sur une ligne.
+
+---
+
 ## [1.3.4] - 2026-10-29
 ### 🛡️ La saisie en cours n'est plus perdue
 - **Brouillon de séance** : poids, répétitions, séries validées, nombre de séries, exercice ouvert et chrono sont copiés dans la mémoire de l'appareil à chaque action, et **restaurés automatiquement** si l'application se recharge (tirer pour rafraîchir par erreur, application fermée par le système, mise à jour...). Le brouillon est effacé à l'enregistrement de la séance et abandonné au bout de 24 h. Il survit aussi à la modification d'une ancienne séance.
