@@ -573,9 +573,11 @@ select.filter-select { background: var(--bg); border: 1px solid var(--border); c
 #modal-session-pill { display: flex; justify-content: center; }
 
 
-/* Séance : en-tête + bannière (nom, progression, durée) forment UN SEUL bloc collé en haut de l'écran */
-body[data-tab="seance"] header { position: sticky; top: 0; z-index: 100; background: var(--bg); box-shadow: var(--shadow-sticky); padding-bottom: 0; }
+/* En-tête (nom + version de l'app, titre de l'onglet) collé en haut de l'écran sur tous les onglets ;
+   sur Séance, la bannière (nom, progression, durée) en fait partie : UN SEUL bloc collé */
+header { position: sticky; top: 0; z-index: 100; background: var(--bg); box-shadow: var(--shadow-sticky); padding-bottom: 8px; }
 .seance-sticky { display: none; margin: 0 -20px; padding: 6px 20px 8px; }
+body[data-tab="seance"] header { padding-bottom: 0; }
 body[data-tab="seance"] .seance-sticky { display: block; }
 .seance-sticky .workout-progress { margin-bottom: 0; }
 .seance-sticky #deload-subtitle { margin-bottom: 10px; }

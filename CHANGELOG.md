@@ -7,6 +7,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.3.7] - 2026-10-29
+### 📌 En-tête fixe sur tous les onglets
+- Le **nom de l'application avec son numéro de version et le titre de l'onglet** (Programme, Graphiques, Historique) restent désormais collés en haut de l'écran pendant le défilement, comme sur l'onglet Séance.
+
+---
+
 ## [1.3.6] - 2026-10-29
 ### 📌 Bannière de séance stable
 - L'**en-tête (titre) et la bannière** (nom de la séance, déload, progression, durée) forment désormais **un seul bloc collé en haut** de l'onglet Séance : plus de décalage de 15 px au premier défilement, plus de deux éléments collants indépendants qui pouvaient se désynchroniser (Android / barre d'adresse).
