@@ -1953,6 +1953,8 @@ function switchTab(tabName) {
   const targetContainer = document.getElementById(`tab-${tabName}`);
   const targetNav = document.getElementById(`nav-${tabName}`);
   if(targetContainer) targetContainer.classList.add('active');
+  const scroller = document.getElementById('app-scroll');
+  if (scroller) scroller.scrollTop = 0;
   if(targetNav) targetNav.classList.add('active');
 
   const timerBtn = document.getElementById('timer-btn');

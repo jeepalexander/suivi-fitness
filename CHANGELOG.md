@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.3.8] - 2026-10-29
+### 🧭 Navigation du bas immobile dans le navigateur
+- Seule une **zone centrale défile** (`#app-scroll`) ; le document lui-même ne défile plus. Dans Chrome (onglet normal), la barre d'adresse ne se replie donc plus et la barre de navigation du bas ne « saute » plus pendant le défilement.
+- L'en-tête (et la bannière de séance) est maintenant fixe par construction, hors de la zone défilante. Le tirer-pour-rafraîchir reste désactivé (`overscroll-behavior: contain`).
+- Le défilement revient en haut à chaque changement d'onglet.
+
+---
+
 ## [1.3.7] - 2026-10-29
 ### 📌 En-tête fixe sur tous les onglets
 - Le **nom de l'application avec son numéro de version et le titre de l'onglet** (Programme, Graphiques, Historique) restent désormais collés en haut de l'écran pendant le défilement, comme sur l'onglet Séance.

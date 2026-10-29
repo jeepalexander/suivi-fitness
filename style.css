@@ -106,7 +106,12 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-body); -webkit-tap-highlight-color: transparent; }
-body { background-color: var(--bg); color: var(--text); padding-bottom: 112px; font-size: 17px; }
+body { background-color: var(--bg); color: var(--text); font-size: 17px; }
+/* Le document ne défile pas : c'est #app-scroll qui défile. La barre d'adresse du navigateur reste donc fixe
+   et la navigation du bas ne bouge plus (Android Chrome faisait « sauter » les éléments fixes en la repliant). */
+html, body { height: 100%; overflow: hidden; }
+body { height: 100vh; height: 100dvh; display: flex; flex-direction: column; }
+#app-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; padding-bottom: 112px; }
 /* Empêche le « tirer pour rafraîchir » du navigateur (il rechargeait l'application en pleine saisie) */
 html, body { overscroll-behavior-y: none; }
 
@@ -204,7 +209,7 @@ nav button.active svg { stroke-width: 1.95; }
 /* --- Séance : exercices en accordéon (étape 4) --- */
 .exercise-item {
   background: var(--card-bg); border: 1px solid var(--line); border-radius: 20px;
-  padding: 10px 14px 10px 10px; margin-bottom: 10px; scroll-margin-top: calc(var(--sticky-total, 230px) + 8px);
+  padding: 10px 14px 10px 10px; margin-bottom: 10px; scroll-margin-top: 8px;
 }
 .exercise-item.open { border-radius: 24px; padding: 16px; box-shadow: var(--shadow-card); }
 .ex-header { display: flex; align-items: center; gap: 8px; }
@@ -575,7 +580,7 @@ select.filter-select { background: var(--bg); border: 1px solid var(--border); c
 
 /* En-tête (nom + version de l'app, titre de l'onglet) collé en haut de l'écran sur tous les onglets ;
    sur Séance, la bannière (nom, progression, durée) en fait partie : UN SEUL bloc collé */
-header { position: sticky; top: 0; z-index: 100; background: var(--bg); box-shadow: var(--shadow-sticky); padding-bottom: 8px; }
+header { position: relative; flex: none; width: 100%; z-index: 100; background: var(--bg); box-shadow: var(--shadow-sticky); padding-bottom: 8px; }
 .seance-sticky { display: none; margin: 0 -20px; padding: 6px 20px 8px; }
 body[data-tab="seance"] header { padding-bottom: 0; }
 body[data-tab="seance"] .seance-sticky { display: block; }
