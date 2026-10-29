@@ -107,6 +107,8 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-body); -webkit-tap-highlight-color: transparent; }
 body { background-color: var(--bg); color: var(--text); padding-bottom: 112px; }
+/* Empêche le « tirer pour rafraîchir » du navigateur (il rechargeait l'application en pleine saisie) */
+html, body { overscroll-behavior-y: none; }
 
 header { padding: 22px 20px 6px 20px; max-width: 600px; margin: 0 auto; text-align: left; }
 .page-header { display: flex; flex-direction: column; gap: 2px; min-width: 0; }

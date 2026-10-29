@@ -492,9 +492,9 @@ function startWorkoutTimer() {
       startTime = parseInt(startTime, 10);
     }
 
-    workoutTimerInterval = setInterval(() => {
+    const tick = () => {
       const now = Date.now();
-      workoutSeconds = Math.floor((now - startTime) / 1000);
+      workoutSeconds = Math.max(0, Math.floor((now - startTime) / 1000));
 
       const m = Math.floor(workoutSeconds / 60);
       const s = workoutSeconds % 60;
@@ -502,7 +502,9 @@ function startWorkoutTimer() {
       if(el) {
         el.innerText = `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
       }
-    }, 1000);
+    };
+    tick();
+    workoutTimerInterval = setInterval(tick, 1000);
   }
 }
 
@@ -562,11 +564,13 @@ function toggleSetDone(btn) {
     scrollOnNextRefresh = true;
   }
   updateSetsProgress();
+  saveDraft();
 }
 
 function markInputActive(input) {
   startWorkoutTimer();
   input.classList.add('active-input');
+  saveDraft();
 }
 
 // ==========================================
@@ -622,6 +626,7 @@ function addSet(btn) {
   // firstChild renvoyait le texte blanc précédant la balise et aucune ligne n'apparaissait.
   grid.insertAdjacentHTML('beforeend', setRowHtml(exName, rows.length + 1, weightVal, repsVal));
   updateSetsProgress();
+  saveDraft();
 }
 
 function removeSet(btn) {
@@ -631,6 +636,7 @@ function removeSet(btn) {
   rows[rows.length - 1].remove();
   renumberSets(grid);
   updateSetsProgress();
+  saveDraft();
 }
 
 function updateSetsProgress() {
@@ -721,6 +727,7 @@ function toggleExercise(btn) {
   manualOpenExercise = wasOpen ? -1 : idx;
   refreshExerciseStates();
   if (!wasOpen) item.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  saveDraft();
 }
 
 // ==========================================
@@ -744,6 +751,100 @@ function displayDeloadNotificationIfNeeded() {
   // Supprimé ou vidé car la mention est maintenant intégrée directement au titre de la séance (seance-type-title)
   const existingBanner = document.getElementById('deload-banner');
   if (existingBanner) existingBanner.remove();
+}
+
+// ==========================================
+// BROUILLON DE SÉANCE
+// La saisie en cours (poids, reps, séries validées, nombre de séries, exercice ouvert, chrono)
+// est copiée dans localStorage à chaque action et restaurée au rechargement de l'application
+// (tirer pour rafraîchir, application fermée par le système...). Elle est effacée à l'enregistrement
+// de la séance et abandonnée au bout de 24 h.
+// ==========================================
+const DRAFT_KEY = 'h49_draft';
+const DRAFT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+let draftRestoring = false;
+
+function readDraft() {
+  try {
+    const d = JSON.parse(localStorage.getItem(DRAFT_KEY));
+    if (d && d.v === 1 && Array.isArray(d.exercises) && (Date.now() - d.updatedAt) < DRAFT_MAX_AGE_MS) return d;
+  } catch (e) {}
+  return null;
+}
+
+function clearDraft() {
+  try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+}
+
+function saveDraft() {
+  if (draftRestoring || editingOriginalId !== null || !state) return;
+  const items = Array.from(document.querySelectorAll('#exercises-list .exercise-item'));
+  if (!items.length) return;
+
+  const type = (document.getElementById('seance-badge') || {}).innerText;
+  const prog = PROGRAM[(type || '').trim()];
+  let dirty = false;
+  const exercises = items.map(item => {
+    const rows = Array.from(item.querySelectorAll('.set-row'));
+    const progEx = prog ? prog.exercises.find(e => e.name === item.dataset.ex) : null;
+    if (progEx && rows.length !== progEx.seriesCount) dirty = true;
+    return {
+      name: item.dataset.ex,
+      sets: rows.map(row => {
+        const w = row.querySelector('.weight-input'), r = row.querySelector('.reps-input');
+        const done = row.classList.contains('done');
+        const aw = w.classList.contains('active-input'), ar = r.classList.contains('active-input');
+        if (done || aw || ar) dirty = true;
+        return { w: w.value, r: r.value, done, aw, ar };
+      })
+    };
+  });
+
+  // Formulaire intact : rien à conserver (et on n'écrase pas d'éventuelles nouvelles suggestions)
+  if (!dirty) { clearDraft(); return; }
+
+  const draft = {
+    v: 1,
+    type: (type || '').trim(),
+    updatedAt: Date.now(),
+    startedAt: parseInt(localStorage.getItem('workout_start_time'), 10) || null,
+    manualOpen: manualOpenExercise === undefined ? null : manualOpenExercise,
+    exercises
+  };
+  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); } catch (e) {}
+}
+
+function restoreDraft(type) {
+  const d = readDraft();
+  if (!d || d.type !== type) return false;
+  const clean = v => String(v == null ? '' : v).replace(/[^0-9.,\-]/g, '');
+  draftRestoring = true;
+  try {
+    document.querySelectorAll('#exercises-list .exercise-item').forEach(item => {
+      const saved = d.exercises.find(e => e.name === item.dataset.ex);
+      if (!saved || !Array.isArray(saved.sets) || !saved.sets.length) return;
+      const grid = item.querySelector('.sets-grid');
+      grid.innerHTML = saved.sets.map((s, i) => setRowHtml(item.dataset.ex, i + 1, clean(s.w), clean(s.r))).join('');
+      grid.querySelectorAll('.set-row').forEach((row, i) => {
+        const s = saved.sets[i];
+        const w = row.querySelector('.weight-input'), r = row.querySelector('.reps-input');
+        if (s.aw) w.classList.add('active-input');
+        if (s.ar) r.classList.add('active-input');
+        if (s.done) {
+          row.classList.add('done');
+          row.querySelector('.btn-check-set').setAttribute('aria-pressed', 'true');
+        }
+      });
+    });
+    if (Number.isInteger(d.manualOpen)) manualOpenExercise = d.manualOpen;
+    if (d.startedAt) {
+      localStorage.setItem('workout_start_time', String(d.startedAt));
+      startWorkoutTimer();
+    }
+  } finally {
+    draftRestoring = false;
+  }
+  return true;
 }
 
 function initWorkoutForm(customSession = null) { 
@@ -861,6 +962,9 @@ function initWorkoutForm(customSession = null) {
     container.appendChild(div);
   });
 
+  // Saisie en cours retrouvée après un rechargement (jamais en modification d'une ancienne séance)
+  if (!customSession && editingOriginalId === null) restoreDraft(type);
+
   updateSetsProgress(); 
 }
 
@@ -934,6 +1038,8 @@ document.addEventListener('submit', function(e) {
 
     clearEditState();
     localStorage.removeItem('workout_start_time');
+    // Une séance enregistrée vide le brouillon ; une modification d'ancienne séance le laisse intact
+    if (!isEditing) clearDraft();
 
     saveState();
 
@@ -1905,6 +2011,7 @@ function importData(event) {
       if (importedState.history && importedState.nextType) {
         state = importedState;
         clearEditState();
+        clearDraft();
         saveState();
         populateExerciseSelect();
         initWorkoutForm();
@@ -1929,6 +2036,7 @@ function resetData() {
     fetch('data.json').then(res => res.json()).then(defaultData => {
       state = defaultData;
       clearEditState();
+      clearDraft();
       saveState();
       populateExerciseSelect();
       initWorkoutForm();

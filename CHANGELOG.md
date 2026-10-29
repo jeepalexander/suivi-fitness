@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.3.4] - 2026-10-29
+### 🛡️ La saisie en cours n'est plus perdue
+- **Brouillon de séance** : poids, répétitions, séries validées, nombre de séries, exercice ouvert et chrono sont copiés dans la mémoire de l'appareil à chaque action, et **restaurés automatiquement** si l'application se recharge (tirer pour rafraîchir par erreur, application fermée par le système, mise à jour...). Le brouillon est effacé à l'enregistrement de la séance et abandonné au bout de 24 h. Il survit aussi à la modification d'une ancienne séance.
+- **Plus de « tirer pour rafraîchir »** : le geste du navigateur qui rechargeait l'application est désactivé (`overscroll-behavior`).
+- Le chrono de séance affiche tout de suite la bonne durée au lieu de repartir de 00:00 pendant une seconde.
+
+---
+
 ## [1.3.3] - 2026-10-29
 ### 🔤 Police des titres : Saira Semi Condensed
 - **Titres et chiffres** passent de Chakra Petch à **Saira Semi Condensed** (600 / 700) : sportive et technique, plus discrète et plus étroite. Le texte courant reste en Figtree.
