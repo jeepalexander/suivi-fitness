@@ -67,7 +67,79 @@ let workoutSeconds = 0;
 let tonnageChart, exerciseChart, weightChart;
 let currentVolumeFilter = 'all'; // 'all' (séances), 'month' (par mois) ou 'type' (séance A/B/C)
 const SESSION_TYPES = ['A', 'B', 'C'];
-const SESSION_TYPE_COLORS = { A: '#1f77b4', B: '#ff7f0e', C: '#d62728' };
+const SESSION_TYPE_COLORS = { A: '#1B6FD8', B: '#C2570C', C: '#C62B35' };
+// Couleurs des graphiques : valeurs de repli (thème clair). Elles sont relues depuis
+// les variables --chart-* de style.css à chaque changement de thème (voir readChartColors).
+const CHART_COLORS = { primary: '#3730E3', success: '#0B7A43', volume: '#C2570C', tick: '#5B6577', grid: '#E3E7ED', band: 'rgba(246, 213, 139, 0.45)' };
+if (typeof Chart !== 'undefined') {
+  Chart.defaults.font.family = "'Figtree', system-ui, sans-serif";
+  Chart.defaults.color = CHART_COLORS.tick;
+}
+
+// --- Thème clair / sombre / auto ---
+// La préférence est stockée sur l'appareil (h49_theme), hors de l'état exporté.
+// Clair par défaut. Le script de index.html pose data-theme avant le premier affichage.
+const THEME_KEY = 'h49_theme';
+const THEME_BAR_COLORS = { light: '#F2F4F7', dark: '#0B0F1A' };
+let themeMediaQuery = null;
+
+function getThemePreference() {
+  try {
+    const v = localStorage.getItem(THEME_KEY);
+    if (v === 'light' || v === 'dark' || v === 'auto') return v;
+  } catch (e) {}
+  return 'light';
+}
+
+function resolveTheme(pref) {
+  if (pref === 'auto') {
+    return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  }
+  return pref === 'dark' ? 'dark' : 'light';
+}
+
+function readChartColors() {
+  const cs = getComputedStyle(document.documentElement);
+  const read = (name, fallback) => cs.getPropertyValue(name).trim() || fallback;
+  CHART_COLORS.primary = read('--chart-primary', CHART_COLORS.primary);
+  CHART_COLORS.success = read('--chart-success', CHART_COLORS.success);
+  CHART_COLORS.volume = read('--chart-volume', CHART_COLORS.volume);
+  CHART_COLORS.tick = read('--chart-tick', CHART_COLORS.tick);
+  CHART_COLORS.grid = read('--chart-grid', CHART_COLORS.grid);
+  CHART_COLORS.band = read('--chart-band', CHART_COLORS.band);
+  if (typeof Chart !== 'undefined') Chart.defaults.color = CHART_COLORS.tick;
+}
+
+function applyTheme() {
+  const pref = getThemePreference();
+  const theme = resolveTheme(pref);
+  document.documentElement.setAttribute('data-theme', theme);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', THEME_BAR_COLORS[theme]);
+  document.querySelectorAll('#theme-choice [data-theme-choice]').forEach(btn => {
+    const on = btn.dataset.themeChoice === pref;
+    btn.classList.toggle('active', on);
+    btn.setAttribute('aria-checked', on ? 'true' : 'false');
+  });
+  readChartColors();
+  // Les graphiques sont déjà construits avec les anciennes couleurs : on les redessine.
+  if (typeof state !== 'undefined' && state && document.body.dataset.tab === 'progression') renderCharts();
+}
+
+function setThemePreference(pref) {
+  try { localStorage.setItem(THEME_KEY, pref); } catch (e) {}
+  applyTheme();
+}
+
+function initTheme() {
+  applyTheme();
+  if (window.matchMedia) {
+    themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = () => { if (getThemePreference() === 'auto') applyTheme(); };
+    if (themeMediaQuery.addEventListener) themeMediaQuery.addEventListener('change', onChange);
+    else if (themeMediaQuery.addListener) themeMediaQuery.addListener(onChange);
+  }
+}
 let currentSessionTypeFilter = SESSION_TYPES[0];
 let currentExMetricMode = 'max';
 
@@ -137,6 +209,7 @@ function updateNextTypeFromHistory() {
 }
 
 async function initApp() {
+  initTheme();
   const saved = localStorage.getItem('h49_state');
   if (saved) {
     try {
@@ -183,49 +256,84 @@ function saveState() {
   localStorage.setItem('h49_state', JSON.stringify(state));
 }
 
-function getIcon(exName) {
+function getIcon(exName, decorative = false) {
   const path = EXERCISE_ICONS[exName] || "icons/bench_press.png";
-  return `<img src="${path}" alt="${exName}" onerror="this.src='icons/bench_press.png'">`;
+  return `<img src="${path}" alt="${decorative ? '' : exName}" onerror="this.src='icons/bench_press.png'">`;
 }
+
+function programTilesHtml(prog) {
+  return prog.exercises.map(ex => `
+    <div class="ex-tile">
+      <div class="ex-icon-badge">${getIcon(ex.name)}</div>
+      <span>${ex.name}</span>
+    </div>
+  `).join('');
+}
+
+const SESSION_ORDER = ['A', 'B', 'C'];
+const CHEVRON_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
 
 function renderProgramOverview() {
   const container = document.getElementById('program-overview');
   if (!container) return;
-  container.innerHTML = '';
 
-  Object.keys(PROGRAM).forEach(type => {
-    const prog = PROGRAM[type];
-    const card = document.createElement('div');
-    card.className = 'card';
+  const nextType = PROGRAM[state.nextType] ? state.nextType : 'A';
+  const next = PROGRAM[nextType];
+  const startIdx = SESSION_ORDER.indexOf(nextType);
+  const others = [1, 2].map(i => SESSION_ORDER[(startIdx + i) % SESSION_ORDER.length]);
 
-    let exListHtml = '';
-    prog.exercises.forEach((ex) => {
-      exListHtml += `
-        <div class="program-ex-item" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 12px 8px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid var(--border);">
-          <div class="ex-icon-badge" style="margin-bottom: 8px;">${getIcon(ex.name)}</div>
-          <strong style="font-size: 0.8rem; line-height: 1.2;">${ex.name}</strong>
+  const deloadHtml = checkDeloadStatus()
+    ? `<span class="deload-pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>Déload actif · −20 %</span>`
+    : '';
+
+  const othersHtml = others.map(type => `
+    <div class="next-row-wrap">
+      <button type="button" class="next-row" aria-expanded="false" onclick="toggleProgramRow(this)">
+        <span class="type-pill type-pill-${type} small">${type}</span>
+        <span class="next-row-name">${PROGRAM[type].title.replace('/', ' / ')}</span>
+        <span class="next-row-chevron">${CHEVRON_SVG}</span>
+      </button>
+      <div class="tile-grid next-row-panel" hidden>${programTilesHtml(PROGRAM[type])}</div>
+    </div>
+  `).join('');
+
+  container.innerHTML = `
+    <div class="card next-card">
+      <div class="session-head">
+        <span class="type-pill type-pill-${nextType}">${nextType}</span>
+        <div class="session-head-text">
+          <span class="overline">Prochaine séance</span>
+          <span class="session-name">${next.title.replace('/', ' / ')}</span>
         </div>
-      `;
-    });
+      </div>
+      ${deloadHtml}
+      <button type="button" class="btn btn-start" onclick="switchTab('seance')">
+        Démarrer la séance
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+      <p class="warmup-note">🚣 Échauffement : Rameur 1000 m + 2 séries légères uniquement sur le 1er exercice.</p>
+    </div>
 
-    card.innerHTML = `
-      <div class="card-title" style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-        <span class="badge ${prog.badge}">Séance ${type}</span>
-        <span style="font-size: 1rem; font-weight: bold;">${prog.title}</span>
-      </div>
-      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
-        ${exListHtml}
-      </div>
-    `;
-    container.appendChild(card);
-  });
+    <div class="section-block">
+      <h2 class="section-label">Au programme · ${next.exercises.length} exercices</h2>
+      <div class="tile-grid">${programTilesHtml(next)}</div>
+    </div>
+
+    <div class="section-block">
+      <h2 class="section-label">Ensuite</h2>
+      ${othersHtml}
+    </div>
+  `;
 }
 
-// ==========================================
-// SUGGESTION DES POIDS (AVEC EXCLUSION DU DÉLOAD)
-// ==========================================
-// Une série est considérée comme réellement effectuée si elle a une charge ET des répétitions.
-// Les séries à 0 kg / 0 rép. correspondent à des séries (ou exercices) non faits.
+// Déplie / replie la liste des exercices d'une séance dans « Ensuite »
+function toggleProgramRow(btn) {
+  const panel = btn.nextElementSibling;
+  const open = btn.getAttribute('aria-expanded') === 'true';
+  btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+  if (panel) panel.hidden = open;
+}
+
 function isPerformedSet(set) {
   return !!set && (parseFloat(set.weight) || 0) > 0 && (parseFloat(set.reps) || 0) > 0;
 }
@@ -424,14 +532,34 @@ function getFormattedWorkoutDuration() {
   return `${m} min`;
 }
 
+const CHECK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const MINUS_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"/></svg>';
+const PLUS_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>';
+
+// Exercice ouvert à la main : undefined = automatique (premier exercice non terminé),
+// un index = ouvert par l'utilisateur, -1 = tout replié.
+let manualOpenExercise;
+let scrollOnNextRefresh = false;
+let lastOpenExerciseIdx = null;
+
+function isExerciseComplete(item) {
+  const rows = item.querySelectorAll('.set-row');
+  return rows.length > 0 && Array.from(rows).every(r => r.classList.contains('done'));
+}
+
 function toggleSetDone(btn) {
   startWorkoutTimer();
   const row = btn.closest('.set-row');
   row.classList.toggle('done');
-  if (row.classList.contains('done')) {
-    btn.innerHTML = '✓';
-  } else {
-    btn.innerHTML = '○';
+  const done = row.classList.contains('done');
+  btn.setAttribute('aria-pressed', done ? 'true' : 'false');
+
+  // Exercice ouvert à la main et terminé : on repasse en automatique (passage au suivant)
+  if (done) {
+    const items = Array.from(document.querySelectorAll('#exercises-list .exercise-item'));
+    const item = row.closest('.exercise-item');
+    if (manualOpenExercise === items.indexOf(item) && isExerciseComplete(item)) manualOpenExercise = undefined;
+    scrollOnNextRefresh = true;
   }
   updateSetsProgress();
 }
@@ -455,8 +583,20 @@ function findProgramExercise(name) {
 function renumberSets(grid) {
   grid.querySelectorAll('.set-row').forEach((row, i) => {
     const label = row.querySelector('.set-label');
-    if (label) label.innerText = 'Série ' + (i + 1);
+    if (label) label.innerText = String(i + 1);
   });
+}
+
+// Gabarit d'une ligne de série (utilisé à la création du formulaire et par le bouton +)
+function setRowHtml(exName, number, weightVal, repsVal) {
+  return `
+    <div class="set-row">
+      <span class="set-label">${number}</span>
+      <input type="number" step="0.5" inputmode="decimal" class="set-input weight-input" data-ex="${exName}" aria-label="Série ${number}, poids en kg" placeholder="kg" value="${weightVal}" oninput="markInputActive(this)">
+      <input type="number" inputmode="numeric" class="set-input reps-input" data-ex="${exName}" aria-label="Série ${number}, répétitions" placeholder="reps" value="${repsVal}" oninput="markInputActive(this)">
+      <button type="button" class="btn-check-set" aria-pressed="false" aria-label="Valider la série ${number}" onclick="toggleSetDone(this)">${CHECK_SVG}</button>
+    </div>
+  `;
 }
 
 function addSet(btn) {
@@ -480,14 +620,7 @@ function addSet(btn) {
 
   // insertAdjacentHTML insère directement l'élément : avec un conteneur temporaire,
   // firstChild renvoyait le texte blanc précédant la balise et aucune ligne n'apparaissait.
-  grid.insertAdjacentHTML('beforeend', `
-    <div class="set-row">
-      <span class="set-label">Série ${rows.length + 1}</span>
-      <input type="number" step="0.5" class="set-input weight-input" data-ex="${exName}" placeholder="kg" value="${weightVal}" oninput="markInputActive(this)">
-      <input type="number" class="set-input reps-input" data-ex="${exName}" placeholder="reps" value="${repsVal}" oninput="markInputActive(this)">
-      <button type="button" class="btn-check-set" onclick="toggleSetDone(this)">○</button>
-    </div>
-  `);
+  grid.insertAdjacentHTML('beforeend', setRowHtml(exName, rows.length + 1, weightVal, repsVal));
   updateSetsProgress();
 }
 
@@ -505,6 +638,89 @@ function updateSetsProgress() {
   const doneRows = document.querySelectorAll('.set-row.done').length;
   const textEl = document.getElementById('sets-progress-text');
   if(textEl) textEl.innerText = `${doneRows} / ${totalRows}`;
+  const barEl = document.getElementById('sets-progress-bar');
+  if (barEl) barEl.style.width = totalRows ? `${Math.round((doneRows / totalRows) * 100)}%` : '0%';
+  refreshExerciseStates();
+}
+
+// Texte de la ligne repliée : « 4 séries · 32.5 → 55 kg · 2/4 faites » (ou « Terminé · 4 séries »)
+function exerciseSummaryText(item) {
+  const rows = Array.from(item.querySelectorAll('.set-row'));
+  const n = rows.length;
+  const plural = n > 1 ? 'séries' : 'série';
+  if (isExerciseComplete(item)) return `Terminé · ${n} ${plural}`;
+  const weights = rows.map(r => r.querySelector('.weight-input').value).filter(v => v !== '');
+  let range = '';
+  if (weights.length) {
+    const first = weights[0], last = weights[weights.length - 1];
+    range = first === last ? ` · ${first} kg` : ` · ${first} → ${last} kg`;
+  }
+  const done = rows.filter(r => r.classList.contains('done')).length;
+  return `${n} ${plural}${range}${done > 0 ? ` · ${done}/${n} faites` : ''}`;
+}
+
+// Ligne de l'exercice ouvert : « Dernière fois · 86 kg max » (charge max de la dernière séance où il a été fait)
+function exerciseLastTimeText(exName) {
+  const history = (state && state.history) ? state.history : [];
+  for (let i = history.length - 1; i >= 0; i--) {
+    const h = history[i];
+    if (editingOriginalId !== null && h.id === editingOriginalId) continue; // pas la séance en cours de modification
+    const ex = (h.exercises || []).find(e => e.name === exName);
+    const performed = ex && Array.isArray(ex.sets) ? ex.sets.filter(isPerformedSet) : [];
+    if (performed.length > 0) {
+      const max = Math.max(...performed.map(s => parseFloat(s.weight) || 0));
+      return `Dernière fois · ${max} kg max`;
+    }
+  }
+  return 'Première fois';
+}
+
+// Ouvre un seul exercice à la fois, met en évidence la série en cours et met à jour les libellés
+function refreshExerciseStates() {
+  const items = Array.from(document.querySelectorAll('#exercises-list .exercise-item'));
+  if (!items.length) return;
+
+  let openIdx;
+  if (manualOpenExercise === undefined) {
+    openIdx = items.findIndex(it => !isExerciseComplete(it)); // -1 si tout est terminé
+  } else {
+    openIdx = items[manualOpenExercise] ? manualOpenExercise : -1;
+  }
+
+  items.forEach((item, i) => {
+    const open = i === openIdx;
+    const rows = Array.from(item.querySelectorAll('.set-row'));
+    item.classList.toggle('open', open);
+    item.classList.toggle('complete', isExerciseComplete(item));
+    item.querySelector('.ex-toggle').setAttribute('aria-expanded', open ? 'true' : 'false');
+    item.querySelector('.ex-body').hidden = !open;
+    item.querySelector('.ex-controls').hidden = !open;
+
+    rows.forEach(r => r.classList.remove('current'));
+    if (open) {
+      const current = rows.find(r => !r.classList.contains('done'));
+      if (current) current.classList.add('current');
+    }
+    item.querySelector('.ex-sub').textContent = open ? exerciseLastTimeText(item.dataset.ex) : exerciseSummaryText(item);
+  });
+
+  // Passage automatique à l'exercice suivant : on le ramène dans l'écran
+  if (scrollOnNextRefresh && openIdx !== -1 && openIdx !== lastOpenExerciseIdx) {
+    items[openIdx].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  scrollOnNextRefresh = false;
+  lastOpenExerciseIdx = openIdx;
+}
+
+// Appui sur l'en-tête d'un exercice : l'ouvre (en repliant l'autre) ou le replie
+function toggleExercise(btn) {
+  const items = Array.from(document.querySelectorAll('#exercises-list .exercise-item'));
+  const item = btn.closest('.exercise-item');
+  const idx = items.indexOf(item);
+  const wasOpen = item.classList.contains('open');
+  manualOpenExercise = wasOpen ? -1 : idx;
+  refreshExerciseStates();
+  if (!wasOpen) item.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ==========================================
@@ -538,20 +754,25 @@ function initWorkoutForm(customSession = null) {
   const prog = PROGRAM[type];
 
   // Le titre principal reste simple (ex: "Séance A (Presse / Couché)")
+  manualOpenExercise = undefined;
+  lastOpenExerciseIdx = null;
+  scrollOnNextRefresh = false;
+
   const titleEl = document.getElementById('seance-type-title'); 
   if(titleEl) {
-    titleEl.innerText = prog.title;
-    titleEl.style.color = ''; 
+    titleEl.innerText = prog.title.replace('/', ' / ');
   }
+  const overlineEl = document.getElementById('seance-overline');
+  if (overlineEl) overlineEl.innerText = customSession ? `Modification · ${formatDate(customSession.date)}` : 'Séance du jour';
 
   // --- GESTION DU SOUS-TITRE DELOAD ---
   const deloadSubEl = document.getElementById('deload-subtitle');
   if (deloadSubEl) {
     if (isDeloadActive()) {
-      deloadSubEl.innerText = "⚡ SEMAINE DE DÉLOAD ACTIVE (-20% sur les charges)";
-      deloadSubEl.style.display = "block";
+      deloadSubEl.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>Déload actif · −20 % sur les charges';
+      deloadSubEl.style.display = "inline-flex";
     } else {
-      deloadSubEl.innerText = "";
+      deloadSubEl.innerHTML = "";
       deloadSubEl.style.display = "none";
     }
   }
@@ -559,7 +780,7 @@ function initWorkoutForm(customSession = null) {
   const badge = document.getElementById('seance-badge');
   if(badge) {
     badge.innerText = type;
-    badge.className = `badge ${prog.badge}`;
+    badge.className = `type-pill type-pill-${type}`;
   }
 
   // Bouton Annuler + libellé du bouton de validation selon le mode (création / modification)
@@ -584,11 +805,6 @@ function initWorkoutForm(customSession = null) {
       durationDisplay.style.cursor = 'pointer';
       durationDisplay.title = '';
     }
-  }
-
-  const subHeader = document.getElementById('sub-header'); 
-  if(subHeader) { 
-    subHeader.innerText = customSession ? `Modification de la séance du ${formatDate(customSession.date)}` : `Prochaine séance : ${type}`; 
   }
 
   const container = document.getElementById('exercises-list'); 
@@ -618,28 +834,29 @@ function initWorkoutForm(customSession = null) {
         repsVal = lastSet.reps;
       }
 
-      rowsHtml += `
-        <div class="set-row">
-          <span class="set-label">Série ${s}</span>
-          <input type="number" step="0.5" class="set-input weight-input" data-ex="${ex.name}" placeholder="kg" value="${weightVal}" oninput="markInputActive(this)">
-          <input type="number" class="set-input reps-input" data-ex="${ex.name}" placeholder="reps" value="${repsVal}" oninput="markInputActive(this)">
-          <button type="button" class="btn-check-set" onclick="toggleSetDone(this)">○</button>
-        </div>
-      `;
+      rowsHtml += setRowHtml(ex.name, s, weightVal, repsVal);
     }
 
+    div.dataset.ex = ex.name;
     div.innerHTML = `
       <div class="ex-header">
-        <span class="ex-title">
-          <div class="ex-icon-badge">${getIcon(ex.name)}</div>
-          ${ex.name}
-        </span>
-        <span class="ex-controls">
-          <button type="button" class="btn-set-count" onclick="removeSet(this)" title="Supprimer la dernière série">−</button>
-          <button type="button" class="btn-set-count" onclick="addSet(this)" title="Ajouter une série">+</button>
+        <button type="button" class="ex-toggle" aria-expanded="false" onclick="toggleExercise(this)">
+          <span class="ex-icon-badge">${getIcon(ex.name, true)}</span>
+          <span class="ex-text">
+            <span class="ex-name">${ex.name}</span>
+            <span class="ex-sub"></span>
+          </span>
+          <span class="ex-chevron">${CHEVRON_SVG}</span>
+        </button>
+        <span class="ex-controls" hidden>
+          <button type="button" class="btn-set-count" onclick="removeSet(this)" aria-label="Supprimer la dernière série" title="Supprimer la dernière série">${MINUS_SVG}</button>
+          <button type="button" class="btn-set-count" onclick="addSet(this)" aria-label="Ajouter une série" title="Ajouter une série">${PLUS_SVG}</button>
         </span>
       </div>
-      <div class="sets-grid" data-ex="${ex.name}">${rowsHtml}</div>
+      <div class="ex-body" hidden>
+        <div class="sets-head" aria-hidden="true"><span>Série</span><span>Kg</span><span>Réps</span><span></span></div>
+        <div class="sets-grid" data-ex="${ex.name}">${rowsHtml}</div>
+      </div>
     `;
     container.appendChild(div);
   });
@@ -869,11 +1086,9 @@ function renderTonnageChart() {
     data = sortedHistory.map(e => parseFloat(e.tonnage) || 0);
   }
 
-  // Couleur : celle de la séance affichée en mode A/B/C, bleu sinon
-  const lineColor = currentVolumeFilter === 'type'
-    ? (SESSION_TYPE_COLORS[currentSessionTypeFilter] || '#1f77b4')
-    : '#1f77b4';
+  // Courbe blanche sur le bloc héros indigo
   const lineLabel = currentVolumeFilter === 'type' ? `Tonnage séance ${currentSessionTypeFilter} (kg)` : 'Tonnage (kg)';
+  const onHero = 'rgba(255, 255, 255, 0.8)';
 
   tonnageChart = new Chart(ctx1, {
     type: 'line',
@@ -882,21 +1097,21 @@ function renderTonnageChart() {
       datasets: [{
         label: lineLabel,
         data: data,
-        borderColor: lineColor,
-        backgroundColor: `${lineColor}22`,
-        borderWidth: 2,
+        borderColor: '#fff',
+        backgroundColor: 'rgba(255, 255, 255, 0.18)',
+        borderWidth: 2.5,
         fill: true,
         tension: 0.3,
-        pointBackgroundColor: lineColor,
-        pointRadius: 4
+        pointBackgroundColor: '#fff',
+        pointRadius: 3
       }]
     },
     options: {
       responsive: true,
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: '#a0a0a0', font: { size: 9 } } },
-        y: { ticks: { color: '#a0a0a0' } }
+        x: { ticks: { color: onHero, font: { size: 9 }, maxTicksLimit: 6 }, grid: { display: false }, border: { display: false } },
+        y: { ticks: { color: onHero, maxTicksLimit: 5 }, grid: { color: 'rgba(255, 255, 255, 0.15)' }, border: { display: false } }
       }
     }
   });
@@ -910,17 +1125,16 @@ function renderExerciseChart() {
 
   const selectEl = document.getElementById('exercise-filter');
   const selectedEx = selectEl ? selectEl.value : '';
+  const isSelected = name => selectedEx === "Mollets"
+    ? (name === "Mollets" || name === "Mollets / Finition")
+    : name === selectedEx;
   let labels = [];
   let chartData = [];
+  let dates = [];
 
   state.history.forEach(h => {
     if (h.exercises) {
-      const exData = h.exercises.find(e => {
-        if (selectedEx === "Mollets") {
-          return e.name === "Mollets" || e.name === "Mollets / Finition";
-        }
-        return e.name === selectedEx;
-      });
+      const exData = h.exercises.find(e => isSelected(e.name));
 
       // On ignore les séances où l'exercice n'a pas été réellement fait (séries à 0 kg / 0 rép.)
       // pour ne pas tracer de faux creux à 0 dans la progression.
@@ -929,6 +1143,7 @@ function renderExerciseChart() {
 
       if (exData && wasPerformed) {
         labels.push(`${h.type} (${formatDate(h.date)})`);
+        dates.push(h.date);
         if (currentExMetricMode === 'volume') {
           chartData.push(exData.totalVolume || 0);
         } else {
@@ -941,8 +1156,31 @@ function renderExerciseChart() {
     }
   });
 
+  // Bande ambre : séances du palier en cours pour cet exercice (règle des 4 dernières séances)
+  let plateauStart = -1;
+  try {
+    const plateau = analyzeMonthlyProgress().plateaus.find(p => isSelected(p.exercise));
+    if (plateau) plateauStart = dates.findIndex(d => d >= plateau.sinceDate);
+  } catch (e) { plateauStart = -1; }
+  const note = document.getElementById('exercise-plateau-note');
+  if (note) note.hidden = plateauStart < 0;
+
+  const bandPlugin = {
+    id: 'plateauBand',
+    beforeDatasetsDraw(chart) {
+      if (plateauStart < 0 || chartData.length === 0) return;
+      const { ctx: c, chartArea, scales } = chart;
+      const step = chartData.length > 1 ? (scales.x.getPixelForValue(1) - scales.x.getPixelForValue(0)) : 0;
+      const left = Math.max(chartArea.left, scales.x.getPixelForValue(plateauStart) - step / 2);
+      c.save();
+      c.fillStyle = CHART_COLORS.band;
+      c.fillRect(left, chartArea.top, chartArea.right - left, chartArea.bottom - chartArea.top);
+      c.restore();
+    }
+  };
+
   const labelTitle = currentExMetricMode === 'volume' ? 'Volume Cumulé (kg)' : 'Charge Max (kg)';
-  const color = currentExMetricMode === 'volume' ? '#ff7f0e' : '#2ca02c';
+  const color = currentExMetricMode === 'volume' ? CHART_COLORS.volume : CHART_COLORS.primary;
 
   exerciseChart = new Chart(ctx, {
     type: 'line',
@@ -953,20 +1191,38 @@ function renderExerciseChart() {
         data: chartData.length ? chartData : [0],
         borderColor: color,
         backgroundColor: `${color}22`,
+        borderWidth: 2.5,
         fill: true,
         tension: 0.2,
-        pointRadius: 4
+        pointRadius: 3
       }]
     },
     options: {
       responsive: true,
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: '#a0a0a0', font: { size: 8 } } },
-        y: { ticks: { color: '#a0a0a0' } }
+        x: { ticks: { color: CHART_COLORS.tick, font: { size: 9 }, maxTicksLimit: 6 }, grid: { display: false } },
+        y: { ticks: { color: CHART_COLORS.tick, maxTicksLimit: 5 }, grid: { color: CHART_COLORS.grid }, border: { display: false } }
       }
-    }
+    },
+    plugins: [bandPlugin]
   });
+}
+
+const HISTORY_MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const HISTORY_DAYS = ['Dim.','Lun.','Mar.','Mer.','Jeu.','Ven.','Sam.'];
+const HISTORY_MONTHS_SHORT = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+
+// « Sam. 10 oct. »
+function formatHistoryDate(dateStr) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr || '');
+  if (!m) return dateStr || '';
+  const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  return `${HISTORY_DAYS[d.getUTCDay()]} ${+m[3]} ${HISTORY_MONTHS_SHORT[+m[2] - 1]}`;
+}
+
+function historyTonnes(kg) {
+  return (parseFloat(kg || 0) / 1000).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 }
 
 function renderHistory() {
@@ -974,43 +1230,69 @@ function renderHistory() {
   if(!container) return;
   container.innerHTML = '';
 
-  [...state.history].reverse().forEach((h, originalIndexReversed) => {
-    const realIndex = state.history.length - 1 - originalIndexReversed;
-    const div = document.createElement('div');
-    div.className = 'history-item';
-    div.style.cursor = 'pointer';
-    div.title = "Cliquez pour modifier cette séance";
-    
-    div.onclick = () => openSessionModal(realIndex);
+  const history = state.history || [];
+  const countEl = document.getElementById('history-count');
+  if (countEl) countEl.textContent = `${history.length} séance${history.length > 1 ? 's' : ''} enregistrée${history.length > 1 ? 's' : ''}`;
 
-    // 1. Définition du badge de déload
-    const deloadBadgeHtml = h.isDeload ? `<span style="font-size:0.7rem; background:#ff980033; color:#ff9800; padding:2px 6px; border-radius:4px; margin-left:6px;"> Deload</span>` : '';
-    
-    // Conversion du tonnage en Tonnes (division par 1000) et formatage
-    const tonnageInTonnes = (parseFloat(h.tonnage || 0) / 1000).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1});
+  // Index réels triés du plus récent au plus ancien, regroupés par mois
+  const order = history.map((h, i) => i).sort((x, y) => {
+    const a = history[x], b = history[y];
+    return a.date < b.date ? 1 : a.date > b.date ? -1 : (b.id || 0) - (a.id || 0);
+  });
+  const groups = [];
+  order.forEach(i => {
+    const key = (history[i].date || '').substring(0, 7);
+    let g = groups[groups.length - 1];
+    if (!g || g.key !== key) { g = { key, items: [], tonnage: 0 }; groups.push(g); }
+    g.items.push(i);
+    g.tonnage += parseFloat(history[i].tonnage) || 0;
+  });
 
-    // 2. Injection du badge dans le HTML de la ligne
-    div.innerHTML = `
-      <div>
-        <span class="badge badge-${h.type}">${h.type}</span>
-        <span style="font-weight:500; margin-left:8px;">${formatDate(h.date)}</span>
-        <span style="font-size:0.75rem; color:var(--text-muted); margin-left:6px;">⏱️️ ${h.duration || 'N/A'}</span>
-        ${deloadBadgeHtml}
-      </div>
-      <div style="font-weight:500; color:#1f77b4;"><strong>${tonnageInTonnes} T</strong></div>
-    `;
-    container.appendChild(div);
+  groups.forEach(g => {
+    const [y, mm] = g.key.split('-');
+    const section = document.createElement('section');
+    section.className = 'history-month';
+    section.innerHTML = `
+      <div class="history-month-head">
+        <h3 class="history-month-title">${HISTORY_MONTHS[(+mm || 1) - 1]} ${y}</h3>
+        <span class="history-month-meta">${g.items.length} séance${g.items.length > 1 ? 's' : ''} · ${historyTonnes(g.tonnage)} T</span>
+      </div>`;
+    const card = document.createElement('div');
+    card.className = 'card history-card';
+
+    g.items.forEach(realIndex => {
+      const h = history[realIndex];
+      const hasDuration = h.duration && h.duration !== 'N/A';
+      const row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'history-item';
+      row.setAttribute('aria-label', `Séance ${h.type} du ${formatDate(h.date)} : modifier`);
+      row.onclick = () => openSessionModal(realIndex);
+      row.innerHTML = `
+        <span class="type-pill type-pill-${h.type} small">${h.type}</span>
+        <span class="history-main">
+          <span class="history-date">${formatHistoryDate(h.date)}${h.isDeload ? ' <span class="deload-tag">Déload</span>' : ''}</span>
+          <span class="history-duration">${hasDuration ? h.duration : 'Durée non enregistrée'}</span>
+        </span>
+        <span class="history-tonnage">${historyTonnes(h.tonnage)} T</span>
+        <span class="history-chevron">${CHEVRON_SVG}</span>`;
+      card.appendChild(row);
+    });
+    section.appendChild(card);
+    container.appendChild(section);
   });
 }
 
 function injectSessionModalHtml() {
   if (document.getElementById('session-modal')) return;
   const modalHtml = `
-    <div id="session-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:1000;">
-      <div style="background:#222; padding:20px; border-radius:8px; width:90%; max-width:300px; text-align:center; color:#fff; border: 1px solid #444;">
-        <h3 id="modal-session-title" style="margin-bottom: 15px; font-size: 1.1rem;">Séance</h3>
-        <button id="modal-edit-btn" style="background:#ff7f0e; border:none; color:white; padding:10px 20px; border-radius:5px; cursor:pointer; width:100%; font-size:1em; margin-bottom: 10px; font-weight:600;">Modifier la séance</button>
-        <button onclick="closeSessionModal()" style="background:#444; border:none; color:white; padding:8px 15px; border-radius:5px; cursor:pointer; width:100%;">Fermer</button>
+    <div id="session-modal" class="modal-overlay" style="display:none;" onclick="if(event.target===this) closeSessionModal()">
+      <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="modal-session-title">
+        <div id="modal-session-pill"></div>
+        <h3 id="modal-session-title" class="modal-title">Séance</h3>
+        <p id="modal-session-meta" class="modal-meta"></p>
+        <button id="modal-edit-btn" class="btn">Modifier la séance</button>
+        <button onclick="closeSessionModal()" class="btn btn-secondary">Fermer</button>
       </div>
     </div>
   `;
@@ -1049,6 +1331,13 @@ function openSessionModal(index) {
   const titleEl = document.getElementById('modal-session-title');
   if (titleEl) {
     titleEl.innerText = `Séance ${session.type} du ${formatDate(session.date)}`;
+  }
+  const pillEl = document.getElementById('modal-session-pill');
+  if (pillEl) pillEl.innerHTML = `<span class="type-pill type-pill-${session.type}">${session.type}</span>`;
+  const metaEl = document.getElementById('modal-session-meta');
+  if (metaEl) {
+    const hasDuration = session.duration && session.duration !== 'N/A';
+    metaEl.textContent = `${formatHistoryDate(session.date)} · ${historyTonnes(session.tonnage)} T · ${hasDuration ? session.duration : 'durée non enregistrée'}`;
   }
   const modal = document.getElementById('session-modal');
   if (modal) {
@@ -1146,30 +1435,55 @@ function analyzeMonthlyProgress() {
   const sortedMonths = Object.keys(monthlyData).sort();
   const monthlyArray = sortedMonths.map(key => monthlyData[key]);
 
-  // 2. Filtrer pour garder seulement les 4 derniers mois
-  const last4Months = sortedMonths.slice(-4);
-  const last4MonthlyData = last4Months.map(key => monthlyData[key]);
+  // 2. Les 4 derniers mois calendaires (mois en cours inclus), même sans séance.
+  // On ne remonte pas avant le premier mois contenant des séances.
+  const now = new Date();
+  const monthKeyFromOffset = offset => {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  };
+  const realMonthKey = monthKeyFromOffset(0);
+  const firstMonthKey = sortedMonths[0];
 
-  // 3. Détecter les records du mois en cours (uniquement le dernier record par exercice)
-  const currentMonthKey = sortedMonths[sortedMonths.length - 1];
-  const currentMonthData = monthlyData[currentMonthKey];
+  const last4MonthlyData = [];
+  for (let offset = 3; offset >= 0; offset--) {
+    const key = monthKeyFromOffset(offset);
+    if (key < firstMonthKey) continue;
+    const [year, month] = key.split('-');
+    last4MonthlyData.push(monthlyData[key] || {
+      year: year,
+      month: month,
+      monthName: monthNames[month] || month,
+      totalTonnage: 0,
+      sessionCount: 0,
+      sessions: [],
+      exercises: {},
+      sessionTypes: { A: 0, B: 0, C: 0 }
+    });
+  }
+
+  // 3. Records battus ce mois-ci (mois calendaire réel, comparés à tout l'historique antérieur)
+  const lastDataMonthKey = sortedMonths[sortedMonths.length - 1];
+  // Dernier mois ayant des séances (sert aux conseils ci-dessous)
+  const currentMonthData = monthlyData[lastDataMonthKey];
+  const thisMonthData = monthlyData[realMonthKey];
   const currentMonthRecords = [];
 
-  allExercises.forEach(exName => {
-    if (currentMonthData.exercises[exName] && currentMonthData.exercises[exName].maxWeights.length > 0) {
-      const currentMax = Math.max(...currentMonthData.exercises[exName].maxWeights);
-      
-      // Trouver le précédent record pour cet exercice (avant le mois en cours)
+  if (thisMonthData) {
+    const earlierMonths = sortedMonths.filter(key => key < realMonthKey);
+    allExercises.forEach(exName => {
+      const thisEx = thisMonthData.exercises[exName];
+      if (!thisEx || thisEx.maxWeights.length === 0) return;
+      const currentMax = Math.max(...thisEx.maxWeights);
+
+      // Meilleure charge avant ce mois-ci pour cet exercice
       let previousMax = 0;
-      for (let i = sortedMonths.length - 2; i >= 0; i--) {
-        const prevMonthKey = sortedMonths[i];
-        if (monthlyData[prevMonthKey].exercises[exName] && monthlyData[prevMonthKey].exercises[exName].maxWeights.length > 0) {
-          const prevMax = Math.max(...monthlyData[prevMonthKey].exercises[exName].maxWeights);
-          if (prevMax > previousMax) {
-            previousMax = prevMax;
-          }
+      earlierMonths.forEach(key => {
+        const prevEx = monthlyData[key].exercises[exName];
+        if (prevEx && prevEx.maxWeights.length > 0) {
+          previousMax = Math.max(previousMax, ...prevEx.maxWeights);
         }
-      }
+      });
 
       if (currentMax > previousMax) {
         currentMonthRecords.push({
@@ -1178,107 +1492,122 @@ function analyzeMonthlyProgress() {
           improvement: currentMax - previousMax
         });
       }
-    }
-  });
+    });
+  }
 
-  // 4. Détecter les paliers (pas de progression en poids OU volume depuis 2+ mois)
-  const plateaus = [];
-  allExercises.forEach(exName => {
-    // Collecter les données mensuelles pour cet exercice
-    const exerciseMonthlyData = [];
-    sortedMonths.forEach(monthKey => {
-      if (monthlyData[monthKey].exercises[exName]) {
-        const maxWeight = monthlyData[monthKey].exercises[exName].maxWeights.length > 0 
-          ? Math.max(...monthlyData[monthKey].exercises[exName].maxWeights) : 0;
-        const totalVolume = monthlyData[monthKey].exercises[exName].volumes.length > 0 
-          ? monthlyData[monthKey].exercises[exName].volumes.reduce((a, b) => a + b, 0) : 0;
-        exerciseMonthlyData.push({ monthKey, maxWeight, totalVolume });
-      }
+  // 4. Détecter les paliers : pour chaque exercice, sur ses 4 dernières séances réalisées
+  // (indépendamment des mois). Il y a palier quand aucune des 3 séances suivantes ne dépasse la plus
+  // ancienne des 4, ni en charge max ni en volume. La série est prolongée tant que c'est vrai.
+  const PLATEAU_WINDOW = 4;
+  const exerciseSessions = {};
+
+  state.history
+    .filter(session => session.date && session.exercises)
+    .slice()
+    .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : (a.id || 0) - (b.id || 0)))
+    .forEach(session => {
+      const perExercise = {};
+      session.exercises.forEach(ex => {
+        const maxWeight = parseFloat(ex.maxWeight) || 0;
+        if (!ex.name || maxWeight <= 0) return; // exercice non réalisé
+        if (!perExercise[ex.name]) {
+          perExercise[ex.name] = { date: session.date, maxWeight: 0, totalVolume: 0 };
+        }
+        perExercise[ex.name].maxWeight = Math.max(perExercise[ex.name].maxWeight, maxWeight);
+        perExercise[ex.name].totalVolume += parseFloat(ex.totalVolume) || 0;
+      });
+      Object.keys(perExercise).forEach(name => {
+        if (!exerciseSessions[name]) exerciseSessions[name] = [];
+        exerciseSessions[name].push(perExercise[name]);
+      });
     });
 
-    if (exerciseMonthlyData.length >= 2) {
-      // Vérifier si les 2 derniers mois ont la même charge max ET le même volume
-      const last2 = exerciseMonthlyData.slice(-2);
-      const last = last2[1];
-      const secondLast = last2[0];
+  const plateaus = [];
+  Object.keys(exerciseSessions).forEach(exName => {
+    const sessions = exerciseSessions[exName];
+    const total = sessions.length;
+    if (total < PLATEAU_WINDOW) return;
 
-      if (last.maxWeight === secondLast.maxWeight && 
-          last.totalVolume === secondLast.totalVolume && 
-          last.maxWeight > 0) {
-        
-        // Vérifier depuis combien de mois c'est stable
-        let stableCount = 2;
-        for (let i = exerciseMonthlyData.length - 3; i >= 0; i--) {
-          const prev = exerciseMonthlyData[i];
-          if (prev.maxWeight === last.maxWeight && prev.totalVolume === last.totalVolume) {
-            stableCount++;
-          } else {
-            break;
-          }
-        }
+    // La plus ancienne des `length` dernières séances n'est battue par aucune des suivantes
+    const holdsOver = length => {
+      const recent = sessions.slice(total - length);
+      const reference = recent[0];
+      return recent.slice(1).every(s =>
+        s.maxWeight <= reference.maxWeight && s.totalVolume <= reference.totalVolume
+      );
+    };
+    if (!holdsOver(PLATEAU_WINDOW)) return;
 
-        if (stableCount >= 2) {
-          const stableSince = exerciseMonthlyData[exerciseMonthlyData.length - stableCount].monthKey;
-          const stableSinceData = monthlyData[stableSince];
-          plateaus.push({
-            exercise: exName,
-            currentMax: last.maxWeight,
-            currentVolume: last.totalVolume,
-            stableSince: `${stableSinceData.monthName} ${stableSinceData.year}`,
-            monthsStable: stableCount
-          });
-        }
+    let length = PLATEAU_WINDOW;
+    while (length < total && holdsOver(length + 1)) length++;
+
+    const latest = sessions[total - 1];
+    plateaus.push({
+      exercise: exName,
+      currentMax: latest.maxWeight,
+      currentVolume: latest.totalVolume,
+      sinceDate: sessions[total - length].date,
+      sessionsCount: length
+    });
+  });
+  plateaus.sort((a, b) => b.sessionsCount - a.sessionsCount);
+
+  // 5. Progression
+  // 5a. Mois dernier vs mois précédent (mois calendaires ; le mois en cours, incomplet, est exclu)
+  let lastVsPreviousDiffPercent = null;
+  const lastMonthKey = monthKeyFromOffset(1);
+  const previousMonthKey = monthKeyFromOffset(2);
+
+  if (previousMonthKey >= firstMonthKey) {
+    const lastTonnage = monthlyData[lastMonthKey] ? monthlyData[lastMonthKey].totalTonnage : 0;
+    const previousTonnage = monthlyData[previousMonthKey] ? monthlyData[previousMonthKey].totalTonnage : 0;
+    if (previousTonnage > 0) {
+      lastVsPreviousDiffPercent = Math.round(((lastTonnage - previousTonnage) / previousTonnage) * 100);
+    }
+  }
+
+  // 5b. Progression par séance (A/B/C) sur l'ensemble de l'historique, sans tenir compte des mois :
+  // médiane du tonnage des (jusqu'à) 3 dernières séances vs les 3 premières, séances de décharge exclues.
+  const median = values => {
+    const sorted = values.slice().sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+  };
+
+  const sessionProgress = {};
+  const typePercents = [];
+  ['A', 'B', 'C'].forEach(type => {
+    const tonnages = state.history
+      .filter(session => session.date && session.type === type && !session.isDeload && (parseFloat(session.tonnage) || 0) > 0)
+      .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : (a.id || 0) - (b.id || 0)))
+      .map(session => parseFloat(session.tonnage));
+
+    let percent = null;
+    if (tonnages.length >= 2) {
+      const n = Math.min(3, Math.floor(tonnages.length / 2));
+      const first = median(tonnages.slice(0, n));
+      const last = median(tonnages.slice(-n));
+      if (first > 0) {
+        percent = Math.round(((last - first) / first) * 100);
+        typePercents.push(percent);
       }
     }
+    sessionProgress[type] = { percent: percent, sessions: tonnages.length };
   });
 
-  // 5. Statistiques globales (comparaison mois dernier vs mois précédent)
-  let overallStats = null;
-  const completeMonths = sortedMonths.filter(m => m !== currentMonthKey);
-  
-  if (completeMonths.length >= 2) {
-    const lastCompleteMonthKey = completeMonths[completeMonths.length - 1];
-    const prevCompleteMonthKey = completeMonths[completeMonths.length - 2];
-    
-    const lastComplete = monthlyData[lastCompleteMonthKey];
-    const prevComplete = monthlyData[prevCompleteMonthKey];
-    
-    const tonnageDiff = lastComplete.totalTonnage - prevComplete.totalTonnage;
-    const tonnageDiffPercent = prevComplete.totalTonnage > 0 
-      ? Math.round((tonnageDiff / prevComplete.totalTonnage) * 100) 
-      : 0;
+  // 5c. Indice de progression global : moyenne des progressions A, B et C disponibles
+  const globalProgressIndex = typePercents.length > 0
+    ? Math.round(typePercents.reduce((sum, value) => sum + value, 0) / typePercents.length)
+    : null;
 
-    // Calculer l'indice de progression global (sur tous les mois complets)
-    let globalProgressIndex = 0;
-    if (completeMonths.length >= 2) {
-      const firstComplete = monthlyData[completeMonths[0]];
-      const lastCompleteTonnage = monthlyData[completeMonths[completeMonths.length - 1]].totalTonnage;
-      if (firstComplete.totalTonnage > 0) {
-        globalProgressIndex = Math.round(
-          ((lastCompleteTonnage - firstComplete.totalTonnage) / firstComplete.totalTonnage) * 100
-        );
-      }
-    }
-
-    overallStats = {
-      lastVsPreviousDiffPercent: tonnageDiffPercent,
-      globalProgressIndex: globalProgressIndex
-    };
-  }
+  const overallStats = {
+    lastVsPreviousDiffPercent: lastVsPreviousDiffPercent,
+    globalProgressIndex: globalProgressIndex,
+    sessionProgress: sessionProgress
+  };
 
   // 6. Conseils personnalisés
   const advice = [];
-
-  // Trouver le pire exercice en palier
-  if (plateaus.length > 0) {
-    const worstPlateau = plateaus.reduce((worst, current) => 
-      current.monthsStable > worst.monthsStable ? current : worst
-    );
-    advice.push({
-      type: 'warning',
-      text: `⚠️ ${worstPlateau.exercise} en palier depuis ${worstPlateau.monthsStable} mois (${worstPlateau.currentMax} kg)`
-    });
-  }
 
   // Détecter déséquilibre entre séances A/B/C
   if (currentMonthData.sessionTypes.A > 0 || currentMonthData.sessionTypes.B > 0 || currentMonthData.sessionTypes.C > 0) {
@@ -1309,7 +1638,7 @@ function analyzeMonthlyProgress() {
 
   return {
     monthlyData: last4MonthlyData,
-    currentMonthKey: currentMonthKey,
+    currentMonthKey: realMonthKey,
     currentMonthRecords: currentMonthRecords,
     plateaus: plateaus,
     overallStats: overallStats,
@@ -1317,242 +1646,130 @@ function analyzeMonthlyProgress() {
   };
 }
 
+// Bloc héros : indice de progression global + pastille « X % vs mois précédent »
+function renderHero(stats) {
+  const idx = document.getElementById('hero-index');
+  const pill = document.getElementById('hero-pill');
+  if (idx) {
+    const g = stats ? stats.globalProgressIndex : null;
+    idx.textContent = (g === null || g === undefined) ? '–' : `${g > 0 ? '+' : ''}${g} %`;
+  }
+  if (pill) {
+    const d = stats ? stats.lastVsPreviousDiffPercent : null;
+    if (d === null || d === undefined) {
+      pill.hidden = true;
+    } else {
+      pill.hidden = false;
+      pill.textContent = `${d > 0 ? '▲ +' : d < 0 ? '▼ ' : ''}${d} % vs mois précédent`;
+    }
+  }
+}
+
 function renderProgressAnalysis() {
   const container = document.getElementById('monthly-analysis');
   if (!container) return;
 
   const analysis = analyzeMonthlyProgress();
+  const stats = analysis.overallStats;
+  renderHero(stats);
   let html = '';
 
   // Si pas de données
   if (analysis.monthlyData.length === 0) {
-    html = `
-      <div class="analysis-empty">
+    container.innerHTML = `
+      <div class="card analysis-empty">
         <p>\ud83d\udcca Aucune donnée disponible.</p>
-        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">
-          Enregistre des séances pour voir ta progression !
-        </p>
-      </div>
-    `;
-    container.innerHTML = html;
+        <p style="font-size: 0.85rem; margin-top: 8px;">Enregistre des séances pour voir ta progression !</p>
+      </div>`;
     return;
   }
 
-  // 1. Résumé mensuel (4 derniers mois max)
-  html += `<div class="monthly-summary">`;
-
+  // 1. 4 derniers mois : barres horizontales (le mois courant en indigo)
+  const maxTonnage = Math.max(...analysis.monthlyData.map(m => m.totalTonnage), 1);
+  html += `<div class="card"><h3 class="analysis-section-title">4 derniers mois</h3><div class="bar-list">`;
   analysis.monthlyData.forEach(month => {
     const tonnageInTonnes = (month.totalTonnage / 1000).toFixed(1);
     const isCurrentMonth = month.year + '-' + month.month === analysis.currentMonthKey;
-    const inProgressText = isCurrentMonth ? '<span class="in-progress-badge">en cours</span>' : '';
-    
+    const monthLabel = isCurrentMonth ? 'Ce mois-ci' : `${month.monthName} ${month.year}`;
+    const width = Math.round((month.totalTonnage / maxTonnage) * 100);
     html += `
-      <div class="month-card">
-        <div class="month-header">
-          <span class="month-name">${month.monthName} ${month.year}</span>
-          <span class="month-sessions">${month.sessionCount} séance${month.sessionCount > 1 ? 's' : ''}</span>
+      <div>
+        <div class="bar-row-head">
+          <span><span class="bar-label">${monthLabel}</span> <span class="bar-meta">· ${month.sessionCount} séance${month.sessionCount > 1 ? 's' : ''}</span></span>
+          <span class="bar-value">${tonnageInTonnes} T</span>
         </div>
-        <div class="month-tonnage">${tonnageInTonnes} T</div>
-        ${inProgressText}
-      </div>
-    `;
+        <div class="bar-track"><div class="bar-fill${isCurrentMonth ? ' current' : ''}" style="width:${width}%"></div></div>
+      </div>`;
   });
+  html += `</div></div>`;
 
-  html += `</div>`;
-
-  // 2. Records battus (uniquement ceux du mois en cours)
+  // 2. Records battus ce mois-ci
   if (analysis.currentMonthRecords.length > 0) {
-    html += `<div class="analysis-section">`;
-    html += `<div class="records-list">`;
-
+    html += `<div class="card"><h3 class="analysis-section-title">Records battus ce mois-ci</h3><div class="records-list">`;
     analysis.currentMonthRecords.forEach(record => {
       html += `
         <div class="record-item">
           <span class="record-exercise">${record.exercise}</span>
           <span class="record-value">${record.newMax} kg</span>
           <span class="record-improvement">+${record.improvement} kg</span>
-        </div>
-      `;
+        </div>`;
     });
-
     html += `</div></div>`;
   }
 
   // 3. Paliers détectés
+  html += `<div class="card"><h3 class="analysis-section-title">Paliers détectés</h3>`;
   if (analysis.plateaus.length > 0) {
-    html += `<div class="analysis-section">`;
     html += `<div class="plateaus-list">`;
-
     analysis.plateaus.forEach(plateau => {
       html += `
         <div class="plateau-item">
           <span class="plateau-exercise">${plateau.exercise}</span>
           <span class="plateau-value">${plateau.currentMax} kg</span>
-          <span class="plateau-duration">stable depuis ${plateau.stableSince}</span>
-        </div>
-      `;
+          <span class="plateau-duration">sans progression depuis le ${plateau.sinceDate.substring(8, 10)}/${plateau.sinceDate.substring(5, 7)} (${plateau.sessionsCount} séances)</span>
+        </div>`;
     });
-
-    html += `</div></div>`;
+    html += `</div>`;
+  } else {
+    html += `<p class="analysis-none">Aucun palier détecté</p>`;
   }
+  html += `</div>`;
 
-  // 4. Statistiques globales
-  if (analysis.overallStats) {
-    html += `<div class="analysis-section">`;
-    html += `<div class="overall-stats">`;
-
-    const diffClass = analysis.overallStats.lastVsPreviousDiffPercent >= 0 ? 'positive' : 'negative';
-    const diffSymbol = analysis.overallStats.lastVsPreviousDiffPercent >= 0 ? '\u25b2' : '\u25bc';
-
-    html += `
-      <div class="stat-item">
-        <span class="stat-label">Mois dernier vs précédent</span>
-        <span class="stat-value ${diffClass}">
-          ${diffSymbol} ${Math.abs(analysis.overallStats.lastVsPreviousDiffPercent)}%
-        </span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Progression globale</span>
-        <span class="stat-value ${analysis.overallStats.globalProgressIndex >= 0 ? 'positive' : 'negative'}">
-          ${analysis.overallStats.globalProgressIndex >= 0 ? '\u25b2' : '\u25bc'} ${Math.abs(analysis.overallStats.globalProgressIndex)}%
-        </span>
-      </div>
-    `;
-
-    html += `</div></div>`;
+  // 4. Progression par séance (A/B/C), sur tout l'historique
+  if (stats) {
+    const types = ['A', 'B', 'C'].filter(t => stats.sessionProgress[t].percent !== null && stats.sessionProgress[t].percent !== undefined);
+    if (types.length > 0) {
+      const maxAbs = Math.max(...types.map(t => Math.abs(stats.sessionProgress[t].percent)), 1);
+      html += `<div class="card"><h3 class="analysis-section-title">Progression par séance</h3>`;
+      types.forEach(t => {
+        const percent = stats.sessionProgress[t].percent;
+        const cls = percent >= 0 ? 'positive' : 'negative';
+        const symbol = percent >= 0 ? '\u25b2' : '\u25bc';
+        const width = Math.max(3, Math.round((Math.abs(percent) / maxAbs) * 100));
+        html += `
+          <div class="progress-row">
+            <span class="type-pill type-pill-${t} small">${t}</span>
+            <div class="bar-track"><div class="bar-fill type-${t}" style="width:${width}%"></div></div>
+            <span class="stat-value ${cls}">${symbol} ${Math.abs(percent)} %</span>
+          </div>`;
+      });
+      html += `<p class="analysis-note">Tonnage médian des 3 dernières séances vs les 3 premières, sur tout l'historique (sans tenir compte des mois). L'indice global est la moyenne des séances A, B et C.</p></div>`;
+    }
   }
 
   // 5. Conseils
   if (analysis.advice.length > 0) {
-    html += `<div class="advice-list">`;
-
+    html += `<div class="card"><div class="advice-list">`;
     analysis.advice.forEach(adviceItem => {
-      const icon = adviceItem.type === 'success' ? '\u2705' : 
-                   adviceItem.type === 'warning' ? '\u26a0\ufe0f' : 
+      const icon = adviceItem.type === 'success' ? '\u2705' :
+                   adviceItem.type === 'warning' ? '\u26a0\ufe0f' :
                    adviceItem.type === 'info' ? '\u2139\ufe0f' : '\ud83d\udcad';
       html += `
         <div class="advice-item advice-${adviceItem.type}">
           <span class="advice-icon">${icon}</span>
           <span class="advice-text">${adviceItem.text}</span>
-        </div>
-      `;
+        </div>`;
     });
-
-    html += `</div>`;
-  }
-
-  container.innerHTML = html;
-}    return;
-  }
-
-  // 1. Résumé mensuel
-  html += `<div class="analysis-section">`;
-  html += `<h3 class="analysis-section-title">📅 Résumé Mensuel</h3>`;
-  html += `<div class="monthly-summary">`;
-
-  analysis.monthlyData.forEach(month => {
-    const tonnageInTonnes = (month.totalTonnage / 1000).toFixed(1);
-    html += `
-      <div class="month-card">
-        <div class="month-header">
-          <span class="month-name">${month.monthName} ${month.year}</span>
-          <span class="month-sessions">${month.sessionCount} séance${month.sessionCount > 1 ? 's' : ''}</span>
-        </div>
-        <div class="month-tonnage">${tonnageInTonnes} T</div>
-      </div>
-    `;
-  });
-
-  html += `</div></div>`;
-
-  // 2. Records battus
-  if (analysis.records.length > 0) {
-    html += `<div class="analysis-section">`;
-    html += `<h3 class="analysis-section-title">🔥 Records Battus</h3>`;
-    html += `<div class="records-list">`;
-
-    analysis.records.forEach(record => {
-      html += `
-        <div class="record-item">
-          <span class="record-exercise">${record.exercise}</span>
-          <span class="record-value">${record.newMax} kg</span>
-          <span class="record-improvement">+${record.improvement} kg vs ${record.month}</span>
-        </div>
-      `;
-    });
-
-    html += `</div></div>`;
-  }
-
-  // 3. Paliers détectés
-  if (analysis.plateaus.length > 0) {
-    html += `<div class="analysis-section">`;
-    html += `<h3 class="analysis-section-title">⚠️ Paliers Détectés</h3>`;
-    html += `<div class="plateaus-list">`;
-
-    analysis.plateaus.forEach(plateau => {
-      html += `
-        <div class="plateau-item">
-          <span class="plateau-exercise">${plateau.exercise}</span>
-          <span class="plateau-value">${plateau.currentMax} kg</span>
-          <span class="plateau-duration">stable depuis ${plateau.stableSince}</span>
-        </div>
-      `;
-    });
-
-    html += `</div></div>`;
-  }
-
-  // 4. Statistiques globales
-  if (analysis.overallStats) {
-    html += `<div class="analysis-section">`;
-    html += `<h3 class="analysis-section-title">📈 Progression Globale</h3>`;
-    html += `<div class="overall-stats">`;
-
-    const diffClass = analysis.overallStats.tonnageDiff >= 0 ? 'positive' : 'negative';
-    const diffSymbol = analysis.overallStats.tonnageDiff >= 0 ? '▲' : '▼';
-    const diffText = analysis.overallStats.tonnageDiff >= 0 
-      ? `+${analysis.overallStats.tonnageDiffPercent}%` 
-      : `${analysis.overallStats.tonnageDiffPercent}%`;
-
-    html += `
-      <div class="stat-item">
-        <span class="stat-label">Ce mois vs mois dernier</span>
-        <span class="stat-value ${diffClass}">
-          ${diffSymbol} ${Math.abs(analysis.overallStats.tonnageDiffPercent)}%
-        </span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Séances ce mois</span>
-        <span class="stat-value">${analysis.overallStats.currentSessions}</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Tonnage ce mois</span>
-        <span class="stat-value">${(analysis.overallStats.currentTonnage / 1000).toFixed(1)} T</span>
-      </div>
-    `;
-
-    html += `</div></div>`;
-  }
-
-  // 5. Conseils
-  if (analysis.advice.length > 0) {
-    html += `<div class="analysis-section">`;
-    html += `<h3 class="analysis-section-title">💡 Conseils</h3>`;
-    html += `<div class="advice-list">`;
-
-    analysis.advice.forEach(adviceItem => {
-      const icon = adviceItem.type === 'success' ? '✅' : 
-                   adviceItem.type === 'warning' ? '⚠️' : 
-                   adviceItem.type === 'info' ? 'ℹ️' : '💭';
-      html += `
-        <div class="advice-item advice-${adviceItem.type}">
-          <span class="advice-icon">${icon}</span>
-          <span class="advice-text">${adviceItem.text}</span>
-        </div>
-      `;
-    });
-
     html += `</div></div>`;
   }
 
@@ -1569,6 +1786,12 @@ function renderCharts() {
   const ctx2 = canvas.getContext('2d');
   if (weightChart) weightChart.destroy();
 
+  const wcur = document.getElementById('weight-current');
+  if (wcur) {
+    const last = state.weights && state.weights.length ? state.weights[state.weights.length - 1].weight : null;
+    wcur.textContent = last === null ? '–' : last;
+  }
+
   weightChart = new Chart(ctx2, {
     type: 'line',
     data: {
@@ -1576,8 +1799,10 @@ function renderCharts() {
       datasets: [{
         label: 'Poids (kg)',
         data: state.weights.map(w => w.weight),
-        borderColor: '#ff7f0e',
-        backgroundColor: '#ff7f0e22',
+        borderColor: CHART_COLORS.success,
+        backgroundColor: CHART_COLORS.success + '22',
+        borderWidth: 2.5,
+        pointRadius: 3,
         fill: true,
         tension: 0.2
       }]
@@ -1586,12 +1811,33 @@ function renderCharts() {
       responsive: true,
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: '#a0a0a0' } },
-        y: { ticks: { color: '#a0a0a0' } }
+        x: { ticks: { color: CHART_COLORS.tick, maxTicksLimit: 6 }, grid: { display: false } },
+        y: { ticks: { color: CHART_COLORS.tick, maxTicksLimit: 5 }, grid: { color: CHART_COLORS.grid }, border: { display: false } }
       }
     }
   });
 }
+
+// Hauteurs de l'en-tête et du bloc fixe de l'onglet Séance (positionnement collant + marge de défilement)
+function updateStickyOffsets() {
+  const header = document.querySelector('header');
+  const sticky = document.getElementById('seance-sticky');
+  if (!header || !sticky) return;
+  const hh = header.offsetHeight;
+  const root = document.documentElement.style;
+  root.setProperty('--header-h', hh + 'px');
+  root.setProperty('--sticky-total', (hh + sticky.offsetHeight) + 'px');
+}
+window.addEventListener('resize', updateStickyOffsets);
+if (typeof ResizeObserver !== 'undefined') {
+  const stickyObserver = new ResizeObserver(updateStickyOffsets);
+  const h0 = document.querySelector('header'), s0 = document.getElementById('seance-sticky');
+  if (h0) stickyObserver.observe(h0);
+  if (s0) stickyObserver.observe(s0);
+}
+
+// Titre affiché en haut de chaque onglet
+const PAGE_TITLES = { programme: 'Programme', seance: 'Séance', progression: 'Graphiques', historique: 'Historique' };
 
 function switchTab(tabName) {
   document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
@@ -1610,6 +1856,11 @@ function switchTab(tabName) {
       timerBtn.style.display = 'none';
     }
   }
+
+  document.body.dataset.tab = tabName;
+  updateStickyOffsets();
+  const pageTitle = document.getElementById('page-title');
+  if (pageTitle) pageTitle.innerText = PAGE_TITLES[tabName] || '';
 
   if (tabName === 'programme') renderProgramOverview();
   if (tabName === 'progression') renderCharts();

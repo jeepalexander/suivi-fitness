@@ -7,6 +7,157 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.3.2] - 2026-10-28
+### 🖼️ Icônes d'exercices sans fond
+- Les 18 icônes sont **détourées** (PNG transparents) et recadrées au plus juste : plus de fond gris propre à chaque image, ni de tuile arrondie derrière. Elles se posent directement sur le fond de la carte, en thème clair comme en thème sombre.
+- Emplacements légèrement agrandis (tuiles du Programme 64 px, ligne d'exercice 48 px, exercice ouvert 60 px) et affichage sans recadrage (`object-fit: contain`).
+- Images redimensionnées en 192×192 : ≈ 490 Ko au total (≈ 690 Ko avant).
+- L'icône d'écran d'accueil (manifest et `apple-touch-icon`) garde l'image d'origine dans `icons/app-icon.png` (une icône transparente s'afficherait sur fond noir) ; ajoutée à `ASSETS` du service worker.
+
+---
+
+## [1.3.1] - 2026-10-28
+### 🌙 Thème sombre
+- **Nouvelle carte « Apparence »** en haut de l'onglet Historique (sous Sauvegarder / Restaurer) : **Clair / Sombre / Auto**. « Auto » suit le réglage du téléphone, y compris quand il change en cours d'utilisation. **Clair par défaut.**
+- Le choix est mémorisé sur l'appareil (`h49_theme`) et n'est pas inclus dans la sauvegarde des séances.
+- Palette sombre « ardoise bleutée » : fond `#0B0F1A`, cartes `#151B2B`, texte `#E8ECF5`. Primaire éclairci pour le texte et les icônes, boutons en indigo `#4F46E5`, vert/ambre éclaircis pour les états. Le bloc héros indigo, les pastilles A/B/C et les icônes d'exercices sont inchangés.
+- **Pas de flash blanc** au lancement : le thème est appliqué par un petit script avant le premier affichage. La couleur de la barre du navigateur (`theme-color`) suit le thème. Barre d'état iOS laissée en `default`.
+- **Graphiques** : couleurs lues depuis les variables CSS (`--chart-*`) et redessinées au changement de thème.
+- Design : nouveaux jetons (`--primary-strong`, `--hero-bg`, `--on-success`, `--danger`, ombres et voile de fenêtre) ; le thème clair reste visuellement identique.
+
+---
+
+## [1.3.0] - 2026-10-28
+### 🔤 Nouvelle police : Chakra Petch
+- **Titres et chiffres** (titres d'écran, poids des séries, indice de progression, tonnages, chrono) passent de Bricolage Grotesque à **Chakra Petch** (600 / 700), plus sportive et technique. Le texte courant reste en Figtree.
+- Police embarquée en local (licence SIL OFL 1.1) et préchargée par le service worker : fonctionne hors-ligne. Les fichiers Bricolage Grotesque sont supprimés.
+- Contrôle en thème clair à 360 px et 390 px : aucun débordement sur les 4 onglets.
+
+---
+
+## [1.2.1] - 2026-10-22
+### 🔧 Écran Séance
+- **En-tête fixe** : le titre, le chrono de pause, la pastille de séance, le déload et la progression (« n / total séries », durée, barre) restent à l'écran pendant le défilement des exercices. Le chrono n'en recouvre plus le contenu.
+- Suppression de la ligne « Prochaine séance : X » sous le titre (redondante) ; en modification, la date est indiquée dans l'étiquette « Modification · jj/mm ».
+
+---
+
+## [1.2.0] - 2026-10-22
+### 🎨 Nouveau design - étape 7/7 : finition (design terminé)
+- **Ligne de contexte** sous le titre (« Prochaine séance : A ») affichée uniquement sur l'onglet Séance.
+- **Mode hors-ligne** : toutes les icônes d'exercices sont désormais préchargées par le service worker (testé en coupant le réseau : 4 onglets et images OK).
+- Contrôle de cohérence : les couleurs restantes écrites en dur sont volontaires (blanc sur le bloc indigo, ombres, fond de fenêtre, couleurs A/B/C nécessaires aux graphiques).
+
+---
+
+## [1.1.17] - 2026-10-22
+### 🎨 Nouveau design - étape 6/7 : Historique
+- **En-tête** : compteur « N séances enregistrées » ; boutons Sauvegarder / Restaurer en haut de page (plus de barre fixe au-dessus de la navigation).
+- **Liste groupée par mois** (titre du mois + « N séances · X T »), chaque ligne affichant pastille de séance, date (« Sam. 10 oct. »), durée (ou « Durée non enregistrée »), tonnage et chevron ; pastille « Déload » le cas échéant.
+- **Fenêtre de modification** restylée (pastille, résumé de la séance, boutons aux couleurs du thème) ; elle se ferme aussi en touchant le fond.
+
+---
+
+## [1.1.16] - 2026-10-22
+### 🎨 Nouveau design - étape 5/7 : Graphiques et analyse
+- **Bloc héros indigo** : indice de progression global en grand, pastille « X % vs mois précédent », filtres Séances / Par mois / A·B·C et courbe de volume blanche.
+- **4 derniers mois** en barres horizontales (le mois courant en indigo, libellé « Ce mois-ci »).
+- **Records**, **paliers** et **progression par séance** (A/B/C en barres colorées) présentés en cartes séparées.
+- **Progression par exercice** : bascule Charge max / Volume cumulé et bande ambre sur les séances du palier en cours.
+- **Poids corporel** : valeur actuelle en grand, courbe et champ d'ajout restylés.
+
+---
+
+## [1.1.15] - 2026-10-22
+### 🎨 Nouveau design - étape 4/7 : écran Séance
+- **En-tête de séance** : pastille A/B/C, nom de la séance, pastille « Déload actif » et barre de progression des séries avec durée.
+- **Exercices en accordéon** : un seul exercice ouvert à la fois (le suivant s'ouvre quand l'exercice est terminé), résumé « N séries · charges » sur les exercices fermés.
+- **Exercice ouvert** : ligne « Dernière fois · N kg max » (calculée depuis l'historique), boutons − / + pour le nombre de séries, grandes cases Kg / Réps et validation par coche.
+- **Chrono** : puce flottante avec icône horloge, qui ne masque plus l'exercice ouvert.
+
+---
+
+## [1.1.14] - 2026-10-21
+### 🎨 Nouveau design - étape 3/7 : écran Programme
+- **Carte « Prochaine séance »** : pastille de la séance (A/B/C), nom, pastille « Déload actif » si besoin,
+  gros bouton « Démarrer la séance » (ouvre l'onglet Séance) et rappel d'échauffement.
+- **« Au programme »** : exercices de la prochaine séance en grille de 3 colonnes (icône + nom).
+- **« Ensuite »** : les deux autres séances sur une ligne chacune ; un appui déplie la liste de leurs exercices.
+- Le rappel d'échauffement du haut de page est intégré à la carte.
+
+---
+
+## [1.1.13] - 2026-10-21
+### 🎨 Nouveau design - étape 2/7 : en-tête et navigation
+- **Navigation flottante** : barre blanche arrondie, détachée des bords et du bas de l'écran, avec icônes
+  fines ; l'onglet actif est sur fond indigo clair.
+- **En-tête de page** : grand titre de l'onglet (Programme, Séance, Graphiques, Historique) avec, au-dessus,
+  le nom de l'application et sa version, et en dessous le contexte (ex. « Prochaine séance : A »).
+- **Chrono de repos** : devient une puce flottante en haut à droite, toujours accessible pendant la séance.
+- Barre de sauvegarde de l'onglet Historique repositionnée au-dessus de la navigation.
+- Aucun changement de fonctionnement.
+
+---
+
+## [1.1.12] - 2026-10-20
+### 🎨 Nouveau design - étape 1/7 : polices et thème clair
+- Thème clair indigo (fond clair, cartes blanches, couleur principale indigo) appliqué à toute l'application,
+  via des variables CSS (jetons de design) réutilisables pour les étapes suivantes.
+- Nouvelles polices embarquées en local (fonctionnent hors-ligne) : Bricolage Grotesque (titres et chiffres)
+  et Figtree (texte). Remplace Inter.
+- Couleurs des séances A/B/C et des graphiques mises à jour (contraste renforcé).
+- Fenêtre de séance, badge de déload, tuiles du programme et barre d'état du téléphone adaptés au thème clair.
+- Aucun changement de fonctionnement.
+
+---
+
+## [1.1.11] - 2026-10-18
+### 📊 Améliorations
+- **Paliers détectés** : la détection se fait désormais **par exercice, sur ses 4 dernières séances réalisées**
+  (indépendamment des mois). Il y a palier quand aucune des 3 séances suivantes ne dépasse la plus ancienne des 4,
+  ni en charge max ni en volume. La série est prolongée tant que c'est vrai (« depuis le JJ/MM (N séances) »).
+  Remplace le calcul basé sur les mois (1.1.10).
+- Conseil « palier » supprimé (doublon avec la section « Paliers détectés »).
+
+---
+
+## [1.1.10] - 2026-10-18
+### 📊 Améliorations
+- **Analyse mensuelle (onglet Graphiques)** :
+  - Les « 4 derniers mois » sont désormais des mois calendaires : le dernier bloc est toujours « Ce mois-ci »,
+    même sans séance (0 séance, 0,0 T), et un mois sans séance est affiché à 0 au lieu d'être sauté.
+    On ne remonte pas avant le premier mois contenant des séances.
+  - « Mois dernier vs précédent » se base aussi sur les mois calendaires.
+  - Nouvelle section « Paliers détectés » (avec le message « Aucun palier détecté » quand il n'y en a pas).
+  - **Détection des paliers corrigée** : l'ancien calcul exigeait un volume mensuel strictement identique d'un mois
+    à l'autre (donc ne se déclenchait quasiment jamais). Un exercice est désormais en palier si, sur les 2 derniers
+    mois complets, sa charge max ET son volume mensuel ne progressent pas (mois en cours exclu, exercice pratiqué le
+    mois dernier). Affichage « sans progression depuis … ».
+  - Conseil « palier » : suppression de l'icône ⚠️ en double.
+
+---
+
+## [1.1.9] - 2026-10-18
+### 📊 Améliorations
+- **Analyse mensuelle (onglet Graphiques)** :
+  - Titre de section « 4 derniers mois » ; le bloc du mois en cours s'intitule « Ce mois-ci » (badge « en cours » supprimé).
+  - Titre « Records battus ce mois-ci » (records calculés sur le mois calendaire réel).
+  - Nouvelle section « Progression » :
+    - conservation du calcul mois dernier vs mois précédent ;
+    - **indice de progression global** sur l'ensemble des séances, sans tenir compte des mois (moyenne des progressions A, B et C), qui remplace l'ancien calcul basé sur le premier mois complet ;
+    - **pourcentage de progression par séance** (A, B, C) : tonnage médian des 3 dernières séances vs les 3 premières, séances de décharge exclues.
+  - Le mois en cours est désormais déterminé par la date du jour (et non plus par le dernier mois contenant des séances).
+
+---
+
+## [1.1.8] - 2026-10-18
+### 🐛 Corrections
+- **Plantage de l'application sur DEV** : `app.js` contenait une erreur de syntaxe (reste de l'ancienne
+  fonction `renderProgressAnalysis()` laissé après la nouvelle version, introduit en 1.1.7), ce qui empêchait
+  tout le script de se charger. Code orphelin supprimé.
+
+---
+
 ## [1.1.7] - 2026-10-18
 ### 📊 Améliorations
 - **Analyse mensuelle de progression** dans l'onglet Graphiques :
