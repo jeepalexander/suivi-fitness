@@ -7,6 +7,11 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.3.3] - 2026-10-29
+### 🚀 Mise en production
+- Fusion de `dev` dans `main` : la branche principale reprend le design v1.2.0 (thème indigo, navigation flottante, écrans refaits), la police Chakra Petch (v1.3.0), le thème sombre Clair / Sombre / Auto (v1.3.1) et les icônes d'exercices détourées (v1.3.2).
+- Aucun changement fonctionnel par rapport à la v1.3.2 ; seuls les numéros de version (`manifest.json`, `APP_VERSION` du service worker) sont incrémentés pour forcer la mise à jour sur le smartphone.
+
 ## [1.3.2] - 2026-10-28
 ### 🖼️ Icônes d'exercices sans fond
 - Les 18 icônes sont **détourées** (PNG transparents) et recadrées au plus juste : plus de fond gris propre à chaque image, ni de tuile arrondie derrière. Elles se posent directement sur le fond de la carte, en thème clair comme en thème sombre.
