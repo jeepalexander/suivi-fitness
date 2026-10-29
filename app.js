@@ -1933,7 +1933,7 @@ function updateStickyOffsets() {
   const hh = header.offsetHeight;
   const root = document.documentElement.style;
   root.setProperty('--header-h', hh + 'px');
-  root.setProperty('--sticky-total', (hh + sticky.offsetHeight) + 'px');
+  root.setProperty('--sticky-total', hh + 'px'); // l'en-tête contient désormais la bannière
 }
 window.addEventListener('resize', updateStickyOffsets);
 if (typeof ResizeObserver !== 'undefined') {

@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.3.6] - 2026-10-29
+### 📌 Bannière de séance stable
+- L'**en-tête (titre) et la bannière** (nom de la séance, déload, progression, durée) forment désormais **un seul bloc collé en haut** de l'onglet Séance : plus de décalage de 15 px au premier défilement, plus de deux éléments collants indépendants qui pouvaient se désynchroniser (Android / barre d'adresse).
+- La marge de défilement des exercices s'appuie sur la hauteur de ce bloc unique.
+
+---
+
 ## [1.3.5] - 2026-10-29
 ### 🔠 Polices +1 px
 - **Toutes les tailles de police augmentent d'1 px** (59 règles CSS : titres, chiffres, libellés, boutons, navigation, pastilles ; texte de base 17 px) ainsi que les textes des **graphiques** (légendes 13 px, dates de l'axe 10 px).

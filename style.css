@@ -573,9 +573,10 @@ select.filter-select { background: var(--bg); border: 1px solid var(--border); c
 #modal-session-pill { display: flex; justify-content: center; }
 
 
-/* Séance : en-tête + progression fixes à l'écran pendant le défilement */
-body[data-tab="seance"] header { position: sticky; top: 0; z-index: 100; background: var(--bg); }
-.seance-sticky { position: sticky; top: var(--header-h, 85px); z-index: 99; background: var(--bg); margin: 0 -15px 6px; padding: 6px 15px 8px; box-shadow: var(--shadow-sticky); }
+/* Séance : en-tête + bannière (nom, progression, durée) forment UN SEUL bloc collé en haut de l'écran */
+body[data-tab="seance"] header { position: sticky; top: 0; z-index: 100; background: var(--bg); box-shadow: var(--shadow-sticky); padding-bottom: 0; }
+.seance-sticky { display: none; margin: 0 -20px; padding: 6px 20px 8px; }
+body[data-tab="seance"] .seance-sticky { display: block; }
 .seance-sticky .workout-progress { margin-bottom: 0; }
 .seance-sticky #deload-subtitle { margin-bottom: 10px; }
 .seance-sticky .session-head { margin-bottom: 10px; }

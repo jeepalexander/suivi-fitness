@@ -44,20 +44,6 @@
       <h1 id="page-title">Programme</h1>
     </div>
 
-    <!-- BOUTON CHRONO REPOS (flottant, visible sur l'onglet Séance) -->
-    <button id="timer-btn" class="timer-btn" onclick="toggleRestTimer()">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5M9 3h6"/></svg>
-      <span id="timer-display">PAUSE</span>
-    </button>
-  </header>
-
-  <!-- TAB 0: PROGRAMME GLOBAL -->
-  <div id="tab-programme" class="container active">
-    <div id="program-overview"></div>
-  </div>
-
-  <!-- TAB 1: SÉANCE DU JOUR -->
-  <div id="tab-seance" class="container">
     <div id="seance-sticky" class="seance-sticky">
     <div class="session-head">
       <span id="seance-badge" class="type-pill type-pill-A">A</span>
@@ -77,6 +63,21 @@
       <div class="progress-track"><div id="sets-progress-bar" class="progress-fill"></div></div>
     </div>
     </div>
+
+    <!-- BOUTON CHRONO REPOS (flottant, visible sur l'onglet Séance) -->
+    <button id="timer-btn" class="timer-btn" onclick="toggleRestTimer()">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5M9 3h6"/></svg>
+      <span id="timer-display">PAUSE</span>
+    </button>
+  </header>
+
+  <!-- TAB 0: PROGRAMME GLOBAL -->
+  <div id="tab-programme" class="container active">
+    <div id="program-overview"></div>
+  </div>
+
+  <!-- TAB 1: SÉANCE DU JOUR -->
+  <div id="tab-seance" class="container">
 
     <p class="warmup-note">🚣 Échauffement : Rameur 1000 m + 2 séries légères sur le 1er mouvement.</p>
 
