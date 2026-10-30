@@ -1,87 +1,104 @@
-# \ud83c\udfcb Suivi Fitness
+# 🏋 Suivi Fitness
 
-**Application PWA de suivi d'entra\u00eenement en salle de sport**
+**Application PWA de suivi d'entraînement en salle de sport**
 
-[![Version](https://img.shields.io/badge/version-1.1.6-blue)](https://github.com/jeepalexander/suivi-fitness)
+[![Version](https://img.shields.io/badge/version-1.3.8-blue)](https://github.com/jeepalexander/suivi-fitness)
 [![License](https://img.shields.io/badge/license-MIT-green)]
 
 ---
 
-## \ud83d\uccc Fonctionnalit\u00e9s
+## ✨ Fonctionnalités
 
-\u2705 **Programmes d'entra\u00eenement** A/B/C avec 17 exercices personnalisables
-\u2705 **Suivi des s\u00e9ances** avec historique d\u00e9taill\u00e9 (poids, r\u00e9p\u00e9titions, tonnage)
-\u2705 **Graphiques de progression** (Volume Total, Progression par Exercice, Poids Corporel)
-\u2705 **Analyse mensuelle** avec d\u00e9tection de records et paliers
-\u2705 **Gestion automatique du deload** (semaines 10-12)
-\u2705 **Chronom\u00e8tre de repos** (2 min) avec notifications sonores
-\u2705 **Mode hors-ligne** complet (PWA avec Service Worker)
-\u2705 **Export/Import** des donn\u00e9es en JSON
-\u2705 **Design responsive** optimis\u00e9 pour mobile
-
----
-
-## \ud83d\ude80 Installation
-
-1. **En ligne** : Ouvrir [l'application](https://jeepalexander.github.io/suivi-fitness) dans un navigateur mobile
-2. **Installation PWA** : Ajouter \u00e0 l'\u00e9cran d'accueil depuis votre navigateur
-3. **Local** : Cl\u00f4ner le d\u00e9p\u00f4t et ouvrir `index.html` dans un navigateur
+- ✅ **Programmes d'entraînement** A/B/C avec exercices personnalisables et charges par défaut
+- ✅ **Suivi des séances** : poids, répétitions, séries, tonnage, durée et historique détaillé
+- ✅ **Brouillon de séance** : la saisie en cours est sauvegardée automatiquement et restaurée après un rechargement ou une fermeture de l’application
+- ✅ **Graphiques de progression** : volume total, progression par exercice et poids corporel
+- ✅ **Analyse mensuelle** : records, paliers détectés par exercice et progression par séance A/B/C
+- ✅ **Gestion automatique du deload** (semaines 10-12)
+- ✅ **Chronomètre de séance** et **timer de repos** de 2 minutes avec notification sonore
+- ✅ **Thème clair, sombre ou automatique**, mémorisé sur l’appareil
+- ✅ **Interface mobile optimisée** : en-tête fixe, navigation basse stable et zone de contenu défilante
+- ✅ **Mode hors-ligne complet** (PWA avec Service Worker)
+- ✅ **Export / Import** des données au format JSON
 
 ---
 
-## \ud83d\udcc Utilisation
+## 🚀 Installation
+
+1. **En ligne** : ouvrir [l’application](https://jeepalexander.github.io/suivi-fitness) dans un navigateur mobile.
+2. **Installation PWA** : ajouter l’application à l’écran d’accueil depuis le navigateur.
+3. **En local** : cloner le dépôt puis ouvrir `index.html` dans un navigateur.
+
+---
+
+## 📱 Utilisation
 
 ### Programme
-- Affichage des exercices pour les s\u00e9ances A, B et C
-- Indications des charges par d\u00e9faut
 
-### S\u00e9ance
-- Saisie des poids et r\u00e9p\u00e9titions pour chaque exercice
-- Chronom\u00e8tre int\u00e9gr\u00e9 pour le temps de s\u00e9ance
-- Timer de repos entre les s\u00e9ries
+- Affichage de la prochaine séance A, B ou C.
+- Liste des exercices prévus, avec icônes et charges par défaut.
+- Indication du deload lorsqu’il est actif.
+
+### Séance
+
+- Saisie des poids et répétitions pour chaque série.
+- Ajout ou suppression de séries par exercice.
+- Suggestions basées sur les dernières charges réellement effectuées.
+- Chronomètre de séance et timer de repos.
+- Sauvegarde automatique du brouillon pendant la séance.
 
 ### Graphiques
-- Visualisation du volume total par s\u00e9ance
-- Progression par exercice (charge max ou volume)
-- Analyse mensuelle automatique avec d\u00e9tection de records et paliers
+
+- Volume total par séance, avec filtre A / B / C.
+- Progression par exercice : charge maximale ou volume cumulé.
+- Suivi du poids corporel.
+- Analyse mensuelle : records, paliers et évolution du tonnage.
 
 ### Historique
-- Liste de toutes les s\u00e9ances enregistr\u00e9es
-- Export/Import des donn\u00e9es
+
+- Liste des séances groupée par mois.
+- Consultation et modification des séances passées.
+- Sauvegarde et restauration des données en JSON.
+- Choix du thème : clair, sombre ou automatique.
 
 ---
 
-## \ud83d\ud27 Contribuer
+## 🗂 Structure du projet
 
-Les contributions sont les bienvenues ! Ouvrir une PR ou un issue pour :
-- Rapport de bugs
-- Suggestions de fonctionnalit\u00e9s
-- Am\u00e9liorations du code
-
----
-
-## \ud83d\udc68 Structure du projet
-
-```
+```text
 suivi-fitness/
-\u251c\u2500\u2500 index.html          # Page principale
-\u251c\u2500\u2500 app.js              # Logique de l'application
-\u251c\u2500\u2500 style.css           # Styles
-\u251c\u2500\u2500 sw.js               # Service Worker (PWA)
-\u251c\u2500\u2500 manifest.json       # Configuration PWA
-\u251c\u2500\u2500 data.json           # Donn\u00e9es par d\u00e9faut
-\u251c\u2500\u2500 CHANGELOG.md         # Historique des versions
-\u2514\u2500\u2500 icons/              # Ic\u00f4nes des exercices
+├── index.html          # Page principale
+├── app.js              # Logique de l’application
+├── style.css           # Styles et thèmes
+├── sw.js               # Service Worker (PWA)
+├── manifest.json       # Configuration PWA
+├── data.json           # Données par défaut
+├── CHANGELOG.md        # Historique des versions
+├── js/                 # Bibliothèques locales
+├── css/                # Styles complémentaires
+├── fonts/              # Polices embarquées
+└── icons/              # Icônes de l’application et des exercices
 ```
 
 ---
 
-## \ud83c\udf11 Pr\u00e9requis
+## 🔄 Mise à jour de version
 
-Aucun ! L'application fonctionne avec HTML/CSS/JS natif.
+À chaque release, incrémenter simultanément :
+
+- `version` dans `manifest.json` ;
+- `APP_VERSION` dans `sw.js`.
+
+Le changement du Service Worker permet au navigateur de mettre à jour le cache et donc l’application sur les appareils déjà installés.
 
 ---
 
-## \ud83d\udca1 License
+## 🌙 Prérequis
+
+Aucun. L’application fonctionne avec HTML, CSS et JavaScript natifs.
+
+---
+
+## 📄 Licence
 
 MIT
