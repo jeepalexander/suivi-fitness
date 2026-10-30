@@ -7,6 +7,26 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.4.0] - 2026-10-30
+### 📊 Détection fine de la stagnation
+- Nouvelle carte **« Stagnation fine »** dans l’onglet Graphiques.
+- Pour chaque exercice, comparaison des **3 dernières séances réellement effectuées hors déload** aux **3 séances précédentes**.
+- Analyse simultanée de la **charge maximale** et du **volume**, afin d’éviter qu’une progression de volume soit masquée par une charge stable.
+- Statuts distincts : **Progression**, **Stagnation** et **Régression**.
+- Affichage du détail chiffré : charge et volume des deux périodes, nombre de séances analysées et date du dernier record.
+- Les séances de déload, les séries non effectuées et les exercices avec moins de 4 séances valides sont exclus de l’analyse.
+- Mise à jour automatique lors du changement d’onglet et après modification de l’historique.
+
+---
+
+## [1.3.9] - 2026-10-30
+### 🛡️ Durcissement sécurité
+- Ajout d’une **Content-Security-Policy** limitant scripts, styles, images, polices et connexions à la même origine.
+- Ajout de `js/security.js` : les sauvegardes JSON importées sont analysées et les caractères `<` / `>` sont retirés de toutes les chaînes afin de prévenir l’injection HTML ou JavaScript.
+- `js/security.js` est préchargé par le service worker pour rester actif hors-ligne.
+
+---
+
 ## [1.3.8] - 2026-10-29
 ### 🧭 Navigation du bas immobile dans le navigateur
 - Seule une **zone centrale défile** (`#app-scroll`) ; le document lui-même ne défile plus. Dans Chrome (onglet normal), la barre d'adresse ne se replie donc plus et la barre de navigation du bas ne « saute » plus pendant le défilement.
@@ -145,7 +165,7 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [1.1.12] - 2026-10-20
 ### 🎨 Nouveau design - étape 1/7 : polices et thème clair
-- Thème clair indigo (fond clair, cartes blanches, couleur principale indigo) appliqué à toute l'application,
+- Thème clair indigo (fond clair, cartes blanches, couleur principale indigo) appliquée à toute l'application,
   via des variables CSS (jetons de design) réutilisables pour les étapes suivantes.
 - Nouvelles polices embarquées en local (fonctionnent hors-ligne) : Bricolage Grotesque (titres et chiffres)
   et Figtree (texte). Remplace Inter.
@@ -290,7 +310,7 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [1.0.3] - 2026-10-17
 ### 🐛 Corrections
-- Modification d'une séance : le compteur de durée n'affiche plus un « 00:00 » trompeur. Il indique désormais la durée enregistrée de la séance (libellé « Durée enregistrée »), ou « N/A » si elle n'était pas renseignée.
+- Modification d'une séance : le compteur de durée n'affiche plus un « 00:00 » trompeur. Il indique désormais la durée enregistrée de la séance (libellé « Durée enregistrée »), ou « N/A » si la durée n'était pas renseignée.
 - Le chrono ne démarre plus tout seul lors de la saisie d'une série pendant une modification, ce qui évite d'écraser la durée d'origine par « < 1 min ».
 
 ---
@@ -299,7 +319,7 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ### 🐛 Corrections
 - Modification d'une séance : l'originale n'est plus supprimée de l'historique dès l'ouverture du formulaire. Elle n'est remplacée qu'à la validation, ce qui évite toute perte de données si l'on quitte l'application en cours de modification.
 - La durée et le statut de déload d'origine sont conservés lors de la modification d'une séance.
-- La modification d'une ancienne séance ne change plus les dernières charges utilisées pour les suggestions.
+- La modification d'une ancienne séance ne change pas les dernières charges utilisées pour les suggestions.
 - Correction de la date de la version 1.0.0 dans ce changelog (11/10/2024 → 31/10/2025, date du premier dépôt).
 
 ### 🪶 Ajouts

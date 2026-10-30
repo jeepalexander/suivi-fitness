@@ -116,6 +116,12 @@
 
     <div id="monthly-analysis" class="progress-analysis"></div>
 
+    <div class="card" id="fine-plateau-card">
+      <h3 class="analysis-section-title">Stagnation fine</h3>
+      <p class="analysis-note">Compare les 3 dernières séances effectuées hors déload aux 3 précédentes, par exercice, en charge maximale et en volume.</p>
+      <div id="fine-plateau-list"></div>
+    </div>
+
     <div class="card">
       <h3 class="analysis-section-title">Progression par exercice</h3>
       <select id="exercise-filter" class="filter-select" onchange="renderExerciseChart()">
@@ -195,6 +201,9 @@
 
   <!-- Durcissement sécurité : assainissement des sauvegardes importées -->
   <script src="js/security.js"></script>
+
+  <!-- Analyse fine de stagnation -->
+  <script src="js/analysis.js"></script>
 
   <!-- Enregistrement du Service Worker (mode hors-ligne) -->
   <script>
