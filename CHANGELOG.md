@@ -7,18 +7,6 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
-## [1.4.0] - 2026-10-30
-### 📊 Détection fine de la stagnation
-- Nouvelle carte **« Stagnation fine »** dans l’onglet Graphiques.
-- Pour chaque exercice, comparaison des **3 dernières séances réellement effectuées hors déload** aux **3 séances précédentes**.
-- Analyse simultanée de la **charge maximale** et du **volume**, afin d’éviter qu’une progression de volume soit masquée par une charge stable.
-- Statuts distincts : **Progression**, **Stagnation** et **Régression**.
-- Affichage du détail chiffré : charge et volume des deux périodes, nombre de séances analysées et date du dernier record.
-- Les séances de déload, les séries non effectuées et les exercices avec moins de 4 séances valides sont exclus de l’analyse.
-- Mise à jour automatique lors du changement d’onglet et après modification de l’historique.
-
----
-
 ## [1.3.9] - 2026-10-30
 ### 🛡️ Durcissement sécurité
 - Ajout d’une **Content-Security-Policy** limitant scripts, styles, images, polices et connexions à la même origine.
