@@ -41,6 +41,7 @@
 
   /* Valeurs d'une série à faire : volontairement pâles (suggestions non saisies) */
   --todo: #A9A9B1;
+  --indigo: #3730E3;           /* indigo d'origine : progression de séance, chrono prêt */
 
   /* États */
   --success: #0B7A43;
@@ -117,6 +118,7 @@
   --pill-chip: rgba(17, 17, 20, 0.08);
   --pill-track: #D4D4DA;
   --todo: #5C5C66;
+  --indigo: #9AA1FF;
 
   --success: #3DD68C;
   --success-tint: #0F2A1F;
@@ -661,9 +663,9 @@ header h1 { font-size: 2.625rem; letter-spacing: -0.01em; }
 .container { padding: 6px var(--gutter) 0; }
 
 /* Chrono de repos : prêt (blanc) · en cours (encre) · terminé (rouge) */
-.timer-btn { top: 18px; right: calc(var(--gutter) - 6px); height: 44px; padding: 0 16px 0 12px; border: none; border-radius: 22px; background: var(--surface); color: var(--text); box-shadow: var(--sh-card); font-size: 1rem; }
-.timer-btn.running { background: var(--pill-bg); color: var(--pill-ink); box-shadow: var(--sh-pill); }
-.timer-btn.finished { background: var(--accent); color: #fff; box-shadow: var(--sh-red); }
+.timer-btn { top: 18px; right: calc(var(--gutter) - 6px); height: 44px; padding: 0 16px 0 12px; border: 1px solid var(--border); border-radius: 22px; background: var(--card-bg); color: var(--indigo); box-shadow: var(--sh-card); font-size: 1rem; }
+.timer-btn.running { background: var(--success); border-color: var(--success); color: var(--on-success); }
+.timer-btn.finished { background: var(--accent-c); border-color: var(--accent-c); color: #fff; box-shadow: none; }
 
 /* Navigation : pastille flottante, l'onglet actif porte son libellé */
 nav { left: 30px; right: 30px; max-width: 508px; height: 64px; padding: 0 8px; display: flex; align-items: center; justify-content: space-between; gap: 0; background: var(--surface); border: none; border-radius: 32px; box-shadow: var(--sh-card); }
@@ -681,7 +683,7 @@ nav button svg { width: 24px; height: 24px; flex: none; }
 .btn-secondary { background: var(--fill); color: var(--text); border: none; box-shadow: none; height: 52px; font-weight: 600; }
 .backup-card { padding: 0; }
 .backup-card .btn { height: 52px; padding: 0 8px; font-size: 1rem; }
-.watch-memo { background: var(--fill); border: none; color: var(--text-muted); border-radius: 25px; padding: 14px; font-weight: 600; }
+.watch-memo { background: var(--warn-tint); border: 1px solid var(--warn-border); color: var(--warn); border-radius: 25px; padding: 14px; font-weight: 600; }
 select.filter-select, .weight-field { background: var(--fill); border: none; border-radius: 25px; height: 52px; padding: 0 20px; color: var(--text); }
 .weight-add { width: auto; height: 52px; padding: 0 22px; margin: 0; }
 
@@ -754,7 +756,7 @@ select.filter-select, .weight-field { background: var(--fill); border: none; bor
 .btn-set-count { background: var(--fill); border: none; }
 .workout-meta-bar { background: var(--fill); border: none; border-radius: 25px; }
 .progress-track { height: 8px; background: var(--fill); }
-.progress-fill { background: var(--primary-strong); }
+.progress-fill { background: var(--indigo); }
 
 /* Graphiques */
 .hero-card { border-radius: 34px; padding: 22px 20px 14px; box-shadow: var(--sh-card); margin-bottom: 30px; }

@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.4.2] - 2026-11-01
+### 🎨 Retour aux couleurs d'origine sur trois éléments de la Séance
+- Rappel « N'oublie pas d'arrêter le suivi de ta montre ! » : ambre d'origine.
+- Badge du chrono de repos : fond de carte avec bordure et texte indigo (prêt), vert (en cours), rouge de séance C (terminé), comme avant.
+- Barre de progression des séries de la séance : indigo d'origine (`--indigo`, `#3730E3` en clair, `#9AA1FF` en sombre).
+
+---
+
 ## [1.4.1] - 2026-11-01
 ### 🎯 Ajustements du design après usage
 - **Titre d'exercice sur une seule ligne** : l'exercice ouvert n'est plus enfermé dans une carte (icône 52 px, nom 18 px, boutons − / + 40 px), ce qui laisse la place au nom, même « Développé militaire », à 360 et 390 px.
