@@ -2,7 +2,7 @@
 
 **Application PWA de suivi d'entraînement en salle de sport**
 
-[![Version](https://img.shields.io/badge/version-1.3.8-blue)](https://github.com/jeepalexander/suivi-fitness)
+[![Version](https://img.shields.io/badge/version-1.4.2-blue)](https://github.com/jeepalexander/suivi-fitness)
 [![License](https://img.shields.io/badge/license-MIT-green)]
 
 ---
@@ -16,10 +16,10 @@
 - ✅ **Analyse mensuelle** : records, paliers détectés par exercice et progression par séance A/B/C
 - ✅ **Gestion automatique du deload** (semaines 10-12)
 - ✅ **Chronomètre de séance** et **timer de repos** de 2 minutes avec notification sonore
-- ✅ **Thème clair, sombre ou automatique**, mémorisé sur l’appareil
+- ✅ **Design « Blanc minimaliste »** : fond uni, peu de couleurs, ombres légères, en thème **clair, sombre ou automatique** (mémorisé sur l’appareil)
 - ✅ **Interface mobile optimisée** : en-tête fixe, navigation basse stable et zone de contenu défilante
 - ✅ **Mode hors-ligne complet** (PWA avec Service Worker)
-- ✅ **Export / Import** des données au format JSON
+- ✅ **Export / Import** des données au format JSON, avec assainissement des fichiers importés et Content-Security-Policy
 
 ---
 
@@ -35,13 +35,13 @@
 
 ### Programme
 
-- Affichage de la prochaine séance A, B ou C.
-- Liste des exercices prévus, avec icônes et charges par défaut.
-- Indication du deload lorsqu’il est actif.
+- Grand bloc « Prochaine séance » (A, B ou C) avec nombre d’exercices et de séries, et bouton de démarrage.
+- Exercices prévus en grille d’icônes, puis aperçu des deux séances suivantes.
+- Pastille de deload (ambre) lorsqu’il est actif.
 
 ### Séance
 
-- Saisie des poids et répétitions pour chaque série.
+- Saisie des poids et répétitions pour chaque série : valeurs suggérées en pâle, série en cours surélevée, série validée en vert.
 - Ajout ou suppression de séries par exercice.
 - Suggestions basées sur les dernières charges réellement effectuées.
 - Chronomètre de séance et timer de repos.
@@ -74,8 +74,8 @@ suivi-fitness/
 ├── manifest.json       # Configuration PWA
 ├── data.json           # Données par défaut
 ├── CHANGELOG.md        # Historique des versions
-├── js/                 # Bibliothèques locales
-├── css/                # Styles complémentaires
+├── js/                 # Bibliothèques locales (Chart.js) et security.js
+├── css/                # Styles complémentaires (polices)
 ├── fonts/              # Polices embarquées
 └── icons/              # Icônes de l’application et des exercices
 ```
