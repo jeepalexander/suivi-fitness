@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.4.1] - 2026-11-01
+### 🎯 Ajustements du design après usage
+- **Titre d'exercice sur une seule ligne** : l'exercice ouvert n'est plus enfermé dans une carte (icône 52 px, nom 18 px, boutons − / + 40 px), ce qui laisse la place au nom, même « Développé militaire », à 360 et 390 px.
+- **Séries : le vert signale une série validée** (comme avant), le rouge n'est plus utilisé pour les séries. Série en cours = ligne surélevée avec case cerclée d'encre ; série validée = case verte avec coche.
+- **Valeurs d'une série à faire en pâle** (suggestions non saisies, contraste volontairement bas) ; elles passent en encre dès qu'on les saisit ou que la série devient la série en cours. Valable en thème clair et sombre.
+- **Badges Déload** : retour aux couleurs ambre d'origine (accueil, séance, historique), l'éclair suit la couleur du texte.
+
+---
+
 ## [1.4.0] - 2026-10-31
 ### 🎨 Nouveau design « Blanc minimaliste » (thèmes clair et sombre)
 - Fond uni, très peu de couleurs : encre noire (blanc cassé en sombre), rouge pour l'action, violet pour le bloc de progression globale. Plus de cartes ni de bordures ; des ombres basses et denses là où elles aident la lecture.

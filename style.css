@@ -39,6 +39,9 @@
   --pill-chip: rgba(255, 255, 255, 0.14);
   --pill-track: rgba(255, 255, 255, 0.22);
 
+  /* Valeurs d'une série à faire : volontairement pâles (suggestions non saisies) */
+  --todo: #A9A9B1;
+
   /* États */
   --success: #0B7A43;
   --success-tint: #DDF3E6;
@@ -113,6 +116,7 @@
   --pill-muted: #6B6B73;
   --pill-chip: rgba(17, 17, 20, 0.08);
   --pill-track: #D4D4DA;
+  --todo: #5C5C66;
 
   --success: #3DD68C;
   --success-tint: #0F2A1F;
@@ -708,12 +712,11 @@ select.filter-select, .weight-field { background: var(--fill); border: none; bor
 .next-card-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-top: 16px; }
 .next-card-info { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; min-width: 0; }
 .next-card-count { color: var(--pill-muted); font-size: 0.9375rem; }
-.next-card .deload-pill { background: var(--pill-chip); color: var(--pill-ink); }
 .btn-start { width: 62px; height: 62px; flex: none; margin: 0; padding: 0; border: none; border-radius: 50%; background: var(--accent); color: #fff; box-shadow: var(--sh-red); cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .btn-start svg { width: 26px; height: 26px; }
 .btn-start:active { opacity: 0.85; }
-.deload-pill { background: var(--fill); border: none; color: var(--text); padding: 6px 12px; }
-.deload-pill svg { stroke: var(--accent); fill: var(--accent); stroke-width: 1.6; }
+/* Pastille de déload : ambre d'origine (v1.4.1) */
+.deload-pill { background: var(--warn-tint); border: 1px solid var(--warn-border); color: var(--warn); padding: 5px 12px; }
 .warmup-note { color: var(--text-muted); font-size: 0.875rem; }
 .section-block { margin-top: 26px; margin-bottom: 0; gap: 12px; }
 .section-label { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; }
@@ -726,21 +729,28 @@ select.filter-select, .weight-field { background: var(--fill); border: none; bor
 
 /* Séance */
 .exercise-item { background: none; border: none; border-radius: 30px; padding: 8px 0; margin-bottom: 4px; }
-.exercise-item.open { background: var(--surface); padding: 16px; margin: 8px 0 14px; box-shadow: var(--sh-card); border-radius: 30px; }
-.sets-head { grid-template-columns: 22px minmax(0, 1fr) minmax(0, 1fr) 50px; gap: 12px; padding: 0 8px 4px 4px; }
-.set-row { grid-template-columns: 22px minmax(0, 1fr) minmax(0, 1fr) 50px; gap: 12px; padding: 6px 8px 6px 4px; border-radius: 26px; }
+.exercise-item.open { background: none; padding: 8px 0; margin: 10px 0 14px; box-shadow: none; border-radius: 0; }
+.exercise-item.open .ex-icon-badge { width: 52px; height: 52px; }
+.exercise-item.open .ex-toggle { gap: 12px; }
+.exercise-item.open .ex-name { font-size: 1.125rem; font-weight: 700; white-space: nowrap; }
+.exercise-item.open .ex-controls { gap: 8px; }
+.exercise-item.open .btn-set-count { width: 40px; height: 40px; }
+.exercise-item.open .ex-body { margin-top: 12px; }
+@media (max-width: 380px) { .exercise-item.open .ex-icon-badge { width: 44px; height: 44px; } .exercise-item.open .ex-toggle { gap: 8px; } .exercise-item.open .ex-name { font-size: 1.0625rem; } .exercise-item.open .ex-controls { gap: 6px; } }
+.sets-head { grid-template-columns: 30px minmax(0, 1fr) minmax(0, 1fr) 50px; gap: 10px; padding: 0 8px 4px 4px; }
+.set-row { grid-template-columns: 30px minmax(0, 1fr) minmax(0, 1fr) 50px; gap: 10px; padding: 6px 8px 6px 4px; border-radius: 26px; }
 .sets-grid { gap: 2px; }
-.set-label { font-size: 0.9375rem; color: var(--text-muted); }
+.set-label { font-size: 0.9375rem; color: var(--todo); }
 .set-row.current .set-label { color: var(--text); }
 .set-row.done .set-label { color: var(--text-muted); }
-.set-input { height: 50px; border: none; border-radius: 25px; background: var(--fill); font-size: 1.5rem; }
-.set-input:focus { border: none; background: var(--fill); box-shadow: inset 0 0 0 2px var(--primary); }
+.set-input { height: 50px; border: none; border-radius: 25px; background: var(--fill); font-size: 1.5rem; color: var(--todo); }
+.set-input:focus { color: var(--text); border: none; background: var(--fill); box-shadow: inset 0 0 0 2px var(--primary); }
 .set-row.current { background: var(--surface); box-shadow: var(--sh-card); }
 .set-row.current .set-input { border: none; background: var(--fill); }
 .set-row.done .set-input { background: transparent; color: var(--text-muted); }
 .btn-check-set { width: 50px; height: 50px; border: none; border-radius: 25px; background: var(--fill); color: var(--text-muted); }
-.set-row.current .btn-check-set { border: none; background: var(--accent); color: #fff; box-shadow: var(--sh-red); }
-.set-row.done .btn-check-set { background: var(--primary-strong); color: var(--on-strong); box-shadow: none; }
+.set-row.current .btn-check-set { border: none; background: var(--surface); color: var(--text); box-shadow: inset 0 0 0 2px var(--text); }
+.set-row.done .btn-check-set { background: var(--success); color: var(--on-success); box-shadow: none; }
 .btn-set-count { background: var(--fill); border: none; }
 .workout-meta-bar { background: var(--fill); border: none; border-radius: 25px; }
 .progress-track { height: 8px; background: var(--fill); }
@@ -758,8 +768,8 @@ select.filter-select, .weight-field { background: var(--fill); border: none; bor
 .history-item { border-bottom: none; min-height: 62px; padding: 8px 0; }
 .history-month-head { margin: 22px 0 6px; }
 .history-month-title { font-size: 1.5rem; }
-.deload-tag { display: inline-flex; align-items: center; gap: 3px; background: var(--fill); color: var(--text); border: none; padding: 2px 8px; }
-.deload-tag svg { width: 11px; height: 11px; fill: var(--accent); stroke: var(--accent); stroke-width: 1.6; }
+.deload-tag { display: inline-flex; align-items: center; gap: 3px; background: var(--warn-tint); color: var(--warn); border: 1px solid var(--warn-border); padding: 1px 8px 1px 6px; }
+.deload-tag svg { width: 11px; height: 11px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .danger-zone { border-top: none; }
 
 /* Fenêtres */
