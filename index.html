@@ -11,7 +11,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="theme-color" content="#F2F4F7">
+  <meta name="theme-color" content="#FFFFFF">
   <meta name="apple-mobile-web-app-title" content="SUIVI FITNESS">
 
   <!-- Thème : résolu avant le premier affichage pour éviter tout flash (clair par défaut) -->
@@ -22,7 +22,7 @@
         var dark = p === 'dark' || (p === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
         document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
         var m = document.querySelector('meta[name="theme-color"]');
-        if (m) m.setAttribute('content', dark ? '#0B0F1A' : '#F2F4F7');
+        if (m) m.setAttribute('content', dark ? '#0E0E11' : '#FFFFFF');
       } catch (e) {}
     })();
   </script>
@@ -172,19 +172,19 @@
 
   <!-- NAVIGATION -->
   <nav>
-    <button onclick="switchTab('programme')" id="nav-programme" class="active">
+    <button onclick="switchTab('programme')" id="nav-programme" aria-label="Programme" class="active">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
       Programme
     </button>
-    <button onclick="switchTab('seance')" id="nav-seance">
+    <button onclick="switchTab('seance')" id="nav-seance" aria-label="Séance">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>
       Séance
     </button>
-    <button onclick="switchTab('progression')" id="nav-progression">
+    <button onclick="switchTab('progression')" id="nav-progression" aria-label="Graphiques">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>
       Graphiques
     </button>
-    <button onclick="switchTab('historique')" id="nav-historique">
+    <button onclick="switchTab('historique')" id="nav-historique" aria-label="Historique">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l3 2"/></svg>
       Historique
     </button>

@@ -70,7 +70,7 @@ const SESSION_TYPES = ['A', 'B', 'C'];
 const SESSION_TYPE_COLORS = { A: '#1B6FD8', B: '#C2570C', C: '#C62B35' };
 // Couleurs des graphiques : valeurs de repli (thème clair). Elles sont relues depuis
 // les variables --chart-* de style.css à chaque changement de thème (voir readChartColors).
-const CHART_COLORS = { primary: '#3730E3', success: '#0B7A43', volume: '#C2570C', tick: '#5B6577', grid: '#E3E7ED', band: 'rgba(246, 213, 139, 0.45)' };
+const CHART_COLORS = { primary: '#111114', success: '#0B7A43', volume: '#C2570C', tick: '#6B6B73', grid: '#EEEEF1', band: 'rgba(246, 213, 139, 0.45)' };
 if (typeof Chart !== 'undefined') {
   Chart.defaults.font.family = "'Figtree', system-ui, sans-serif";
   Chart.defaults.font.size = 13; // 12 par défaut, +1 comme le reste de l'interface
@@ -81,7 +81,7 @@ if (typeof Chart !== 'undefined') {
 // La préférence est stockée sur l'appareil (h49_theme), hors de l'état exporté.
 // Clair par défaut. Le script de index.html pose data-theme avant le premier affichage.
 const THEME_KEY = 'h49_theme';
-const THEME_BAR_COLORS = { light: '#F2F4F7', dark: '#0B0F1A' };
+const THEME_BAR_COLORS = { light: '#FFFFFF', dark: '#0E0E11' };
 let themeMediaQuery = null;
 
 function getThemePreference() {
@@ -283,9 +283,11 @@ function renderProgramOverview() {
   const startIdx = SESSION_ORDER.indexOf(nextType);
   const others = [1, 2].map(i => SESSION_ORDER[(startIdx + i) % SESSION_ORDER.length]);
 
+  const BOLT_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>';
   const deloadHtml = checkDeloadStatus()
-    ? `<span class="deload-pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>Déload actif · −20 %</span>`
+    ? `<span class="deload-pill">${BOLT_SVG}Déload actif · −20 %</span>`
     : '';
+  const totalSets = next.exercises.reduce((n, ex) => n + ex.seriesCount, 0);
 
   const othersHtml = others.map(type => `
     <div class="next-row-wrap">
@@ -299,21 +301,20 @@ function renderProgramOverview() {
   `).join('');
 
   container.innerHTML = `
-    <div class="card next-card">
-      <div class="session-head">
-        <span class="type-pill type-pill-${nextType}">${nextType}</span>
-        <div class="session-head-text">
-          <span class="overline">Prochaine séance</span>
-          <span class="session-name">${next.title.replace('/', ' / ')}</span>
+    <div class="next-card">
+      <span class="overline">Prochaine séance · <span class="type-letter type-letter-${nextType}">${nextType}</span></span>
+      <span class="session-name">${next.title.replace('/', ' / ')}</span>
+      <div class="next-card-row">
+        <div class="next-card-info">
+          <span class="next-card-count">${next.exercises.length} exercices · ${totalSets} séries</span>
+          ${deloadHtml}
         </div>
+        <button type="button" class="btn-start" aria-label="Démarrer la séance" onclick="switchTab('seance')">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
       </div>
-      ${deloadHtml}
-      <button type="button" class="btn btn-start" onclick="switchTab('seance')">
-        Démarrer la séance
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </button>
-      <p class="warmup-note">🚣 Échauffement : Rameur 1000 m + 2 séries légères uniquement sur le 1er exercice.</p>
     </div>
+    <p class="warmup-note">🚣 Échauffement : Rameur 1000 m + 2 séries légères uniquement sur le 1er exercice.</p>
 
     <div class="section-block">
       <h2 class="section-label">Au programme · ${next.exercises.length} exercices</h2>
@@ -1378,7 +1379,7 @@ function renderHistory() {
       row.innerHTML = `
         <span class="type-pill type-pill-${h.type} small">${h.type}</span>
         <span class="history-main">
-          <span class="history-date">${formatHistoryDate(h.date)}${h.isDeload ? ' <span class="deload-tag">Déload</span>' : ''}</span>
+          <span class="history-date">${formatHistoryDate(h.date)}${h.isDeload ? ' <span class="deload-tag"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>Déload</span>' : ''}</span>
           <span class="history-duration">${hasDuration ? h.duration : 'Durée non enregistrée'}</span>
         </span>
         <span class="history-tonnage">${historyTonnes(h.tonnage)} T</span>

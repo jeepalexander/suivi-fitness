@@ -7,6 +7,18 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.4.0] - 2026-10-31
+### 🎨 Nouveau design « Blanc minimaliste » (thèmes clair et sombre)
+- Fond uni, très peu de couleurs : encre noire (blanc cassé en sombre), rouge pour l'action, violet pour le bloc de progression globale. Plus de cartes ni de bordures ; des ombres basses et denses là où elles aident la lecture.
+- **Programme** : grand bloc « Prochaine séance » (noir en clair, **blanc cassé en sombre**) avec bouton rouge rond ; exercices en grille 3 × 2 d'icônes sans cadre, avec ombre portée.
+- **Navigation** : pastille flottante, l'onglet actif affiche son libellé (libellés accessibles conservés pour les lecteurs d'écran).
+- **Séance** : champs en pastilles, série en cours surélevée avec validation rouge, séries validées en grisé ; chrono de repos prêt / en cours / terminé.
+- **Pastilles A / B / C** en cercles de couleur ; pastille et tag **Déload** avec éclair rouge (accueil, séance, historique).
+- **Graphiques** : bloc violet conservé dans les deux thèmes ; courbes et graduations aux couleurs du thème.
+- Gris secondaire assombri pour respecter le contraste 4,5:1. Aucun changement de données ni de logique.
+
+---
+
 ## [1.3.9] - 2026-10-30
 ### 🛡️ Durcissement sécurité
 - Ajout d’une **Content-Security-Policy** limitant scripts, styles, images, polices et connexions à la même origine.
