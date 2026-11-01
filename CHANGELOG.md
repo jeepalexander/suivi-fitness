@@ -8,7 +8,10 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 
 ## [1.5.2] - 2026-11-01
-### ⚙️ Nouveaux icones
+### 🎨 Nouvelles icônes d'exercices
+- Les icônes d'exercices sont remplacées par de nouveaux visuels (`icons/*.png`).
+- Elles sont plus détaillées donc plus lourdes (≈ 2,2 Mo au total, contre ≈ 0,5 Mo avant) : la première installation / mise à jour télécharge davantage ; ensuite tout est servi hors-ligne depuis le cache.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.5.2.
 
 ---
 
