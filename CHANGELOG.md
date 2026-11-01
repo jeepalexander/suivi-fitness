@@ -7,6 +7,18 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.4.3] - 2026-11-01
+### ✅ Seules les séries cochées sont enregistrées
+- Les valeurs suggérées mais non validées ne sont plus ajoutées à l'historique : tonnage, records et paliers ne comptent que les séries cochées. Un exercice sans série cochée n'apparaît pas dans la séance enregistrée.
+- Aucune série cochée : l'enregistrement est refusé.
+- Série cochée avec un poids ou des répétitions invalides (vide, 0, répétitions non entières) : refus, l'exercice s'ouvre et le champ à corriger prend le focus.
+- **Séance partielle : confirmation** (« Enregistrer N séries cochées ? M séries non cochées seront ignorées »).
+- Modification d'une ancienne séance : les séries déjà enregistrées reviennent cochées, les autres restent à cocher.
+- Les dernières charges ne mémorisent que les séries cochées ; message de fin avec le nombre de séries enregistrées ; courte phrase d'aide au-dessus du bouton d'enregistrement.
+- Aucun changement de design.
+
+---
+
 ## [1.4.2] - 2026-11-01
 ### 🎨 Retour aux couleurs d'origine sur trois éléments de la Séance
 - Rappel « N'oublie pas d'arrêter le suivi de ta montre ! » : ambre d'origine.

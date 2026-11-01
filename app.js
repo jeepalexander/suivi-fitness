@@ -594,13 +594,13 @@ function renumberSets(grid) {
 }
 
 // Gabarit d'une ligne de série (utilisé à la création du formulaire et par le bouton +)
-function setRowHtml(exName, number, weightVal, repsVal) {
+function setRowHtml(exName, number, weightVal, repsVal, done = false) {
   return `
-    <div class="set-row">
+    <div class="set-row${done ? ' done' : ''}">
       <span class="set-label">${number}</span>
       <input type="number" step="0.5" inputmode="decimal" class="set-input weight-input" data-ex="${exName}" aria-label="Série ${number}, poids en kg" placeholder="kg" value="${weightVal}" oninput="markInputActive(this)">
       <input type="number" inputmode="numeric" class="set-input reps-input" data-ex="${exName}" aria-label="Série ${number}, répétitions" placeholder="reps" value="${repsVal}" oninput="markInputActive(this)">
-      <button type="button" class="btn-check-set" aria-pressed="false" aria-label="Valider la série ${number}" onclick="toggleSetDone(this)">${CHECK_SVG}</button>
+      <button type="button" class="btn-check-set" aria-pressed="${done ? 'true' : 'false'}" aria-label="Valider la série ${number}" onclick="toggleSetDone(this)">${CHECK_SVG}</button>
     </div>
   `;
 }
@@ -928,16 +928,19 @@ function initWorkoutForm(customSession = null) {
       let weightVal = ex.defaultWeight;
       let repsVal = ex.defaultReps;
 
+      let preChecked = false;
       if (existingEx && existingEx.sets && existingEx.sets[s - 1]) {
         weightVal = existingEx.sets[s - 1].weight;
         repsVal = existingEx.sets[s - 1].reps;
+        // En modification : une série déjà enregistrée (valeurs positives) revient cochée
+        preChecked = Number(weightVal) > 0 && Number(repsVal) > 0;
       } else {
         const lastSet = getSuggestedSetValues(ex.name, s - 1, ex.defaultWeight, ex.defaultReps);
         weightVal = lastSet.weight;
         repsVal = lastSet.reps;
       }
 
-      rowsHtml += setRowHtml(ex.name, s, weightVal, repsVal);
+      rowsHtml += setRowHtml(ex.name, s, weightVal, repsVal, preChecked);
     }
 
     div.dataset.ex = ex.name;
@@ -979,23 +982,57 @@ document.addEventListener('submit', function(e) {
     if (!state.lastWeights) state.lastWeights = {};
     const isEditing = editingOriginalId !== null;
 
-    const weights = document.querySelectorAll('.weight-input');
-    const reps = document.querySelectorAll('.reps-input');
+    // Seules les séries cochées sont enregistrées (v1.4.3)
+    const setRows = Array.from(document.querySelectorAll('#exercises-list .set-row'));
+    const validatedRows = setRows.filter(row => row.classList.contains('done'));
 
-    weights.forEach((wInput, idx) => {
-      const w = parseFloat(wInput.value) || 0;
-      const r = parseFloat(reps[idx].value) || 0;
+    if (validatedRows.length === 0) {
+      alert("Aucune série n'est cochée. Valide au moins une série avec la coche avant d'enregistrer la séance.");
+      return;
+    }
+
+    // Une série cochée doit avoir un poids et un nombre de répétitions valides
+    for (const row of validatedRows) {
+      const wInput = row.querySelector('.weight-input');
+      const rInput = row.querySelector('.reps-input');
+      const w = Number(wInput.value);
+      const r = Number(rInput.value);
+      if (wInput.value === '' || !Number.isFinite(w) || w <= 0 || rInput.value === '' || !Number.isInteger(r) || r <= 0) {
+        const item = row.closest('.exercise-item');
+        const items = Array.from(document.querySelectorAll('#exercises-list .exercise-item'));
+        const number = Array.from(row.parentElement.children).indexOf(row) + 1;
+        manualOpenExercise = items.indexOf(item);
+        refreshExerciseStates();
+        alert(`La série ${number} de « ${item.dataset.ex} » est cochée, mais son poids ou ses répétitions ne sont pas valides.`);
+        (wInput.value === '' || !Number.isFinite(w) || w <= 0 ? wInput : rInput).focus();
+        return;
+      }
+    }
+
+    // Séance partielle : confirmation avant d'ignorer les séries non cochées
+    const uncheckedCount = setRows.length - validatedRows.length;
+    if (uncheckedCount > 0) {
+      const okS = validatedRows.length > 1 ? 's' : '';
+      const noS = uncheckedCount > 1 ? 's' : '';
+      const ignored = uncheckedCount > 1 ? 'seront ignorées' : 'sera ignorée';
+      if (!confirm(`Enregistrer ${validatedRows.length} série${okS} cochée${okS} ?\n\n${uncheckedCount} série${noS} non cochée${noS} ${ignored}.`)) return;
+    }
+
+    validatedRows.forEach((row) => {
+      const wInput = row.querySelector('.weight-input');
+      const w = Number(wInput.value);
+      const r = Number(row.querySelector('.reps-input').value);
       const exName = wInput.dataset.ex;
       const setVolume = w * r;
 
       totalTonnage += setVolume;
-      
+
       let exLog = exerciseLogs.find(e => e.name === exName);
       if(!exLog) {
         exLog = { name: exName, sets: [], maxWeight: 0, totalVolume: 0 };
         exerciseLogs.push(exLog);
       }
-      
+
       exLog.sets.push({ weight: w, reps: r });
       exLog.totalVolume += setVolume;
       if(w > exLog.maxWeight) {
@@ -1003,8 +1040,7 @@ document.addEventListener('submit', function(e) {
       }
 
       // On ne touche pas aux dernières charges quand on corrige une ancienne séance
-      // et on ne mémorise pas les séries non faites (0 kg / 0 rép.)
-      if (!isEditing && w > 0 && r > 0) state.lastWeights[exName] = w;
+      if (!isEditing) state.lastWeights[exName] = w;
     });
 
     // En modification sans chrono lancé, on garde la durée d'origine (même si elle n'était pas renseignée)
@@ -1048,7 +1084,7 @@ document.addEventListener('submit', function(e) {
     // Actualise la bannière de déload en temps réel
     displayDeloadNotificationIfNeeded();
 
-    alert(`${isEditing ? 'Séance modifiée' : 'Séance enregistrée'} !\n• Temps : ${sessionDuration || 'N/A'}\n• Tonnage réel : ${Math.round(totalTonnage).toLocaleString()} kg`);
+    alert(`${isEditing ? 'Séance modifiée' : 'Séance enregistrée'} !\n• Temps : ${sessionDuration || 'N/A'}\n• Séries enregistrées : ${validatedRows.length}\n• Tonnage réel : ${Math.round(totalTonnage).toLocaleString()} kg`);
     
     initWorkoutForm();
     renderHistory();

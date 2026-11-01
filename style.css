@@ -776,3 +776,5 @@ select.filter-select, .weight-field { background: var(--fill); border: none; bor
 
 /* Fenêtres */
 .modal-sheet { border: none; border-radius: 34px; padding: 28px 24px 24px; }
+
+.submit-hint { text-align: center; color: var(--text-muted); font-size: 0.875rem; margin: 14px 0 -2px; }

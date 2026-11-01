@@ -2,7 +2,7 @@
 
 **Application PWA de suivi d'entraînement en salle de sport**
 
-[![Version](https://img.shields.io/badge/version-1.4.2-blue)](https://github.com/jeepalexander/suivi-fitness)
+[![Version](https://img.shields.io/badge/version-1.4.3-blue)](https://github.com/jeepalexander/suivi-fitness)
 [![License](https://img.shields.io/badge/license-MIT-green)]
 
 ---
@@ -46,6 +46,7 @@
 - Suggestions basées sur les dernières charges réellement effectuées.
 - Chronomètre de séance et timer de repos.
 - Sauvegarde automatique du brouillon pendant la séance.
+- Seules les séries cochées sont enregistrées ; une confirmation s’affiche si la séance est partielle.
 
 ### Graphiques
 
