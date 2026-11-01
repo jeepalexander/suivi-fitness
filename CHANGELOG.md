@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.4.4] - 2026-11-01
+### 🧹 Rangement de `app.js` (aucun changement de comportement ni de design)
+- Sommaire en tête de fichier et 16 sections aux séparateurs uniformes (constantes, état, thème, données, déload, Programme, chronos, brouillon, Séance, Historique, Graphiques, analyse, navigation, import/export, démarrage).
+- Variables globales regroupées dans une seule section « État », avec leur rôle commenté.
+- Fonctions remises dans un ordre logique ; le gestionnaire d'enregistrement de séance devient une fonction nommée, `submitWorkout`.
+- Vérifié : le code est identique ligne à ligne, hors cette fonction nommée.
+
+---
+
 ## [1.4.3] - 2026-11-01
 ### ✅ Seules les séries cochées sont enregistrées
 - Les valeurs suggérées mais non validées ne sont plus ajoutées à l'historique : tonnage, records et paliers ne comptent que les séries cochées. Un exercice sans série cochée n'apparaît pas dans la séance enregistrée.

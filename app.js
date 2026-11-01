@@ -1,3 +1,29 @@
+// Suivi Fitness : logique de l'application (JavaScript natif, aucune dépendance sauf Chart.js local).
+// Toutes les fonctions et variables sont globales : les boutons de index.html les appellent par leur nom (onclick).
+// L'ordre des sections ci-dessous n'a pas d'importance pour les fonctions, mais les constantes (1) et les
+// variables d'état (2) doivent rester en tête, car certaines s'initialisent à partir des constantes.
+//
+// SOMMAIRE
+//   1. CONSTANTES ET DONNÉES DU PROGRAMME
+//   2. ÉTAT DE L'APPLICATION (variables globales)
+//   3. THÈME CLAIR / SOMBRE / AUTO
+//   4. DONNÉES : SAUVEGARDE ET OUTILS COMMUNS
+//   5. DÉLOAD (SEMAINE DE RELÂCHE)
+//   6. ÉCRAN PROGRAMME
+//   7. CHRONOS : REPOS ET DURÉE DE SÉANCE
+//   8. BROUILLON DE SÉANCE
+//   9. ÉCRAN SÉANCE : SÉRIES ET EXERCICES
+//  10. ÉCRAN SÉANCE : FORMULAIRE ET ENREGISTREMENT
+//  11. ÉCRAN HISTORIQUE ET MODIFICATION D'UNE SÉANCE
+//  12. ÉCRAN GRAPHIQUES : FILTRES ET COURBES
+//  13. ANALYSE MENSUELLE DE PROGRESSION
+//  14. NAVIGATION ET DISPOSITION
+//  15. SAUVEGARDE, IMPORT ET RÉINITIALISATION
+//  16. DÉMARRAGE
+
+// ============================================================
+// 1. CONSTANTES ET DONNÉES DU PROGRAMME
+// ============================================================
 const EXERCISE_ICONS = {
   "Presse à cuisses": "icons/leg_press.png",
   "Développé couché": "icons/bench_press.png",
@@ -59,31 +85,86 @@ const PROGRAM = {
   }
 };
 
-let state = null;
-let restTimerInterval = null;
-const REST_DURATION = 120;
-let workoutTimerInterval = null;
-let workoutSeconds = 0;
-let tonnageChart, exerciseChart, weightChart;
-let currentVolumeFilter = 'all'; // 'all' (séances), 'month' (par mois) ou 'type' (séance A/B/C)
 const SESSION_TYPES = ['A', 'B', 'C'];
 const SESSION_TYPE_COLORS = { A: '#1B6FD8', B: '#C2570C', C: '#C62B35' };
+const SESSION_ORDER = ['A', 'B', 'C'];
+const REST_DURATION = 120;
+
 // Couleurs des graphiques : valeurs de repli (thème clair). Elles sont relues depuis
 // les variables --chart-* de style.css à chaque changement de thème (voir readChartColors).
 const CHART_COLORS = { primary: '#111114', success: '#0B7A43', volume: '#C2570C', tick: '#6B6B73', grid: '#EEEEF1', band: 'rgba(246, 213, 139, 0.45)' };
+
 if (typeof Chart !== 'undefined') {
   Chart.defaults.font.family = "'Figtree', system-ui, sans-serif";
   Chart.defaults.font.size = 13; // 12 par défaut, +1 comme le reste de l'interface
   Chart.defaults.color = CHART_COLORS.tick;
 }
 
-// --- Thème clair / sombre / auto ---
 // La préférence est stockée sur l'appareil (h49_theme), hors de l'état exporté.
 // Clair par défaut. Le script de index.html pose data-theme avant le premier affichage.
 const THEME_KEY = 'h49_theme';
+
 const THEME_BAR_COLORS = { light: '#FFFFFF', dark: '#0E0E11' };
+
+const CHECK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const MINUS_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"/></svg>';
+const PLUS_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>';
+const CHEVRON_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+
+const HISTORY_MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const HISTORY_DAYS = ['Dim.','Lun.','Mar.','Mer.','Jeu.','Ven.','Sam.'];
+const HISTORY_MONTHS_SHORT = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+
+// Titre affiché en haut de chaque onglet
+const PAGE_TITLES = { programme: 'Programme', seance: 'Séance', progression: 'Graphiques', historique: 'Historique' };
+
+// La saisie en cours (poids, reps, séries validées, nombre de séries, exercice ouvert, chrono)
+// est copiée dans localStorage à chaque action et restaurée au rechargement de l'application
+// (tirer pour rafraîchir, application fermée par le système...). Elle est effacée à l'enregistrement
+// de la séance et abandonnée au bout de 24 h.
+const DRAFT_KEY = 'h49_draft';
+const DRAFT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+// ============================================================
+// 2. ÉTAT DE L'APPLICATION (variables globales)
+// ============================================================
+// Données de l'application (historique, poids, dernières charges) : remplacées seulement par initApp, importData et resetData
+let state = null;
+
+// Chronos : minuteries en cours et secondes écoulées de la séance
+let restTimerInterval = null;
+let workoutTimerInterval = null;
+let workoutSeconds = 0;
+
+// Graphiques : instances Chart.js (gardées pour les détruire avant de redessiner) et état des boutons de filtre
+let tonnageChart, exerciseChart, weightChart;
+let currentVolumeFilter = 'all'; // 'all' (séances), 'month' (par mois) ou 'type' (séance A/B/C)
+let currentSessionTypeFilter = SESSION_TYPES[0];
+let currentExMetricMode = 'max';
+
+// Thème : écouteur du réglage clair/sombre du téléphone
 let themeMediaQuery = null;
 
+// Modification d'une séance : editingOriginalId est l'interrupteur (null = création) ; clearEditState() remet le tout à zéro
+let selectedSessionIndex = null;
+let editingOriginalDate = null;
+let editingOriginalId = null;
+let editingOriginalDuration = null;
+let editingOriginalIsDeload = false;
+
+// Accordéon des exercices de la Séance
+// Exercice ouvert à la main : undefined = automatique (premier exercice non terminé),
+// un index = ouvert par l'utilisateur, -1 = tout replié.
+let manualOpenExercise;
+let scrollOnNextRefresh = false;
+let lastOpenExerciseIdx = null;
+
+// Brouillon : verrou posé pendant la restauration (évite d'écrire un brouillon en le relisant)
+let draftRestoring = false;
+
+// ============================================================
+// 3. THÈME CLAIR / SOMBRE / AUTO
+// ============================================================
 function getThemePreference() {
   try {
     const v = localStorage.getItem(THEME_KEY);
@@ -141,15 +222,16 @@ function initTheme() {
     else if (themeMediaQuery.addListener) themeMediaQuery.addListener(onChange);
   }
 }
-let currentSessionTypeFilter = SESSION_TYPES[0];
-let currentExMetricMode = 'max';
 
-// Variables pour la modification de séance
-let selectedSessionIndex = null;
-let editingOriginalDate = null;
-let editingOriginalId = null;
-let editingOriginalDuration = null;
-let editingOriginalIsDeload = false;
+// ============================================================
+// 4. DONNÉES : SAUVEGARDE ET OUTILS COMMUNS
+// ============================================================
+function saveState() {
+  if (state && state.history) {
+    state.history.sort((a, b) => new Date(a.date) - new Date(b.date));
+  }
+  localStorage.setItem('h49_state', JSON.stringify(state));
+}
 
 function clearEditState() {
   editingOriginalDate = null;
@@ -209,59 +291,48 @@ function updateNextTypeFromHistory() {
   }
 }
 
-async function initApp() {
-  initTheme();
-  const saved = localStorage.getItem('h49_state');
-  if (saved) {
-    try {
-      state = JSON.parse(saved);
-    } catch (e) {
-      console.error("Sauvegarde locale corrompue, réinitialisation.", e);
-      localStorage.removeItem('h49_state');
-      state = { nextType: 'A', history: [], weights: [], lastWeights: {} };
-    }
-  } else {
-    try {
-      const response = await fetch('data.json');
-      state = await response.json();
-    } catch (e) {
-      console.error("Impossible de charger data.json", e);
-      state = { nextType: 'A', history: [], weights: [], lastWeights: {} };
-    }
-  }
-
-  recalculateHistoryTonnages();
-  updateNextTypeFromHistory();
-  saveState();
-
-  // Affichage de la version de l'application dans le titre
-  fetch('manifest.json').then(r => r.json()).then(m => {
-    const titleEl = document.getElementById('app-title');
-    if (titleEl && m.version) titleEl.innerText = 'SUIVI FITNESS ' + m.version;
-  }).catch(() => {});
-
-  renderProgramOverview();
-  populateExerciseSelect();
-  initWorkoutForm();
-  renderHistory();
-  injectSessionModalHtml();
-
-  // Ajout de la vérification du déload au chargement
-  displayDeloadNotificationIfNeeded();
-}
-
-function saveState() {
-  if (state && state.history) {
-    state.history.sort((a, b) => new Date(a.date) - new Date(b.date));
-  }
-  localStorage.setItem('h49_state', JSON.stringify(state));
-}
-
 function getIcon(exName, decorative = false) {
   const path = EXERCISE_ICONS[exName] || "icons/bench_press.png";
   return `<img src="${path}" alt="${decorative ? '' : exName}" onerror="this.src='icons/bench_press.png'">`;
 }
 
+function formatDate(dateStr) {
+  if(!dateStr) return '';
+  const parts = dateStr.split('-');
+  if(parts.length === 3) return `${parts[2]}/${parts[1]}`;
+  return dateStr;
+}
+
+function isPerformedSet(set) {
+  return !!set && (parseFloat(set.weight) || 0) > 0 && (parseFloat(set.reps) || 0) > 0;
+}
+
+// ============================================================
+// 5. DÉLOAD (SEMAINE DE RELÂCHE)
+// ============================================================
+function checkDeloadStatus() {
+  if (!state || !state.history) return false;
+  // On se base sur le numéro de la PROCHAINE séance à venir
+  const nextSessionNumber = state.history.length + 1;
+  return nextSessionNumber > 0 && (nextSessionNumber % 12 === 0 || (nextSessionNumber % 12 >= 10));
+}
+
+function isDeloadActive() {
+  // En modification, on conserve le statut de déload d'origine de la séance
+  if (editingOriginalId !== null) return !!editingOriginalIsDeload;
+  return checkDeloadStatus();
+}
+
+// Affiche une bannière d'alerte en haut de l'application si on est en semaine de déload
+function displayDeloadNotificationIfNeeded() {
+  // Supprimé ou vidé car la mention est maintenant intégrée directement au titre de la séance (seance-type-title)
+  const existingBanner = document.getElementById('deload-banner');
+  if (existingBanner) existingBanner.remove();
+}
+
+// ============================================================
+// 6. ÉCRAN PROGRAMME
+// ============================================================
 function programTilesHtml(prog) {
   return prog.exercises.map(ex => `
     <div class="ex-tile">
@@ -270,9 +341,6 @@ function programTilesHtml(prog) {
     </div>
   `).join('');
 }
-
-const SESSION_ORDER = ['A', 'B', 'C'];
-const CHEVRON_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
 
 function renderProgramOverview() {
   const container = document.getElementById('program-overview');
@@ -336,48 +404,9 @@ function toggleProgramRow(btn) {
   if (panel) panel.hidden = open;
 }
 
-function isPerformedSet(set) {
-  return !!set && (parseFloat(set.weight) || 0) > 0 && (parseFloat(set.reps) || 0) > 0;
-}
-
-function getSuggestedSetValues(exName, setIndex, fallbackWeight, fallbackReps) {
-  let foundSet = null;
-
-  // On parcourt l'historique du plus récent au plus ancien
-  for (let i = state.history.length - 1; i >= 0; i--) {
-    const h = state.history[i];
-    
-    // Détermine mathématiquement si cette séance historique était une séance de déload
-    const sessionNum = i + 1;
-    const wasDeload = (sessionNum % 12 === 0 || (sessionNum % 12 >= 10));
-    
-    // On ignore les séances de déload pour aller chercher la dernière vraie charge normale
-    if (!wasDeload && h.exercises) {
-      const foundEx = h.exercises.find(e => e.name === exName);
-      // On ne reprend qu'une série réellement faite : les séries non faites sont ignorées
-      // et on remonte à la dernière séance où cette série a vraiment été réalisée.
-      if (foundEx && foundEx.sets && isPerformedSet(foundEx.sets[setIndex])) {
-        foundSet = { ...foundEx.sets[setIndex] };
-        break;
-      }
-    }
-  }
-  
-  if (!foundSet) {
-    if (state.lastWeights && state.lastWeights[exName]) {
-      foundSet = { weight: state.lastWeights[exName], reps: fallbackReps };
-    } else {
-      foundSet = { weight: fallbackWeight, reps: fallbackReps };
-    }
-  }
-  
-  // Si le déload est actif pour la prochaine séance, on applique la réduction de 20%
-  if (isDeloadActive() && foundSet.weight) {
-    foundSet.weight = Math.round((foundSet.weight * 0.8) / 2.5) * 2.5; // Arrondi au palier de 2.5kg
-  }
-  
-  return foundSet;
-}
+// ============================================================
+// 7. CHRONOS : REPOS ET DURÉE DE SÉANCE
+// ============================================================
 function playBeep() {
   try {
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -536,15 +565,133 @@ function getFormattedWorkoutDuration() {
   return `${m} min`;
 }
 
-const CHECK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
-const MINUS_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"/></svg>';
-const PLUS_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>';
+// ============================================================
+// 8. BROUILLON DE SÉANCE
+// ============================================================
+function readDraft() {
+  try {
+    const d = JSON.parse(localStorage.getItem(DRAFT_KEY));
+    if (d && d.v === 1 && Array.isArray(d.exercises) && (Date.now() - d.updatedAt) < DRAFT_MAX_AGE_MS) return d;
+  } catch (e) {}
+  return null;
+}
 
-// Exercice ouvert à la main : undefined = automatique (premier exercice non terminé),
-// un index = ouvert par l'utilisateur, -1 = tout replié.
-let manualOpenExercise;
-let scrollOnNextRefresh = false;
-let lastOpenExerciseIdx = null;
+function clearDraft() {
+  try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+}
+
+function saveDraft() {
+  if (draftRestoring || editingOriginalId !== null || !state) return;
+  const items = Array.from(document.querySelectorAll('#exercises-list .exercise-item'));
+  if (!items.length) return;
+
+  const type = (document.getElementById('seance-badge') || {}).innerText;
+  const prog = PROGRAM[(type || '').trim()];
+  let dirty = false;
+  const exercises = items.map(item => {
+    const rows = Array.from(item.querySelectorAll('.set-row'));
+    const progEx = prog ? prog.exercises.find(e => e.name === item.dataset.ex) : null;
+    if (progEx && rows.length !== progEx.seriesCount) dirty = true;
+    return {
+      name: item.dataset.ex,
+      sets: rows.map(row => {
+        const w = row.querySelector('.weight-input'), r = row.querySelector('.reps-input');
+        const done = row.classList.contains('done');
+        const aw = w.classList.contains('active-input'), ar = r.classList.contains('active-input');
+        if (done || aw || ar) dirty = true;
+        return { w: w.value, r: r.value, done, aw, ar };
+      })
+    };
+  });
+
+  // Formulaire intact : rien à conserver (et on n'écrase pas d'éventuelles nouvelles suggestions)
+  if (!dirty) { clearDraft(); return; }
+
+  const draft = {
+    v: 1,
+    type: (type || '').trim(),
+    updatedAt: Date.now(),
+    startedAt: parseInt(localStorage.getItem('workout_start_time'), 10) || null,
+    manualOpen: manualOpenExercise === undefined ? null : manualOpenExercise,
+    exercises
+  };
+  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); } catch (e) {}
+}
+
+function restoreDraft(type) {
+  const d = readDraft();
+  if (!d || d.type !== type) return false;
+  const clean = v => String(v == null ? '' : v).replace(/[^0-9.,\-]/g, '');
+  draftRestoring = true;
+  try {
+    document.querySelectorAll('#exercises-list .exercise-item').forEach(item => {
+      const saved = d.exercises.find(e => e.name === item.dataset.ex);
+      if (!saved || !Array.isArray(saved.sets) || !saved.sets.length) return;
+      const grid = item.querySelector('.sets-grid');
+      grid.innerHTML = saved.sets.map((s, i) => setRowHtml(item.dataset.ex, i + 1, clean(s.w), clean(s.r))).join('');
+      grid.querySelectorAll('.set-row').forEach((row, i) => {
+        const s = saved.sets[i];
+        const w = row.querySelector('.weight-input'), r = row.querySelector('.reps-input');
+        if (s.aw) w.classList.add('active-input');
+        if (s.ar) r.classList.add('active-input');
+        if (s.done) {
+          row.classList.add('done');
+          row.querySelector('.btn-check-set').setAttribute('aria-pressed', 'true');
+        }
+      });
+    });
+    if (Number.isInteger(d.manualOpen)) manualOpenExercise = d.manualOpen;
+    if (d.startedAt) {
+      localStorage.setItem('workout_start_time', String(d.startedAt));
+      startWorkoutTimer();
+    }
+  } finally {
+    draftRestoring = false;
+  }
+  return true;
+}
+
+// ============================================================
+// 9. ÉCRAN SÉANCE : SÉRIES ET EXERCICES
+// ============================================================
+function getSuggestedSetValues(exName, setIndex, fallbackWeight, fallbackReps) {
+  let foundSet = null;
+
+  // On parcourt l'historique du plus récent au plus ancien
+  for (let i = state.history.length - 1; i >= 0; i--) {
+    const h = state.history[i];
+    
+    // Détermine mathématiquement si cette séance historique était une séance de déload
+    const sessionNum = i + 1;
+    const wasDeload = (sessionNum % 12 === 0 || (sessionNum % 12 >= 10));
+    
+    // On ignore les séances de déload pour aller chercher la dernière vraie charge normale
+    if (!wasDeload && h.exercises) {
+      const foundEx = h.exercises.find(e => e.name === exName);
+      // On ne reprend qu'une série réellement faite : les séries non faites sont ignorées
+      // et on remonte à la dernière séance où cette série a vraiment été réalisée.
+      if (foundEx && foundEx.sets && isPerformedSet(foundEx.sets[setIndex])) {
+        foundSet = { ...foundEx.sets[setIndex] };
+        break;
+      }
+    }
+  }
+  
+  if (!foundSet) {
+    if (state.lastWeights && state.lastWeights[exName]) {
+      foundSet = { weight: state.lastWeights[exName], reps: fallbackReps };
+    } else {
+      foundSet = { weight: fallbackWeight, reps: fallbackReps };
+    }
+  }
+  
+  // Si le déload est actif pour la prochaine séance, on applique la réduction de 20%
+  if (isDeloadActive() && foundSet.weight) {
+    foundSet.weight = Math.round((foundSet.weight * 0.8) / 2.5) * 2.5; // Arrondi au palier de 2.5kg
+  }
+  
+  return foundSet;
+}
 
 function isExerciseComplete(item) {
   const rows = item.querySelectorAll('.set-row');
@@ -575,9 +722,6 @@ function markInputActive(input) {
   saveDraft();
 }
 
-// ==========================================
-// AJOUT / SUPPRESSION DE SÉRIES (ONGLET SÉANCE)
-// ==========================================
 function findProgramExercise(name) {
   for (const t of Object.keys(PROGRAM)) {
     const found = PROGRAM[t].exercises.find(e => e.name === name);
@@ -732,123 +876,9 @@ function toggleExercise(btn) {
   saveDraft();
 }
 
-// ==========================================
-// GESTION DU DÉLOAD (SEMAINE DE RELÂCHE)
-// ==========================================
-function checkDeloadStatus() {
-  if (!state || !state.history) return false;
-  // On se base sur le numéro de la PROCHAINE séance à venir
-  const nextSessionNumber = state.history.length + 1;
-  return nextSessionNumber > 0 && (nextSessionNumber % 12 === 0 || (nextSessionNumber % 12 >= 10));
-}
-
-function isDeloadActive() {
-  // En modification, on conserve le statut de déload d'origine de la séance
-  if (editingOriginalId !== null) return !!editingOriginalIsDeload;
-  return checkDeloadStatus();
-}
-
-// Affiche une bannière d'alerte en haut de l'application si on est en semaine de déload
-function displayDeloadNotificationIfNeeded() {
-  // Supprimé ou vidé car la mention est maintenant intégrée directement au titre de la séance (seance-type-title)
-  const existingBanner = document.getElementById('deload-banner');
-  if (existingBanner) existingBanner.remove();
-}
-
-// ==========================================
-// BROUILLON DE SÉANCE
-// La saisie en cours (poids, reps, séries validées, nombre de séries, exercice ouvert, chrono)
-// est copiée dans localStorage à chaque action et restaurée au rechargement de l'application
-// (tirer pour rafraîchir, application fermée par le système...). Elle est effacée à l'enregistrement
-// de la séance et abandonnée au bout de 24 h.
-// ==========================================
-const DRAFT_KEY = 'h49_draft';
-const DRAFT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
-let draftRestoring = false;
-
-function readDraft() {
-  try {
-    const d = JSON.parse(localStorage.getItem(DRAFT_KEY));
-    if (d && d.v === 1 && Array.isArray(d.exercises) && (Date.now() - d.updatedAt) < DRAFT_MAX_AGE_MS) return d;
-  } catch (e) {}
-  return null;
-}
-
-function clearDraft() {
-  try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
-}
-
-function saveDraft() {
-  if (draftRestoring || editingOriginalId !== null || !state) return;
-  const items = Array.from(document.querySelectorAll('#exercises-list .exercise-item'));
-  if (!items.length) return;
-
-  const type = (document.getElementById('seance-badge') || {}).innerText;
-  const prog = PROGRAM[(type || '').trim()];
-  let dirty = false;
-  const exercises = items.map(item => {
-    const rows = Array.from(item.querySelectorAll('.set-row'));
-    const progEx = prog ? prog.exercises.find(e => e.name === item.dataset.ex) : null;
-    if (progEx && rows.length !== progEx.seriesCount) dirty = true;
-    return {
-      name: item.dataset.ex,
-      sets: rows.map(row => {
-        const w = row.querySelector('.weight-input'), r = row.querySelector('.reps-input');
-        const done = row.classList.contains('done');
-        const aw = w.classList.contains('active-input'), ar = r.classList.contains('active-input');
-        if (done || aw || ar) dirty = true;
-        return { w: w.value, r: r.value, done, aw, ar };
-      })
-    };
-  });
-
-  // Formulaire intact : rien à conserver (et on n'écrase pas d'éventuelles nouvelles suggestions)
-  if (!dirty) { clearDraft(); return; }
-
-  const draft = {
-    v: 1,
-    type: (type || '').trim(),
-    updatedAt: Date.now(),
-    startedAt: parseInt(localStorage.getItem('workout_start_time'), 10) || null,
-    manualOpen: manualOpenExercise === undefined ? null : manualOpenExercise,
-    exercises
-  };
-  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); } catch (e) {}
-}
-
-function restoreDraft(type) {
-  const d = readDraft();
-  if (!d || d.type !== type) return false;
-  const clean = v => String(v == null ? '' : v).replace(/[^0-9.,\-]/g, '');
-  draftRestoring = true;
-  try {
-    document.querySelectorAll('#exercises-list .exercise-item').forEach(item => {
-      const saved = d.exercises.find(e => e.name === item.dataset.ex);
-      if (!saved || !Array.isArray(saved.sets) || !saved.sets.length) return;
-      const grid = item.querySelector('.sets-grid');
-      grid.innerHTML = saved.sets.map((s, i) => setRowHtml(item.dataset.ex, i + 1, clean(s.w), clean(s.r))).join('');
-      grid.querySelectorAll('.set-row').forEach((row, i) => {
-        const s = saved.sets[i];
-        const w = row.querySelector('.weight-input'), r = row.querySelector('.reps-input');
-        if (s.aw) w.classList.add('active-input');
-        if (s.ar) r.classList.add('active-input');
-        if (s.done) {
-          row.classList.add('done');
-          row.querySelector('.btn-check-set').setAttribute('aria-pressed', 'true');
-        }
-      });
-    });
-    if (Number.isInteger(d.manualOpen)) manualOpenExercise = d.manualOpen;
-    if (d.startedAt) {
-      localStorage.setItem('workout_start_time', String(d.startedAt));
-      startWorkoutTimer();
-    }
-  } finally {
-    draftRestoring = false;
-  }
-  return true;
-}
-
+// ============================================================
+// 10. ÉCRAN SÉANCE : FORMULAIRE ET ENREGISTREMENT
+// ============================================================
 function initWorkoutForm(customSession = null) { 
   resetWorkoutTimer(); 
   if(!state) return;
@@ -973,126 +1003,275 @@ function initWorkoutForm(customSession = null) {
   updateSetsProgress(); 
 }
 
-document.addEventListener('submit', function(e) {
-  if(e.target && e.target.id === 'workout-form') {
-    e.preventDefault();
-    let totalTonnage = 0;
-    let exerciseLogs = [];
+// Enregistrement de la séance (formulaire de l'onglet Séance) : seules les séries cochées sont conservées
+function submitWorkout(e) {
+  e.preventDefault();
+  let totalTonnage = 0;
+  let exerciseLogs = [];
 
-    if (!state.lastWeights) state.lastWeights = {};
-    const isEditing = editingOriginalId !== null;
+  if (!state.lastWeights) state.lastWeights = {};
+  const isEditing = editingOriginalId !== null;
 
-    // Seules les séries cochées sont enregistrées (v1.4.3)
-    const setRows = Array.from(document.querySelectorAll('#exercises-list .set-row'));
-    const validatedRows = setRows.filter(row => row.classList.contains('done'));
+  // Seules les séries cochées sont enregistrées (v1.4.3)
+  const setRows = Array.from(document.querySelectorAll('#exercises-list .set-row'));
+  const validatedRows = setRows.filter(row => row.classList.contains('done'));
 
-    if (validatedRows.length === 0) {
-      alert("Aucune série n'est cochée. Valide au moins une série avec la coche avant d'enregistrer la séance.");
+  if (validatedRows.length === 0) {
+    alert("Aucune série n'est cochée. Valide au moins une série avec la coche avant d'enregistrer la séance.");
+    return;
+  }
+
+  // Une série cochée doit avoir un poids et un nombre de répétitions valides
+  for (const row of validatedRows) {
+    const wInput = row.querySelector('.weight-input');
+    const rInput = row.querySelector('.reps-input');
+    const w = Number(wInput.value);
+    const r = Number(rInput.value);
+    if (wInput.value === '' || !Number.isFinite(w) || w <= 0 || rInput.value === '' || !Number.isInteger(r) || r <= 0) {
+      const item = row.closest('.exercise-item');
+      const items = Array.from(document.querySelectorAll('#exercises-list .exercise-item'));
+      const number = Array.from(row.parentElement.children).indexOf(row) + 1;
+      manualOpenExercise = items.indexOf(item);
+      refreshExerciseStates();
+      alert(`La série ${number} de « ${item.dataset.ex} » est cochée, mais son poids ou ses répétitions ne sont pas valides.`);
+      (wInput.value === '' || !Number.isFinite(w) || w <= 0 ? wInput : rInput).focus();
       return;
     }
-
-    // Une série cochée doit avoir un poids et un nombre de répétitions valides
-    for (const row of validatedRows) {
-      const wInput = row.querySelector('.weight-input');
-      const rInput = row.querySelector('.reps-input');
-      const w = Number(wInput.value);
-      const r = Number(rInput.value);
-      if (wInput.value === '' || !Number.isFinite(w) || w <= 0 || rInput.value === '' || !Number.isInteger(r) || r <= 0) {
-        const item = row.closest('.exercise-item');
-        const items = Array.from(document.querySelectorAll('#exercises-list .exercise-item'));
-        const number = Array.from(row.parentElement.children).indexOf(row) + 1;
-        manualOpenExercise = items.indexOf(item);
-        refreshExerciseStates();
-        alert(`La série ${number} de « ${item.dataset.ex} » est cochée, mais son poids ou ses répétitions ne sont pas valides.`);
-        (wInput.value === '' || !Number.isFinite(w) || w <= 0 ? wInput : rInput).focus();
-        return;
-      }
-    }
-
-    // Séance partielle : confirmation avant d'ignorer les séries non cochées
-    const uncheckedCount = setRows.length - validatedRows.length;
-    if (uncheckedCount > 0) {
-      const okS = validatedRows.length > 1 ? 's' : '';
-      const noS = uncheckedCount > 1 ? 's' : '';
-      const ignored = uncheckedCount > 1 ? 'seront ignorées' : 'sera ignorée';
-      if (!confirm(`Enregistrer ${validatedRows.length} série${okS} cochée${okS} ?\n\n${uncheckedCount} série${noS} non cochée${noS} ${ignored}.`)) return;
-    }
-
-    validatedRows.forEach((row) => {
-      const wInput = row.querySelector('.weight-input');
-      const w = Number(wInput.value);
-      const r = Number(row.querySelector('.reps-input').value);
-      const exName = wInput.dataset.ex;
-      const setVolume = w * r;
-
-      totalTonnage += setVolume;
-
-      let exLog = exerciseLogs.find(e => e.name === exName);
-      if(!exLog) {
-        exLog = { name: exName, sets: [], maxWeight: 0, totalVolume: 0 };
-        exerciseLogs.push(exLog);
-      }
-
-      exLog.sets.push({ weight: w, reps: r });
-      exLog.totalVolume += setVolume;
-      if(w > exLog.maxWeight) {
-        exLog.maxWeight = w;
-      }
-
-      // On ne touche pas aux dernières charges quand on corrige une ancienne séance
-      if (!isEditing) state.lastWeights[exName] = w;
-    });
-
-    // En modification sans chrono lancé, on garde la durée d'origine (même si elle n'était pas renseignée)
-    const keepOriginalDuration = isEditing && workoutSeconds === 0;
-    const sessionDuration = keepOriginalDuration
-      ? (editingOriginalDuration || undefined)
-      : getFormattedWorkoutDuration();
-    const typeBadgeEl = document.getElementById('seance-badge');
-    const type = typeBadgeEl ? typeBadgeEl.innerText.trim().slice(-1) : state.nextType;
-
-    const sessionDate = editingOriginalDate || new Date().toISOString().slice(0, 10);
-    const sessionId = editingOriginalId || Date.now();
-
-    const entry = {
-      id: sessionId,
-      date: sessionDate,
-      type: type,
-      isDeload: isDeloadActive(),
-      tonnage: Math.round(totalTonnage),
-      duration: sessionDuration,
-      exercises: exerciseLogs
-    };
-
-    // En modification, la séance d'origine est encore dans l'historique : on la remplace
-    if (isEditing) {
-      const originalIdx = state.history.findIndex(h => h.id === editingOriginalId);
-      if (originalIdx !== -1) state.history.splice(originalIdx, 1);
-    }
-
-    state.history.push(entry);
-    state.history.sort((a, b) => new Date(a.date) - new Date(b.date));
-    updateNextTypeFromHistory();
-
-    clearEditState();
-    localStorage.removeItem('workout_start_time');
-    // Une séance enregistrée vide le brouillon ; une modification d'ancienne séance le laisse intact
-    if (!isEditing) clearDraft();
-
-    saveState();
-
-    // Actualise la bannière de déload en temps réel
-    displayDeloadNotificationIfNeeded();
-
-    alert(`${isEditing ? 'Séance modifiée' : 'Séance enregistrée'} !\n• Temps : ${sessionDuration || 'N/A'}\n• Séries enregistrées : ${validatedRows.length}\n• Tonnage réel : ${Math.round(totalTonnage).toLocaleString()} kg`);
-    
-    initWorkoutForm();
-    renderHistory();
-    renderCharts();
-    switchTab('seance');
   }
+
+  // Séance partielle : confirmation avant d'ignorer les séries non cochées
+  const uncheckedCount = setRows.length - validatedRows.length;
+  if (uncheckedCount > 0) {
+    const okS = validatedRows.length > 1 ? 's' : '';
+    const noS = uncheckedCount > 1 ? 's' : '';
+    const ignored = uncheckedCount > 1 ? 'seront ignorées' : 'sera ignorée';
+    if (!confirm(`Enregistrer ${validatedRows.length} série${okS} cochée${okS} ?\n\n${uncheckedCount} série${noS} non cochée${noS} ${ignored}.`)) return;
+  }
+
+  validatedRows.forEach((row) => {
+    const wInput = row.querySelector('.weight-input');
+    const w = Number(wInput.value);
+    const r = Number(row.querySelector('.reps-input').value);
+    const exName = wInput.dataset.ex;
+    const setVolume = w * r;
+
+    totalTonnage += setVolume;
+
+    let exLog = exerciseLogs.find(e => e.name === exName);
+    if(!exLog) {
+      exLog = { name: exName, sets: [], maxWeight: 0, totalVolume: 0 };
+      exerciseLogs.push(exLog);
+    }
+
+    exLog.sets.push({ weight: w, reps: r });
+    exLog.totalVolume += setVolume;
+    if(w > exLog.maxWeight) {
+      exLog.maxWeight = w;
+    }
+
+    // On ne touche pas aux dernières charges quand on corrige une ancienne séance
+    if (!isEditing) state.lastWeights[exName] = w;
+  });
+
+  // En modification sans chrono lancé, on garde la durée d'origine (même si elle n'était pas renseignée)
+  const keepOriginalDuration = isEditing && workoutSeconds === 0;
+  const sessionDuration = keepOriginalDuration
+    ? (editingOriginalDuration || undefined)
+    : getFormattedWorkoutDuration();
+  const typeBadgeEl = document.getElementById('seance-badge');
+  const type = typeBadgeEl ? typeBadgeEl.innerText.trim().slice(-1) : state.nextType;
+
+  const sessionDate = editingOriginalDate || new Date().toISOString().slice(0, 10);
+  const sessionId = editingOriginalId || Date.now();
+
+  const entry = {
+    id: sessionId,
+    date: sessionDate,
+    type: type,
+    isDeload: isDeloadActive(),
+    tonnage: Math.round(totalTonnage),
+    duration: sessionDuration,
+    exercises: exerciseLogs
+  };
+
+  // En modification, la séance d'origine est encore dans l'historique : on la remplace
+  if (isEditing) {
+    const originalIdx = state.history.findIndex(h => h.id === editingOriginalId);
+    if (originalIdx !== -1) state.history.splice(originalIdx, 1);
+  }
+
+  state.history.push(entry);
+  state.history.sort((a, b) => new Date(a.date) - new Date(b.date));
+  updateNextTypeFromHistory();
+
+  clearEditState();
+  localStorage.removeItem('workout_start_time');
+  // Une séance enregistrée vide le brouillon ; une modification d'ancienne séance le laisse intact
+  if (!isEditing) clearDraft();
+
+  saveState();
+
+  // Actualise la bannière de déload en temps réel
+  displayDeloadNotificationIfNeeded();
+
+  alert(`${isEditing ? 'Séance modifiée' : 'Séance enregistrée'} !\n• Temps : ${sessionDuration || 'N/A'}\n• Séries enregistrées : ${validatedRows.length}\n• Tonnage réel : ${Math.round(totalTonnage).toLocaleString()} kg`);
+  
+  initWorkoutForm();
+  renderHistory();
+  renderCharts();
+  switchTab('seance');
+}
+
+document.addEventListener('submit', function(e) {
+  if (e.target && e.target.id === 'workout-form') submitWorkout(e);
 });
 
+// ============================================================
+// 11. ÉCRAN HISTORIQUE ET MODIFICATION D'UNE SÉANCE
+// ============================================================
+function renderHistory() {
+  const container = document.getElementById('history-list');
+  if(!container) return;
+  container.innerHTML = '';
+
+  const history = state.history || [];
+  const countEl = document.getElementById('history-count');
+  if (countEl) countEl.textContent = `${history.length} séance${history.length > 1 ? 's' : ''} enregistrée${history.length > 1 ? 's' : ''}`;
+
+  // Index réels triés du plus récent au plus ancien, regroupés par mois
+  const order = history.map((h, i) => i).sort((x, y) => {
+    const a = history[x], b = history[y];
+    return a.date < b.date ? 1 : a.date > b.date ? -1 : (b.id || 0) - (a.id || 0);
+  });
+  const groups = [];
+  order.forEach(i => {
+    const key = (history[i].date || '').substring(0, 7);
+    let g = groups[groups.length - 1];
+    if (!g || g.key !== key) { g = { key, items: [], tonnage: 0 }; groups.push(g); }
+    g.items.push(i);
+    g.tonnage += parseFloat(history[i].tonnage) || 0;
+  });
+
+  groups.forEach(g => {
+    const [y, mm] = g.key.split('-');
+    const section = document.createElement('section');
+    section.className = 'history-month';
+    section.innerHTML = `
+      <div class="history-month-head">
+        <h3 class="history-month-title">${HISTORY_MONTHS[(+mm || 1) - 1]} ${y}</h3>
+        <span class="history-month-meta">${g.items.length} séance${g.items.length > 1 ? 's' : ''} · ${historyTonnes(g.tonnage)} T</span>
+      </div>`;
+    const card = document.createElement('div');
+    card.className = 'card history-card';
+
+    g.items.forEach(realIndex => {
+      const h = history[realIndex];
+      const hasDuration = h.duration && h.duration !== 'N/A';
+      const row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'history-item';
+      row.setAttribute('aria-label', `Séance ${h.type} du ${formatDate(h.date)} : modifier`);
+      row.onclick = () => openSessionModal(realIndex);
+      row.innerHTML = `
+        <span class="type-pill type-pill-${h.type} small">${h.type}</span>
+        <span class="history-main">
+          <span class="history-date">${formatHistoryDate(h.date)}${h.isDeload ? ' <span class="deload-tag"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>Déload</span>' : ''}</span>
+          <span class="history-duration">${hasDuration ? h.duration : 'Durée non enregistrée'}</span>
+        </span>
+        <span class="history-tonnage">${historyTonnes(h.tonnage)} T</span>
+        <span class="history-chevron">${CHEVRON_SVG}</span>`;
+      card.appendChild(row);
+    });
+    section.appendChild(card);
+    container.appendChild(section);
+  });
+}
+
+// « Sam. 10 oct. »
+function formatHistoryDate(dateStr) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr || '');
+  if (!m) return dateStr || '';
+  const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  return `${HISTORY_DAYS[d.getUTCDay()]} ${+m[3]} ${HISTORY_MONTHS_SHORT[+m[2] - 1]}`;
+}
+
+function historyTonnes(kg) {
+  return (parseFloat(kg || 0) / 1000).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+}
+
+function injectSessionModalHtml() {
+  if (document.getElementById('session-modal')) return;
+  const modalHtml = `
+    <div id="session-modal" class="modal-overlay" style="display:none;" onclick="if(event.target===this) closeSessionModal()">
+      <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="modal-session-title">
+        <div id="modal-session-pill"></div>
+        <h3 id="modal-session-title" class="modal-title">Séance</h3>
+        <p id="modal-session-meta" class="modal-meta"></p>
+        <button id="modal-edit-btn" class="btn">Modifier la séance</button>
+        <button onclick="closeSessionModal()" class="btn btn-secondary">Fermer</button>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+  document.getElementById('modal-edit-btn').addEventListener('click', () => {
+    if (selectedSessionIndex !== null) {
+      const sessionToEdit = state.history[selectedSessionIndex];
+      
+      // La séance reste dans l'historique tant que la modification n'est pas validée :
+      // rien n'est perdu si on quitte ou si on annule.
+      editingOriginalDate = sessionToEdit.date;
+      editingOriginalId = sessionToEdit.id;
+      editingOriginalDuration = sessionToEdit.duration || null;
+      editingOriginalIsDeload = !!sessionToEdit.isDeload;
+
+      initWorkoutForm(sessionToEdit);
+
+      closeSessionModal();
+      switchTab('seance');
+
+      alert(`Séance ${sessionToEdit.type} du ${formatDate(sessionToEdit.date)} chargée dans le formulaire. Corrigez-la puis validez, ou annulez : l'originale reste intacte tant que vous n'avez pas validé.`);
+    }
+  });
+}
+
+function openSessionModal(index) {
+  selectedSessionIndex = index;
+  const session = state.history[index];
+  const titleEl = document.getElementById('modal-session-title');
+  if (titleEl) {
+    titleEl.innerText = `Séance ${session.type} du ${formatDate(session.date)}`;
+  }
+  const pillEl = document.getElementById('modal-session-pill');
+  if (pillEl) pillEl.innerHTML = `<span class="type-pill type-pill-${session.type}">${session.type}</span>`;
+  const metaEl = document.getElementById('modal-session-meta');
+  if (metaEl) {
+    const hasDuration = session.duration && session.duration !== 'N/A';
+    metaEl.textContent = `${formatHistoryDate(session.date)} · ${historyTonnes(session.tonnage)} T · ${hasDuration ? session.duration : 'durée non enregistrée'}`;
+  }
+  const modal = document.getElementById('session-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+  }
+}
+
+function closeSessionModal() {
+  const modal = document.getElementById('session-modal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+  selectedSessionIndex = null;
+}
+
+function cancelEditSession() {
+  clearEditState();
+  initWorkoutForm();
+  switchTab('historique');
+}
+
+// ============================================================
+// 12. ÉCRAN GRAPHIQUES : FILTRES ET COURBES
+// ============================================================
 function populateExerciseSelect() {
   const select = document.getElementById('exercise-filter');
   if(!select) return;
@@ -1163,13 +1342,6 @@ function setExMetricMode(mode, btn) {
   document.getElementById('btn-mode-vol').classList.remove('active');
   btn.classList.add('active');
   renderExerciseChart();
-}
-
-function formatDate(dateStr) {
-  if(!dateStr) return '';
-  const parts = dateStr.split('-');
-  if(parts.length === 3) return `${parts[2]}/${parts[1]}`;
-  return dateStr;
 }
 
 function renderTonnageChart() {
@@ -1353,150 +1525,6 @@ function renderExerciseChart() {
   });
 }
 
-const HISTORY_MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-const HISTORY_DAYS = ['Dim.','Lun.','Mar.','Mer.','Jeu.','Ven.','Sam.'];
-const HISTORY_MONTHS_SHORT = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
-
-// « Sam. 10 oct. »
-function formatHistoryDate(dateStr) {
-  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr || '');
-  if (!m) return dateStr || '';
-  const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
-  return `${HISTORY_DAYS[d.getUTCDay()]} ${+m[3]} ${HISTORY_MONTHS_SHORT[+m[2] - 1]}`;
-}
-
-function historyTonnes(kg) {
-  return (parseFloat(kg || 0) / 1000).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-}
-
-function renderHistory() {
-  const container = document.getElementById('history-list');
-  if(!container) return;
-  container.innerHTML = '';
-
-  const history = state.history || [];
-  const countEl = document.getElementById('history-count');
-  if (countEl) countEl.textContent = `${history.length} séance${history.length > 1 ? 's' : ''} enregistrée${history.length > 1 ? 's' : ''}`;
-
-  // Index réels triés du plus récent au plus ancien, regroupés par mois
-  const order = history.map((h, i) => i).sort((x, y) => {
-    const a = history[x], b = history[y];
-    return a.date < b.date ? 1 : a.date > b.date ? -1 : (b.id || 0) - (a.id || 0);
-  });
-  const groups = [];
-  order.forEach(i => {
-    const key = (history[i].date || '').substring(0, 7);
-    let g = groups[groups.length - 1];
-    if (!g || g.key !== key) { g = { key, items: [], tonnage: 0 }; groups.push(g); }
-    g.items.push(i);
-    g.tonnage += parseFloat(history[i].tonnage) || 0;
-  });
-
-  groups.forEach(g => {
-    const [y, mm] = g.key.split('-');
-    const section = document.createElement('section');
-    section.className = 'history-month';
-    section.innerHTML = `
-      <div class="history-month-head">
-        <h3 class="history-month-title">${HISTORY_MONTHS[(+mm || 1) - 1]} ${y}</h3>
-        <span class="history-month-meta">${g.items.length} séance${g.items.length > 1 ? 's' : ''} · ${historyTonnes(g.tonnage)} T</span>
-      </div>`;
-    const card = document.createElement('div');
-    card.className = 'card history-card';
-
-    g.items.forEach(realIndex => {
-      const h = history[realIndex];
-      const hasDuration = h.duration && h.duration !== 'N/A';
-      const row = document.createElement('button');
-      row.type = 'button';
-      row.className = 'history-item';
-      row.setAttribute('aria-label', `Séance ${h.type} du ${formatDate(h.date)} : modifier`);
-      row.onclick = () => openSessionModal(realIndex);
-      row.innerHTML = `
-        <span class="type-pill type-pill-${h.type} small">${h.type}</span>
-        <span class="history-main">
-          <span class="history-date">${formatHistoryDate(h.date)}${h.isDeload ? ' <span class="deload-tag"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>Déload</span>' : ''}</span>
-          <span class="history-duration">${hasDuration ? h.duration : 'Durée non enregistrée'}</span>
-        </span>
-        <span class="history-tonnage">${historyTonnes(h.tonnage)} T</span>
-        <span class="history-chevron">${CHEVRON_SVG}</span>`;
-      card.appendChild(row);
-    });
-    section.appendChild(card);
-    container.appendChild(section);
-  });
-}
-
-function injectSessionModalHtml() {
-  if (document.getElementById('session-modal')) return;
-  const modalHtml = `
-    <div id="session-modal" class="modal-overlay" style="display:none;" onclick="if(event.target===this) closeSessionModal()">
-      <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="modal-session-title">
-        <div id="modal-session-pill"></div>
-        <h3 id="modal-session-title" class="modal-title">Séance</h3>
-        <p id="modal-session-meta" class="modal-meta"></p>
-        <button id="modal-edit-btn" class="btn">Modifier la séance</button>
-        <button onclick="closeSessionModal()" class="btn btn-secondary">Fermer</button>
-      </div>
-    </div>
-  `;
-  document.body.insertAdjacentHTML('beforeend', modalHtml);
-
-  document.getElementById('modal-edit-btn').addEventListener('click', () => {
-    if (selectedSessionIndex !== null) {
-      const sessionToEdit = state.history[selectedSessionIndex];
-      
-      // La séance reste dans l'historique tant que la modification n'est pas validée :
-      // rien n'est perdu si on quitte ou si on annule.
-      editingOriginalDate = sessionToEdit.date;
-      editingOriginalId = sessionToEdit.id;
-      editingOriginalDuration = sessionToEdit.duration || null;
-      editingOriginalIsDeload = !!sessionToEdit.isDeload;
-
-      initWorkoutForm(sessionToEdit);
-
-      closeSessionModal();
-      switchTab('seance');
-
-      alert(`Séance ${sessionToEdit.type} du ${formatDate(sessionToEdit.date)} chargée dans le formulaire. Corrigez-la puis validez, ou annulez : l'originale reste intacte tant que vous n'avez pas validé.`);
-    }
-  });
-}
-
-function cancelEditSession() {
-  clearEditState();
-  initWorkoutForm();
-  switchTab('historique');
-}
-
-function openSessionModal(index) {
-  selectedSessionIndex = index;
-  const session = state.history[index];
-  const titleEl = document.getElementById('modal-session-title');
-  if (titleEl) {
-    titleEl.innerText = `Séance ${session.type} du ${formatDate(session.date)}`;
-  }
-  const pillEl = document.getElementById('modal-session-pill');
-  if (pillEl) pillEl.innerHTML = `<span class="type-pill type-pill-${session.type}">${session.type}</span>`;
-  const metaEl = document.getElementById('modal-session-meta');
-  if (metaEl) {
-    const hasDuration = session.duration && session.duration !== 'N/A';
-    metaEl.textContent = `${formatHistoryDate(session.date)} · ${historyTonnes(session.tonnage)} T · ${hasDuration ? session.duration : 'durée non enregistrée'}`;
-  }
-  const modal = document.getElementById('session-modal');
-  if (modal) {
-    modal.style.display = 'flex';
-  }
-}
-
-function closeSessionModal() {
-  const modal = document.getElementById('session-modal');
-  if (modal) {
-    modal.style.display = 'none';
-  }
-  selectedSessionIndex = null;
-}
-
 function addWeight() {
   const input = document.getElementById('new-weight');
   const val = parseFloat(input.value);
@@ -1511,10 +1539,51 @@ function addWeight() {
   }
 }
 
-// ============================================
-// ANALYSE MENSUELLE DE PROGRESSION
-// ============================================
+function renderCharts() {
+  renderTonnageChart();
+  renderExerciseChart();
+  renderProgressAnalysis();
 
+  const canvas = document.getElementById('weightChart');
+  if(!canvas) return;
+  const ctx2 = canvas.getContext('2d');
+  if (weightChart) weightChart.destroy();
+
+  const wcur = document.getElementById('weight-current');
+  if (wcur) {
+    const last = state.weights && state.weights.length ? state.weights[state.weights.length - 1].weight : null;
+    wcur.textContent = last === null ? '–' : last;
+  }
+
+  weightChart = new Chart(ctx2, {
+    type: 'line',
+    data: {
+      labels: state.weights.map(w => formatDate(w.date)),
+      datasets: [{
+        label: 'Poids (kg)',
+        data: state.weights.map(w => w.weight),
+        borderColor: CHART_COLORS.success,
+        backgroundColor: CHART_COLORS.success + '22',
+        borderWidth: 2.5,
+        pointRadius: 3,
+        fill: true,
+        tension: 0.2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: CHART_COLORS.tick, maxTicksLimit: 6, maxRotation: 0, minRotation: 0, autoSkip: true }, grid: { display: false } },
+        y: { ticks: { color: CHART_COLORS.tick, maxTicksLimit: 5 }, grid: { color: CHART_COLORS.grid }, border: { display: false } }
+      }
+    }
+  });
+}
+
+// ============================================================
+// 13. ANALYSE MENSUELLE DE PROGRESSION
+// ============================================================
 function analyzeMonthlyProgress() {
   if (!state.history || state.history.length === 0) {
     return {
@@ -1920,48 +1989,9 @@ function renderProgressAnalysis() {
   container.innerHTML = html;
 }
 
-function renderCharts() {
-  renderTonnageChart();
-  renderExerciseChart();
-  renderProgressAnalysis();
-
-  const canvas = document.getElementById('weightChart');
-  if(!canvas) return;
-  const ctx2 = canvas.getContext('2d');
-  if (weightChart) weightChart.destroy();
-
-  const wcur = document.getElementById('weight-current');
-  if (wcur) {
-    const last = state.weights && state.weights.length ? state.weights[state.weights.length - 1].weight : null;
-    wcur.textContent = last === null ? '–' : last;
-  }
-
-  weightChart = new Chart(ctx2, {
-    type: 'line',
-    data: {
-      labels: state.weights.map(w => formatDate(w.date)),
-      datasets: [{
-        label: 'Poids (kg)',
-        data: state.weights.map(w => w.weight),
-        borderColor: CHART_COLORS.success,
-        backgroundColor: CHART_COLORS.success + '22',
-        borderWidth: 2.5,
-        pointRadius: 3,
-        fill: true,
-        tension: 0.2
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: CHART_COLORS.tick, maxTicksLimit: 6, maxRotation: 0, minRotation: 0, autoSkip: true }, grid: { display: false } },
-        y: { ticks: { color: CHART_COLORS.tick, maxTicksLimit: 5 }, grid: { color: CHART_COLORS.grid }, border: { display: false } }
-      }
-    }
-  });
-}
-
+// ============================================================
+// 14. NAVIGATION ET DISPOSITION
+// ============================================================
 // Hauteurs de l'en-tête et du bloc fixe de l'onglet Séance (positionnement collant + marge de défilement)
 function updateStickyOffsets() {
   const header = document.querySelector('header');
@@ -1972,16 +2002,15 @@ function updateStickyOffsets() {
   root.setProperty('--header-h', hh + 'px');
   root.setProperty('--sticky-total', hh + 'px'); // l'en-tête contient désormais la bannière
 }
+
 window.addEventListener('resize', updateStickyOffsets);
+
 if (typeof ResizeObserver !== 'undefined') {
   const stickyObserver = new ResizeObserver(updateStickyOffsets);
   const h0 = document.querySelector('header'), s0 = document.getElementById('seance-sticky');
   if (h0) stickyObserver.observe(h0);
   if (s0) stickyObserver.observe(s0);
 }
-
-// Titre affiché en haut de chaque onglet
-const PAGE_TITLES = { programme: 'Programme', seance: 'Séance', progression: 'Graphiques', historique: 'Historique' };
 
 function switchTab(tabName) {
   document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
@@ -2013,6 +2042,9 @@ function switchTab(tabName) {
   if (tabName === 'progression') renderProgressAnalysis();
 }
 
+// ============================================================
+// 15. SAUVEGARDE, IMPORT ET RÉINITIALISATION
+// ============================================================
 async function exportData() {
   const dataStr = JSON.stringify(state, null, 2);
   const blob = new Blob([dataStr], { type: 'application/json' });
@@ -2087,6 +2119,50 @@ function resetData() {
       alert("Erreur lors de la réinitialisation.");
     });
   }
+}
+
+// ============================================================
+// 16. DÉMARRAGE
+// ============================================================
+async function initApp() {
+  initTheme();
+  const saved = localStorage.getItem('h49_state');
+  if (saved) {
+    try {
+      state = JSON.parse(saved);
+    } catch (e) {
+      console.error("Sauvegarde locale corrompue, réinitialisation.", e);
+      localStorage.removeItem('h49_state');
+      state = { nextType: 'A', history: [], weights: [], lastWeights: {} };
+    }
+  } else {
+    try {
+      const response = await fetch('data.json');
+      state = await response.json();
+    } catch (e) {
+      console.error("Impossible de charger data.json", e);
+      state = { nextType: 'A', history: [], weights: [], lastWeights: {} };
+    }
+  }
+
+  recalculateHistoryTonnages();
+  updateNextTypeFromHistory();
+  saveState();
+
+  // Affichage de la version de l'application dans le titre
+  fetch('manifest.json').then(r => r.json()).then(m => {
+    const titleEl = document.getElementById('app-title');
+    if (titleEl && m.version) titleEl.innerText = 'SUIVI FITNESS ' + m.version;
+  }).catch(() => {});
+
+  renderProgramOverview();
+  populateExerciseSelect();
+  initWorkoutForm();
+  renderHistory();
+  injectSessionModalHtml();
+
+  // Ajout de la vérification du déload au chargement
+  displayDeloadNotificationIfNeeded();
 }
 
 document.addEventListener('DOMContentLoaded', initApp);
