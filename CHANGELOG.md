@@ -7,6 +7,27 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.5.0] - 2026-11-01
+### 🔔 Indicateur de mise à jour
+- Nouvelle carte **« Application »** dans l'onglet Historique : version exécutée, bouton « Vérifier » (« À jour · vérifié à hh:mm », « Vérification impossible » si le réseau est coupé).
+- Quand une nouvelle version vient d'être installée en arrière-plan, un avis « La version X est prête » apparaît dans cette carte, avec une **pastille rouge sur l'icône Historique** et un bouton **« Relancer maintenant »** (la saisie en cours est conservée par les brouillons).
+- **L'application ne se recharge jamais toute seule** : l'avis ne s'affiche que si la version installée diffère de celle qui tourne. Vérification silencieuse au retour au premier plan (au plus toutes les 30 min).
+- Correctif du service worker : à l'installation, les fichiers sont désormais réclamés au réseau (`cache: 'reload'`) au lieu du cache HTTP du navigateur, qui pouvait enregistrer d'anciens fichiers sous le numéro de la nouvelle version (le téléphone restait alors sur l'ancien code). Le service worker prévient aussi les pages ouvertes (`SW_ACTIVATED`).
+
+### 💾 Poids corporel dans le brouillon
+- Le poids tapé dans l'onglet Graphiques est conservé (rechargement, application fermée par le système) pendant 24 h, dans un brouillon séparé de celui de la séance : enregistrer une séance ne l'efface pas.
+- Vidé à « Ajouter », à la réinitialisation et à l'import d'une sauvegarde ; valeur strictement validée à la restauration (nombre de 1 à 3 chiffres, 2 décimales au plus) ; jamais inclus dans la sauvegarde exportée.
+
+### ⏱️ Chrono de repos adapté à l'exercice
+- Le chrono propose la durée de l'**exercice ouvert** : « PAUSE 3:00 » (soulevé de terre, presse, développés couché et incliné), « PAUSE 2:00 » (autres mouvements polyarticulaires, durée par défaut), « PAUSE 1:30 » (exercices d'isolation). Il se met à jour tout seul quand on change d'exercice ou qu'on passe au suivant.
+- Le décompte en cours et le « GO ! » ne changent jamais quand on ouvre un autre exercice ; le décompte s'affiche dès l'appui.
+- Les durées sont regroupées dans `REST_BY_EXERCISE` (`app.js`) : un seul endroit à modifier.
+
+### 🧪 Tests
+- 3 nouveaux fichiers (`test_poids_brouillon.py`, `test_chrono.py`, `test_mise_a_jour.py`) ; `test_mise_en_page.py` couvre l'avis « version prête ». Total : 73 contrôles.
+
+---
+
 ## [1.4.4] - 2026-11-01
 ### 🧹 Rangement de `app.js` (aucun changement de comportement ni de design)
 - Sommaire en tête de fichier et 16 sections aux séparateurs uniformes (constantes, état, thème, données, déload, Programme, chronos, brouillon, Séance, Historique, Graphiques, analyse, navigation, import/export, démarrage).

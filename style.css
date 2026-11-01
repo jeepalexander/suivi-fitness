@@ -778,3 +778,18 @@ select.filter-select, .weight-field { background: var(--fill); border: none; bor
 .modal-sheet { border: none; border-radius: 34px; padding: 28px 24px 24px; }
 
 .submit-hint { text-align: center; color: var(--text-muted); font-size: 0.875rem; margin: 14px 0 -2px; }
+
+/* ===== MISES À JOUR (v1.5.0) : carte « Application » de l'onglet Historique ===== */
+.update-card { margin-bottom: 30px; }
+.update-card .card-title { margin-bottom: 12px; }
+.update-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.update-version { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; }
+.update-check { width: auto; flex: none; margin: 0; height: 48px; padding: 0 22px; border-radius: 24px; background: var(--fill); border: none; }
+.update-banner { margin-top: 14px; padding: 14px 16px; border-radius: 25px; background: var(--warn-tint); border: 1px solid var(--warn-border); color: var(--warn); font-size: 1rem; line-height: 1.35; font-weight: 500; }
+.update-banner[hidden] { display: none; }
+.update-apply { margin-top: 12px; height: 52px; padding: 0 8px; }
+
+/* Pastille sur l'icône Historique de la navigation quand une version est prête */
+nav button { position: relative; }
+nav button.has-update::after { content: ''; position: absolute; top: 7px; right: 7px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--card-bg); }
+nav button.active.has-update::after { right: 5px; top: 6px; }

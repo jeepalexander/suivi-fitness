@@ -17,6 +17,7 @@ with Srv() as url, sync_playwright() as p:
         for th in ('light', 'dark'):
             ctx, pg, errs = newpage(br, w=w, scheme=th, pref=th)
             pg.goto(url); pg.wait_for_timeout(600)
+            pg.evaluate("runningVersion = '1.5.0'; activeVersion = '1.5.1'; renderUpdateStatus()")  # avis « version prête » affiché : il doit tenir lui aussi
             bad = []
             for tab in ('programme', 'seance', 'progression', 'historique'):
                 pg.evaluate("t=>switchTab(t)", tab); pg.wait_for_timeout(400)

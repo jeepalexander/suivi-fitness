@@ -19,7 +19,8 @@
 //  13. ANALYSE MENSUELLE DE PROGRESSION
 //  14. NAVIGATION ET DISPOSITION
 //  15. SAUVEGARDE, IMPORT ET RÉINITIALISATION
-//  16. DÉMARRAGE
+//  16. MISES À JOUR DE L'APPLICATION
+//  17. DÉMARRAGE
 
 // ============================================================
 // 1. CONSTANTES ET DONNÉES DU PROGRAMME
@@ -88,7 +89,31 @@ const PROGRAM = {
 const SESSION_TYPES = ['A', 'B', 'C'];
 const SESSION_TYPE_COLORS = { A: '#1B6FD8', B: '#C2570C', C: '#C62B35' };
 const SESSION_ORDER = ['A', 'B', 'C'];
-const REST_DURATION = 120;
+const REST_DURATION = 120; // repos par défaut (s), pour un exercice absent de la liste ci-dessous
+
+// Repos (en secondes) proposé par le chrono selon l'exercice ouvert dans la Séance :
+// 180 s pour les mouvements lourds, 120 s pour les autres mouvements polyarticulaires, 90 s pour l'isolation.
+// Pour ajuster un temps : modifier la valeur ici (aucun autre fichier à toucher).
+const REST_BY_EXERCISE = {
+  "Soulevé de terre": 180,
+  "Presse à cuisses": 180,
+  "Développé couché": 180,
+  "Développé incliné": 180,
+  "Développé militaire": 120,
+  "Tirage horizontal": 120,
+  "Tirage vertical": 120,
+  "Tractions": 120,
+  "Dips": 120,
+  "Rowing unilatéral": 120,
+  "Fentes marchées": 120,
+  "Curl biceps": 90,
+  "Extension triceps": 90,
+  "Élévations latérales": 90,
+  "Oiseau (Arrière d'épaule)": 90,
+  "Leg Extension": 90,
+  "Leg Curl": 90,
+  "Mollets": 90
+};
 
 // Couleurs des graphiques : valeurs de repli (thème clair). Elles sont relues depuis
 // les variables --chart-* de style.css à chaque changement de thème (voir readChartColors).
@@ -124,6 +149,13 @@ const PAGE_TITLES = { programme: 'Programme', seance: 'Séance', progression: 'G
 // de la séance et abandonnée au bout de 24 h.
 const DRAFT_KEY = 'h49_draft';
 const DRAFT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+// Le poids corporel saisi (onglet Graphiques) a son propre brouillon, indépendant de la séance :
+// enregistrer une séance ne doit pas l'effacer. Même durée de validité (24 h).
+const WEIGHT_DRAFT_KEY = 'h49_draft_weight';
+
+// Mises à jour : délai minimal entre deux vérifications automatiques (retour au premier plan)
+const UPDATE_CHECK_MIN_INTERVAL_MS = 30 * 60 * 1000;
 
 // ============================================================
 // 2. ÉTAT DE L'APPLICATION (variables globales)
@@ -161,6 +193,12 @@ let lastOpenExerciseIdx = null;
 
 // Brouillon : verrou posé pendant la restauration (évite d'écrire un brouillon en le relisant)
 let draftRestoring = false;
+
+// Mises à jour : version exécutée par cette page (lue au démarrage), dernière version annoncée
+// par le service worker, et heure de la dernière vérification
+let runningVersion = null;
+let activeVersion = null;
+let lastUpdateCheck = 0;
 
 // ============================================================
 // 3. THÈME CLAIR / SOMBRE / AUTO
@@ -461,12 +499,43 @@ function runRestTimer(endTime) {
   }, 1000);
 }
 
-// Retour à l'état initial du timer de repos (affichage « PAUSE »)
+// Repos adapté à l'exercice : durée (s) associée à un exercice, ou repos par défaut
+function restDurationFor(exName) {
+  return REST_BY_EXERCISE[exName] || REST_DURATION;
+}
+
+// Durée du prochain repos : celle de l'exercice actuellement ouvert dans la Séance
+function currentRestDuration() {
+  const open = document.querySelector('#exercises-list .exercise-item.open');
+  return open ? restDurationFor(open.dataset.ex) : REST_DURATION;
+}
+
+function formatRestDuration(seconds) {
+  const s = seconds % 60;
+  return `${Math.floor(seconds / 60)}:${s < 10 ? '0' : ''}${s}`;
+}
+
+// Texte du chrono au repos : « PAUSE 1:30 » (la durée qui sera lancée)
+function restIdleLabel() {
+  return `PAUSE ${formatRestDuration(currentRestDuration())}`;
+}
+
+// Met à jour le texte du chrono quand l'exercice ouvert change, seulement s'il est au repos
+// (jamais pendant un décompte ni sur « GO ! »)
+function refreshRestTimerIdle() {
+  const btn = document.getElementById('timer-btn');
+  const display = document.getElementById('timer-display');
+  if (!btn || !display || restTimerInterval) return;
+  if (btn.classList.contains('running') || btn.classList.contains('finished')) return;
+  display.innerText = restIdleLabel();
+}
+
+// Retour à l'état initial du timer de repos (affichage « PAUSE m:ss »)
 function resetRestTimerUi() {
   const btn = document.getElementById('timer-btn');
   const display = document.getElementById('timer-display');
   if (btn) btn.className = 'timer-btn';
-  if (display) display.innerText = 'PAUSE';
+  if (display) display.innerText = restIdleLabel();
 }
 
 function toggleRestTimer() {
@@ -481,8 +550,10 @@ function toggleRestTimer() {
     // Terminé (« GO ! ») : retour à l'état initial SANS relancer le chrono
     resetRestTimerUi();
   } else {
-    const endTime = Date.now() + (REST_DURATION * 1000);
+    const duration = currentRestDuration();
+    const endTime = Date.now() + (duration * 1000);
     localStorage.setItem('rest_end_time', endTime);
+    updateTimerDisplay(duration);
     runRestTimer(endTime);
   }
 }
@@ -649,6 +720,44 @@ function restoreDraft(type) {
     draftRestoring = false;
   }
   return true;
+}
+
+// --- Poids corporel (champ de l'onglet Graphiques) : brouillon séparé de celui de la séance ---
+function clearWeightDraft() {
+  try { localStorage.removeItem(WEIGHT_DRAFT_KEY); } catch (e) {}
+}
+
+// Vide le champ et son brouillon (import d'une sauvegarde, réinitialisation)
+function discardWeightInput() {
+  const input = document.getElementById('new-weight');
+  if (input) input.value = '';
+  clearWeightDraft();
+}
+
+function saveWeightDraft() {
+  const input = document.getElementById('new-weight');
+  if (!input) return;
+  try {
+    if (input.value !== '') {
+      localStorage.setItem(WEIGHT_DRAFT_KEY, JSON.stringify({ v: 1, value: input.value, updatedAt: Date.now() }));
+    } else if (!(input.validity && input.validity.badInput)) {
+      // Champ réellement vidé (et non simple saisie incomplète comme « 72, ») : plus rien à conserver
+      localStorage.removeItem(WEIGHT_DRAFT_KEY);
+    }
+  } catch (e) {}
+}
+
+function restoreWeightDraft() {
+  const input = document.getElementById('new-weight');
+  if (!input || input.value !== '') return;
+  try {
+    const d = JSON.parse(localStorage.getItem(WEIGHT_DRAFT_KEY));
+    if (!d || d.v !== 1 || !((Date.now() - d.updatedAt) < DRAFT_MAX_AGE_MS)) return;
+    // Valeur stricte : 1 à 3 chiffres, 2 décimales au plus (virgule → point). Tout le reste est ignoré,
+    // jamais « réparé » : un brouillon altéré ne doit rien injecter dans le champ.
+    const raw = String(d.value == null ? '' : d.value).trim().replace(',', '.');
+    if (/^\d{1,3}(\.\d{1,2})?$/.test(raw) && parseFloat(raw) > 0) input.value = raw;
+  } catch (e) {}
 }
 
 // ============================================================
@@ -855,6 +964,9 @@ function refreshExerciseStates() {
     }
     item.querySelector('.ex-sub').textContent = open ? exerciseLastTimeText(item.dataset.ex) : exerciseSummaryText(item);
   });
+
+  // Le chrono de repos suit l'exercice ouvert
+  refreshRestTimerIdle();
 
   // Passage automatique à l'exercice suivant : on le ramène dans l'écran
   if (scrollOnNextRefresh && openIdx !== -1 && openIdx !== lastOpenExerciseIdx) {
@@ -1535,6 +1647,7 @@ function addWeight() {
     });
     saveState();
     input.value = '';
+    clearWeightDraft();
     renderCharts();
   }
 }
@@ -2084,6 +2197,7 @@ function importData(event) {
         state = importedState;
         clearEditState();
         clearDraft();
+        discardWeightInput();
         saveState();
         populateExerciseSelect();
         initWorkoutForm();
@@ -2109,6 +2223,7 @@ function resetData() {
       state = defaultData;
       clearEditState();
       clearDraft();
+      discardWeightInput();
       saveState();
       populateExerciseSelect();
       initWorkoutForm();
@@ -2122,10 +2237,93 @@ function resetData() {
 }
 
 // ============================================================
-// 16. DÉMARRAGE
+// 16. MISES À JOUR DE L'APPLICATION
+// ============================================================
+// Le service worker (sw.js) installe et active tout seul une nouvelle version, mais la page déjà
+// ouverte continue d'exécuter l'ancien code jusqu'au prochain lancement : on ne la recharge JAMAIS
+// automatiquement (la saisie en cours serait perdue). À la place, sw.js prévient la page
+// (message SW_ACTIVATED) ; si sa version diffère de celle exécutée, l'onglet Historique affiche
+// « nouvelle version prête » (+ un point sur son icône) et un bouton pour relancer quand on veut.
+function isUpdateReady() {
+  return !!(runningVersion && activeVersion && activeVersion !== runningVersion);
+}
+
+function renderUpdateStatus() {
+  const ready = isUpdateReady();
+  const versionEl = document.getElementById('update-version');
+  if (versionEl) versionEl.textContent = runningVersion ? `Version ${runningVersion}` : 'Version …';
+  const banner = document.getElementById('update-banner');
+  if (banner) banner.hidden = !ready;
+  const bannerText = document.getElementById('update-banner-text');
+  if (bannerText && ready) bannerText.textContent = `La version ${activeVersion} est prête. Relancez l'application pour l'utiliser.`;
+  const statusEl = document.getElementById('update-status');
+  if (statusEl && ready) statusEl.textContent = 'Mise à jour téléchargée.';
+  const nav = document.getElementById('nav-historique');
+  if (nav) {
+    nav.classList.toggle('has-update', ready);
+    nav.setAttribute('aria-label', ready ? 'Historique, mise à jour disponible' : 'Historique');
+  }
+}
+
+function setUpdateStatusText(text) {
+  const statusEl = document.getElementById('update-status');
+  if (statusEl && !isUpdateReady()) statusEl.textContent = text;
+}
+
+function onServiceWorkerMessage(event) {
+  const d = event.data;
+  if (!d || d.type !== 'SW_ACTIVATED' || typeof d.version !== 'string') return;
+  activeVersion = d.version;
+  renderUpdateStatus();
+}
+
+// Bouton « Vérifier » : cherche une nouvelle version maintenant
+async function checkForUpdate() {
+  if (!('serviceWorker' in navigator)) {
+    setUpdateStatusText('Mises à jour automatiques indisponibles sur ce navigateur.');
+    return;
+  }
+  setUpdateStatusText('Vérification…');
+  try {
+    const reg = await navigator.serviceWorker.getRegistration();
+    if (!reg) { setUpdateStatusText('Mode hors-ligne pas encore installé : relancez l\'application.'); return; }
+    lastUpdateCheck = Date.now();
+    await reg.update();
+    if (reg.installing || reg.waiting) {
+      setUpdateStatusText('Téléchargement de la mise à jour…'); // SW_ACTIVATED suivra
+    } else {
+      const t = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      setUpdateStatusText(`À jour · vérifié à ${t}`);
+    }
+  } catch (e) {
+    setUpdateStatusText('Vérification impossible (hors connexion ?).');
+  }
+}
+
+// Bouton « Relancer maintenant » : la saisie en cours est d'abord enregistrée dans le brouillon
+function applyUpdate() {
+  try { saveDraft(); saveWeightDraft(); } catch (e) {}
+  location.reload();
+}
+
+// Vérification silencieuse quand l'application revient au premier plan (au plus toutes les 30 min)
+function initUpdateIndicator() {
+  renderUpdateStatus();
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.addEventListener('message', onServiceWorkerMessage);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden || Date.now() - lastUpdateCheck < UPDATE_CHECK_MIN_INTERVAL_MS) return;
+    lastUpdateCheck = Date.now();
+    navigator.serviceWorker.getRegistration().then(reg => reg && reg.update()).catch(() => {});
+  });
+}
+
+// ============================================================
+// 17. DÉMARRAGE
 // ============================================================
 async function initApp() {
   initTheme();
+  initUpdateIndicator();
   const saved = localStorage.getItem('h49_state');
   if (saved) {
     try {
@@ -2153,6 +2351,8 @@ async function initApp() {
   fetch('manifest.json').then(r => r.json()).then(m => {
     const titleEl = document.getElementById('app-title');
     if (titleEl && m.version) titleEl.innerText = 'SUIVI FITNESS ' + m.version;
+    // Version exécutée par cette page : sert à repérer qu'une version plus récente est prête
+    if (m.version) { runningVersion = m.version; renderUpdateStatus(); }
   }).catch(() => {});
 
   renderProgramOverview();
@@ -2160,6 +2360,7 @@ async function initApp() {
   initWorkoutForm();
   renderHistory();
   injectSessionModalHtml();
+  restoreWeightDraft();
 
   // Ajout de la vérification du déload au chargement
   displayDeloadNotificationIfNeeded();

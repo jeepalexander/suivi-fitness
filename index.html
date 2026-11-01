@@ -136,7 +136,7 @@
       <div class="weight-current"><span id="weight-current" class="weight-value">–</span><span class="weight-unit">kg</span></div>
       <canvas id="weightChart" height="150"></canvas>
       <div class="weight-form">
-        <input type="number" step="0.1" id="new-weight" placeholder="Poids (kg)" class="weight-field">
+        <input type="number" step="0.1" id="new-weight" placeholder="Poids (kg)" class="weight-field" oninput="saveWeightDraft()">
         <button onclick="addWeight()" class="btn weight-add">Ajouter</button>
       </div>
     </div>
@@ -160,6 +160,19 @@
         <button type="button" class="filter-btn" role="radio" data-theme-choice="auto" onclick="setThemePreference('auto')">Auto</button>
       </div>
       <p class="theme-hint">« Auto » suit le réglage clair/sombre du téléphone. Ce choix est propre à cet appareil et n'est pas inclus dans la sauvegarde.</p>
+    </div>
+
+    <div class="card update-card" id="update-card">
+      <div class="card-title">Application</div>
+      <div class="update-row">
+        <span id="update-version" class="update-version">Version …</span>
+        <button type="button" class="btn btn-secondary update-check" onclick="checkForUpdate()">Vérifier</button>
+      </div>
+      <p id="update-status" class="theme-hint" role="status" aria-live="polite">Les mises à jour s'installent d'elles-mêmes ; l'application ne se relance jamais toute seule.</p>
+      <div id="update-banner" class="update-banner" hidden>
+        <span id="update-banner-text"></span>
+        <button type="button" class="btn update-apply" onclick="applyUpdate()">Relancer maintenant</button>
+      </div>
     </div>
 
     <div id="history-list"></div>
