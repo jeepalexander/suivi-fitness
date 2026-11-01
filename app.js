@@ -89,30 +89,30 @@ const PROGRAM = {
 const SESSION_TYPES = ['A', 'B', 'C'];
 const SESSION_TYPE_COLORS = { A: '#1B6FD8', B: '#C2570C', C: '#C62B35' };
 const SESSION_ORDER = ['A', 'B', 'C'];
-const REST_DURATION = 120; // repos par défaut (s), pour un exercice absent de la liste ci-dessous
+const REST_DURATION = 90; // repos par défaut (s), pour un exercice absent de la liste ci-dessous
 
 // Repos (en secondes) proposé par le chrono selon l'exercice ouvert dans la Séance :
-// 180 s pour les mouvements lourds, 120 s pour les autres mouvements polyarticulaires, 90 s pour l'isolation.
+// 150 s pour les mouvements lourds, 90 s pour les autres mouvements polyarticulaires, 60 s pour l'isolation.
 // Pour ajuster un temps : modifier la valeur ici (aucun autre fichier à toucher).
 const REST_BY_EXERCISE = {
-  "Soulevé de terre": 180,
-  "Presse à cuisses": 180,
-  "Développé couché": 180,
-  "Développé incliné": 180,
-  "Développé militaire": 120,
-  "Tirage horizontal": 120,
-  "Tirage vertical": 120,
-  "Tractions": 120,
-  "Dips": 120,
-  "Rowing unilatéral": 120,
-  "Fentes marchées": 120,
-  "Curl biceps": 90,
-  "Extension triceps": 90,
-  "Élévations latérales": 90,
-  "Oiseau (Arrière d'épaule)": 90,
-  "Leg Extension": 90,
-  "Leg Curl": 90,
-  "Mollets": 90
+  "Soulevé de terre": 150,
+  "Presse à cuisses": 150,
+  "Développé couché": 150,
+  "Développé incliné": 150,
+  "Développé militaire": 90,
+  "Tirage horizontal": 90,
+  "Tirage vertical": 90,
+  "Tractions": 90,
+  "Dips": 90,
+  "Rowing unilatéral": 90,
+  "Fentes marchées": 90,
+  "Curl biceps": 60,
+  "Extension triceps": 60,
+  "Élévations latérales": 60,
+  "Oiseau (Arrière d'épaule)": 60,
+  "Leg Extension": 60,
+  "Leg Curl": 60,
+  "Mollets": 60
 };
 
 // Couleurs des graphiques : valeurs de repli (thème clair). Elles sont relues depuis

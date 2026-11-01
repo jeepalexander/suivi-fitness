@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.5.3] - 2026-11-01
+### ⏱️ Temps de repos raccourcis
+- Les repos proposés par le chrono étaient trop longs : **2:30** pour les mouvements lourds (soulevé de terre, presse, développés couché et incliné), **1:30** pour les autres mouvements polyarticulaires et par défaut, **1:00** pour l'isolation (avant : 3:00 / 2:00 / 1:30).
+- Valeurs modifiables dans `REST_BY_EXERCISE` (`app.js`).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.5.3.
+
+---
+
 ## [1.5.2] - 2026-11-01
 ### 🎨 Nouvelles icônes d'exercices
 - Les icônes d'exercices sont remplacées par de nouveaux visuels (`icons/*.png`).
