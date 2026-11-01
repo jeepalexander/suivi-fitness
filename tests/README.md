@@ -18,7 +18,9 @@ Un test seul : `python3 tests/test_validation.py`.
 | `test_mise_en_page.py` | 12 | À 360 et 390 px, thèmes clair et sombre : aucun débordement sur les 4 onglets, noms d'exercice sur une ligne, aucune erreur JavaScript |
 
 ## Quand les lancer
-Avant chaque commit sur `dev` qui touche `app.js`, `index.html` ou `style.css`. Si un test échoue après une modification, le message dit lequel et pourquoi.
+Automatiquement : GitHub les exécute à chaque envoi de code et à chaque demande de fusion (`.github/workflows/tests.yml`, onglet **Actions** du dépôt) ; un échec apparaît en rouge sur le commit.
+
+À la main, Avant chaque commit sur `dev` qui touche `app.js`, `index.html` ou `style.css`. Si un test échoue après une modification, le message dit lequel et pourquoi.
 
 ## Limites
 - Chromium uniquement : pas de test sur Safari ni sur un vrai Android.
