@@ -75,6 +75,7 @@ suivi-fitness/
 ├── manifest.json       # Configuration PWA
 ├── data.json           # Données par défaut
 ├── CHANGELOG.md        # Historique des versions
+├── tests/              # Tests automatiques (voir tests/README.md)
 ├── js/                 # Bibliothèques locales (Chart.js) et security.js
 ├── css/                # Styles complémentaires (polices)
 ├── fonts/              # Polices embarquées

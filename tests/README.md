@@ -1,0 +1,26 @@
+# Tests automatiques
+
+Ils ouvrent l'application dans un vrai navigateur (Chromium piloté par Playwright), avec les données de `data.json`, et vérifient les comportements qui ont déjà posé problème.
+
+## Lancer
+```bash
+pip install playwright --break-system-packages   # une seule fois (ou dans un environnement virtuel)
+playwright install chromium                      # une seule fois
+python3 tests/run_tests.py                       # code de sortie 0 = tout est bon
+```
+Un test seul : `python3 tests/test_validation.py`.
+
+## Ce qui est couvert
+| Fichier | Contrôles | Vérifie |
+|---|---|---|
+| `test_validation.py` | 11 | Seules les séries cochées sont enregistrées ; refus sans coche ou avec valeurs invalides ; confirmation en séance partielle ; modification d'une séance (séries précochées) |
+| `test_brouillon.py` | 17 | La saisie en cours survit au rechargement (valeurs, coches, chrono, exercice ouvert) ; brouillon périmé ou piégé ignoré ; « tirer pour rafraîchir » désactivé |
+| `test_mise_en_page.py` | 12 | À 360 et 390 px, thèmes clair et sombre : aucun débordement sur les 4 onglets, noms d'exercice sur une ligne, aucune erreur JavaScript |
+
+## Quand les lancer
+Avant chaque commit sur `dev` qui touche `app.js`, `index.html` ou `style.css`. Si un test échoue après une modification, le message dit lequel et pourquoi.
+
+## Limites
+- Chromium uniquement : pas de test sur Safari ni sur un vrai Android.
+- Rien sur le rendu visuel fin (couleurs, ombres) : à regarder à l'œil.
+- Ajouter un test : copier la structure d'un fichier existant (`Srv`, `newpage` dans `harness.py`) et l'ajouter à la liste de `run_tests.py`.
