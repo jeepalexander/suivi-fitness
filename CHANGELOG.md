@@ -7,6 +7,11 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.5.2] - 2026-11-01
+### ⚙️ Nouveaux icones
+
+---
+
 ## [1.5.1] - 2026-11-01
 ### ⚙️ Nouvelle page « Réglages »
 - Les cartes **Apparence** (Clair / Sombre / Auto) et **Application** (version, « Vérifier », avis « version prête ») quittent l'onglet Historique, qui est désormais plus court : il garde Sauvegarder / Restaurer, la liste des séances et la réinitialisation.
