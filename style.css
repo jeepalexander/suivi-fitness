@@ -793,3 +793,11 @@ select.filter-select, .weight-field { background: var(--fill); border: none; bor
 nav button { position: relative; }
 nav button.has-update::after { content: ''; position: absolute; top: 7px; right: 7px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--card-bg); }
 nav button.active.has-update::after { right: 5px; top: 6px; }
+
+/* ===== RÉGLAGES (v1.5.1) : bouton d'en-tête (roue dentée / retour), en haut à droite ===== */
+.hdr-btn { position: absolute; top: 24px; right: var(--gutter); z-index: 110; display: none; align-items: center; justify-content: center; gap: 4px; width: 48px; height: 48px; padding: 0; border-radius: 24px; border: none; background: var(--surface); color: var(--text); box-shadow: var(--sh-card); cursor: pointer; }
+.hdr-btn svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.hdr-btn-text { width: auto; padding: 0 18px 0 10px; font-size: 0.9375rem; font-weight: 600; }
+.hdr-btn.has-update::after { content: ''; position: absolute; top: 8px; right: 8px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--surface); }
+#tab-reglages .update-card { margin-bottom: 0; }
+#tab-reglages .theme-card { margin-bottom: 14px; }

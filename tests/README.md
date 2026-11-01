@@ -18,7 +18,8 @@ Un test seul : `python3 tests/test_validation.py`.
 | `test_poids_brouillon.py` | 18 | Le poids corporel saisi (onglet Graphiques) survit au rechargement ; vidé à l'ajout, à la réinitialisation ; brouillon périmé, négatif, absurde ou piégé ignoré |
 | `test_chrono.py` | 15 | Le chrono de repos suit l'exercice ouvert (3:00 / 2:00 / 1:30), reste stable pendant le décompte et sur « GO ! », passe à l'exercice suivant |
 | `test_mise_a_jour.py` | 17 | Avec un vrai service worker et une version simulée : avis « version prête » sans rechargement automatique, bouton « Relancer » (saisie conservée), réseau coupé |
-| `test_mise_en_page.py` | 12 | À 360 et 390 px, thèmes clair et sombre : aucun débordement sur les 4 onglets, noms d'exercice sur une ligne, aucune erreur JavaScript |
+| `test_reglages.py` | 17 | Bouton en haut à droite de l'Historique, page Réglages (Apparence + Application), retour, pastille de mise à jour |
+| `test_mise_en_page.py` | 12 | À 360 et 390 px, thèmes clair et sombre : aucun débordement sur les 5 pages, noms d'exercice sur une ligne, aucune erreur JavaScript |
 
 ## Quand les lancer
 Automatiquement : GitHub les exécute à chaque envoi de code et à chaque demande de fusion (`.github/workflows/tests.yml`, onglet **Actions** du dépôt) ; un échec apparaît en rouge sur le commit.

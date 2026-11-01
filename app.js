@@ -141,7 +141,7 @@ const HISTORY_DAYS = ['Dim.','Lun.','Mar.','Mer.','Jeu.','Ven.','Sam.'];
 const HISTORY_MONTHS_SHORT = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
 
 // Titre affiché en haut de chaque onglet
-const PAGE_TITLES = { programme: 'Programme', seance: 'Séance', progression: 'Graphiques', historique: 'Historique' };
+const PAGE_TITLES = { programme: 'Programme', seance: 'Séance', progression: 'Graphiques', historique: 'Historique', reglages: 'Réglages' };
 
 // La saisie en cours (poids, reps, séries validées, nombre de séries, exercice ouvert, chrono)
 // est copiée dans localStorage à chaque action et restaurée au rechargement de l'application
@@ -2130,7 +2130,8 @@ function switchTab(tabName) {
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
 
   const targetContainer = document.getElementById(`tab-${tabName}`);
-  const targetNav = document.getElementById(`nav-${tabName}`);
+  // « Réglages » est une page secondaire de l'Historique : c'est l'icône Historique qui reste allumée
+  const targetNav = document.getElementById(`nav-${tabName === 'reglages' ? 'historique' : tabName}`);
   if(targetContainer) targetContainer.classList.add('active');
   const scroller = document.getElementById('app-scroll');
   if (scroller) scroller.scrollTop = 0;
@@ -2146,6 +2147,10 @@ function switchTab(tabName) {
   }
 
   document.body.dataset.tab = tabName;
+  const settingsBtn = document.getElementById('settings-btn');
+  if (settingsBtn) settingsBtn.style.display = tabName === 'historique' ? 'flex' : 'none';
+  const settingsBack = document.getElementById('settings-back');
+  if (settingsBack) settingsBack.style.display = tabName === 'reglages' ? 'flex' : 'none';
   updateStickyOffsets();
   const pageTitle = document.getElementById('page-title');
   if (pageTitle) pageTitle.innerText = PAGE_TITLES[tabName] || '';
@@ -2242,7 +2247,7 @@ function resetData() {
 // Le service worker (sw.js) installe et active tout seul une nouvelle version, mais la page déjà
 // ouverte continue d'exécuter l'ancien code jusqu'au prochain lancement : on ne la recharge JAMAIS
 // automatiquement (la saisie en cours serait perdue). À la place, sw.js prévient la page
-// (message SW_ACTIVATED) ; si sa version diffère de celle exécutée, l'onglet Historique affiche
+// (message SW_ACTIVATED) ; si sa version diffère de celle exécutée, la page Réglages affiche
 // « nouvelle version prête » (+ un point sur son icône) et un bouton pour relancer quand on veut.
 function isUpdateReady() {
   return !!(runningVersion && activeVersion && activeVersion !== runningVersion);
@@ -2262,6 +2267,12 @@ function renderUpdateStatus() {
   if (nav) {
     nav.classList.toggle('has-update', ready);
     nav.setAttribute('aria-label', ready ? 'Historique, mise à jour disponible' : 'Historique');
+  }
+  // La pastille suit aussi le bouton Réglages (là où se trouve l'avis)
+  const gear = document.getElementById('settings-btn');
+  if (gear) {
+    gear.classList.toggle('has-update', ready);
+    gear.setAttribute('aria-label', ready ? 'Réglages, mise à jour disponible' : 'Réglages');
   }
 }
 

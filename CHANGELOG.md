@@ -7,6 +7,18 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.5.1] - 2026-11-01
+### ⚙️ Nouvelle page « Réglages »
+- Les cartes **Apparence** (Clair / Sombre / Auto) et **Application** (version, « Vérifier », avis « version prête ») quittent l'onglet Historique, qui est désormais plus court : il garde Sauvegarder / Restaurer, la liste des séances et la réinitialisation.
+- Un **bouton roue dentée en haut à droite de l'Historique** ouvre la page Réglages ; un bouton **« Retour »** à la même place revient à l'Historique. La page n'a pas d'icône propre dans la barre du bas (l'icône Historique reste allumée).
+- La **pastille rouge « mise à jour »** apparaît maintenant aussi sur la roue dentée, pour que l'avis reste visible depuis l'Historique.
+- Aucune donnée touchée : le choix de thème et la sauvegarde fonctionnent comme avant.
+
+### 🧪 Tests
+- Nouveau `test_reglages.py` (17 contrôles) ; `test_mise_a_jour.py` et `test_mise_en_page.py` suivent la nouvelle page (5 pages × 2 largeurs × 2 thèmes). Total : 90 contrôles.
+
+---
+
 ## [1.5.0] - 2026-11-01
 ### 🔔 Indicateur de mise à jour
 - Nouvelle carte **« Application »** dans l'onglet Historique : version exécutée, bouton « Vérifier » (« À jour · vérifié à hh:mm », « Vérification impossible » si le réseau est coupé).

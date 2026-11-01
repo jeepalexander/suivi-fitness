@@ -51,7 +51,7 @@ try:
         check('première installation : aucun avis de mise à jour', pg.evaluate("document.getElementById('update-banner').hidden") is True and not pg.evaluate("document.getElementById('nav-historique').classList.contains('has-update')"))
 
         # vérification sans nouvelle version
-        pg.evaluate("switchTab('historique')"); pg.wait_for_timeout(300)
+        pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(300)
         pg.click('.update-check')
         ok = wait_for(pg, "document.getElementById('update-status').textContent.startsWith('À jour')", 8000)
         check('« Vérifier » sans nouvelle version : « À jour · vérifié à hh:mm »', ok, pg.inner_text('#update-status'))
@@ -67,7 +67,7 @@ try:
         mf = (tmp / 'manifest.json').read_text(encoding='utf-8').replace(f'"version": "{version}"', '"version": "9.9.9"')
         (tmp / 'manifest.json').write_text(mf, encoding='utf-8')
 
-        pg.evaluate("switchTab('historique')"); pg.wait_for_timeout(200)
+        pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(200)
         pg.click('.update-check')
         ok = wait_for(pg, "document.getElementById('update-banner').hidden === false", 20000)
         check('nouvelle version installée : avis « prête » affiché', ok)
@@ -80,7 +80,7 @@ try:
         check('saisie en cours intacte (poids corporel)', pg.input_value('#new-weight') == '70.2')
 
         # bouton « Relancer maintenant » : la page recharge, nouvelle version, saisie conservée par le brouillon
-        pg.evaluate("switchTab('historique')"); pg.wait_for_timeout(200)
+        pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(200)
         pg.click('.update-apply'); pg.wait_for_timeout(1800)
         check('après relance : version 9.9.9 en service', wait_for(pg, "document.getElementById('update-version').textContent==='Version 9.9.9'", 8000), pg.inner_text('#update-version'))
         check('après relance : plus d\'avis', pg.evaluate("document.getElementById('update-banner').hidden") is True and not pg.evaluate("document.getElementById('nav-historique').classList.contains('has-update')"))
@@ -90,7 +90,7 @@ try:
 
         # serveur injoignable (équivalent d'une coupure réseau) : message clair, pas de fausse alerte
         srv.terminate(); srv.wait(); time.sleep(0.5)
-        pg.evaluate("switchTab('historique')"); pg.click('.update-check'); pg.wait_for_timeout(1500)
+        pg.evaluate("switchTab('reglages')"); pg.click('.update-check'); pg.wait_for_timeout(1500)
         st = pg.inner_text('#update-status')
         check('réseau coupé : « Vérification impossible », sans fausse alerte', 'impossible' in st and pg.evaluate("document.getElementById('update-banner').hidden") is True, st)
         ctx.close(); br.close()

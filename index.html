@@ -65,6 +65,15 @@
     </div>
     </div>
 
+    <!-- BOUTONS RÉGLAGES (en haut à droite) : roue dentée sur Historique, retour sur Réglages -->
+    <button id="settings-btn" class="hdr-btn" type="button" onclick="switchTab('reglages')" aria-label="Réglages">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
+    <button id="settings-back" class="hdr-btn hdr-btn-text" type="button" onclick="switchTab('historique')" aria-label="Retour à l'historique">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      <span>Retour</span>
+    </button>
+
     <!-- BOUTON CHRONO REPOS (flottant, visible sur l'onglet Séance) -->
     <button id="timer-btn" class="timer-btn" onclick="toggleRestTimer()">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5M9 3h6"/></svg>
@@ -152,6 +161,15 @@
       <button onclick="document.getElementById('import-file').click()" class="btn btn-secondary">Restaurer</button>
     </div>
 
+    <div id="history-list"></div>
+
+    <div class="danger-zone">
+      <button onclick="resetData()" class="btn-danger-link">Réinitialiser les données d'origine</button>
+    </div>
+  </div>
+
+  <!-- TAB 4: RÉGLAGES (page secondaire, ouverte depuis le bouton en haut à droite de l'Historique) -->
+  <div id="tab-reglages" class="container">
     <div class="card theme-card">
       <div class="card-title">Apparence</div>
       <div class="filter-group seg-group" id="theme-choice" role="radiogroup" aria-label="Thème de l'application">
@@ -173,12 +191,6 @@
         <span id="update-banner-text"></span>
         <button type="button" class="btn update-apply" onclick="applyUpdate()">Relancer maintenant</button>
       </div>
-    </div>
-
-    <div id="history-list"></div>
-
-    <div class="danger-zone">
-      <button onclick="resetData()" class="btn-danger-link">Réinitialiser les données d'origine</button>
     </div>
   </div>
 

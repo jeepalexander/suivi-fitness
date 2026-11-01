@@ -1,5 +1,5 @@
 """Mise en page : aucun débordement, aucune erreur JS, titres d'exercice sur une ligne,
-4 onglets x 2 largeurs (360 / 390 px) x 2 thèmes (clair / sombre)."""
+5 pages x 2 largeurs (360 / 390 px) x 2 thèmes (clair / sombre)."""
 import sys
 from harness import *
 
@@ -19,12 +19,12 @@ with Srv() as url, sync_playwright() as p:
             pg.goto(url); pg.wait_for_timeout(600)
             pg.evaluate("runningVersion = '1.5.0'; activeVersion = '1.5.1'; renderUpdateStatus()")  # avis « version prête » affiché : il doit tenir lui aussi
             bad = []
-            for tab in ('programme', 'seance', 'progression', 'historique'):
+            for tab in ('programme', 'seance', 'progression', 'historique', 'reglages'):
                 pg.evaluate("t=>switchTab(t)", tab); pg.wait_for_timeout(400)
                 o = pg.evaluate(OVERFLOW_JS)
                 if o['docW'] > o['vw'] or o['out']:
                     bad.append((tab, o))
-            check(f'{w} px, {th} : aucun débordement sur les 4 onglets', not bad, str(bad)[:200])
+            check(f'{w} px, {th} : aucun débordement sur les 5 pages', not bad, str(bad)[:200])
             # chaque exercice ouvert tour à tour : le nom tient sur une ligne
             pg.evaluate("switchTab('seance')"); pg.wait_for_timeout(300)
             n = pg.evaluate("document.querySelectorAll('.exercise-item').length")
