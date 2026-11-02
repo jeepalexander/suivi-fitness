@@ -16,7 +16,7 @@ Un test seul : `python3 tests/test_validation.py`.
 | `test_validation.py` | 11 | Seules les séries cochées sont enregistrées ; refus sans coche ou avec valeurs invalides ; confirmation en séance partielle ; modification d'une séance (séries précochées) |
 | `test_brouillon.py` | 17 | La saisie en cours survit au rechargement (valeurs, coches, chrono, exercice ouvert) ; brouillon périmé ou piégé ignoré ; « tirer pour rafraîchir » désactivé |
 | `test_poids_brouillon.py` | 18 | Le poids corporel saisi (onglet Graphiques) survit au rechargement ; vidé à l'ajout, à la réinitialisation ; brouillon périmé, négatif, absurde ou piégé ignoré |
-| `test_chrono.py` | 15 | Le chrono de repos suit l'exercice ouvert (3:00 / 2:00 / 1:30), reste stable pendant le décompte et sur « GO ! », passe à l'exercice suivant |
+| `test_chrono.py` | 15 | Le chrono de repos suit l'exercice ouvert (2:30 / 1:30 / 1:00), reste stable pendant le décompte et sur « GO ! », passe à l'exercice suivant |
 | `test_mise_a_jour.py` | 17 | Avec un vrai service worker et une version simulée : avis « version prête » sans rechargement automatique, bouton « Relancer » (saisie conservée), réseau coupé |
 | `test_reglages.py` | 17 | Bouton en haut à droite de l'Historique, page Réglages (Apparence + Application), retour, pastille de mise à jour |
 | `test_mise_en_page.py` | 12 | À 360 et 390 px, thèmes clair et sombre : aucun débordement sur les 5 pages, noms d'exercice sur une ligne, aucune erreur JavaScript |

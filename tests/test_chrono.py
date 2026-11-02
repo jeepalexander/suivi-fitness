@@ -26,42 +26,42 @@ with Srv() as base, sync_playwright() as p:
     names = pg.evaluate("[...document.querySelectorAll('#exercises-list .exercise-item')].map(i=>i.dataset.ex)")
     print('  exercices de la séance :', names)
 
-    check('au chargement : le chrono annonce la durée de l\'exercice ouvert', pg.inner_text('#timer-display') == 'PAUSE 3:00', pg.inner_text('#timer-display'))
+    check('au chargement : le chrono annonce la durée de l\'exercice ouvert', pg.inner_text('#timer-display') == 'PAUSE 2:30', pg.inner_text('#timer-display'))
 
     # durées attendues (écrites en dur, indépendantes du code)
-    attendu = {'Presse à cuisses': 'PAUSE 3:00', 'Développé couché': 'PAUSE 3:00', 'Développé militaire': 'PAUSE 2:00',
-               'Tirage horizontal': 'PAUSE 2:00', 'Curl biceps': 'PAUSE 1:30', 'Mollets': 'PAUSE 1:30'}
+    attendu = {'Presse à cuisses': 'PAUSE 2:30', 'Développé couché': 'PAUSE 2:30', 'Développé militaire': 'PAUSE 1:30',
+               'Tirage horizontal': 'PAUSE 1:30', 'Curl biceps': 'PAUSE 1:00', 'Mollets': 'PAUSE 1:00'}
     vus = {}
     for n in names:
         vus[n] = open_ex(pg, n)
     ecarts = {n: (vus[n], a) for n, a in attendu.items() if n in vus and vus[n] != a}
-    check('chaque exercice ouvert tour à tour : durée adaptée (lourd 3:00, composé 2:00, isolation 1:30)', not ecarts, str(ecarts))
+    check('chaque exercice ouvert tour à tour : durée adaptée (lourd 2:30, composé 1:30, isolation 1:00)', not ecarts, str(ecarts))
     check('les durées diffèrent selon les exercices', len(set(vus.values())) >= 3, str(sorted(set(vus.values()))))
 
-    check('exercice inconnu : repos par défaut 2:00', pg.evaluate("restDurationFor('Exercice inconnu')") == 120)
+    check('exercice inconnu : repos par défaut 1:30', pg.evaluate("restDurationFor('Exercice inconnu')") == 90)
 
     # replier tous les exercices : repos par défaut
     pg.evaluate("document.querySelector('#exercises-list .exercise-item.open .ex-toggle').click()"); pg.wait_for_timeout(150)
-    check('aucun exercice ouvert : repos par défaut', pg.inner_text('#timer-display') == 'PAUSE 2:00', pg.inner_text('#timer-display'))
+    check('aucun exercice ouvert : repos par défaut', pg.inner_text('#timer-display') == 'PAUSE 1:30', pg.inner_text('#timer-display'))
 
     # lancement sur un exercice d'isolation
     open_ex(pg, 'Curl biceps')
     pg.click('#timer-btn'); pg.wait_for_timeout(100)
     fin = int(pg.evaluate("localStorage.getItem('rest_end_time')"))
     reste = (fin - pg.evaluate("Date.now()")) / 1000
-    check('lancement sur Curl biceps : décompte de 90 s', 88 <= reste <= 91, f'{reste:.1f} s')
+    check('lancement sur Curl biceps : décompte de 60 s', 58 <= reste <= 61, f'{reste:.1f} s')
     txt = pg.inner_text('#timer-display')
-    check('affichage immédiat du décompte (pas « PAUSE »)', txt in ('1:30', '1:29'), txt)
+    check('affichage immédiat du décompte (pas « PAUSE »)', txt in ('1:00', '0:59'), txt)
 
     # changer d'exercice pendant le décompte : rien ne bouge
     open_ex(pg, 'Presse à cuisses'); pg.wait_for_timeout(1100)
     txt2 = pg.inner_text('#timer-display')
     fin2 = int(pg.evaluate("localStorage.getItem('rest_end_time')"))
-    check('exercice changé pendant le décompte : le décompte continue, fin inchangée', txt2.startswith('1:') and fin2 == fin, f'{txt2} fin identique={fin2 == fin}')
+    check('exercice changé pendant le décompte : le décompte continue, fin inchangée', txt2.startswith('0:') and fin2 == fin, f'{txt2} fin identique={fin2 == fin}')
 
-    # arrêt : retour à « PAUSE » avec la durée de l'exercice ouvert (Presse = 3:00)
+    # arrêt : retour à « PAUSE » avec la durée de l'exercice ouvert (Presse = 2:30)
     pg.click('#timer-btn'); pg.wait_for_timeout(100)
-    check('arrêt : retour à PAUSE avec la durée de l\'exercice ouvert', pg.inner_text('#timer-display') == 'PAUSE 3:00', pg.inner_text('#timer-display'))
+    check('arrêt : retour à PAUSE avec la durée de l\'exercice ouvert', pg.inner_text('#timer-display') == 'PAUSE 2:30', pg.inner_text('#timer-display'))
     check('arrêt : plus d\'heure de fin mémorisée', pg.evaluate("localStorage.getItem('rest_end_time')") is None)
 
     # fin de décompte : « GO ! » reste affiché si on change d'exercice, puis un appui remet « PAUSE »
@@ -72,7 +72,7 @@ with Srv() as base, sync_playwright() as p:
     open_ex(pg, 'Développé couché')
     check('« GO ! » conservé quand on change d\'exercice', pg.inner_text('#timer-display') == 'GO !', pg.inner_text('#timer-display'))
     pg.evaluate("document.getElementById('timer-btn').click()"); pg.wait_for_timeout(100)  # la puce « GO ! » pulse : clic par script
-    check('appui sur « GO ! » : retour à PAUSE adapté, sans relancer le chrono', pg.inner_text('#timer-display') == 'PAUSE 3:00' and pg.evaluate("localStorage.getItem('rest_end_time')") is None, pg.inner_text('#timer-display'))
+    check('appui sur « GO ! » : retour à PAUSE adapté, sans relancer le chrono', pg.inner_text('#timer-display') == 'PAUSE 2:30' and pg.evaluate("localStorage.getItem('rest_end_time')") is None, pg.inner_text('#timer-display'))
 
     # progression automatique : valider toutes les séries du 1er exercice → l'exercice suivant s'ouvre et le chrono suit
     pg.evaluate("switchTab('seance')")
@@ -80,7 +80,7 @@ with Srv() as base, sync_playwright() as p:
     pg.evaluate("document.querySelectorAll('#exercises-list .exercise-item')[0].querySelectorAll('.set-row .btn-check-set').forEach(b=>b.click())"); pg.wait_for_timeout(400)
     ouvert = pg.evaluate("document.querySelector('#exercises-list .exercise-item.open').dataset.ex")
     check('exercice terminé : l\'exercice suivant s\'ouvre et le chrono s\'y adapte',
-          ouvert == names[1] and pg.inner_text('#timer-display') == attendu.get(names[1], 'PAUSE 2:00'), f'{ouvert} → {pg.inner_text("#timer-display")}')
+          ouvert == names[1] and pg.inner_text('#timer-display') == attendu.get(names[1], 'PAUSE 1:30'), f'{ouvert} → {pg.inner_text("#timer-display")}')
     check('aucune erreur JS', not errs, str(errs))
     ctx.close(); br.close()
 print('\n', sum(res), '/', len(res), 'contrôles OK')

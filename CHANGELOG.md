@@ -7,6 +7,18 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.5.4] - 2026-11-01
+### 🧹 Nettoyage du CSS (aucun changement visuel)
+- Le bloc « BLANC MINIMALISTE (v1.4.0) », qui surchargeait les règles d'origine, est **fusionné dans les règles de chaque composant** : une seule valeur par propriété, plus de règle écrasée par une autre. `style.css` passe de 803 à 473 lignes (40,8 → 31,7 Ko) et est réorganisé en 11 sections (jetons, base, en-tête, navigation, composants communs, Programme, Séance, Graphiques, Historique, Réglages, fenêtre de séance).
+- **Règles mortes supprimées :** `.workout-meta-bar`, `.program-ex-row`, `.analysis-block`, `.type-pill.small` (identique à `.type-pill`), `#tab-seance .session-head` (la bannière est dans l'en-tête), `#deload-subtitle` en doublon, rayures de bordures jamais visibles (`border: none` appliqué par-dessus).
+- **Variables inutilisées supprimées :** `--accent-text`, `--pill-chip`, `--pill-track`, `--primary-tint`, `--line`, `--primary-soft`, `--success-border`, `--radius-card`, `--shadow-card`, `--shadow-float`, `--shadow-nav`, `--shadow-sticky`. `--gutter` et `--sh-btn` rejoignent les jetons.
+- **Vérification :** instantané des styles calculés de tous les éléments dans 20 états (5 pages, exercice ouvert, séries cochées, chrono prêt / en cours / terminé, modale, avis de mise à jour, records, paliers, conseils, déload) × 3 largeurs (360, 390, 600 px) × 2 thèmes, avant et après : **0 écart** à part `grid-template-columns` sur la barre de navigation, qui est en flex et l'ignorait déjà.
+
+---
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.5.4.
+
+---
+
 ## [1.5.3] - 2026-11-01
 ### ⏱️ Temps de repos raccourcis
 - Les repos proposés par le chrono étaient trop longs : **2:30** pour les mouvements lourds (soulevé de terre, presse, développés couché et incliné), **1:30** pour les autres mouvements polyarticulaires et par défaut, **1:00** pour l'isolation (avant : 3:00 / 2:00 / 1:30).
