@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
   <title>SUIVI FITNESS</title>
 
   
@@ -21,7 +21,7 @@
         var p = localStorage.getItem('h49_theme');
         var dark = p === 'dark' || (p === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
         document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-        var m = document.querySelector('meta[name="theme-color"]');
+        var m = document.querySelector('meta[name=\"theme-color\"]');
         if (m) m.setAttribute('content', dark ? '#0E0E11' : '#FFFFFF');
       } catch (e) {}
     })();
@@ -32,6 +32,9 @@
   <!-- Chart.js & Fonts (Local for offline use) -->
   <script src="js/chart.umd.min.js"></script>
   <link href="css/fonts.css" rel="stylesheet">
+
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <!-- Liaison CSS externe -->
   <link rel="stylesheet" href="style.css">
@@ -81,7 +84,7 @@
     </button>
   </header>
 
-  <!-- Zone défilante : seule cette zone défile (le document ne défile pas), donc la barre d'adresse du navigateur ne se replie plus et la navigation reste immobile -->
+  <!-- Zone défilante -->
   <main id="app-scroll">
 
   <!-- TAB 0: PROGRAMME GLOBAL -->
@@ -168,7 +171,7 @@
     </div>
   </div>
 
-  <!-- TAB 4: RÉGLAGES (page secondaire, ouverte depuis le bouton en haut à droite de l'Historique) -->
+  <!-- TAB 4: RÉGLAGES -->
   <div id="tab-reglages" class="container">
     <div class="card theme-card">
       <div class="card-title">Apparence</div>
@@ -178,6 +181,16 @@
         <button type="button" class="filter-btn" role="radio" data-theme-choice="auto" onclick="setThemePreference('auto')">Auto</button>
       </div>
       <p class="theme-hint">« Auto » suit le réglage clair/sombre du téléphone. Ce choix est propre à cet appareil et n'est pas inclus dans la sauvegarde.</p>
+    </div>
+
+    <div class="card" id="drive-card">
+      <div class="card-title">Sauvegarde Google Drive</div>
+      <p id="drive-status" class="theme-hint">Non connecté</p>
+      <div class="update-row" style="gap:8px;flex-wrap:wrap">
+        <button type="button" id="drive-connect-btn" class="btn" onclick="connectGoogleDrive()">Connecter Google Drive</button>
+        <button type="button" id="drive-disconnect-btn" class="btn btn-secondary" style="display:none" onclick="disconnectGoogleDrive()">Déconnecter</button>
+      </div>
+      <p class="theme-hint">À chaque séance enregistrée, un fichier <code>seance_AAAA-MM-JJ.json</code> est créé dans le dossier « FITNESS AAP – Séances » de ton Drive.</p>
     </div>
 
     <div class="card update-card" id="update-card">
