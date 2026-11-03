@@ -476,11 +476,12 @@ function updateTimerDisplay(seconds) {
 
 function runRestTimer(endTime) {
   const btn = document.getElementById('timer-btn');
-  const progressBar = document.getElementById('timer-progress');
   if (restTimerInterval) clearInterval(restTimerInterval);
 
-  if (btn) btn.className = 'timer-btn running';
-  if (progressBar) progressBar.style.width = '100%';
+  if (btn) {
+    btn.className = 'timer-btn running';
+    btn.style.setProperty('--progress', '100%');
+  }
 
   const startTime = Date.now();
   const totalDuration = endTime - startTime;
@@ -492,14 +493,16 @@ function runRestTimer(endTime) {
     const progressPercent = totalDuration > 0 ? ((totalDuration - elapsed) / totalDuration * 100) : 0;
 
     updateTimerDisplay(secondsRemaining);
-    if (progressBar) progressBar.style.width = `${Math.max(0, progressPercent)}%`;
+    if (btn) btn.style.setProperty('--progress', `${Math.max(0, progressPercent)}%`);
 
     if (secondsRemaining <= 0) {
       clearInterval(restTimerInterval);
       restTimerInterval = null;
       localStorage.removeItem('rest_end_time');
-      if (btn) btn.className = 'timer-btn finished';
-      if (progressBar) progressBar.style.width = '0%';
+      if (btn) {
+        btn.className = 'timer-btn finished';
+        btn.style.setProperty('--progress', '0%');
+      }
       const display = document.getElementById('timer-display');
       if(display) display.innerText = 'GO !';
       playBeep();
@@ -543,10 +546,11 @@ function refreshRestTimerIdle() {
 function resetRestTimerUi() {
   const btn = document.getElementById('timer-btn');
   const display = document.getElementById('timer-display');
-  const progressBar = document.getElementById('timer-progress');
-  if (btn) btn.className = 'timer-btn';
+  if (btn) {
+    btn.className = 'timer-btn';
+    btn.style.setProperty('--progress', '0%');
+  }
   if (display) display.innerText = restIdleLabel();
-  if (progressBar) progressBar.style.width = '0%';
 }
 
 function toggleRestTimer() {

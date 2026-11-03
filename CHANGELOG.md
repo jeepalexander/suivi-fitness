@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.5.9] - 2026-11-03
+### ⏱️ Barre de progression propre
+- La barre de progression du timer utilise désormais un **pseudo-élément CSS** (`::before`) au lieu d'une div supplémentaire, pour une intégration plus propre et sans débordement.
+
+---
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.5.9.
+
+---
+
 ## [1.5.8] - 2026-11-03
 ### ⏱️ Barre de progression droite
 - La barre de progression du timer est maintenant **droite** (sans bordure arrondie) à l'intérieur de la pastille.
