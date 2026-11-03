@@ -826,8 +826,10 @@ function toggleSetDone(btn) {
   // Si on a validé une série et que l'exercice est maintenant complet, relancer le timer de repos
   if (done) {
     const item = row.closest('.exercise-item');
+    console.log('Série validée, exercice complet ?', isExerciseComplete(item));
     if (isExerciseComplete(item)) {
       const timerBtn = document.getElementById('timer-btn');
+      console.log('TimerBtn existe ?', !!timerBtn);
       if (timerBtn) {
         const duration = currentRestDuration();
         const endTime = Date.now() + (duration * 1000);
