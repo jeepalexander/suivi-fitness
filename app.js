@@ -161,6 +161,7 @@ const DRIVE_FOLDER_NAME = 'FITNESS AAP – Séances';
 const DRIVE_TOKEN_KEY = 'h49_drive_token';
 const DRIVE_FOLDER_ID_KEY = 'h49_drive_folder_id';
 const DRIVE_QUEUE_KEY = 'h49_drive_queue';
+const DRIVE_ACCOUNT_KEY = 'h49_drive_account';
 
 // Mises à jour : délai minimal entre deux vérifications automatiques (retour au premier plan)
 const UPDATE_CHECK_MIN_INTERVAL_MS = 30 * 60 * 1000;
@@ -2229,10 +2230,39 @@ function setDriveToken(tokenResponse) {
 function clearDriveToken() {
   localStorage.removeItem(DRIVE_TOKEN_KEY);
   localStorage.removeItem(DRIVE_FOLDER_ID_KEY);
+  localStorage.removeItem(DRIVE_ACCOUNT_KEY);
 }
 
 function isDriveConnected() {
   return !!getDriveToken();
+}
+
+// Compte Google connecté (adresse affichée dans Réglages). Stocké sur l'appareil seulement,
+// jamais injecté en HTML (textContent) ; hors sauvegarde exportée.
+function getDriveAccount() {
+  try {
+    const a = JSON.parse(localStorage.getItem(DRIVE_ACCOUNT_KEY) || 'null');
+    if (a && typeof a.email === 'string' && a.email) return a;
+  } catch (e) { /* ignoré */ }
+  return null;
+}
+
+async function fetchDriveAccount() {
+  const t = getDriveToken();
+  if (!t) return;
+  try {
+    const res = await fetch('https://www.googleapis.com/drive/v3/about?fields=user(displayName,emailAddress)', {
+      headers: { Authorization: 'Bearer ' + t.access_token }
+    });
+    if (!res.ok) return;
+    const u = (await res.json()).user;
+    if (!u || typeof u.emailAddress !== 'string' || !u.emailAddress) return;
+    localStorage.setItem(DRIVE_ACCOUNT_KEY, JSON.stringify({
+      email: u.emailAddress,
+      name: typeof u.displayName === 'string' ? u.displayName : ''
+    }));
+    updateDriveUI();
+  } catch (e) { /* hors-ligne : l'adresse s'affichera à la prochaine connexion */ }
 }
 
 function updateDriveUI() {
@@ -2241,7 +2271,10 @@ function updateDriveUI() {
   const disconnectBtn = document.getElementById('drive-disconnect-btn');
   if (!statusEl) return;
   if (isDriveConnected()) {
-    statusEl.textContent = 'Connecté — sauvegarde automatique active';
+    const account = getDriveAccount();
+    statusEl.textContent = account
+      ? 'Connecté : ' + account.email + ' — sauvegarde automatique active'
+      : 'Connecté — sauvegarde automatique active';
     if (connectBtn) connectBtn.style.display = 'none';
     if (disconnectBtn) disconnectBtn.style.display = '';
   } else {
@@ -2265,6 +2298,7 @@ function initDriveTokenClient() {
       }
       setDriveToken(resp);
       updateDriveUI();
+      fetchDriveAccount();
       // process any queued sessions
       processDriveQueue();
     }
@@ -2584,7 +2618,10 @@ async function initApp() {
   initTheme();
   initUpdateIndicator();
   // Google Drive : statut + file d'attente
-  setTimeout(() => { initDriveTokenClient(); updateDriveUI(); processDriveQueue(); }, 800);
+  setTimeout(() => {
+    initDriveTokenClient(); updateDriveUI(); processDriveQueue();
+    if (isDriveConnected() && !getDriveAccount()) fetchDriveAccount();
+  }, 800);
   const saved = localStorage.getItem('h49_state');
   if (saved) {
     try {

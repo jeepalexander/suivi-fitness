@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.5] - 2026-11-03
+### 👤 Compte Google affiché dans Réglages
+- Une fois Google Drive connecté, la carte « Sauvegarde Google Drive » indique l'adresse du compte (« Connecté : adresse — sauvegarde automatique active »).
+- L'adresse est lue via l'API Drive (déjà autorisée), stockée sur l'appareil seulement (`h49_drive_account`, hors sauvegarde exportée), affichée en texte brut et effacée à la déconnexion.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.5.
+
+---
+
 ## [1.6.4] - 2026-11-03
 ### 🛠️ Correctif : l'application démarre de nouveau (et fonctionne hors-ligne)
 - `app.js` est de nouveau le **code complet de l'application** (v1.6.0 avec sauvegarde Google Drive). Le chargeur qui allait chercher le code sur jsDelivr est supprimé : il empêchait `initApp` de s'exécuter (écran Programme vide) et rendait l'application inutilisable sans réseau.
