@@ -1,9 +1,8 @@
 // Service Worker - Suivi Fitness
-// Cache-first pour le mode hors-ligne complet de la PWA.
 // APP_VERSION doit être incrémenté à chaque release (en même temps que
 // manifest.json) : le navigateur ne réinstalle le service worker que si
 // le contenu de ce fichier change.
-const APP_VERSION = '1.6.2';
+const APP_VERSION = '1.6.3';
 const CACHE_NAME = 'suivi-fitness-' + APP_VERSION;
 const ASSETS = [
   './',
@@ -61,12 +60,15 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  try {
+    if (new URL(event.request.url).origin !== self.location.origin) return;
+  } catch (e) { return; }
   event.respondWith(
     caches.open(CACHE_NAME).then((cache) =>
       cache.match(event.request).then((cached) => {
         if (cached) return cached;
         return fetch(event.request).then((response) => {
-          if (response.ok && new URL(event.request.url).origin === self.location.origin) {
+          if (response.ok) {
             cache.put(event.request, response.clone());
           }
           return response;
