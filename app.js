@@ -162,6 +162,7 @@ const DRIVE_TOKEN_KEY = 'h49_drive_token';
 const DRIVE_FOLDER_ID_KEY = 'h49_drive_folder_id';
 const DRIVE_QUEUE_KEY = 'h49_drive_queue';
 const DRIVE_ACCOUNT_KEY = 'h49_drive_account';
+const DRIVE_WANTED_KEY = 'h49_drive_wanted'; // '1' tant que l'utilisateur n'a pas cliqué « Déconnecter »
 
 // Mises à jour : délai minimal entre deux vérifications automatiques (retour au premier plan)
 const UPDATE_CHECK_MIN_INTERVAL_MS = 30 * 60 * 1000;
@@ -2198,6 +2199,7 @@ function switchTab(tabName) {
   if (tabName === 'programme') renderProgramOverview();
   if (tabName === 'progression') renderCharts();
   if (tabName === 'progression') renderProgressAnalysis();
+  if (tabName === 'reglages') updateDriveUI(); // le jeton Drive a pu expirer depuis l'ouverture de l'appli
 }
 
 
@@ -2227,10 +2229,26 @@ function setDriveToken(tokenResponse) {
   return t;
 }
 
+// Déconnexion voulue par l'utilisateur : tout est oublié (jeton, dossier, compte, souhait de sauvegarde).
 function clearDriveToken() {
   localStorage.removeItem(DRIVE_TOKEN_KEY);
   localStorage.removeItem(DRIVE_FOLDER_ID_KEY);
   localStorage.removeItem(DRIVE_ACCOUNT_KEY);
+  localStorage.removeItem(DRIVE_WANTED_KEY);
+}
+
+// Jeton expiré ou refusé par Google (il ne dure qu'environ 1 h) : on n'oublie que le jeton ;
+// le compte, le dossier et le souhait de sauvegarde restent, pour renouveler le jeton tout seul.
+function expireDriveToken() {
+  localStorage.removeItem(DRIVE_TOKEN_KEY);
+}
+
+function isDriveWanted() {
+  return localStorage.getItem(DRIVE_WANTED_KEY) === '1';
+}
+
+function getDriveQueueLength() {
+  try { return JSON.parse(localStorage.getItem(DRIVE_QUEUE_KEY) || '[]').length; } catch (e) { return 0; }
 }
 
 function isDriveConnected() {
@@ -2270,18 +2288,54 @@ function updateDriveUI() {
   const connectBtn = document.getElementById('drive-connect-btn');
   const disconnectBtn = document.getElementById('drive-disconnect-btn');
   if (!statusEl) return;
+  const account = getDriveAccount();
+  const pending = getDriveQueueLength();
+  const pendingText = pending > 0 ? ' · ' + pending + ' séance' + (pending > 1 ? 's' : '') + ' en attente d\'envoi' : '';
   if (isDriveConnected()) {
-    const account = getDriveAccount();
-    statusEl.textContent = account
+    statusEl.textContent = (account
       ? 'Connecté : ' + account.email + ' — sauvegarde automatique active'
-      : 'Connecté — sauvegarde automatique active';
+      : 'Connecté — sauvegarde automatique active') + pendingText;
     if (connectBtn) connectBtn.style.display = 'none';
     if (disconnectBtn) disconnectBtn.style.display = '';
+  } else if (isDriveWanted()) {
+    // Jeton expiré (≈ 1 h) : il sera renouvelé tout seul au prochain « Enregistrer la séance ».
+    statusEl.textContent = (account ? 'Compte ' + account.email + ' : ' : '')
+      + 'sauvegarde renouvelée automatiquement à la prochaine séance enregistrée' + pendingText;
+    if (connectBtn) { connectBtn.style.display = ''; connectBtn.textContent = 'Reconnecter maintenant'; }
+    if (disconnectBtn) disconnectBtn.style.display = '';
   } else {
-    statusEl.textContent = 'Non connecté';
-    if (connectBtn) connectBtn.style.display = '';
+    statusEl.textContent = 'Non connecté' + pendingText;
+    if (connectBtn) { connectBtn.style.display = ''; connectBtn.textContent = 'Connecter Google Drive'; }
     if (disconnectBtn) disconnectBtn.style.display = 'none';
   }
+}
+
+// Renouvelle le jeton Google (≈ 1 h de validité) sans que l'utilisateur ait à se reconnecter :
+// « prompt: '' » + l'adresse déjà connue (« hint ») évitent l'écran de choix de compte. À appeler
+// depuis un geste de l'utilisateur (ex. « Enregistrer la séance »), sinon le navigateur peut bloquer
+// la petite fenêtre Google. Répond true si un jeton valide a été obtenu, false sinon (jamais d'alerte).
+let driveRenewPending = null;
+function renewDriveToken() {
+  if (driveRenewPending) return driveRenewPending.promise;
+  initDriveTokenClient();
+  if (!driveTokenClient) return Promise.resolve(false);
+  let resolveFn;
+  const promise = new Promise((resolve) => { resolveFn = resolve; });
+  const pending = {
+    promise,
+    finish(ok) {
+      clearTimeout(pending.timer);
+      if (driveRenewPending === pending) driveRenewPending = null;
+      resolveFn(ok);
+    }
+  };
+  pending.timer = setTimeout(() => pending.finish(false), 30000);
+  driveRenewPending = pending;
+  const account = getDriveAccount();
+  const options = { prompt: '' };
+  if (account) options.hint = account.email;
+  try { driveTokenClient.requestAccessToken(options); } catch (e) { pending.finish(false); }
+  return promise;
 }
 
 function initDriveTokenClient() {
@@ -2293,14 +2347,22 @@ function initDriveTokenClient() {
     callback: (resp) => {
       if (resp.error) {
         console.warn('Drive auth error', resp);
+        if (driveRenewPending) { driveRenewPending.finish(false); updateDriveUI(); return; } // renouvellement silencieux : pas d'alerte
         alert('Connexion Google Drive annulée ou échouée.');
         return;
       }
       setDriveToken(resp);
+      localStorage.setItem(DRIVE_WANTED_KEY, '1');
       updateDriveUI();
-      fetchDriveAccount();
+      if (!getDriveAccount()) fetchDriveAccount();
+      if (driveRenewPending) { driveRenewPending.finish(true); return; } // l'appelant envoie lui-même la file d'attente
       // process any queued sessions
       processDriveQueue();
+    },
+    // Fenêtre Google bloquée ou fermée
+    error_callback: (err) => {
+      console.warn('Drive auth popup', err);
+      if (driveRenewPending) { driveRenewPending.finish(false); updateDriveUI(); }
     }
   });
 }
@@ -2361,10 +2423,16 @@ async function ensureDriveFolder(accessToken) {
   return folderId;
 }
 
-async function uploadSessionToDrive(session) {
-  const token = getDriveToken();
+// options.renew = true : si le jeton a expiré, on en redemande un tout de suite (à n'utiliser que
+// depuis un geste de l'utilisateur, voir renewDriveToken).
+async function uploadSessionToDrive(session, options) {
+  let token = getDriveToken();
+  if (!token && options && options.renew && isDriveWanted()) {
+    if (await renewDriveToken()) token = getDriveToken();
+  }
   if (!token) {
     enqueueDriveSession(session);
+    updateDriveUI();
     return { queued: true };
   }
 
@@ -2389,10 +2457,10 @@ async function uploadSessionToDrive(session) {
     });
 
     if (res.status === 401) {
-      // token expired → re-auth later
-      clearDriveToken();
-      updateDriveUI();
+      // jeton refusé par Google → on ne garde que le compte et le dossier ; renouvelé à la prochaine séance
+      expireDriveToken();
       enqueueDriveSession(session);
+      updateDriveUI();
       return { queued: true, reason: 'token' };
     }
     if (!res.ok) {
@@ -2435,10 +2503,15 @@ async function processDriveQueue() {
 }
 
 function backupSessionToDrive(session) {
-  // fire-and-forget ; never block the UI
-  uploadSessionToDrive(session).then(r => {
-    if (r && r.ok) console.log('Séance sauvegardée sur Drive');
-  }).catch(() => {});
+  // fire-and-forget ; never block the UI. Appelée depuis « Enregistrer la séance » (geste de
+  // l'utilisateur) : le jeton expiré est renouvelé silencieusement, puis les séances restées
+  // en attente partent aussi.
+  uploadSessionToDrive(session, { renew: true }).then(r => {
+    if (r && r.ok) {
+      console.log('Séance sauvegardée sur Drive');
+      return processDriveQueue();
+    }
+  }).then(() => updateDriveUI()).catch(() => {});
 }
 
 

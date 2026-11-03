@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.6] - 2026-11-03
+### 🔄 Google Drive : plus besoin de se reconnecter toutes les heures
+- Le jeton Google ne dure qu'environ 1 h. À chaque « Enregistrer la séance », s'il a expiré, l'application en redemande **un nouveau toute seule** (demande silencieuse, sans choix de compte grâce à l'adresse déjà connue), envoie la séance, puis les séances restées en attente.
+- Le souhait de sauvegarde est retenu (`h49_drive_wanted`) jusqu'à un clic sur « Déconnecter » ; l'expiration du jeton n'oublie plus le compte ni le dossier.
+- Si Google demande quand même une confirmation (fenêtre refusée, session Google fermée), rien n'est perdu : la séance reste en file d'attente et Réglages l'indique (« N séances en attente d'envoi », bouton « Reconnecter maintenant »).
+- Réglages : l'état est rafraîchi à chaque ouverture de la page.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.6.
+
+---
+
 ## [1.6.5] - 2026-11-03
 ### 👤 Compte Google affiché dans Réglages
 - Une fois Google Drive connecté, la carte « Sauvegarde Google Drive » indique l'adresse du compte (« Connecté : adresse — sauvegarde automatique active »).
