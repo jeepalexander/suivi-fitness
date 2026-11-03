@@ -827,11 +827,15 @@ function toggleSetDone(btn) {
   if (done) {
     const item = row.closest('.exercise-item');
     if (isExerciseComplete(item)) {
-      const duration = currentRestDuration();
-      const endTime = Date.now() + (duration * 1000);
-      localStorage.setItem('rest_end_time', endTime);
-      updateTimerDisplay(duration);
-      runRestTimer(endTime);
+      const timerBtn = document.getElementById('timer-btn');
+      if (timerBtn) {
+        const duration = currentRestDuration();
+        const endTime = Date.now() + (duration * 1000);
+        localStorage.setItem('rest_end_time', endTime);
+        updateTimerDisplay(duration);
+        runRestTimer(endTime);
+        console.log('Timer relancé automatiquement :', duration, 'secondes');
+      }
     }
   }
 
