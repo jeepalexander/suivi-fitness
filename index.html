@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com https://raw.githubusercontent.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
   <title>SUIVI FITNESS</title>
 
   
@@ -21,7 +21,7 @@
         var p = localStorage.getItem('h49_theme');
         var dark = p === 'dark' || (p === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
         document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-        var m = document.querySelector('meta[name=\"theme-color\"]');
+        var m = document.querySelector('meta[name="theme-color"]');
         if (m) m.setAttribute('content', dark ? '#0E0E11' : '#FFFFFF');
       } catch (e) {}
     })();
@@ -84,33 +84,23 @@
     </button>
   </header>
 
-  <!-- Zone défilante -->
   <main id="app-scroll">
 
-  <!-- TAB 0: PROGRAMME GLOBAL -->
   <div id="tab-programme" class="container active">
     <div id="program-overview"></div>
   </div>
 
-  <!-- TAB 1: SÉANCE DU JOUR -->
   <div id="tab-seance" class="container">
-
     <p class="warmup-note">🚣 Échauffement : Rameur 1000 m + 2 séries légères sur le 1er mouvement.</p>
-
     <form id="workout-form">
       <div id="exercises-list"></div>
-
-      <div class="watch-memo">
-        ⌚ N'oublie pas d'arrêter le suivi de ta montre !
-      </div>
-
+      <div class="watch-memo">⌚ N'oublie pas d'arrêter le suivi de ta montre !</div>
       <p class="submit-hint">Seules les séries cochées sont enregistrées.</p>
       <button type="submit" id="submit-workout-btn" class="btn">Valider & Enregistrer la séance</button>
       <button type="button" id="cancel-edit-btn" class="btn btn-secondary" style="display: none;" onclick="cancelEditSession()">Annuler la modification</button>
     </form>
   </div>
 
-  <!-- TAB 2: PROGRESSION & ANALYSE -->
   <div id="tab-progression" class="container">
     <div class="hero-card">
       <div class="hero-label">Indice de progression global</div>
@@ -126,23 +116,17 @@
       </div>
       <div class="hero-chart"><canvas id="tonnageChart" height="200"></canvas></div>
     </div>
-
     <div id="monthly-analysis" class="progress-analysis"></div>
-
     <div class="card">
       <h3 class="analysis-section-title">Progression par exercice</h3>
-      <select id="exercise-filter" class="filter-select" onchange="renderExerciseChart()">
-      </select>
-
+      <select id="exercise-filter" class="filter-select" onchange="renderExerciseChart()"></select>
       <div class="filter-group seg-group">
         <button class="filter-btn active" id="btn-mode-max" onclick="setExMetricMode('max', this)">Charge max</button>
         <button class="filter-btn" id="btn-mode-vol" onclick="setExMetricMode('volume', this)">Volume cumulé</button>
       </div>
-
       <canvas id="exerciseChart" height="180"></canvas>
       <p id="exercise-plateau-note" class="analysis-note" hidden>La bande ambre marque les séances sans progression (palier).</p>
     </div>
-
     <div class="card">
       <h3 class="analysis-section-title">Poids corporel</h3>
       <div class="weight-current"><span id="weight-current" class="weight-value">–</span><span class="weight-unit">kg</span></div>
@@ -154,24 +138,19 @@
     </div>
   </div>
 
-  <!-- TAB 3: HISTORIQUE -->
   <div id="tab-historique" class="container">
     <p id="history-count" class="history-count"></p>
-
     <div class="card backup-card">
       <input type="file" id="import-file" style="display:none" onchange="importData(event)">
       <button onclick="exportData()" class="btn">Sauvegarder</button>
       <button onclick="document.getElementById('import-file').click()" class="btn btn-secondary">Restaurer</button>
     </div>
-
     <div id="history-list"></div>
-
     <div class="danger-zone">
       <button onclick="resetData()" class="btn-danger-link">Réinitialiser les données d'origine</button>
     </div>
   </div>
 
-  <!-- TAB 4: RÉGLAGES -->
   <div id="tab-reglages" class="container">
     <div class="card theme-card">
       <div class="card-title">Apparence</div>
@@ -182,7 +161,6 @@
       </div>
       <p class="theme-hint">« Auto » suit le réglage clair/sombre du téléphone. Ce choix est propre à cet appareil et n'est pas inclus dans la sauvegarde.</p>
     </div>
-
     <div class="card" id="drive-card">
       <div class="card-title">Sauvegarde Google Drive</div>
       <p id="drive-status" class="theme-hint">Non connecté</p>
@@ -192,7 +170,6 @@
       </div>
       <p class="theme-hint">À chaque séance enregistrée, un fichier <code>seance_AAAA-MM-JJ.json</code> est créé dans le dossier « FITNESS AAP – Séances » de ton Drive.</p>
     </div>
-
     <div class="card update-card" id="update-card">
       <div class="card-title">Application</div>
       <div class="update-row">
@@ -209,7 +186,6 @@
 
   </main>
 
-  <!-- NAVIGATION -->
   <nav>
     <button onclick="switchTab('programme')" id="nav-programme" aria-label="Programme" class="active">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
@@ -229,13 +205,8 @@
     </button>
   </nav>
 
-  <!-- Liaison Script externe -->
   <script src="app.js"></script>
-
-  <!-- Durcissement sécurité : assainissement des sauvegardes importées -->
   <script src="js/security.js"></script>
-
-  <!-- Enregistrement du Service Worker (mode hors-ligne) -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
