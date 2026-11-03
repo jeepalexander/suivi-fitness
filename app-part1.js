@@ -1,0 +1,1 @@
+// LOAD_FROM_FILE:/tmp/app-split/app-part1.js
