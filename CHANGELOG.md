@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.7] - 2026-11-04
+### 👤 Compte Google : lecture de l'adresse fiabilisée
+- Si l'API Drive « about » ne donne pas l'adresse, une **seconde méthode** la lit sur le propriétaire du dossier de sauvegarde créé par l'application (aucune permission supplémentaire, aucune nouvelle autorisation à donner).
+- Si aucune des deux ne répond, Réglages **affiche la raison** (ex. « adresse du compte indisponible (about : erreur 403 ; dossier : erreur 404) ») au lieu de ne rien montrer.
+- Nouvel essai de lecture à chaque ouverture de Réglages tant que l'adresse est inconnue.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.7.
+
+---
+
 ## [1.6.6] - 2026-11-03
 ### 🔄 Google Drive : plus besoin de se reconnecter toutes les heures
 - Le jeton Google ne dure qu'environ 1 h. À chaque « Enregistrer la séance », s'il a expiré, l'application en redemande **un nouveau toute seule** (demande silencieuse, sans choix de compte grâce à l'adresse déjà connue), envoie la séance, puis les séances restées en attente.

@@ -19,7 +19,7 @@ Un test seul : `python3 tests/test_validation.py`.
 | `test_chrono.py` | 15 | Le chrono de repos suit l'exercice ouvert (2:30 / 1:30 / 1:00), reste stable pendant le décompte et sur « GO ! », passe à l'exercice suivant |
 | `test_mise_a_jour.py` | 17 | Avec un vrai service worker et une version simulée : avis « version prête » sans rechargement automatique, bouton « Relancer » (saisie conservée), réseau coupé |
 | `test_reglages.py` | 17 | Bouton en haut à droite de l'Historique, page Réglages (Apparence + Application), retour, pastille de mise à jour |
-| `test_drive_compte.py` | 9 | Google Drive : adresse du compte affichée dans Réglages (API Drive simulée), effacée à la déconnexion, texte brut (aucune injection), API en erreur ou non connecté |
+| `test_drive_compte.py` | 12 | Google Drive : adresse du compte affichée dans Réglages (API simulée), seconde méthode via le propriétaire du dossier, raison de l'échec affichée, nouvel essai à la réouverture, effacée à la déconnexion, texte brut (aucune injection) |
 | `test_drive_renouvellement.py` | 17 | Google Drive : jeton expiré (≈ 1 h) renouvelé tout seul à l'enregistrement d'une séance (sans écran de choix), séances en attente envoyées avec, rien de perdu si Google refuse (message dans Réglages, aucune alerte), 401, déconnexion, première connexion |
 | `test_mise_en_page.py` | 12 | À 360 et 390 px, thèmes clair et sombre : aucun débordement sur les 5 pages, noms d'exercice sur une ligne, aucune erreur JavaScript |
 

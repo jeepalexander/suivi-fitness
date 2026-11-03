@@ -2199,7 +2199,10 @@ function switchTab(tabName) {
   if (tabName === 'programme') renderProgramOverview();
   if (tabName === 'progression') renderCharts();
   if (tabName === 'progression') renderProgressAnalysis();
-  if (tabName === 'reglages') updateDriveUI(); // le jeton Drive a pu expirer depuis l'ouverture de l'appli
+  if (tabName === 'reglages') {
+    updateDriveUI(); // le jeton Drive a pu expirer depuis l'ouverture de l'appli
+    if (isDriveConnected() && !getDriveAccount()) fetchDriveAccount(); // nouvel essai de lecture de l'adresse
+  }
 }
 
 
@@ -2265,22 +2268,54 @@ function getDriveAccount() {
   return null;
 }
 
+// Lecture de l'adresse du compte connecté, sans permission supplémentaire :
+//  1) API Drive « about » ; 2) à défaut, propriétaire du dossier de sauvegarde créé par l'application.
+// Si aucune des deux ne répond, la raison est affichée dans Réglages (driveAccountError).
+let driveAccountError = '';
+let driveAccountFetching = false;
+
 async function fetchDriveAccount() {
   const t = getDriveToken();
-  if (!t) return;
+  if (!t || driveAccountFetching) return;
+  driveAccountFetching = true;
+  const headers = { Authorization: 'Bearer ' + t.access_token };
+  const reasons = [];
+  let found = null;
   try {
-    const res = await fetch('https://www.googleapis.com/drive/v3/about?fields=user(displayName,emailAddress)', {
-      headers: { Authorization: 'Bearer ' + t.access_token }
-    });
-    if (!res.ok) return;
-    const u = (await res.json()).user;
-    if (!u || typeof u.emailAddress !== 'string' || !u.emailAddress) return;
-    localStorage.setItem(DRIVE_ACCOUNT_KEY, JSON.stringify({
-      email: u.emailAddress,
-      name: typeof u.displayName === 'string' ? u.displayName : ''
-    }));
+    try {
+      const res = await fetch('https://www.googleapis.com/drive/v3/about?fields=user(displayName,emailAddress)', { headers });
+      if (res.ok) {
+        const u = (await res.json()).user;
+        if (u && typeof u.emailAddress === 'string' && u.emailAddress) found = { email: u.emailAddress, name: u.displayName };
+        else reasons.push('about : sans adresse');
+      } else reasons.push('about : erreur ' + res.status);
+    } catch (e) { reasons.push('about : réseau'); }
+
+    if (!found) {
+      try {
+        const folderId = await ensureDriveFolder(t.access_token);
+        const res = await fetch('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(folderId) + '?fields=owners(displayName,emailAddress)', { headers });
+        if (res.ok) {
+          const o = ((await res.json()).owners || [])[0];
+          if (o && typeof o.emailAddress === 'string' && o.emailAddress) found = { email: o.emailAddress, name: o.displayName };
+          else reasons.push('dossier : sans adresse');
+        } else reasons.push('dossier : erreur ' + res.status);
+      } catch (e) { reasons.push('dossier : indisponible'); }
+    }
+
+    if (found) {
+      localStorage.setItem(DRIVE_ACCOUNT_KEY, JSON.stringify({
+        email: found.email,
+        name: typeof found.name === 'string' ? found.name : ''
+      }));
+      driveAccountError = '';
+    } else {
+      driveAccountError = reasons.join(' ; ');
+    }
+  } finally {
+    driveAccountFetching = false;
     updateDriveUI();
-  } catch (e) { /* hors-ligne : l'adresse s'affichera à la prochaine connexion */ }
+  }
 }
 
 function updateDriveUI() {
@@ -2292,9 +2327,10 @@ function updateDriveUI() {
   const pending = getDriveQueueLength();
   const pendingText = pending > 0 ? ' · ' + pending + ' séance' + (pending > 1 ? 's' : '') + ' en attente d\'envoi' : '';
   if (isDriveConnected()) {
+    const accountIssue = !account && driveAccountError ? ' · adresse du compte indisponible (' + driveAccountError + ')' : '';
     statusEl.textContent = (account
       ? 'Connecté : ' + account.email + ' — sauvegarde automatique active'
-      : 'Connecté — sauvegarde automatique active') + pendingText;
+      : 'Connecté — sauvegarde automatique active') + accountIssue + pendingText;
     if (connectBtn) connectBtn.style.display = 'none';
     if (disconnectBtn) disconnectBtn.style.display = '';
   } else if (isDriveWanted()) {
