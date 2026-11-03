@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.5.8] - 2026-11-03
+### ⏱️ Barre de progression droite
+- La barre de progression du timer est maintenant **droite** (sans bordure arrondie) à l'intérieur de la pastille.
+
+---
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.5.8.
+
+---
+
 ## [1.5.7] - 2026-11-03
 ### ⏱️ Barre de progression du timer
 - **La pastille du timer de repos se vide progressivement** pendant le décompte, pour visualiser le temps restant.
