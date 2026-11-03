@@ -822,6 +822,19 @@ function toggleSetDone(btn) {
     scrollOnNextRefresh = true;
   }
   updateSetsProgress();
+
+  // Si on a validé une série et que l'exercice est maintenant complet, relancer le timer de repos
+  if (done) {
+    const item = row.closest('.exercise-item');
+    if (isExerciseComplete(item)) {
+      const duration = currentRestDuration();
+      const endTime = Date.now() + (duration * 1000);
+      localStorage.setItem('rest_end_time', endTime);
+      updateTimerDisplay(duration);
+      runRestTimer(endTime);
+    }
+  }
+
   saveDraft();
 }
 
