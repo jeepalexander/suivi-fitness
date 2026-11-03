@@ -1,1 +1,1 @@
-PLACEHOLDER_DO_NOT_USE
+@/home/workdir/artifacts/drive-account-v1.6.1/app.js
