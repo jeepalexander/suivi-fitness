@@ -7,12 +7,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
-## [1.5.5] - 2026-11-03
+## [1.5.6] - 2026-11-03
 ### ⏱️ Timer de repos automatique
-- À la validation complète d'un exercice (toutes ses séries cochées), **le timer de repos se relance automatiquement** avec la durée adaptée à l'exercice suivant. Plus besoin de cliquer manuellement sur la pastille de pause.
+- **Le timer de repos se relance automatiquement à chaque validation de série** avec la durée adaptée à l'exercice en cours. Plus besoin de cliquer manuellement sur la pastille de pause.
 
 ---
-- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.5.5.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.5.6.
 
 ---
 
