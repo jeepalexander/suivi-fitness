@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.5.7] - 2026-11-03
+### ⏱️ Barre de progression du timer
+- **La pastille du timer de repos se vide progressivement** pendant le décompte, pour visualiser le temps restant.
+
+---
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.5.7.
+
+---
+
 ## [1.5.6] - 2026-11-03
 ### ⏱️ Timer de repos automatique
 - **Le timer de repos se relance automatiquement à chaque validation de série** avec la durée adaptée à l'exercice en cours. Plus besoin de cliquer manuellement sur la pastille de pause.

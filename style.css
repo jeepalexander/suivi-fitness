@@ -181,6 +181,7 @@ header h1 { font-family: var(--font-display); font-size: 2.625rem; font-weight: 
 .timer-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 .timer-btn.running { background: var(--success); border-color: var(--success); color: var(--on-success); }
 .timer-btn.finished { background: var(--accent-c); border-color: var(--accent-c); color: #fff; box-shadow: none; animation: pulse 0.8s infinite alternate; }
+.timer-progress { position: absolute; top: 0; left: 0; height: 100%; width: 0%; border-radius: 22px; background: rgba(255, 255, 255, 0.3); transition: width 0.1s linear; }
 
 @keyframes pulse {
   from { opacity: 1; transform: scale(1); }

@@ -476,27 +476,36 @@ function updateTimerDisplay(seconds) {
 
 function runRestTimer(endTime) {
   const btn = document.getElementById('timer-btn');
+  const progressBar = document.getElementById('timer-progress');
   if (restTimerInterval) clearInterval(restTimerInterval);
 
   if (btn) btn.className = 'timer-btn running';
+  if (progressBar) progressBar.style.width = '100%';
+
+  const startTime = Date.now();
+  const totalDuration = endTime - startTime;
 
   restTimerInterval = setInterval(() => {
     const now = Date.now();
+    const elapsed = now - startTime;
     const secondsRemaining = Math.max(0, Math.floor((endTime - now) / 1000));
+    const progressPercent = totalDuration > 0 ? ((totalDuration - elapsed) / totalDuration * 100) : 0;
 
     updateTimerDisplay(secondsRemaining);
+    if (progressBar) progressBar.style.width = `${Math.max(0, progressPercent)}%`;
 
     if (secondsRemaining <= 0) {
       clearInterval(restTimerInterval);
       restTimerInterval = null;
       localStorage.removeItem('rest_end_time');
       if (btn) btn.className = 'timer-btn finished';
+      if (progressBar) progressBar.style.width = '0%';
       const display = document.getElementById('timer-display');
       if(display) display.innerText = 'GO !';
       playBeep();
       if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
     }
-  }, 1000);
+  }, 100);
 }
 
 // Repos adapté à l'exercice : durée (s) associée à un exercice, ou repos par défaut
@@ -534,8 +543,10 @@ function refreshRestTimerIdle() {
 function resetRestTimerUi() {
   const btn = document.getElementById('timer-btn');
   const display = document.getElementById('timer-display');
+  const progressBar = document.getElementById('timer-progress');
   if (btn) btn.className = 'timer-btn';
   if (display) display.innerText = restIdleLabel();
+  if (progressBar) progressBar.style.width = '0%';
 }
 
 function toggleRestTimer() {
