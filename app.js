@@ -823,21 +823,15 @@ function toggleSetDone(btn) {
   }
   updateSetsProgress();
 
-  // Si on a validé une série et que l'exercice est maintenant complet, relancer le timer de repos
+  // Si on a validé une série, relancer le timer de repos automatiquement
   if (done) {
-    const item = row.closest('.exercise-item');
-    console.log('Série validée, exercice complet ?', isExerciseComplete(item));
-    if (isExerciseComplete(item)) {
-      const timerBtn = document.getElementById('timer-btn');
-      console.log('TimerBtn existe ?', !!timerBtn);
-      if (timerBtn) {
-        const duration = currentRestDuration();
-        const endTime = Date.now() + (duration * 1000);
-        localStorage.setItem('rest_end_time', endTime);
-        updateTimerDisplay(duration);
-        runRestTimer(endTime);
-        console.log('Timer relancé automatiquement :', duration, 'secondes');
-      }
+    const timerBtn = document.getElementById('timer-btn');
+    if (timerBtn) {
+      const duration = currentRestDuration();
+      const endTime = Date.now() + (duration * 1000);
+      localStorage.setItem('rest_end_time', endTime);
+      updateTimerDisplay(duration);
+      runRestTimer(endTime);
     }
   }
 
