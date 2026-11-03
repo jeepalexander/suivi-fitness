@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.5.5] - 2026-11-03
+### ⏱️ Timer de repos automatique
+- À la validation complète d'un exercice (toutes ses séries cochées), **le timer de repos se relance automatiquement** avec la durée adaptée à l'exercice suivant. Plus besoin de cliquer manuellement sur la pastille de pause.
+
+---
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.5.5.
+
+---
+
 ## [1.5.4] - 2026-11-01
 ### 🧹 Nettoyage du CSS (aucun changement visuel)
 - Le bloc « BLANC MINIMALISTE (v1.4.0) », qui surchargeait les règles d'origine, est **fusionné dans les règles de chaque composant** : une seule valeur par propriété, plus de règle écrasée par une autre. `style.css` passe de 803 à 473 lignes (40,8 → 31,7 Ko) et est réorganisé en 11 sections (jetons, base, en-tête, navigation, composants communs, Programme, Séance, Graphiques, Historique, Réglages, fenêtre de séance).
