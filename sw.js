@@ -8,9 +8,7 @@ const CACHE_NAME = 'suivi-fitness-' + APP_VERSION;
 const ASSETS = [
   './',
   './index.html',
-  './app-part1.js',
-  './app-part2.js',
-  './app-part3.js',
+  './app.js',
   './style.css',
   './manifest.json',
   './data.json',
