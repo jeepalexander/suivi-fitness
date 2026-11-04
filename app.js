@@ -1272,8 +1272,8 @@ function submitWorkout(e) {
   // Actualise la bannière de déload en temps réel
   displayDeloadNotificationIfNeeded();
 
-  alert(`${isEditing ? 'Séance modifiée' : 'Séance enregistrée'} !\n• Temps : ${sessionDuration || 'N/A'}\n• Séries enregistrées : ${validatedRows.length}\n• Tonnage réel : ${Math.round(totalTonnage).toLocaleString()} kg`);
-  
+  alert(`${isEditing ? 'Séance modifiée' : 'Séance enregistrée'} !\n• Temps : ${sessionDuration || 'N/A'}\n• Séries enregistrées : ${validatedRows.length}\n• Tonnage réel : ${Math.round(totalTonnage).toLocaleString()} kg${driveSaveNotice()}`);
+
   initWorkoutForm();
   renderHistory();
   renderCharts();
@@ -2433,9 +2433,10 @@ function updateDriveUI() {
   } else if (isDriveWanted()) {
     // Jeton expiré (≈ 1 h) : renouvelé tout seul au prochain « Enregistrer la séance » dans le navigateur ;
     // dans l'application installée, un appui sur « Reconnecter maintenant » est nécessaire.
-    statusEl.textContent = (account ? 'Compte ' + account.email + ' : ' : '')
+    statusEl.textContent = (driveRedirectError ? 'Connexion Google refusée (' + driveRedirectError + ') · ' : '')
+      + (account ? 'Compte ' + account.email + ' : ' : '')
       + (isInstalledApp()
-        ? 'accès Google expiré : touche « Reconnecter maintenant » pour le renouveler et envoyer les séances en attente'
+        ? 'accès Google expiré : reconnexion automatique à la prochaine séance enregistrée (ou touche « Reconnecter maintenant » pour envoyer les séances en attente)'
         : 'sauvegarde renouvelée automatiquement à la prochaine séance enregistrée') + pendingText;
     if (connectBtn) { connectBtn.style.display = ''; connectBtn.textContent = 'Reconnecter maintenant'; }
     if (disconnectBtn) disconnectBtn.style.display = '';
@@ -2716,7 +2717,7 @@ async function uploadSessionToDrive(session, options) {
   if (!token) {
     enqueueDriveSession(session);
     updateDriveUI();
-    return { queued: true };
+    return { queued: true, reason: 'no-token' };
   }
 
   try {
@@ -2852,15 +2853,41 @@ async function driveFirstSync() {
   await syncDriveHistory();
 }
 
+// Ligne ajoutée au message « Séance enregistrée » quand l'accès Google a expiré dans l'application
+// installée : la reconnexion se lance toute seule juste après (voir backupSessionToDrive).
+function driveSaveNotice() {
+  if (isDriveWanted() && !getDriveToken() && isInstalledApp()) {
+    return '\n• Google Drive : accès expiré, reconnexion automatique…';
+  }
+  return '';
+}
+
+// Dernière reconnexion automatique (redirection) : au plus une toutes les 2 minutes, pour ne jamais
+// enchaîner les allers-retours chez Google si quelque chose échoue.
+const DRIVE_AUTO_RECONNECT_KEY = 'h49_drive_auto_reconnect';
+function autoReconnectDriveIfNeeded() {
+  if (!isInstalledApp() || !isDriveWanted() || getDriveToken()) return;
+  try {
+    const last = Number(localStorage.getItem(DRIVE_AUTO_RECONNECT_KEY) || 0);
+    if (Date.now() - last < 120000) return;
+    localStorage.setItem(DRIVE_AUTO_RECONNECT_KEY, String(Date.now()));
+  } catch (e) { return; }
+  // petit délai : la page a fini d'afficher la confirmation de la séance avant de partir chez Google
+  setTimeout(connectDriveByRedirect, 400);
+}
+
 function backupSessionToDrive(session) {
   // fire-and-forget ; never block the UI. Appelée depuis « Enregistrer la séance » (geste de
-  // l'utilisateur) : le jeton expiré est renouvelé silencieusement, puis les séances restées
-  // en attente partent aussi, puis l'historique si le dossier vient d'être créé.
+  // l'utilisateur) : le jeton expiré est renouvelé silencieusement dans le navigateur ; dans l'application
+  // installée (pas de renouvellement silencieux possible) la séance est mise en file d'attente puis
+  // l'application se reconnecte toute seule par redirection, et la séance part au retour. Les séances
+  // restées en attente partent aussi, puis l'historique si le dossier vient d'être créé.
   uploadSessionToDrive(session, { renew: true }).then(r => {
     if (r && r.ok) {
       console.log('Séance sauvegardée sur Drive');
       return processDriveQueue().then(() => syncDriveHistory());
     }
+    if (r && r.queued && (r.reason === 'no-token' || r.reason === 'token')) autoReconnectDriveIfNeeded();
   }).then(() => updateDriveUI()).catch(() => {});
 }
 

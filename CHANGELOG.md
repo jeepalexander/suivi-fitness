@@ -7,6 +7,17 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.11] - 2026-11-04
+### 🔁 Application installée : reconnexion automatique à l'enregistrement d'une séance
+- Si l'accès Google (≈ 1 h) a expiré quand tu enregistres une séance (ou une modification), l'application **se reconnecte toute seule** par redirection, sans question ni appui : la séance est d'abord gardée en file d'attente, puis part au retour de Google.
+- Le message « Séance enregistrée » ajoute la ligne « Google Drive : accès expiré, reconnexion automatique… » (uniquement dans ce cas).
+- Garde-fou : une seule reconnexion automatique toutes les 2 minutes ; si Google refuse au retour, la raison s'affiche dans Réglages (« Connexion Google refusée (…) ») et les séances restent en attente, sans boucle d'allers-retours.
+- Dans le navigateur, rien ne change (renouvellement silencieux par la fenêtre). Si Drive n'a jamais été connecté : aucune redirection, aucune mention.
+- Correctif : la raison d'un refus de Google au retour s'affiche aussi quand Drive avait déjà été connecté.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.11.
+
+---
+
 ## [1.6.10] - 2026-11-04
 ### 📲 Google Drive : connexion possible depuis l'application installée (plein écran) + séances modifiées mises à jour
 - **Constat sur téléphone :** installée sur l'écran d'accueil, l'application ouvrait la fenêtre de connexion Google dans un onglet séparé, qui restait sur une page blanche (le résultat ne revenait jamais à l'application).
