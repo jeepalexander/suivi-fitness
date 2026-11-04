@@ -35,6 +35,10 @@ def scenario(br, base, about, owner=(404, {}), connected=True, files=(200, {'fil
             st, body = answers.pop(0) if len(answers) > 1 else answers[0]
         elif 'owners' in u:
             st, body = owner
+        elif 'sauvegarde_complete.json' in u:  # recherche de la sauvegarde complète : absente
+            st, body = 200, {'files': []}
+        elif '/upload/' in u:  # envoi de la sauvegarde
+            st, body = 200, {'id': 'B1'}
         else:  # recherche du dossier de sauvegarde / test d'accès
             st, body = file_answers.pop(0) if len(file_answers) > 1 else file_answers[0]
         route.fulfill(status=st, content_type='application/json', body=json.dumps(body))

@@ -165,8 +165,10 @@
       <div class="update-row" style="gap:8px;flex-wrap:wrap">
         <button type="button" id="drive-connect-btn" class="btn" onclick="connectGoogleDrive()">Connecter Google Drive</button>
         <button type="button" id="drive-disconnect-btn" class="btn btn-secondary" style="display:none" onclick="disconnectGoogleDrive()">Déconnecter</button>
+        <button type="button" id="drive-restore-btn" class="btn btn-secondary" style="display:none" onclick="restoreFromDrive()">Restaurer depuis Drive</button>
+        <button type="button" id="drive-replace-btn" class="btn btn-secondary" style="display:none" onclick="replaceDriveBackupWithThisDevice()">Remplacer par cet appareil</button>
       </div>
-      <p class="theme-hint">À chaque séance enregistrée, un fichier <code>seance_AAAA-MM-JJ.json</code> est créé dans le dossier « FITNESS AAP – Séances » de ton Drive. À la première connexion, si ce dossier n'existe pas encore, il est créé et tout l'historique déjà présent y est envoyé.</p>
+      <p class="theme-hint">À chaque séance enregistrée (et à chaque modification de tes données), la sauvegarde complète — historique, poids, dernières charges — est mise à jour dans le fichier <code>sauvegarde_complete.json</code> du dossier « FITNESS AAP – Séances » de ton Drive. C'est le même format que le bouton « Restaurer » de l'Historique.</p>
     </div>
     <div class="card update-card" id="update-card">
       <div class="card-title">Application</div>

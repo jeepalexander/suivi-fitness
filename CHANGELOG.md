@@ -7,6 +7,19 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.12] - 2026-11-04
+### 🗂️ Google Drive : UNE seule sauvegarde complète (plus de fichiers par séance)
+- Le dossier « FITNESS AAP – Séances » contient désormais **un seul fichier**, `sauvegarde_complete.json`, avec tout l'état de l'application (historique, poids corporel, dernières charges) : c'est exactement le format du bouton « Restaurer » de l'Historique.
+- **Première connexion :** le dossier est créé s'il n'existe pas, avec la sauvegarde complète (tout l'historique déjà présent).
+- **Ensuite :** le même fichier est **mis à jour** (jamais dupliqué) à chaque séance enregistrée ou modifiée, et à chaque modification des données (poids, suppression…) tant que l'accès est valide. Rien n'est renvoyé si rien n'a changé (empreinte des données retenue) ; les modifications faites sans accès valide partent dès qu'il revient (« modifications en attente d'envoi »). Réglages affiche la date de la dernière sauvegarde.
+- **Restaurer depuis Drive :** nouveau bouton dans Réglages (confirmation avec la date et le nombre de séances, avertissement de remplacement, contenu assaini comme l'import manuel).
+- **Protection :** si une sauvegarde existe déjà sur le Drive avec des séances que cet appareil n'a pas (réinstallation, autre appareil…), elle n'est **jamais écrasée** : l'envoi est suspendu et Réglages propose « Restaurer depuis Drive » ou « Remplacer par cet appareil ».
+- Supprimés : fichiers `seance_*.json`, file d'attente de séances, envoi de l'historique séance par séance (les anciens repères sont effacés au démarrage). Les fichiers `seance_*.json` éventuellement déjà présents sur le Drive ne sont pas touchés : tu peux les supprimer à la main.
+- Correctif : « modifiée le Invalid Date » quand Google ne renvoie pas de date.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.12.
+
+---
+
 ## [1.6.11] - 2026-11-04
 ### 🔁 Application installée : reconnexion automatique à l'enregistrement d'une séance
 - Si l'accès Google (≈ 1 h) a expiré quand tu enregistres une séance (ou une modification), l'application **se reconnecte toute seule** par redirection, sans question ni appui : la séance est d'abord gardée en file d'attente, puis part au retour de Google.

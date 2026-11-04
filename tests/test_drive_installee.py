@@ -1,6 +1,5 @@
-"""Google Drive : (1) application installée (plein écran) → connexion par redirection, pas par fenêtre ;
-(2) une séance modifiée met à jour SON fichier Drive au lieu d'en créer un second.
-Google Identity et l'API Drive sont simulés (aucun appel réseau réel)."""
+"""Google Drive, application installée (plein écran) : connexion par redirection (pas par fenêtre), reconnexion
+automatique à l'enregistrement d'une séance quand l'accès a expiré. Google Identity et l'API Drive sont simulés."""
 import json, re, sys
 from urllib.parse import urlparse, parse_qs, unquote
 from harness import *
@@ -59,9 +58,8 @@ def run(br, base, seeds=(), installed=False, patch_status=200, goto='index.html'
         if "mimeType='application/vnd.google-apps.folder'" in u:
             files = [{'id': 'EXIST'}] if folder_exists else []
             return route.fulfill(status=200, content_type='application/json', body=json.dumps({'files': files}))
-        if "in parents" in u:  # recherche d'un fichier par son nom
-            files = [{'id': name_lookup}] if name_lookup else []
-            return route.fulfill(status=200, content_type='application/json', body=json.dumps({'files': files}))
+        if 'sauvegarde_complete.json' in u:  # recherche de la sauvegarde complète : absente
+            return route.fulfill(status=200, content_type='application/json', body='{"files":[]}')
         return route.fulfill(status=200, content_type='application/json', body='{"files":[]}')
     pg.route('**/www.googleapis.com/**', api)
 
@@ -95,7 +93,7 @@ with Srv() as base, sync_playwright() as p:
     check("retour : jeton lu et mémorisé, souhait de sauvegarde retenu", ls(pg, 'h49_drive_token') and json.loads(ls(pg, 'h49_drive_token'))['access_token'] == 'tokR' and ls(pg, 'h49_drive_wanted') == '1')
     check("retour : adresse nettoyée (plus de jeton dans l'URL), « state » consommé", '#' not in pg.url and 'access_token' not in pg.url and ls(pg, 'h49_drive_oauth_state') is None, pg.url)
     check("retour : l'application revient sur Réglages, « Connecté »", pg.evaluate("document.body.dataset.tab") == 'reglages' and pg.evaluate("document.getElementById('drive-status').textContent").startswith('Connecté'), pg.evaluate("document.getElementById('drive-status').textContent"))
-    check(f"retour : dossier créé et historique envoyé ({N} fichiers)", len(sent(log, 'POST', '/upload/drive/v3/files')) == N, f"{len(sent(log, 'POST', '/upload/drive/v3/files'))} envois")
+    check("retour : dossier créé et UNE sauvegarde complète envoyée (tout l'historique dans un seul fichier)", len(sent(log, 'POST', '/upload/drive/v3/files')) == 1, f"{len(sent(log, 'POST', '/upload/drive/v3/files'))} envoi(s)")
     ctx.close()
 
     # retour avec un « state » inconnu : ignoré
@@ -122,13 +120,13 @@ with Srv() as base, sync_playwright() as p:
     NOAUTO = "localStorage.setItem('h49_drive_auto_reconnect', String(Date.now()));"  # reconnexion automatique déjà tentée à l'instant
     ctx, pg, log = run(br, base, seeds=[EXPIRED, FOLDER, NOAUTO], installed=True)
     pg.wait_for_timeout(1200)
-    pg.evaluate("backupSessionToDrive({id:701,date:'2026-11-04',type:'A',tonnage:1,exercises:[]})"); pg.wait_for_timeout(900)
+    pg.evaluate("state.history[0].tonnage += 1; saveState(); backupToDrive()"); pg.wait_for_timeout(900)
     txt = pg.evaluate(STATUS)
-    check("installée + accès expiré (reconnexion déjà tentée à l'instant) : aucune fenêtre Google, séance gardée en file d'attente", pg.evaluate("window.__reqs.length") == 0 and len(json.loads(ls(pg, 'h49_drive_queue') or '[]')) == 1)
-    check("installée + accès expiré : Réglages propose « Reconnecter maintenant » et l'explique", 'reconnexion automatique' in txt and 'Reconnecter maintenant' in txt and '1 séance en attente' in txt and pg.evaluate("document.getElementById('drive-connect-btn').textContent") == 'Reconnecter maintenant', txt)
+    check("installée + accès expiré (reconnexion déjà tentée à l'instant) : aucune fenêtre Google, modifications gardées en attente", pg.evaluate("window.__reqs.length") == 0 and pg.evaluate("driveNeedsBackup()"))
+    check("installée + accès expiré : Réglages propose « Reconnecter maintenant » et l'explique", 'reconnexion automatique' in txt and 'Reconnecter maintenant' in txt and "modifications en attente d'envoi" in txt and pg.evaluate("document.getElementById('drive-connect-btn').textContent") == 'Reconnecter maintenant', txt)
     pg.evaluate("connectGoogleDrive()"); pg.wait_for_timeout(4500)
-    check("« Reconnecter maintenant » : redirection avec l'adresse du compte (login_hint), puis séance en attente envoyée",
-          parse_qs(urlparse(log['auth'][0]).query).get('login_hint') == ['jean@example.com'] and len(sent(log, 'POST', '/upload/drive/v3/files')) >= 1 and json.loads(ls(pg, 'h49_drive_queue') or '[]') == [], str(log['auth'][:1]))
+    check("« Reconnecter maintenant » : redirection avec l'adresse du compte (login_hint), puis sauvegarde envoyée",
+          parse_qs(urlparse(log['auth'][0]).query).get('login_hint') == ['jean@example.com'] and len(sent(log, 'POST', '/upload/drive/v3/files')) >= 1 and not pg.evaluate("driveNeedsBackup()"), str(log['auth'][:1]))
     ctx.close()
 
     # ---------- (3) reconnexion AUTOMATIQUE à l'enregistrement (vrai formulaire) ----------
@@ -145,8 +143,8 @@ with Srv() as base, sync_playwright() as p:
     saved = [d for d in log['dialogs'] if 'Séance enregistrée' in d]
     check("installée + accès expiré : le message d'enregistrement annonce la reconnexion automatique", saved and 'Google Drive : accès expiré, reconnexion automatique' in saved[-1], str(saved[-1:])[:160])
     check("installée + accès expiré : la reconnexion part toute seule (aucune question, aucun appui)", len(log['auth']) == 1 and not any('Reconnecter' in d for d in log['dialogs']), f"{len(log['auth'])} redirection(s)")
-    check("au retour : accès renouvelé, la séance enregistrée part sur Drive, file d'attente vide",
-          json.loads(ls(pg, 'h49_drive_token'))['access_token'] == 'tokR' and len(sent(log, 'POST', '/upload/drive/v3/files')) == 1 and json.loads(ls(pg, 'h49_drive_queue') or '[]') == [], f"POST={len(sent(log, 'POST', '/upload/drive/v3/files'))}")
+    check("au retour : accès renouvelé, la sauvegarde (avec la séance enregistrée) part sur Drive, plus rien en attente",
+          json.loads(ls(pg, 'h49_drive_token'))['access_token'] == 'tokR' and len(sent(log, 'POST', '/upload/drive/v3/files')) == 1 and not pg.evaluate("driveNeedsBackup()"), f"POST={len(sent(log, 'POST', '/upload/drive/v3/files'))}")
     check("la séance est bien dans l'historique de l'application", len(json.loads(ls(pg, 'h49_state'))['history']) == n_before + 1)
     ctx.close()
 
@@ -154,9 +152,9 @@ with Srv() as base, sync_playwright() as p:
     ctx, pg, log = run(br, base, seeds=[EXPIRED, FOLDER], installed=True, auth_error=True)
     pg.wait_for_timeout(1200)
     save_form(pg); pg.wait_for_timeout(5000)
-    pg.evaluate("backupSessionToDrive({id:802,date:'2026-11-04',type:'A',tonnage:1,exercises:[]})"); pg.wait_for_timeout(2500)
-    check("Google refuse au retour : une seule redirection, séances gardées en file, raison affichée",
-          len(log['auth']) == 1 and json.loads(ls(pg, 'h49_drive_token'))['access_token'] != 'tokR' and len(json.loads(ls(pg, 'h49_drive_queue') or '[]')) == 2 and 'Connexion Google refusée' in pg.evaluate("document.getElementById('drive-status').textContent"),
+    pg.evaluate("state.history[0].tonnage += 2; saveState(); backupToDrive()"); pg.wait_for_timeout(2500)
+    check("Google refuse au retour : une seule redirection, modifications gardées en attente, raison affichée",
+          len(log['auth']) == 1 and json.loads(ls(pg, 'h49_drive_token'))['access_token'] != 'tokR' and pg.evaluate("driveNeedsBackup()") and 'Connexion Google refusée' in pg.evaluate("document.getElementById('drive-status').textContent"),
           f"{len(log['auth'])} redirection(s)")
     ctx.close()
 
@@ -177,40 +175,6 @@ with Srv() as base, sync_playwright() as p:
     check("jamais connecté à Drive (installée) : aucune redirection, aucune mention de Drive", not log['auth'] and saved and 'Drive' not in saved[-1] and not log['calls'])
     ctx.close()
 
-    # ---------- (2) séance modifiée : le fichier existant est mis à jour ----------
-    SESSION = "{id:%d,date:'2026-11-02',type:'A',tonnage:1000,exercises:[]}"
-    seeds = [VALID, FOLDER]
-
-    ctx, pg, log = run(br, base, seeds=seeds + ["localStorage.setItem('h49_drive_files', JSON.stringify({'501':'FILE9'}));localStorage.setItem('h49_drive_uploaded', JSON.stringify([501]));"])
-    pg.wait_for_timeout(900)
-    pg.evaluate("backupSessionToDrive(%s)" % (SESSION % 501)); pg.wait_for_timeout(900)
-    check("séance déjà envoyée, modifiée : le fichier FILE9 est mis à jour (PATCH)", len(sent(log, 'PATCH', '/upload/drive/v3/files/FILE9')) == 1, str(sent(log, 'PATCH', 'FILE9')))
-    check("séance modifiée : aucun second fichier créé", not sent(log, 'POST', '/upload/drive/v3/files'))
-    ctx.close()
-
-    ctx, pg, log = run(br, base, seeds=seeds + ["localStorage.setItem('h49_drive_uploaded', JSON.stringify([502]));"], name_lookup='FOUND1')
-    pg.wait_for_timeout(900)
-    pg.evaluate("backupSessionToDrive(%s)" % (SESSION % 502)); pg.wait_for_timeout(1100)
-    check("envoyée avant les identifiants de fichier : retrouvée par son nom, puis mise à jour",
-          len(sent(log, 'PATCH', '/upload/drive/v3/files/FOUND1')) == 1 and not sent(log, 'POST', '/upload/drive/v3/files') and any("name='seance_2026-11-02.json'" in u for (m, u) in log['calls']))
-    ctx.close()
-
-    ctx, pg, log = run(br, base, seeds=seeds + ["localStorage.setItem('h49_drive_files', JSON.stringify({'503':'GONE'}));localStorage.setItem('h49_drive_uploaded', JSON.stringify([503]));"], patch_status=404)
-    pg.wait_for_timeout(900)
-    pg.evaluate("backupSessionToDrive(%s)" % (SESSION % 503)); pg.wait_for_timeout(1100)
-    mp = json.loads(ls(pg, 'h49_drive_files'))
-    check("fichier supprimé du Drive (404) : la séance est recréée et le nouvel identifiant retenu", len(sent(log, 'POST', '/upload/drive/v3/files')) == 1 and mp.get('503', '').startswith('CREATED'), str(mp))
-    ctx.close()
-
-    ctx, pg, log = run(br, base, seeds=seeds)
-    pg.wait_for_timeout(900)
-    pg.evaluate("backupSessionToDrive(%s)" % (SESSION % 601)); pg.wait_for_timeout(900)
-    first = json.loads(ls(pg, 'h49_drive_files') or '{}')
-    check("nouvelle séance : fichier créé et identifiant retenu", len(sent(log, 'POST', '/upload/drive/v3/files')) == 1 and first.get('601', '').startswith('CREATED'), str(first))
-    pg.evaluate("backupSessionToDrive(%s)" % (SESSION % 601)); pg.wait_for_timeout(900)
-    check("la même séance modifiée ensuite : mise à jour du même fichier, toujours un seul fichier",
-          len(sent(log, 'POST', '/upload/drive/v3/files')) == 1 and len(sent(log, 'PATCH', '/upload/drive/v3/files/' + first['601'])) == 1)
-    ctx.close()
     br.close()
 
 print(f"\n {sum(res)} / {len(res)} contrôles OK")
