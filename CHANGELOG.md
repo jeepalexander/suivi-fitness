@@ -7,6 +7,18 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.10] - 2026-11-04
+### 📲 Google Drive : connexion possible depuis l'application installée (plein écran) + séances modifiées mises à jour
+- **Constat sur téléphone :** installée sur l'écran d'accueil, l'application ouvrait la fenêtre de connexion Google dans un onglet séparé, qui restait sur une page blanche (le résultat ne revenait jamais à l'application).
+- **Application installée :** la connexion se fait maintenant **par redirection** (la page va chez Google puis revient avec l'accès, lu au démarrage, adresse nettoyée, « state » anti-falsification vérifié). Dans le navigateur, la fenêtre habituelle est conservée.
+- ⚠️ **À faire une fois dans Google Cloud :** ajouter `https://jeepalexander.github.io/suivi-fitness/` aux « URI de redirection autorisés » de l'identifiant client OAuth.
+- Dans l'application installée, le renouvellement silencieux n'est pas possible : si l'accès (≈ 1 h) a expiré, la séance reste en file d'attente et Réglages propose « Reconnecter maintenant ».
+- **Séance modifiée :** son fichier Drive est **mis à jour** au lieu d'en créer un second du même nom. L'identifiant du fichier est retenu pour chaque séance (retrouvé par son nom pour les fichiers envoyés avant) ; si le fichier a été supprimé du Drive, il est recréé.
+- Retour dans l'application : l'état de Drive est relu ; la file d'attente ne peut plus être envoyée deux fois en parallèle.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.10.
+
+---
+
 ## [1.6.9] - 2026-11-04
 ### 📦 Google Drive : envoi de tout l'historique à la première connexion
 - Si le dossier « FITNESS AAP – Séances » **n'existe pas** sur le Drive, l'application le crée puis y envoie **tout l'historique déjà présent** (une séance = un fichier `seance_AAAA-MM-JJ.json` ; si plusieurs séances le même jour : `_1`, `_2`…).

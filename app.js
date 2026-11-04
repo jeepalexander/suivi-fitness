@@ -165,6 +165,8 @@ const DRIVE_ACCOUNT_KEY = 'h49_drive_account';
 const DRIVE_WANTED_KEY = 'h49_drive_wanted'; // '1' tant que l'utilisateur n'a pas cliqué « Déconnecter »
 const DRIVE_HISTORY_TODO_KEY = 'h49_drive_history_todo'; // '1' : le dossier vient d'être créé, l'historique doit y être envoyé
 const DRIVE_UPLOADED_KEY = 'h49_drive_uploaded';         // ids des séances déjà présentes dans le dossier Drive
+const DRIVE_FILES_KEY = 'h49_drive_files';               // { id de séance : id du fichier Drive } : une séance modifiée met à jour SON fichier
+const DRIVE_OAUTH_STATE_KEY = 'h49_drive_oauth_state';   // anti-falsification de la connexion par redirection (appli installée)
 const DRIVE_ERROR_KEY = 'h49_drive_error';   // dernière réponse d'erreur de Google pour le dossier / l'envoi (ex. « 403 accessNotConfigured »)
 
 // Mises à jour : délai minimal entre deux vérifications automatiques (retour au premier plan)
@@ -2271,6 +2273,20 @@ function markDriveUploaded(id) {
     if (!a.includes(id)) { a.push(id); localStorage.setItem(DRIVE_UPLOADED_KEY, JSON.stringify(a)); }
   } catch (e) { /* ignoré */ }
 }
+function getDriveFileId(sessionId) {
+  try {
+    const m = JSON.parse(localStorage.getItem(DRIVE_FILES_KEY) || '{}');
+    return (m && typeof m[sessionId] === 'string') ? m[sessionId] : null;
+  } catch (e) { return null; }
+}
+function setDriveFileId(sessionId, fileId) {
+  if (sessionId == null) return;
+  try {
+    const m = JSON.parse(localStorage.getItem(DRIVE_FILES_KEY) || '{}') || {};
+    if (fileId) m[sessionId] = fileId; else delete m[sessionId];
+    localStorage.setItem(DRIVE_FILES_KEY, JSON.stringify(m));
+  } catch (e) { /* ignoré */ }
+}
 function isDriveHistoryTodo() {
   try { return localStorage.getItem(DRIVE_HISTORY_TODO_KEY) === '1'; } catch (e) { return false; }
 }
@@ -2415,13 +2431,16 @@ function updateDriveUI() {
     if (connectBtn) connectBtn.style.display = 'none';
     if (disconnectBtn) disconnectBtn.style.display = '';
   } else if (isDriveWanted()) {
-    // Jeton expiré (≈ 1 h) : il sera renouvelé tout seul au prochain « Enregistrer la séance ».
+    // Jeton expiré (≈ 1 h) : renouvelé tout seul au prochain « Enregistrer la séance » dans le navigateur ;
+    // dans l'application installée, un appui sur « Reconnecter maintenant » est nécessaire.
     statusEl.textContent = (account ? 'Compte ' + account.email + ' : ' : '')
-      + 'sauvegarde renouvelée automatiquement à la prochaine séance enregistrée' + pendingText;
+      + (isInstalledApp()
+        ? 'accès Google expiré : touche « Reconnecter maintenant » pour le renouveler et envoyer les séances en attente'
+        : 'sauvegarde renouvelée automatiquement à la prochaine séance enregistrée') + pendingText;
     if (connectBtn) { connectBtn.style.display = ''; connectBtn.textContent = 'Reconnecter maintenant'; }
     if (disconnectBtn) disconnectBtn.style.display = '';
   } else {
-    statusEl.textContent = 'Non connecté' + pendingText;
+    statusEl.textContent = (driveRedirectError ? 'Connexion Google refusée (' + driveRedirectError + ') · ' : '') + 'Non connecté' + pendingText;
     if (connectBtn) { connectBtn.style.display = ''; connectBtn.textContent = 'Connecter Google Drive'; }
     if (disconnectBtn) disconnectBtn.style.display = 'none';
   }
@@ -2434,6 +2453,10 @@ function updateDriveUI() {
 let driveRenewPending = null;
 function renewDriveToken() {
   if (driveRenewPending) return driveRenewPending.promise;
+  // Application installée (écran d'accueil) : la petite fenêtre Google ne peut pas rendre la main à
+  // l'application. Pas de renouvellement silencieux possible : la séance reste en file d'attente et
+  // Réglages propose « Reconnecter maintenant » (connexion par redirection, voir connectDriveByRedirect).
+  if (isInstalledApp()) return Promise.resolve(false);
   initDriveTokenClient();
   if (!driveTokenClient) return Promise.resolve(false);
   let resolveFn;
@@ -2485,7 +2508,71 @@ function initDriveTokenClient() {
   });
 }
 
+// --- Application installée sur l'écran d'accueil : connexion par redirection ---------------------
+// Dans une application installée (affichage « plein écran »), la fenêtre de connexion de la
+// bibliothèque Google s'ouvre dans un onglet séparé et reste sur une page blanche : elle ne peut pas
+// renvoyer le résultat à l'application. On passe donc par une redirection : la page va chez Google
+// puis revient avec le jeton dans l'adresse (« #access_token=... »), lu au démarrage.
+// L'adresse de retour (driveRedirectUri) doit être déclarée dans Google Cloud (identifiant client OAuth,
+// « URI de redirection autorisés »).
+let driveRedirectError = '';
+
+function isInstalledApp() {
+  try {
+    if (window.navigator.standalone === true) return true;
+    return ['fullscreen', 'standalone', 'minimal-ui'].some(m => window.matchMedia('(display-mode: ' + m + ')').matches);
+  } catch (e) { return false; }
+}
+
+function driveRedirectUri() {
+  return location.origin + location.pathname.replace(/index\.html$/, '');
+}
+
+function connectDriveByRedirect() {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  const state = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+  try { localStorage.setItem(DRIVE_OAUTH_STATE_KEY, state); }
+  catch (e) { alert('Stockage indisponible : connexion impossible.'); return; }
+  const p = new URLSearchParams({
+    client_id: GOOGLE_CLIENT_ID,
+    redirect_uri: driveRedirectUri(),
+    response_type: 'token',
+    scope: DRIVE_SCOPE,
+    include_granted_scopes: 'true',
+    state: state
+  });
+  const account = getDriveAccount();
+  if (account) p.set('login_hint', account.email);
+  location.assign('https://accounts.google.com/o/oauth2/v2/auth?' + p.toString());
+}
+
+// Au démarrage : récupère le jeton renvoyé par Google dans l'adresse. Renvoie 'ok', 'error' ou null
+// (rien à faire). L'adresse est nettoyée ; un retour dont le « state » ne correspond pas est ignoré.
+function handleDriveRedirectReturn() {
+  try {
+    const h = location.hash;
+    if (!h || h.length < 2) return null;
+    const params = new URLSearchParams(h.slice(1));
+    if (!params.has('access_token') && !params.has('error')) return null;
+    history.replaceState(null, '', location.pathname + location.search);
+    const expected = localStorage.getItem(DRIVE_OAUTH_STATE_KEY);
+    if (!expected || params.get('state') !== expected) return null;
+    localStorage.removeItem(DRIVE_OAUTH_STATE_KEY);
+    if (params.get('error') || !params.get('access_token')) {
+      driveRedirectError = params.get('error') || 'réponse vide';
+      return 'error';
+    }
+    setDriveToken({ access_token: params.get('access_token'), expires_in: params.get('expires_in') });
+    localStorage.setItem(DRIVE_WANTED_KEY, '1');
+    clearDriveError();
+    driveRedirectError = '';
+    return 'ok';
+  } catch (e) { return null; }
+}
+
 function connectGoogleDrive() {
+  if (isInstalledApp()) { connectDriveByRedirect(); return; }
   initDriveTokenClient();
   if (!driveTokenClient) {
     alert('Bibliothèque Google non chargée. Vérifie ta connexion et réessaie.');
@@ -2559,6 +2646,7 @@ async function ensureDriveFolderOnce(accessToken) {
   localStorage.setItem(DRIVE_FOLDER_ID_KEY, folderId);
   // Le dossier n'existait pas : il vient d'être créé vide, tout l'historique doit y être envoyé.
   localStorage.removeItem(DRIVE_UPLOADED_KEY);
+  localStorage.removeItem(DRIVE_FILES_KEY); // les anciens fichiers ne sont plus dans ce dossier
   localStorage.setItem(DRIVE_HISTORY_TODO_KEY, '1');
   return folderId;
 }
@@ -2580,6 +2668,44 @@ function uploadDriveFile(accessToken, folderId, session, fileName) {
   });
 }
 
+// Cherche dans le dossier le fichier d'une séance déjà envoyée (par son nom) ; null si introuvable.
+async function findDriveFileByName(accessToken, folderId, fileName) {
+  try {
+    const q = encodeURIComponent(`name='${fileName}' and '${folderId}' in parents and trashed=false`);
+    const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id)&pageSize=1`, {
+      headers: { Authorization: 'Bearer ' + accessToken }
+    });
+    if (!res.ok) return null;
+    const f = ((await res.json()).files || [])[0];
+    return f && typeof f.id === 'string' ? f.id : null;
+  } catch (e) { return null; }
+}
+
+// Enregistre la séance dans le dossier : si elle y a déjà un fichier (séance modifiée), CE fichier est
+// mis à jour ; sinon un fichier est créé et son identifiant retenu. Renvoie la réponse de Google.
+async function saveSessionFile(accessToken, folderId, session, fileName) {
+  let fileId = getDriveFileId(session.id);
+  if (!fileId && session.id != null && getDriveUploadedIds().includes(session.id)) {
+    // déjà envoyée avant que les identifiants de fichier soient retenus : on la retrouve par son nom
+    fileId = await findDriveFileByName(accessToken, folderId, fileName);
+  }
+  if (fileId) {
+    const upd = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${encodeURIComponent(fileId)}?uploadType=media&fields=id,name`, {
+      method: 'PATCH',
+      headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify(session, null, 2)
+    });
+    if (upd.ok) { setDriveFileId(session.id, fileId); return upd; }
+    if (upd.status !== 404) return upd; // 401, 403... : traités par l'appelant
+    setDriveFileId(session.id, null);   // fichier supprimé du Drive : on le recrée ci-dessous
+  }
+  const res = await uploadDriveFile(accessToken, folderId, session, fileName);
+  if (res.ok) {
+    try { const f = await res.clone().json(); if (f && typeof f.id === 'string') setDriveFileId(session.id, f.id); } catch (e) { /* ignoré */ }
+  }
+  return res;
+}
+
 // options.renew = true : si le jeton a expiré, on en redemande un tout de suite (à n'utiliser que
 // depuis un geste de l'utilisateur, voir renewDriveToken).
 async function uploadSessionToDrive(session, options) {
@@ -2598,7 +2724,7 @@ async function uploadSessionToDrive(session, options) {
     const dateStr = (session.date || new Date().toISOString().slice(0, 10));
     const fileName = `seance_${dateStr}.json`;
 
-    const res = await uploadDriveFile(token.access_token, folderId, session, fileName);
+    const res = await saveSessionFile(token.access_token, folderId, session, fileName);
 
     if (res.status === 401) {
       // jeton refusé par Google → on ne garde que le compte et le dossier ; renouvelé à la prochaine séance
@@ -2638,17 +2764,27 @@ function enqueueDriveSession(session) {
   } catch (e) {}
 }
 
+let driveQueueBusy = false;
 async function processDriveQueue() {
-  if (!isDriveConnected()) return;
+  if (!isDriveConnected() || driveQueueBusy) return;
   let q;
   try { q = JSON.parse(localStorage.getItem(DRIVE_QUEUE_KEY) || '[]'); } catch (e) { return; }
   if (!q.length) return;
-  const remaining = [];
-  for (const session of q) {
-    const result = await uploadSessionToDrive(session);
-    if (result.queued) remaining.push(session);
+  driveQueueBusy = true;
+  try {
+    const remaining = [];
+    for (const session of q) {
+      const result = await uploadSessionToDrive(session);
+      if (result.queued) remaining.push(session);
+    }
+    // les séances mises en file d'attente pendant l'envoi sont conservées
+    let current = [];
+    try { current = JSON.parse(localStorage.getItem(DRIVE_QUEUE_KEY) || '[]'); } catch (e) { /* ignoré */ }
+    const added = current.filter(s => !q.some(o => o.id === s.id));
+    localStorage.setItem(DRIVE_QUEUE_KEY, JSON.stringify(remaining.concat(added)));
+  } finally {
+    driveQueueBusy = false;
   }
-  localStorage.setItem(DRIVE_QUEUE_KEY, JSON.stringify(remaining));
 }
 
 // --- Envoi de l'historique existant ------------------------------------------------------------
@@ -2684,7 +2820,7 @@ async function syncDriveHistory() {
       const t = getDriveToken();
       if (!t) { complete = false; break; }
       let res;
-      try { res = await uploadDriveFile(t.access_token, folderId, h, names.get(h.id)); }
+      try { res = await saveSessionFile(t.access_token, folderId, h, names.get(h.id)); }
       catch (e) { complete = false; break; } // réseau coupé : reprise plus tard
       if (res.status === 401) { expireDriveToken(); complete = false; break; }
       if (!res.ok) { setDriveError(await driveErrorText(res)); complete = false; break; }
@@ -2904,12 +3040,20 @@ function initUpdateIndicator() {
 async function initApp() {
   initTheme();
   initUpdateIndicator();
-  // Google Drive : statut + file d'attente
+  // Google Drive : retour d'une connexion par redirection (application installée), puis statut + file d'attente
+  const driveReturn = handleDriveRedirectReturn();
   setTimeout(() => {
     initDriveTokenClient(); updateDriveUI();
     processDriveQueue().then(() => driveFirstSync());
     if (isDriveConnected() && !getDriveAccount()) fetchDriveAccount();
+    if (driveReturn) switchTab('reglages'); // on revient sur Réglages pour voir le résultat de la connexion
   }, 800);
+  // Retour dans l'application (ex. après une connexion faite dans un onglet voisin) : on relit l'état de Drive
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) return;
+    updateDriveUI();
+    if (isDriveConnected()) processDriveQueue().then(() => driveFirstSync());
+  });
   const saved = localStorage.getItem('h49_state');
   if (saved) {
     try {
