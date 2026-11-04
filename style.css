@@ -177,7 +177,6 @@ header h1 { font-family: var(--font-display); font-size: 2.625rem; font-weight: 
 .hdr-btn.has-update::after { content: ''; position: absolute; top: 8px; right: 8px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--surface); }
 
 /* Chrono de repos : prêt (blanc) · en cours (vert) · terminé (rouge) */
-.timer-btn { position: absolute; top: 18px; right: calc(var(--gutter) - 6px); z-index: 110; display: none; align-items: center; gap: 6px; height: 44px; padding: 0 16px 0 12px; border: 1px solid var(--border); border-radius: 22px; background: var(--card-bg); color: var(--indigo); box-shadow: var(--sh-card); font-family: var(--font-display); font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; }
 .timer-btn { position: absolute; top: 18px; right: calc(var(--gutter) - 6px); z-index: 110; display: none; align-items: center; gap: 6px; height: 44px; padding: 0 16px 0 12px; border: 1px solid var(--border); border-radius: 22px; background: var(--card-bg); color: var(--indigo); box-shadow: var(--sh-card); font-family: var(--font-display); font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; --progress: 0%; }
 .timer-btn::before { content: ''; position: absolute; top: 0; left: 0; height: 100%; width: var(--progress); background: rgba(255, 255, 255, 0.3); transition: width 0.1s linear; z-index: 1; }
 .timer-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }

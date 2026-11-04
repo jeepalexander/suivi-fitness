@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.14] - 2026-11-04
+### 🐛 Corrections de bugs
+- **CSS** : Suppression de la duplication de `.timer-btn` qui empêchait l'affichage correct de la barre de progression.
+- **Vérification de version** : Réalignement des versions après correction du CSS.
+
+---
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.14.
+
+---
+
 ## [1.6.13] - 2026-11-04
 ### ⏱️ Barre de progression visible
 - Correction du `z-index` sur `.timer-btn::before` pour que la barre de progression du timer de pause soit **visible au-dessus du contenu** du bouton.
