@@ -7,6 +7,17 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.9] - 2026-11-04
+### 📦 Google Drive : envoi de tout l'historique à la première connexion
+- Si le dossier « FITNESS AAP – Séances » **n'existe pas** sur le Drive, l'application le crée puis y envoie **tout l'historique déjà présent** (une séance = un fichier `seance_AAAA-MM-JJ.json` ; si plusieurs séances le même jour : `_1`, `_2`…).
+- Se déclenche tout seul : à la connexion, à l'ouverture de l'application, à l'ouverture de Réglages et après un enregistrement de séance. Si le dossier existe déjà, rien n'est renvoyé.
+- Reprise automatique : si l'envoi s'interrompt (jeton expiré, réseau coupé, refus de Google), les séances déjà envoyées sont retenues et seules les autres partent ensuite, sans doublon.
+- Réglages affiche l'avancement (« envoi de l'historique vers Drive (12/33)… ») puis « historique envoyé (33 séances) ».
+- Une seule création de dossier à la fois (plus de risque de dossiers en double).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.9.
+
+---
+
 ## [1.6.8] - 2026-11-04
 ### 🔎 Google Drive : l'application dit la vérité quand Google refuse l'accès
 - Constat sur téléphone : Google répondait « 403 » à **toutes** les requêtes Drive (lecture de l'adresse et du dossier). L'ancien texte « sauvegarde automatique active » était donc trompeur.

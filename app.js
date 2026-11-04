@@ -163,6 +163,8 @@ const DRIVE_FOLDER_ID_KEY = 'h49_drive_folder_id';
 const DRIVE_QUEUE_KEY = 'h49_drive_queue';
 const DRIVE_ACCOUNT_KEY = 'h49_drive_account';
 const DRIVE_WANTED_KEY = 'h49_drive_wanted'; // '1' tant que l'utilisateur n'a pas cliqué « Déconnecter »
+const DRIVE_HISTORY_TODO_KEY = 'h49_drive_history_todo'; // '1' : le dossier vient d'être créé, l'historique doit y être envoyé
+const DRIVE_UPLOADED_KEY = 'h49_drive_uploaded';         // ids des séances déjà présentes dans le dossier Drive
 const DRIVE_ERROR_KEY = 'h49_drive_error';   // dernière réponse d'erreur de Google pour le dossier / l'envoi (ex. « 403 accessNotConfigured »)
 
 // Mises à jour : délai minimal entre deux vérifications automatiques (retour au premier plan)
@@ -2203,7 +2205,10 @@ function switchTab(tabName) {
   if (tabName === 'reglages') {
     updateDriveUI(); // le jeton Drive a pu expirer depuis l'ouverture de l'appli
     if (isDriveConnected() && !getDriveAccount()) fetchDriveAccount(); // nouvel essai de lecture de l'adresse
-    if (isDriveConnected()) probeDriveAccess(); // vérifie que Google autorise bien l'accès à Drive
+    if (isDriveConnected()) {
+      probeDriveAccess(); // vérifie que Google autorise bien l'accès à Drive
+      driveFirstSync();   // crée le dossier / envoie l'historique si ce n'est pas encore fait
+    }
   }
 }
 
@@ -2251,6 +2256,23 @@ async function driveErrorText(res) {
     reason = (e && ((e.errors && e.errors[0] && e.errors[0].reason) || (e.details && e.details[0] && e.details[0].reason) || e.status)) || '';
   } catch (err) { /* corps illisible : on garde le code seul */ }
   return res.status + (reason ? ' ' + String(reason).slice(0, 60) : '');
+}
+
+function getDriveUploadedIds() {
+  try {
+    const a = JSON.parse(localStorage.getItem(DRIVE_UPLOADED_KEY) || '[]');
+    return Array.isArray(a) ? a : [];
+  } catch (e) { return []; }
+}
+function markDriveUploaded(id) {
+  if (id == null) return;
+  try {
+    const a = getDriveUploadedIds();
+    if (!a.includes(id)) { a.push(id); localStorage.setItem(DRIVE_UPLOADED_KEY, JSON.stringify(a)); }
+  } catch (e) { /* ignoré */ }
+}
+function isDriveHistoryTodo() {
+  try { return localStorage.getItem(DRIVE_HISTORY_TODO_KEY) === '1'; } catch (e) { return false; }
 }
 
 function getDriveError() {
@@ -2364,7 +2386,14 @@ function updateDriveUI() {
   if (!statusEl) return;
   const account = getDriveAccount();
   const pending = getDriveQueueLength();
-  const pendingText = pending > 0 ? ' · ' + pending + ' séance' + (pending > 1 ? 's' : '') + ' en attente d\'envoi' : '';
+  let pendingText = pending > 0 ? ' · ' + pending + ' séance' + (pending > 1 ? 's' : '') + ' en attente d\'envoi' : '';
+  if (driveHistoryProgress) {
+    pendingText += ' · envoi de l\'historique vers Drive (' + driveHistoryProgress.done + '/' + driveHistoryProgress.total + ')…';
+  } else if (isDriveHistoryTodo()) {
+    pendingText += ' · historique à envoyer vers Drive';
+  } else if (driveHistoryNote) {
+    pendingText += ' · ' + driveHistoryNote;
+  }
   const driveError = getDriveError();
   if (isDriveConnected() && driveError) {
     // Google refuse l'accès au dossier / à l'envoi : on ne prétend pas que la sauvegarde fonctionne.
@@ -2445,8 +2474,8 @@ function initDriveTokenClient() {
       if (!getDriveAccount()) fetchDriveAccount();
       probeDriveAccess();
       if (driveRenewPending) { driveRenewPending.finish(true); return; } // l'appelant envoie lui-même la file d'attente
-      // process any queued sessions
-      processDriveQueue();
+      // process any queued sessions, puis crée le dossier et envoie l'historique si besoin
+      processDriveQueue().then(() => driveFirstSync());
     },
     // Fenêtre Google bloquée ou fermée
     error_callback: (err) => {
@@ -2485,7 +2514,16 @@ async function driveFolderError(message, res) {
   return err;
 }
 
-async function ensureDriveFolder(accessToken) {
+// Une seule recherche / création de dossier à la fois (évite deux dossiers créés en parallèle).
+let driveFolderLock = null;
+function ensureDriveFolder(accessToken) {
+  if (!driveFolderLock) {
+    driveFolderLock = ensureDriveFolderOnce(accessToken).finally(() => { driveFolderLock = null; });
+  }
+  return driveFolderLock;
+}
+
+async function ensureDriveFolderOnce(accessToken) {
   let folderId = localStorage.getItem(DRIVE_FOLDER_ID_KEY);
   if (folderId) return folderId;
 
@@ -2519,7 +2557,27 @@ async function ensureDriveFolder(accessToken) {
   const created = await create.json();
   folderId = created.id;
   localStorage.setItem(DRIVE_FOLDER_ID_KEY, folderId);
+  // Le dossier n'existait pas : il vient d'être créé vide, tout l'historique doit y être envoyé.
+  localStorage.removeItem(DRIVE_UPLOADED_KEY);
+  localStorage.setItem(DRIVE_HISTORY_TODO_KEY, '1');
   return folderId;
+}
+
+// Envoie une séance (JSON) dans le dossier ; renvoie la réponse de Google (res.ok / res.status).
+function uploadDriveFile(accessToken, folderId, session, fileName) {
+  const metadata = {
+    name: fileName,
+    parents: [folderId],
+    mimeType: 'application/json'
+  };
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+  form.append('file', new Blob([JSON.stringify(session, null, 2)], { type: 'application/json' }));
+  return fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + accessToken },
+    body: form
+  });
 }
 
 // options.renew = true : si le jeton a expiré, on en redemande un tout de suite (à n'utiliser que
@@ -2540,20 +2598,7 @@ async function uploadSessionToDrive(session, options) {
     const dateStr = (session.date || new Date().toISOString().slice(0, 10));
     const fileName = `seance_${dateStr}.json`;
 
-    const metadata = {
-      name: fileName,
-      parents: [folderId],
-      mimeType: 'application/json'
-    };
-    const form = new FormData();
-    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-    form.append('file', new Blob([JSON.stringify(session, null, 2)], { type: 'application/json' }));
-
-    const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name', {
-      method: 'POST',
-      headers: { Authorization: 'Bearer ' + token.access_token },
-      body: form
-    });
+    const res = await uploadDriveFile(token.access_token, folderId, session, fileName);
 
     if (res.status === 401) {
       // jeton refusé par Google → on ne garde que le compte et le dossier ; renouvelé à la prochaine séance
@@ -2571,6 +2616,7 @@ async function uploadSessionToDrive(session, options) {
       return { queued: true };
     }
     clearDriveError(); // un envoi vient de réussir : l'accès à Drive fonctionne
+    markDriveUploaded(session.id);
     return { ok: true, file: await res.json() };
   } catch (e) {
     console.warn('Drive upload error', e);
@@ -2605,14 +2651,79 @@ async function processDriveQueue() {
   localStorage.setItem(DRIVE_QUEUE_KEY, JSON.stringify(remaining));
 }
 
+// --- Envoi de l'historique existant ------------------------------------------------------------
+// Quand le dossier de sauvegarde n'existe pas encore sur le Drive, il est créé (ensureDriveFolder)
+// et TOUT l'historique déjà présent dans l'application y est envoyé, une séance = un fichier.
+// L'envoi reprend là où il s'est arrêté (jeton expiré, réseau coupé...) : les séances déjà envoyées
+// sont retenues (DRIVE_UPLOADED_KEY). Si le dossier existe déjà, rien n'est envoyé.
+let driveHistorySyncing = false;
+let driveHistoryProgress = null; // { done, total } pendant l'envoi
+let driveHistoryNote = '';       // message de fin d'envoi, affiché jusqu'au prochain rechargement
+
+async function syncDriveHistory() {
+  if (driveHistorySyncing || !isDriveHistoryTodo()) return;
+  if (!state || !Array.isArray(state.history) || !getDriveToken()) return;
+  driveHistorySyncing = true;
+  try {
+    const folderId = await ensureDriveFolder(getDriveToken().access_token);
+    const history = state.history.filter(h => h && h.id != null);
+    // Un fichier par séance ; si plusieurs séances ont la même date : suffixe _1, _2...
+    const perDate = {}; const seq = {}; const names = new Map();
+    history.forEach(h => { const d = h.date || 'sans-date'; perDate[d] = (perDate[d] || 0) + 1; });
+    history.forEach(h => {
+      const d = h.date || 'sans-date';
+      seq[d] = (seq[d] || 0) + 1;
+      names.set(h.id, perDate[d] > 1 ? `seance_${d}_${seq[d]}.json` : `seance_${d}.json`);
+    });
+    const already = new Set(getDriveUploadedIds());
+    driveHistoryProgress = { done: history.filter(h => already.has(h.id)).length, total: history.length };
+    updateDriveUI();
+    let complete = true;
+    for (const h of history) {
+      if (getDriveUploadedIds().includes(h.id)) continue; // déjà envoyée (y compris par un enregistrement en cours)
+      const t = getDriveToken();
+      if (!t) { complete = false; break; }
+      let res;
+      try { res = await uploadDriveFile(t.access_token, folderId, h, names.get(h.id)); }
+      catch (e) { complete = false; break; } // réseau coupé : reprise plus tard
+      if (res.status === 401) { expireDriveToken(); complete = false; break; }
+      if (!res.ok) { setDriveError(await driveErrorText(res)); complete = false; break; }
+      markDriveUploaded(h.id);
+      driveHistoryProgress.done++;
+      updateDriveUI();
+    }
+    if (complete) {
+      localStorage.removeItem(DRIVE_HISTORY_TODO_KEY);
+      clearDriveError();
+      driveHistoryNote = 'historique envoyé (' + history.length + ' séance' + (history.length > 1 ? 's' : '') + ')';
+    }
+  } catch (e) {
+    console.warn('Drive : envoi de l\'historique interrompu', e);
+  } finally {
+    driveHistorySyncing = false;
+    driveHistoryProgress = null;
+    updateDriveUI();
+  }
+}
+
+// Première connexion : s'assure que le dossier existe (le crée sinon, ce qui déclenche l'envoi de
+// l'historique) puis envoie l'historique si besoin. Sans effet quand tout est déjà en place.
+async function driveFirstSync() {
+  const t = getDriveToken();
+  if (!t) return;
+  try { await ensureDriveFolder(t.access_token); }
+  catch (e) { updateDriveUI(); return; }
+  await syncDriveHistory();
+}
+
 function backupSessionToDrive(session) {
   // fire-and-forget ; never block the UI. Appelée depuis « Enregistrer la séance » (geste de
   // l'utilisateur) : le jeton expiré est renouvelé silencieusement, puis les séances restées
-  // en attente partent aussi.
+  // en attente partent aussi, puis l'historique si le dossier vient d'être créé.
   uploadSessionToDrive(session, { renew: true }).then(r => {
     if (r && r.ok) {
       console.log('Séance sauvegardée sur Drive');
-      return processDriveQueue();
+      return processDriveQueue().then(() => syncDriveHistory());
     }
   }).then(() => updateDriveUI()).catch(() => {});
 }
@@ -2795,7 +2906,8 @@ async function initApp() {
   initUpdateIndicator();
   // Google Drive : statut + file d'attente
   setTimeout(() => {
-    initDriveTokenClient(); updateDriveUI(); processDriveQueue();
+    initDriveTokenClient(); updateDriveUI();
+    processDriveQueue().then(() => driveFirstSync());
     if (isDriveConnected() && !getDriveAccount()) fetchDriveAccount();
   }, 800);
   const saved = localStorage.getItem('h49_state');
