@@ -32,6 +32,8 @@ class Srv:
 def newpage(br, w=390, h=844, scheme='light', sw='block', pref=None, seed=True):
     """Page neuve avec les données de data.json dans localStorage ; pref = thème forcé ('light' / 'dark' / 'auto')."""
     ctx = br.new_context(viewport={'width': w, 'height': h}, device_scale_factor=2, service_workers=sw, color_scheme=scheme)
+    # Le script Google Identity (sauvegarde Drive) n'est jamais chargé pour de vrai dans les tests.
+    ctx.route('**/accounts.google.com/**', lambda r: r.fulfill(status=200, content_type='application/javascript', body=''))
     pg = ctx.new_page()
     errs = []
     pg.on('pageerror', lambda e: errs.append(str(e)))

@@ -154,6 +154,22 @@ const DRAFT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 // enregistrer une séance ne doit pas l'effacer. Même durée de validité (24 h).
 const WEIGHT_DRAFT_KEY = 'h49_draft_weight';
 
+// Google Drive backup (co-auteur : Grok)
+const GOOGLE_CLIENT_ID = '903120094308-phdlfg1rug8v6hn231n8b4uu7vfj65uf.apps.googleusercontent.com';
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+const DRIVE_FOLDER_NAME = 'FITNESS AAP – Séances';
+const DRIVE_BACKUP_NAME = 'sauvegarde_complete.json';      // UN seul fichier : tout l'état de l'application
+const DRIVE_BACKUP_ID_KEY = 'h49_drive_backup_id';         // identifiant de ce fichier sur le Drive
+const DRIVE_LAST_HASH_KEY = 'h49_drive_last_hash';         // empreinte des données au dernier envoi réussi
+const DRIVE_LAST_BACKUP_KEY = 'h49_drive_last_backup';     // date du dernier envoi réussi
+const DRIVE_CONFLICT_KEY = 'h49_drive_conflict';           // une sauvegarde plus complète existe déjà sur le Drive
+const DRIVE_TOKEN_KEY = 'h49_drive_token';
+const DRIVE_FOLDER_ID_KEY = 'h49_drive_folder_id';
+const DRIVE_ACCOUNT_KEY = 'h49_drive_account';
+const DRIVE_WANTED_KEY = 'h49_drive_wanted'; // '1' tant que l'utilisateur n'a pas cliqué « Déconnecter »
+const DRIVE_OAUTH_STATE_KEY = 'h49_drive_oauth_state';   // anti-falsification de la connexion par redirection (appli installée)
+const DRIVE_ERROR_KEY = 'h49_drive_error';   // dernière réponse d'erreur de Google pour le dossier / l'envoi (ex. « 403 accessNotConfigured »)
+
 // Mises à jour : délai minimal entre deux vérifications automatiques (retour au premier plan)
 const UPDATE_CHECK_MIN_INTERVAL_MS = 30 * 60 * 1000;
 
@@ -269,6 +285,7 @@ function saveState() {
     state.history.sort((a, b) => new Date(a.date) - new Date(b.date));
   }
   localStorage.setItem('h49_state', JSON.stringify(state));
+  scheduleDriveSync(); // Google Drive : la sauvegarde complète suit les modifications (si l'accès est valide)
 }
 
 function clearEditState() {
@@ -1251,11 +1268,14 @@ function submitWorkout(e) {
 
   saveState();
 
+  // Sauvegarde automatique Google Drive (si connecté) : fichier de sauvegarde complète mis à jour
+  backupToDrive();
+
   // Actualise la bannière de déload en temps réel
   displayDeloadNotificationIfNeeded();
 
-  alert(`${isEditing ? 'Séance modifiée' : 'Séance enregistrée'} !\n• Temps : ${sessionDuration || 'N/A'}\n• Séries enregistrées : ${validatedRows.length}\n• Tonnage réel : ${Math.round(totalTonnage).toLocaleString()} kg`);
-  
+  alert(`${isEditing ? 'Séance modifiée' : 'Séance enregistrée'} !\n• Temps : ${sessionDuration || 'N/A'}\n• Séries enregistrées : ${validatedRows.length}\n• Tonnage réel : ${Math.round(totalTonnage).toLocaleString()} kg${driveSaveNotice()}`);
+
   initWorkoutForm();
   renderHistory();
   renderCharts();
@@ -2186,7 +2206,686 @@ function switchTab(tabName) {
   if (tabName === 'programme') renderProgramOverview();
   if (tabName === 'progression') renderCharts();
   if (tabName === 'progression') renderProgressAnalysis();
+  if (tabName === 'reglages') {
+    updateDriveUI(); // le jeton Drive a pu expirer depuis l'ouverture de l'appli
+    if (isDriveConnected() && !getDriveAccount()) fetchDriveAccount(); // nouvel essai de lecture de l'adresse
+    if (isDriveConnected()) {
+      probeDriveAccess(); // vérifie que Google autorise bien l'accès à Drive
+      syncDriveBackup();  // crée le dossier / envoie la sauvegarde complète si ce n'est pas encore fait
+    }
+  }
 }
+
+
+// ============================================================
+// 15b. SAUVEGARDE GOOGLE DRIVE (co-auteur : Grok)
+// ============================================================
+let driveTokenClient = null;
+
+function getDriveToken() {
+  try {
+    const raw = localStorage.getItem(DRIVE_TOKEN_KEY);
+    if (!raw) return null;
+    const t = JSON.parse(raw);
+    if (!t || !t.access_token) return null;
+    // token still usable if expires in > 60 s
+    if (t.expires_at && Date.now() > t.expires_at - 60000) return null;
+    return t;
+  } catch (e) { return null; }
+}
+
+function setDriveToken(tokenResponse) {
+  const t = {
+    access_token: tokenResponse.access_token,
+    expires_at: Date.now() + (Number(tokenResponse.expires_in || 3600) * 1000)
+  };
+  localStorage.setItem(DRIVE_TOKEN_KEY, JSON.stringify(t));
+  return t;
+}
+
+// Déconnexion voulue par l'utilisateur : tout est oublié (jeton, dossier, compte, souhait de sauvegarde).
+function clearDriveToken() {
+  localStorage.removeItem(DRIVE_TOKEN_KEY);
+  localStorage.removeItem(DRIVE_FOLDER_ID_KEY);
+  localStorage.removeItem(DRIVE_ACCOUNT_KEY);
+  localStorage.removeItem(DRIVE_WANTED_KEY);
+  localStorage.removeItem(DRIVE_ERROR_KEY);
+  localStorage.removeItem(DRIVE_BACKUP_ID_KEY);
+  localStorage.removeItem(DRIVE_LAST_HASH_KEY);
+  localStorage.removeItem(DRIVE_LAST_BACKUP_KEY);
+  localStorage.removeItem(DRIVE_CONFLICT_KEY);
+}
+
+// Raison courte d'une réponse d'erreur Google (« 403 accessNotConfigured »), pour l'afficher dans Réglages.
+async function driveErrorText(res) {
+  let reason = '';
+  try {
+    const e = (await res.json()).error;
+    reason = (e && ((e.errors && e.errors[0] && e.errors[0].reason) || (e.details && e.details[0] && e.details[0].reason) || e.status)) || '';
+  } catch (err) { /* corps illisible : on garde le code seul */ }
+  return res.status + (reason ? ' ' + String(reason).slice(0, 60) : '');
+}
+
+// Empreinte légère (FNV-1a) des données : sert à savoir si elles ont changé depuis le dernier envoi.
+function driveHash(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+  return h.toString(16) + '.' + str.length;
+}
+function getDriveBackupId() {
+  try { return localStorage.getItem(DRIVE_BACKUP_ID_KEY) || null; } catch (e) { return null; }
+}
+function setDriveBackupId(id) {
+  try { if (id) localStorage.setItem(DRIVE_BACKUP_ID_KEY, id); else localStorage.removeItem(DRIVE_BACKUP_ID_KEY); } catch (e) { /* ignoré */ }
+}
+function getDriveConflict() {
+  try {
+    const c = JSON.parse(localStorage.getItem(DRIVE_CONFLICT_KEY) || 'null');
+    return c && typeof c.id === 'string' ? c : null;
+  } catch (e) { return null; }
+}
+function setDriveConflict(c) {
+  try { if (c) localStorage.setItem(DRIVE_CONFLICT_KEY, JSON.stringify(c)); else localStorage.removeItem(DRIVE_CONFLICT_KEY); } catch (e) { /* ignoré */ }
+}
+function formatDriveDate(iso) {
+  try {
+    const d = new Date(iso);
+    if (!iso || isNaN(d.getTime())) return '';
+    return d.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+  } catch (e) { return ''; }
+}
+// Anciennes versions (1.6.0 à 1.6.11) : fichiers par séance, file d'attente, historique à envoyer.
+// Tout est contenu dans les données de l'application : ces repères ne servent plus.
+function cleanupLegacyDriveKeys() {
+  ['h49_drive_queue', 'h49_drive_uploaded', 'h49_drive_files', 'h49_drive_history_todo'].forEach(k => {
+    try { localStorage.removeItem(k); } catch (e) { /* ignoré */ }
+  });
+}
+
+function getDriveError() {
+  try { return localStorage.getItem(DRIVE_ERROR_KEY) || ''; } catch (e) { return ''; }
+}
+function setDriveError(text) {
+  try { localStorage.setItem(DRIVE_ERROR_KEY, text); } catch (e) { /* ignoré */ }
+}
+function clearDriveError() {
+  try { localStorage.removeItem(DRIVE_ERROR_KEY); } catch (e) { /* ignoré */ }
+}
+
+// Jeton expiré ou refusé par Google (il ne dure qu'environ 1 h) : on n'oublie que le jeton ;
+// le compte, le dossier et le souhait de sauvegarde restent, pour renouveler le jeton tout seul.
+function expireDriveToken() {
+  localStorage.removeItem(DRIVE_TOKEN_KEY);
+}
+
+function isDriveWanted() {
+  return localStorage.getItem(DRIVE_WANTED_KEY) === '1';
+}
+
+function isDriveConnected() {
+  return !!getDriveToken();
+}
+
+// Compte Google connecté (adresse affichée dans Réglages). Stocké sur l'appareil seulement,
+// jamais injecté en HTML (textContent) ; hors sauvegarde exportée.
+function getDriveAccount() {
+  try {
+    const a = JSON.parse(localStorage.getItem(DRIVE_ACCOUNT_KEY) || 'null');
+    if (a && typeof a.email === 'string' && a.email) return a;
+  } catch (e) { /* ignoré */ }
+  return null;
+}
+
+// Lecture de l'adresse du compte connecté, sans permission supplémentaire :
+//  1) API Drive « about » ; 2) à défaut, propriétaire du dossier de sauvegarde créé par l'application.
+// Si aucune des deux ne répond, la raison est affichée dans Réglages (driveAccountError).
+let driveAccountError = '';
+let driveAccountFetching = false;
+
+async function fetchDriveAccount() {
+  const t = getDriveToken();
+  if (!t || driveAccountFetching) return;
+  driveAccountFetching = true;
+  const headers = { Authorization: 'Bearer ' + t.access_token };
+  const reasons = [];
+  let found = null;
+  try {
+    try {
+      const res = await fetch('https://www.googleapis.com/drive/v3/about?fields=user(displayName,emailAddress)', { headers });
+      if (res.ok) {
+        const u = (await res.json()).user;
+        if (u && typeof u.emailAddress === 'string' && u.emailAddress) found = { email: u.emailAddress, name: u.displayName };
+        else reasons.push('about : sans adresse');
+      } else reasons.push('about : ' + await driveErrorText(res));
+    } catch (e) { reasons.push('about : réseau'); }
+
+    if (!found) {
+      try {
+        const folderId = await ensureDriveFolder(t.access_token);
+        const res = await fetch('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(folderId) + '?fields=owners(displayName,emailAddress)', { headers });
+        if (res.ok) {
+          const o = ((await res.json()).owners || [])[0];
+          if (o && typeof o.emailAddress === 'string' && o.emailAddress) found = { email: o.emailAddress, name: o.displayName };
+          else reasons.push('dossier : sans adresse');
+        } else reasons.push('dossier : ' + await driveErrorText(res));
+      } catch (e) { reasons.push('dossier : ' + (e && e.driveReason ? e.driveReason : 'indisponible')); }
+    }
+
+    if (found) {
+      localStorage.setItem(DRIVE_ACCOUNT_KEY, JSON.stringify({
+        email: found.email,
+        name: typeof found.name === 'string' ? found.name : ''
+      }));
+      driveAccountError = '';
+    } else {
+      driveAccountError = reasons.join(' ; ');
+    }
+  } finally {
+    driveAccountFetching = false;
+    updateDriveUI();
+  }
+}
+
+// Test léger de l'accès à Drive (liste d'un seul fichier) : met à jour la raison d'erreur affichée,
+// pour que le message disparaisse dès que le problème est réglé (nouvelle connexion, API activée...).
+let driveProbing = false;
+async function probeDriveAccess() {
+  const t = getDriveToken();
+  if (!t || driveProbing) return;
+  driveProbing = true;
+  try {
+    const res = await fetch('https://www.googleapis.com/drive/v3/files?pageSize=1&fields=files(id)', {
+      headers: { Authorization: 'Bearer ' + t.access_token }
+    });
+    if (res.ok) clearDriveError(); else setDriveError(await driveErrorText(res));
+  } catch (e) { /* hors-ligne : on garde l'état précédent */ }
+  finally { driveProbing = false; updateDriveUI(); }
+}
+
+function updateDriveUI() {
+  const statusEl = document.getElementById('drive-status');
+  const connectBtn = document.getElementById('drive-connect-btn');
+  const disconnectBtn = document.getElementById('drive-disconnect-btn');
+  const restoreBtn = document.getElementById('drive-restore-btn');
+  const replaceBtn = document.getElementById('drive-replace-btn');
+  if (!statusEl) return;
+  const account = getDriveAccount();
+  const conflict = getDriveConflict();
+  const last = localStorage.getItem(DRIVE_LAST_BACKUP_KEY);
+  let pendingText = '';
+  if (driveSyncing) pendingText = ' · envoi en cours…';
+  else if ((isDriveConnected() || isDriveWanted()) && !conflict && driveNeedsBackup()) pendingText = ' · modifications en attente d\'envoi';
+  else if (last) pendingText = ' · dernière sauvegarde : ' + formatDriveDate(last);
+  const driveError = getDriveError();
+  const showRestore = isDriveConnected() || isDriveWanted();
+  if (restoreBtn) restoreBtn.style.display = showRestore ? '' : 'none';
+  if (replaceBtn) replaceBtn.style.display = 'none';
+  if (isDriveConnected() && conflict) {
+    // Une sauvegarde existe déjà sur le Drive et contient des séances que cet appareil n'a pas : on ne l'écrase pas.
+    statusEl.textContent = (account ? 'Compte ' + account.email + ' : ' : '')
+      + 'une sauvegarde plus complète existe déjà sur ton Drive (' + (conflict.sessions != null ? conflict.sessions + ' séances, ' : '')
+      + 'modifiée le ' + (formatDriveDate(conflict.modified) || 'date inconnue') + ') : l\'envoi est suspendu pour ne rien écraser. '
+      + 'Touche « Restaurer depuis Drive » pour la récupérer, ou « Remplacer par cet appareil » pour la remplacer.';
+    if (connectBtn) connectBtn.style.display = 'none';
+    if (disconnectBtn) disconnectBtn.style.display = '';
+    if (replaceBtn) replaceBtn.style.display = '';
+  } else if (isDriveConnected() && driveError) {
+    // Google refuse l'accès au dossier / à l'envoi : on ne prétend pas que la sauvegarde fonctionne.
+    let hint = ' Touche « Déconnecter », puis reconnecte-toi ; si cela persiste, envoie ce message à Claude.';
+    if (/accessNotConfigured|SERVICE_DISABLED/i.test(driveError)) {
+      hint = ' L\'API Google Drive n\'est pas activée pour le projet Google de l\'application (Google Cloud, « API et services »).';
+    } else if (/insufficient|SCOPE/i.test(driveError)) {
+      hint = ' Autorisation Drive non accordée : touche « Déconnecter », puis reconnecte-toi en acceptant l\'accès à Drive.';
+    }
+    statusEl.textContent = (account ? 'Compte ' + account.email + ' : ' : '')
+      + 'Google refuse l\'accès à Drive (' + driveError + ') — les séances ne sont pas sauvegardées.' + hint + pendingText;
+    if (connectBtn) connectBtn.style.display = 'none';
+    if (disconnectBtn) disconnectBtn.style.display = '';
+  } else if (isDriveConnected()) {
+    const accountIssue = !account && driveAccountError ? ' · adresse du compte indisponible (' + driveAccountError + ')' : '';
+    statusEl.textContent = (account
+      ? 'Connecté : ' + account.email + ' — sauvegarde automatique active'
+      : 'Connecté — sauvegarde automatique active') + accountIssue + pendingText;
+    if (connectBtn) connectBtn.style.display = 'none';
+    if (disconnectBtn) disconnectBtn.style.display = '';
+  } else if (isDriveWanted()) {
+    // Accès expiré (≈ 1 h) : renouvelé tout seul au prochain « Enregistrer la séance » (navigateur : fenêtre
+    // silencieuse ; application installée : reconnexion automatique par redirection).
+    statusEl.textContent = (driveRedirectError ? 'Connexion Google refusée (' + driveRedirectError + ') · ' : '')
+      + (account ? 'Compte ' + account.email + ' : ' : '')
+      + (isInstalledApp()
+        ? 'accès Google expiré : reconnexion automatique à la prochaine séance enregistrée (ou touche « Reconnecter maintenant »)'
+        : 'sauvegarde renouvelée automatiquement à la prochaine séance enregistrée') + pendingText;
+    if (connectBtn) { connectBtn.style.display = ''; connectBtn.textContent = 'Reconnecter maintenant'; }
+    if (disconnectBtn) disconnectBtn.style.display = '';
+  } else {
+    statusEl.textContent = (driveRedirectError ? 'Connexion Google refusée (' + driveRedirectError + ') · ' : '') + 'Non connecté';
+    if (connectBtn) { connectBtn.style.display = ''; connectBtn.textContent = 'Connecter Google Drive'; }
+    if (disconnectBtn) disconnectBtn.style.display = 'none';
+  }
+}
+
+// Renouvelle le jeton Google (≈ 1 h de validité) sans que l'utilisateur ait à se reconnecter :
+// « prompt: '' » + l'adresse déjà connue (« hint ») évitent l'écran de choix de compte. À appeler
+// depuis un geste de l'utilisateur (ex. « Enregistrer la séance »), sinon le navigateur peut bloquer
+// la petite fenêtre Google. Répond true si un jeton valide a été obtenu, false sinon (jamais d'alerte).
+let driveRenewPending = null;
+function renewDriveToken() {
+  if (driveRenewPending) return driveRenewPending.promise;
+  // Application installée (écran d'accueil) : la petite fenêtre Google ne peut pas rendre la main à
+  // l'application. Pas de renouvellement silencieux possible : la séance reste en file d'attente et
+  // Réglages propose « Reconnecter maintenant » (connexion par redirection, voir connectDriveByRedirect).
+  if (isInstalledApp()) return Promise.resolve(false);
+  initDriveTokenClient();
+  if (!driveTokenClient) return Promise.resolve(false);
+  let resolveFn;
+  const promise = new Promise((resolve) => { resolveFn = resolve; });
+  const pending = {
+    promise,
+    finish(ok) {
+      clearTimeout(pending.timer);
+      if (driveRenewPending === pending) driveRenewPending = null;
+      resolveFn(ok);
+    }
+  };
+  pending.timer = setTimeout(() => pending.finish(false), 30000);
+  driveRenewPending = pending;
+  const account = getDriveAccount();
+  const options = { prompt: '' };
+  if (account) options.hint = account.email;
+  try { driveTokenClient.requestAccessToken(options); } catch (e) { pending.finish(false); }
+  return promise;
+}
+
+function initDriveTokenClient() {
+  if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) return;
+  if (driveTokenClient) return;
+  driveTokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: GOOGLE_CLIENT_ID,
+    scope: DRIVE_SCOPE,
+    callback: (resp) => {
+      if (resp.error) {
+        console.warn('Drive auth error', resp);
+        if (driveRenewPending) { driveRenewPending.finish(false); updateDriveUI(); return; } // renouvellement silencieux : pas d'alerte
+        alert('Connexion Google Drive annulée ou échouée.');
+        return;
+      }
+      setDriveToken(resp);
+      localStorage.setItem(DRIVE_WANTED_KEY, '1');
+      updateDriveUI();
+      if (!getDriveAccount()) fetchDriveAccount();
+      probeDriveAccess();
+      if (driveRenewPending) { driveRenewPending.finish(true); return; } // l'appelant envoie lui-même la file d'attente
+      // accès obtenu : crée le dossier et envoie la sauvegarde complète si besoin
+      syncDriveBackup();
+    },
+    // Fenêtre Google bloquée ou fermée
+    error_callback: (err) => {
+      console.warn('Drive auth popup', err);
+      if (driveRenewPending) { driveRenewPending.finish(false); updateDriveUI(); }
+    }
+  });
+}
+
+// --- Application installée sur l'écran d'accueil : connexion par redirection ---------------------
+// Dans une application installée (affichage « plein écran »), la fenêtre de connexion de la
+// bibliothèque Google s'ouvre dans un onglet séparé et reste sur une page blanche : elle ne peut pas
+// renvoyer le résultat à l'application. On passe donc par une redirection : la page va chez Google
+// puis revient avec le jeton dans l'adresse (« #access_token=... »), lu au démarrage.
+// L'adresse de retour (driveRedirectUri) doit être déclarée dans Google Cloud (identifiant client OAuth,
+// « URI de redirection autorisés »).
+let driveRedirectError = '';
+
+function isInstalledApp() {
+  try {
+    if (window.navigator.standalone === true) return true;
+    return ['fullscreen', 'standalone', 'minimal-ui'].some(m => window.matchMedia('(display-mode: ' + m + ')').matches);
+  } catch (e) { return false; }
+}
+
+function driveRedirectUri() {
+  return location.origin + location.pathname.replace(/index\.html$/, '');
+}
+
+function connectDriveByRedirect() {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  const state = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+  try { localStorage.setItem(DRIVE_OAUTH_STATE_KEY, state); }
+  catch (e) { alert('Stockage indisponible : connexion impossible.'); return; }
+  const p = new URLSearchParams({
+    client_id: GOOGLE_CLIENT_ID,
+    redirect_uri: driveRedirectUri(),
+    response_type: 'token',
+    scope: DRIVE_SCOPE,
+    include_granted_scopes: 'true',
+    state: state
+  });
+  const account = getDriveAccount();
+  if (account) p.set('login_hint', account.email);
+  location.assign('https://accounts.google.com/o/oauth2/v2/auth?' + p.toString());
+}
+
+// Au démarrage : récupère le jeton renvoyé par Google dans l'adresse. Renvoie 'ok', 'error' ou null
+// (rien à faire). L'adresse est nettoyée ; un retour dont le « state » ne correspond pas est ignoré.
+function handleDriveRedirectReturn() {
+  try {
+    const h = location.hash;
+    if (!h || h.length < 2) return null;
+    const params = new URLSearchParams(h.slice(1));
+    if (!params.has('access_token') && !params.has('error')) return null;
+    history.replaceState(null, '', location.pathname + location.search);
+    const expected = localStorage.getItem(DRIVE_OAUTH_STATE_KEY);
+    if (!expected || params.get('state') !== expected) return null;
+    localStorage.removeItem(DRIVE_OAUTH_STATE_KEY);
+    if (params.get('error') || !params.get('access_token')) {
+      driveRedirectError = params.get('error') || 'réponse vide';
+      return 'error';
+    }
+    setDriveToken({ access_token: params.get('access_token'), expires_in: params.get('expires_in') });
+    localStorage.setItem(DRIVE_WANTED_KEY, '1');
+    clearDriveError();
+    driveRedirectError = '';
+    return 'ok';
+  } catch (e) { return null; }
+}
+
+function connectGoogleDrive() {
+  if (isInstalledApp()) { connectDriveByRedirect(); return; }
+  initDriveTokenClient();
+  if (!driveTokenClient) {
+    alert('Bibliothèque Google non chargée. Vérifie ta connexion et réessaie.');
+    return;
+  }
+  // prompt only if we have no token
+  const t = getDriveToken();
+  driveTokenClient.requestAccessToken({ prompt: t ? '' : 'consent' });
+}
+
+function disconnectGoogleDrive() {
+  const t = getDriveToken();
+  if (t && t.access_token && typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+    try { google.accounts.oauth2.revoke(t.access_token, () => {}); } catch (e) {}
+  }
+  clearDriveToken();
+  updateDriveUI();
+}
+
+// Erreur de dossier Drive : la raison de Google est mémorisée (affichée dans Réglages) et jointe à l'erreur.
+async function driveFolderError(message, res) {
+  const reason = await driveErrorText(res);
+  setDriveError(reason);
+  const err = new Error(message + ' (' + reason + ')');
+  err.driveReason = reason;
+  return err;
+}
+
+// Une seule recherche / création de dossier à la fois (évite deux dossiers créés en parallèle).
+let driveFolderLock = null;
+function ensureDriveFolder(accessToken) {
+  if (!driveFolderLock) {
+    driveFolderLock = ensureDriveFolderOnce(accessToken).finally(() => { driveFolderLock = null; });
+  }
+  return driveFolderLock;
+}
+
+async function ensureDriveFolderOnce(accessToken) {
+  let folderId = localStorage.getItem(DRIVE_FOLDER_ID_KEY);
+  if (folderId) return folderId;
+
+  // Search existing folder
+  const q = encodeURIComponent(`name='${DRIVE_FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+  const search = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`, {
+    headers: { Authorization: 'Bearer ' + accessToken }
+  });
+  if (!search.ok) throw await driveFolderError('Recherche dossier Drive échouée', search);
+  const data = await search.json();
+  clearDriveError(); // Google a répondu : l'accès au dossier fonctionne
+  if (data.files && data.files.length > 0) {
+    folderId = data.files[0].id;
+    localStorage.setItem(DRIVE_FOLDER_ID_KEY, folderId);
+    return folderId;
+  }
+
+  // Create folder
+  const create = await fetch('https://www.googleapis.com/drive/v3/files', {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer ' + accessToken,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      name: DRIVE_FOLDER_NAME,
+      mimeType: 'application/vnd.google-apps.folder'
+    })
+  });
+  if (!create.ok) throw await driveFolderError('Création dossier Drive échouée', create);
+  const created = await create.json();
+  folderId = created.id;
+  localStorage.setItem(DRIVE_FOLDER_ID_KEY, folderId);
+  // Le dossier n'existait pas : il vient d'être créé vide, la sauvegarde complète doit y être (re)créée.
+  localStorage.removeItem(DRIVE_BACKUP_ID_KEY);
+  localStorage.removeItem(DRIVE_LAST_HASH_KEY);
+  return folderId;
+}
+
+// --- Sauvegarde complète unique ------------------------------------------------------------------
+// UN seul fichier, « sauvegarde_complete.json », contient tout l'état de l'application (historique,
+// poids corporel, dernières charges) : c'est exactement le format du bouton « Restaurer » de l'Historique.
+// Il est créé à la première connexion (avec tout l'historique déjà présent) puis mis à jour, jamais dupliqué,
+// dès que les données changent. L'application retient l'empreinte des données envoyées : rien n'est renvoyé
+// si rien n'a changé, et les modifications faites sans accès valide partent dès que l'accès revient.
+
+// Cherche le fichier de sauvegarde dans le dossier (le plus récent) ; null s'il n'existe pas.
+async function findDriveBackup(accessToken, folderId) {
+  const q = encodeURIComponent(`name='${DRIVE_BACKUP_NAME}' and '${folderId}' in parents and trashed=false`);
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,modifiedTime)&orderBy=modifiedTime%20desc&pageSize=1`, {
+    headers: { Authorization: 'Bearer ' + accessToken }
+  });
+  if (!res.ok) throw await driveFolderError('Recherche de la sauvegarde Drive échouée', res);
+  const f = ((await res.json()).files || [])[0];
+  return f && typeof f.id === 'string' ? f : null;
+}
+
+// Télécharge la sauvegarde : { ok, text, data } (data = null si le contenu n'est pas du JSON).
+async function downloadDriveBackup(accessToken, fileId) {
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?alt=media`, {
+    headers: { Authorization: 'Bearer ' + accessToken }
+  });
+  if (!res.ok) return { ok: false, status: res.status, text: '', data: null };
+  const text = await res.text();
+  let data = null;
+  try { data = JSON.parse(text); } catch (e) { /* contenu illisible */ }
+  return { ok: true, text, data };
+}
+
+// Vrai si la sauvegarde du Drive ne contient aucune séance absente de cet appareil (on peut alors l'écraser sans rien perdre).
+function driveRemoteIsContainedInLocal(remote) {
+  if (!remote || !Array.isArray(remote.history) || !state || !Array.isArray(state.history)) return false;
+  const local = new Set(state.history.map(h => h && h.id));
+  return remote.history.every(h => h && local.has(h.id));
+}
+
+// Écrit la sauvegarde : met à jour le fichier existant (fileId) ou le crée ; renvoie la réponse de Google.
+async function writeDriveBackup(accessToken, folderId, payload, fileId) {
+  if (fileId) {
+    const upd = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${encodeURIComponent(fileId)}?uploadType=media&fields=id,name`, {
+      method: 'PATCH',
+      headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+      body: payload
+    });
+    if (upd.ok) { setDriveBackupId(fileId); return upd; }
+    if (upd.status !== 404) return upd; // 401, 403... : traités par l'appelant
+    setDriveBackupId(null);             // fichier supprimé du Drive : on le recrée ci-dessous
+  }
+  const metadata = { name: DRIVE_BACKUP_NAME, parents: [folderId], mimeType: 'application/json' };
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+  form.append('file', new Blob([payload], { type: 'application/json' }));
+  const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + accessToken },
+    body: form
+  });
+  if (res.ok) {
+    try { const f = await res.clone().json(); if (f && typeof f.id === 'string') setDriveBackupId(f.id); } catch (e) { /* ignoré */ }
+  }
+  return res;
+}
+
+// Vrai si les données ont changé depuis le dernier envoi réussi (ou si aucun envoi n'a encore eu lieu).
+function driveNeedsBackup() {
+  if (!state) return false;
+  return !getDriveBackupId() || driveHash(JSON.stringify(state)) !== localStorage.getItem(DRIVE_LAST_HASH_KEY);
+}
+
+let driveSyncing = false;
+let driveSyncAgain = false;
+
+// Envoie la sauvegarde complète si elle est à envoyer. Renvoie { ok } ou { reason } :
+// 'no-token' (accès expiré), 'token' (refusé par Google), 'conflict', 'error', 'busy'.
+async function syncDriveBackup() {
+  if (!state || !getDriveToken()) return { reason: 'no-token' };
+  if (getDriveConflict()) return { reason: 'conflict' };
+  if (!driveNeedsBackup()) return { ok: true, unchanged: true };
+  if (driveSyncing) { driveSyncAgain = true; return { reason: 'busy' }; }
+  driveSyncing = true;
+  updateDriveUI();
+  try {
+    const token = getDriveToken();
+    const folderId = await ensureDriveFolder(token.access_token);
+    const snapshot = JSON.stringify(state);
+    const payload = JSON.stringify(state, null, 2);
+    let fileId = getDriveBackupId();
+    if (!fileId) {
+      const found = await findDriveBackup(token.access_token, folderId);
+      if (found) {
+        // Une sauvegarde existe déjà sur le Drive sans que cet appareil l'ait écrite (réinstallation, autre
+        // appareil...) : on ne l'écrase que si elle ne contient aucune séance de plus que cet appareil.
+        const remote = await downloadDriveBackup(token.access_token, found.id);
+        if (!remote.ok) {
+          if (remote.status === 401) { expireDriveToken(); return { reason: 'token' }; }
+          setDriveError(String(remote.status));
+          return { reason: 'error' };
+        }
+        if (!driveRemoteIsContainedInLocal(remote.data)) {
+          const n = remote.data && Array.isArray(remote.data.history) ? remote.data.history.length : null;
+          setDriveConflict({ id: found.id, modified: found.modifiedTime || '', sessions: n });
+          return { reason: 'conflict' };
+        }
+        fileId = found.id;
+      }
+    }
+    const res = await writeDriveBackup(token.access_token, folderId, payload, fileId);
+    if (res.status === 401) { expireDriveToken(); return { reason: 'token' }; }
+    if (!res.ok) { setDriveError(await driveErrorText(res)); return { reason: 'error' }; }
+    clearDriveError();
+    localStorage.setItem(DRIVE_LAST_HASH_KEY, driveHash(snapshot));
+    localStorage.setItem(DRIVE_LAST_BACKUP_KEY, new Date().toISOString());
+    return { ok: true };
+  } catch (e) {
+    console.warn('Drive : envoi de la sauvegarde interrompu', e);
+    return { reason: 'error', error: e };
+  } finally {
+    driveSyncing = false;
+    updateDriveUI();
+    if (driveSyncAgain) { driveSyncAgain = false; setTimeout(syncDriveBackup, 0); }
+  }
+}
+
+// Envoi différé après toute modification des données (saveState) : sans effet si l'accès a expiré.
+let driveSyncTimer = null;
+function scheduleDriveSync() {
+  if (!getDriveToken()) return;
+  clearTimeout(driveSyncTimer);
+  driveSyncTimer = setTimeout(syncDriveBackup, 1500);
+}
+
+// Conflit : la sauvegarde du Drive contient des séances absentes de cet appareil. L'utilisateur choisit de
+// la remplacer par les données de cet appareil (ce bouton) ou de la restaurer (restoreFromDrive).
+function replaceDriveBackupWithThisDevice() {
+  const c = getDriveConflict();
+  if (!c) return;
+  const when = formatDriveDate(c.modified) || 'date inconnue';
+  if (!confirm('Remplacer la sauvegarde Drive (' + (c.sessions != null ? c.sessions + ' séances, ' : '') + 'modifiée le ' + when
+    + ') par les données de cet appareil ?\n\nLes séances qu\'elle contient et que cet appareil n\'a pas seront perdues.')) return;
+  setDriveBackupId(c.id);
+  setDriveConflict(null);
+  localStorage.removeItem(DRIVE_LAST_HASH_KEY);
+  syncDriveBackup();
+}
+
+// Restaure les données depuis la sauvegarde complète du Drive, par le même chemin que le bouton « Restaurer »
+// de l'Historique (importData, avec l'assainissement de security.js).
+async function restoreFromDrive() {
+  const token = getDriveToken();
+  if (!token) {
+    alert(isInstalledApp() ? 'Accès Google expiré : touche d\'abord « Reconnecter maintenant ».' : 'Connecte-toi d\'abord à Google Drive.');
+    return;
+  }
+  try {
+    const folderId = await ensureDriveFolder(token.access_token);
+    const file = await findDriveBackup(token.access_token, folderId);
+    if (!file) { alert('Aucune sauvegarde complète trouvée dans le dossier « ' + DRIVE_FOLDER_NAME + ' » de ton Drive.'); return; }
+    const dl = await downloadDriveBackup(token.access_token, file.id);
+    if (!dl.ok || !dl.data || !Array.isArray(dl.data.history) || !dl.data.nextType) {
+      alert('La sauvegarde Drive est illisible ou invalide : rien n\'a été modifié.');
+      return;
+    }
+    const when = formatDriveDate(file.modifiedTime) || 'date inconnue';
+    const n = dl.data.history.length;
+    const local = state && Array.isArray(state.history) ? state.history.length : 0;
+    if (!confirm('Restaurer la sauvegarde Drive du ' + when + ' (' + n + ' séance' + (n > 1 ? 's' : '') + ') ?\n\n'
+      + 'Cela remplace les données de cet appareil (' + local + ' séance' + (local > 1 ? 's' : '') + ').')) return;
+    setDriveBackupId(file.id);
+    setDriveConflict(null);
+    const f = new File([dl.text], DRIVE_BACKUP_NAME, { type: 'application/json' });
+    await window.importData({ target: { files: [f], value: '' } });
+    updateDriveUI();
+  } catch (e) {
+    alert('Restauration impossible : ' + (e && e.message ? e.message : 'erreur réseau') + '.');
+  }
+}
+
+// Ligne ajoutée au message « Séance enregistrée » quand l'accès Google a expiré dans l'application
+// installée : la reconnexion se lance toute seule juste après (voir backupToDrive).
+function driveSaveNotice() {
+  if (isDriveWanted() && !getDriveToken() && isInstalledApp()) {
+    return '\n• Google Drive : accès expiré, reconnexion automatique…';
+  }
+  return '';
+}
+
+// Dernière reconnexion automatique (redirection) : au plus une toutes les 2 minutes, pour ne jamais
+// enchaîner les allers-retours chez Google si quelque chose échoue.
+const DRIVE_AUTO_RECONNECT_KEY = 'h49_drive_auto_reconnect';
+function autoReconnectDriveIfNeeded() {
+  if (!isInstalledApp() || !isDriveWanted() || getDriveToken()) return;
+  try {
+    const last = Number(localStorage.getItem(DRIVE_AUTO_RECONNECT_KEY) || 0);
+    if (Date.now() - last < 120000) return;
+    localStorage.setItem(DRIVE_AUTO_RECONNECT_KEY, String(Date.now()));
+  } catch (e) { return; }
+  // petit délai : la page a fini d'afficher la confirmation de la séance avant de partir chez Google
+  setTimeout(connectDriveByRedirect, 400);
+}
+
+// Appelée par « Enregistrer la séance » / « Enregistrer les modifications » (geste de l'utilisateur) :
+// envoie tout de suite la sauvegarde complète. Accès expiré : dans le navigateur il est renouvelé en
+// silence par la fenêtre Google ; dans l'application installée (pas de renouvellement silencieux possible)
+// l'application se reconnecte toute seule par redirection et la sauvegarde part au retour.
+async function backupToDrive() {
+  try {
+    if (!isDriveWanted() && !getDriveToken()) return; // Drive n'a jamais été connecté : rien à faire
+    let token = getDriveToken();
+    if (!token && await renewDriveToken()) token = getDriveToken();
+    if (!token) { updateDriveUI(); autoReconnectDriveIfNeeded(); return; }
+    const r = await syncDriveBackup();
+    if (r && r.reason === 'token') autoReconnectDriveIfNeeded();
+    updateDriveUI();
+  } catch (e) { /* ne jamais gêner l'enregistrement */ }
+}
+
 
 // ============================================================
 // 15. SAUVEGARDE, IMPORT ET RÉINITIALISATION
@@ -2363,6 +3062,21 @@ function initUpdateIndicator() {
 async function initApp() {
   initTheme();
   initUpdateIndicator();
+  // Google Drive : retour d'une connexion par redirection (application installée), puis statut + sauvegarde à envoyer
+  cleanupLegacyDriveKeys();
+  const driveReturn = handleDriveRedirectReturn();
+  setTimeout(() => {
+    initDriveTokenClient(); updateDriveUI();
+    syncDriveBackup();
+    if (isDriveConnected() && !getDriveAccount()) fetchDriveAccount();
+    if (driveReturn) switchTab('reglages'); // on revient sur Réglages pour voir le résultat de la connexion
+  }, 800);
+  // Retour dans l'application (ex. après une connexion faite dans un onglet voisin) : on relit l'état de Drive
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) return;
+    updateDriveUI();
+    if (isDriveConnected()) syncDriveBackup();
+  });
   const saved = localStorage.getItem('h49_state');
   if (saved) {
     try {

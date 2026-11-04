@@ -1,9 +1,8 @@
 // Service Worker - Suivi Fitness
-// Cache-first pour le mode hors-ligne complet de la PWA.
 // APP_VERSION doit être incrémenté à chaque release (en même temps que
 // manifest.json) : le navigateur ne réinstalle le service worker que si
 // le contenu de ce fichier change.
-const APP_VERSION = '1.5.10';
+const APP_VERSION = '1.6.12';
 const CACHE_NAME = 'suivi-fitness-' + APP_VERSION;
 const ASSETS = [
   './',
@@ -43,9 +42,6 @@ const ASSETS = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    // cache: 'reload' = on va chercher les fichiers sur le réseau, jamais dans le cache HTTP du
-    // navigateur : sinon une nouvelle version pourrait mettre en cache d'anciens fichiers (app.js,
-    // manifest.json...) sous son nouveau numéro, et le téléphone resterait sur l'ancien code.
     caches.open(CACHE_NAME)
       .then((cache) => cache.addAll(ASSETS.map((url) => new Request(url, { cache: 'reload' }))))
       .then(() => self.skipWaiting())
@@ -57,8 +53,6 @@ self.addEventListener('activate', (event) => {
     caches.keys()
       .then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
-      // Prévient les pages ouvertes : si leur version diffère, l'application affiche
-      // « nouvelle version prête » (sans jamais recharger la page toute seule).
       .then(() => self.clients.matchAll({ type: 'window' }))
       .then((clients) => clients.forEach((c) => c.postMessage({ type: 'SW_ACTIVATED', version: APP_VERSION })))
   );
@@ -66,12 +60,15 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  try {
+    if (new URL(event.request.url).origin !== self.location.origin) return;
+  } catch (e) { return; }
   event.respondWith(
     caches.open(CACHE_NAME).then((cache) =>
       cache.match(event.request).then((cached) => {
         if (cached) return cached;
         return fetch(event.request).then((response) => {
-          if (response.ok && new URL(event.request.url).origin === self.location.origin) {
+          if (response.ok) {
             cache.put(event.request, response.clone());
           }
           return response;

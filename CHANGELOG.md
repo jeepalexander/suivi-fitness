@@ -7,12 +7,123 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
-## [1.5.10] - 2026-11-03
-### ⏱️ Barre de progression visible
-- Correction du `z-index` sur `.timer-btn::before` pour que la barre de progression soit **visible au-dessus du contenu** du bouton.
+## [1.6.12] - 2026-11-04
+### 🗂️ Google Drive : UNE seule sauvegarde complète (plus de fichiers par séance)
+- Le dossier « FITNESS AAP – Séances » contient désormais **un seul fichier**, `sauvegarde_complete.json`, avec tout l'état de l'application (historique, poids corporel, dernières charges) : c'est exactement le format du bouton « Restaurer » de l'Historique.
+- **Première connexion :** le dossier est créé s'il n'existe pas, avec la sauvegarde complète (tout l'historique déjà présent).
+- **Ensuite :** le même fichier est **mis à jour** (jamais dupliqué) à chaque séance enregistrée ou modifiée, et à chaque modification des données (poids, suppression…) tant que l'accès est valide. Rien n'est renvoyé si rien n'a changé (empreinte des données retenue) ; les modifications faites sans accès valide partent dès qu'il revient (« modifications en attente d'envoi »). Réglages affiche la date de la dernière sauvegarde.
+- **Restaurer depuis Drive :** nouveau bouton dans Réglages (confirmation avec la date et le nombre de séances, avertissement de remplacement, contenu assaini comme l'import manuel).
+- **Protection :** si une sauvegarde existe déjà sur le Drive avec des séances que cet appareil n'a pas (réinstallation, autre appareil…), elle n'est **jamais écrasée** : l'envoi est suspendu et Réglages propose « Restaurer depuis Drive » ou « Remplacer par cet appareil ».
+- Supprimés : fichiers `seance_*.json`, file d'attente de séances, envoi de l'historique séance par séance (les anciens repères sont effacés au démarrage). Les fichiers `seance_*.json` éventuellement déjà présents sur le Drive ne sont pas touchés : tu peux les supprimer à la main.
+- Correctif : « modifiée le Invalid Date » quand Google ne renvoie pas de date.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.12.
 
 ---
-- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.5.10.
+
+## [1.6.11] - 2026-11-04
+### 🔁 Application installée : reconnexion automatique à l'enregistrement d'une séance
+- Si l'accès Google (≈ 1 h) a expiré quand tu enregistres une séance (ou une modification), l'application **se reconnecte toute seule** par redirection, sans question ni appui : la séance est d'abord gardée en file d'attente, puis part au retour de Google.
+- Le message « Séance enregistrée » ajoute la ligne « Google Drive : accès expiré, reconnexion automatique… » (uniquement dans ce cas).
+- Garde-fou : une seule reconnexion automatique toutes les 2 minutes ; si Google refuse au retour, la raison s'affiche dans Réglages (« Connexion Google refusée (…) ») et les séances restent en attente, sans boucle d'allers-retours.
+- Dans le navigateur, rien ne change (renouvellement silencieux par la fenêtre). Si Drive n'a jamais été connecté : aucune redirection, aucune mention.
+- Correctif : la raison d'un refus de Google au retour s'affiche aussi quand Drive avait déjà été connecté.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.11.
+
+---
+
+## [1.6.10] - 2026-11-04
+### 📲 Google Drive : connexion possible depuis l'application installée (plein écran) + séances modifiées mises à jour
+- **Constat sur téléphone :** installée sur l'écran d'accueil, l'application ouvrait la fenêtre de connexion Google dans un onglet séparé, qui restait sur une page blanche (le résultat ne revenait jamais à l'application).
+- **Application installée :** la connexion se fait maintenant **par redirection** (la page va chez Google puis revient avec l'accès, lu au démarrage, adresse nettoyée, « state » anti-falsification vérifié). Dans le navigateur, la fenêtre habituelle est conservée.
+- ⚠️ **À faire une fois dans Google Cloud :** ajouter `https://jeepalexander.github.io/suivi-fitness/` aux « URI de redirection autorisés » de l'identifiant client OAuth.
+- Dans l'application installée, le renouvellement silencieux n'est pas possible : si l'accès (≈ 1 h) a expiré, la séance reste en file d'attente et Réglages propose « Reconnecter maintenant ».
+- **Séance modifiée :** son fichier Drive est **mis à jour** au lieu d'en créer un second du même nom. L'identifiant du fichier est retenu pour chaque séance (retrouvé par son nom pour les fichiers envoyés avant) ; si le fichier a été supprimé du Drive, il est recréé.
+- Retour dans l'application : l'état de Drive est relu ; la file d'attente ne peut plus être envoyée deux fois en parallèle.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.10.
+
+---
+
+## [1.6.9] - 2026-11-04
+### 📦 Google Drive : envoi de tout l'historique à la première connexion
+- Si le dossier « FITNESS AAP – Séances » **n'existe pas** sur le Drive, l'application le crée puis y envoie **tout l'historique déjà présent** (une séance = un fichier `seance_AAAA-MM-JJ.json` ; si plusieurs séances le même jour : `_1`, `_2`…).
+- Se déclenche tout seul : à la connexion, à l'ouverture de l'application, à l'ouverture de Réglages et après un enregistrement de séance. Si le dossier existe déjà, rien n'est renvoyé.
+- Reprise automatique : si l'envoi s'interrompt (jeton expiré, réseau coupé, refus de Google), les séances déjà envoyées sont retenues et seules les autres partent ensuite, sans doublon.
+- Réglages affiche l'avancement (« envoi de l'historique vers Drive (12/33)… ») puis « historique envoyé (33 séances) ».
+- Une seule création de dossier à la fois (plus de risque de dossiers en double).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.9.
+
+---
+
+## [1.6.8] - 2026-11-04
+### 🔎 Google Drive : l'application dit la vérité quand Google refuse l'accès
+- Constat sur téléphone : Google répondait « 403 » à **toutes** les requêtes Drive (lecture de l'adresse et du dossier). L'ancien texte « sauvegarde automatique active » était donc trompeur.
+- Réglages affiche maintenant la **raison donnée par Google** (ex. « Google refuse l'accès à Drive (403 accessNotConfigured) — les séances ne sont pas sauvegardées ») avec une aide adaptée (API Drive non activée, autorisation non accordée...).
+- Même message si l'envoi d'une séance est refusé ; la séance reste en file d'attente.
+- Test d'accès à Drive à chaque connexion et à chaque ouverture de Réglages : le message disparaît tout seul dès que le problème est réglé.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.8.
+
+---
+
+## [1.6.7] - 2026-11-04
+### 👤 Compte Google : lecture de l'adresse fiabilisée
+- Si l'API Drive « about » ne donne pas l'adresse, une **seconde méthode** la lit sur le propriétaire du dossier de sauvegarde créé par l'application (aucune permission supplémentaire, aucune nouvelle autorisation à donner).
+- Si aucune des deux ne répond, Réglages **affiche la raison** (ex. « adresse du compte indisponible (about : erreur 403 ; dossier : erreur 404) ») au lieu de ne rien montrer.
+- Nouvel essai de lecture à chaque ouverture de Réglages tant que l'adresse est inconnue.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.7.
+
+---
+
+## [1.6.6] - 2026-11-03
+### 🔄 Google Drive : plus besoin de se reconnecter toutes les heures
+- Le jeton Google ne dure qu'environ 1 h. À chaque « Enregistrer la séance », s'il a expiré, l'application en redemande **un nouveau toute seule** (demande silencieuse, sans choix de compte grâce à l'adresse déjà connue), envoie la séance, puis les séances restées en attente.
+- Le souhait de sauvegarde est retenu (`h49_drive_wanted`) jusqu'à un clic sur « Déconnecter » ; l'expiration du jeton n'oublie plus le compte ni le dossier.
+- Si Google demande quand même une confirmation (fenêtre refusée, session Google fermée), rien n'est perdu : la séance reste en file d'attente et Réglages l'indique (« N séances en attente d'envoi », bouton « Reconnecter maintenant »).
+- Réglages : l'état est rafraîchi à chaque ouverture de la page.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.6.
+
+---
+
+## [1.6.5] - 2026-11-03
+### 👤 Compte Google affiché dans Réglages
+- Une fois Google Drive connecté, la carte « Sauvegarde Google Drive » indique l'adresse du compte (« Connecté : adresse — sauvegarde automatique active »).
+- L'adresse est lue via l'API Drive (déjà autorisée), stockée sur l'appareil seulement (`h49_drive_account`, hors sauvegarde exportée), affichée en texte brut et effacée à la déconnexion.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.5.
+
+---
+
+## [1.6.4] - 2026-11-03
+### 🛠️ Correctif : l'application démarre de nouveau (et fonctionne hors-ligne)
+- `app.js` est de nouveau le **code complet de l'application** (v1.6.0 avec sauvegarde Google Drive). Le chargeur qui allait chercher le code sur jsDelivr est supprimé : il empêchait `initApp` de s'exécuter (écran Programme vide) et rendait l'application inutilisable sans réseau.
+- `security.js` assainit de nouveau les sauvegardes importées (il s'exécute après `app.js`, donc `importData` existe).
+- Politique de sécurité (CSP) resserrée : `cdn.jsdelivr.net` et `raw.githubusercontent.com` retirés ; seuls les domaines Google nécessaires à la sauvegarde Drive restent autorisés.
+- Fichier orphelin `app-part1.js` supprimé.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.4.
+- Non restauré : l'affichage du compte Google connecté dans Réglages (prévu en 1.6.1, code perdu), à refaire si souhaité.
+
+---
+
+## [1.6.3] - 2026-11-03
+### ⚠️ Version défectueuse (corrigée en 1.6.4)
+- Tentative de réparation par un chargeur `app.js` chargeant le code depuis jsDelivr (CSP élargie). Application non initialisée et hors-ligne impossible.
+
+---
+
+## [1.6.2] - 2026-11-03
+### ⚠️ Version défectueuse (corrigée en 1.6.4)
+- `app.js` scindé en parties (`app-part1.js`) et premières tentatives de chargeur. Non fonctionnel.
+
+---
+
+## [1.6.1] - 2026-11-03
+### ⚠️ Version défectueuse (corrigée en 1.6.4)
+- Tentative d'affichage du compte Google dans Réglages ; `app.js` a été écrasé par un contenu vide. Fonctionnalité perdue.
+
+---
+
+## [1.6.0] - 2026-11-03
+### ☁️ Sauvegarde automatique Google Drive
+- Carte « Sauvegarde Google Drive » dans Réglages : à chaque séance enregistrée, un fichier `seance_AAAA-MM-JJ.json` est créé dans le dossier « FITNESS AAP – Séances » (portée `drive.file`).
+- CSP étendue à Google Identity Services et aux API Google.
 
 ---
 
