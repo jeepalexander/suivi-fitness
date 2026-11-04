@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.8] - 2026-11-04
+### 🔎 Google Drive : l'application dit la vérité quand Google refuse l'accès
+- Constat sur téléphone : Google répondait « 403 » à **toutes** les requêtes Drive (lecture de l'adresse et du dossier). L'ancien texte « sauvegarde automatique active » était donc trompeur.
+- Réglages affiche maintenant la **raison donnée par Google** (ex. « Google refuse l'accès à Drive (403 accessNotConfigured) — les séances ne sont pas sauvegardées ») avec une aide adaptée (API Drive non activée, autorisation non accordée...).
+- Même message si l'envoi d'une séance est refusé ; la séance reste en file d'attente.
+- Test d'accès à Drive à chaque connexion et à chaque ouverture de Réglages : le message disparaît tout seul dès que le problème est réglé.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.8.
+
+---
+
 ## [1.6.7] - 2026-11-04
 ### 👤 Compte Google : lecture de l'adresse fiabilisée
 - Si l'API Drive « about » ne donne pas l'adresse, une **seconde méthode** la lit sur le propriétaire du dossier de sauvegarde créé par l'application (aucune permission supplémentaire, aucune nouvelle autorisation à donner).

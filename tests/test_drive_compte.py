@@ -19,13 +19,14 @@ OK_USER = (200, {'user': {'displayName': 'Jean', 'emailAddress': 'jean@example.c
 OWNER_OK = (200, {'owners': [{'displayName': 'Proprio', 'emailAddress': 'owner@example.com'}]})
 
 
-def scenario(br, base, about, owner=(404, {}), connected=True):
+def scenario(br, base, about, owner=(404, {}), connected=True, files=(200, {'files': [{'id': 'F1'}]})):
     """about = (statut, corps) ou liste de réponses successives ; owner = réponse pour le propriétaire du dossier."""
     ctx, pg, errs = newpage(br, 390, 844, pref='light')
     if connected:
         pg.add_init_script(TOKEN)
     seen = []
     answers = list(about) if isinstance(about, list) else [about]
+    file_answers = list(files) if isinstance(files, list) else [files]
 
     def handler(route):
         u = route.request.url
@@ -34,8 +35,8 @@ def scenario(br, base, about, owner=(404, {}), connected=True):
             st, body = answers.pop(0) if len(answers) > 1 else answers[0]
         elif 'owners' in u:
             st, body = owner
-        else:  # recherche du dossier de sauvegarde
-            st, body = 200, {'files': [{'id': 'F1'}]}
+        else:  # recherche du dossier de sauvegarde / test d'accès
+            st, body = file_answers.pop(0) if len(file_answers) > 1 else file_answers[0]
         route.fulfill(status=st, content_type='application/json', body=json.dumps(body))
     pg.route('**/www.googleapis.com/**', handler)
     pg.goto(base + 'index.html'); pg.wait_for_timeout(2000)
@@ -74,7 +75,7 @@ with Srv() as base, sync_playwright() as p:
     ctx, pg, seen = scenario(br, base, (403, {'error': {}}), owner=(404, {}))
     txt = pg.evaluate(STATUS)
     check("les deux méthodes en erreur : raison affichée (about 403 + dossier 404), rien de mémorisé",
-          txt.startswith('Connecté — sauvegarde automatique active') and 'adresse du compte indisponible' in txt and 'about : erreur 403' in txt and 'dossier : erreur 404' in txt and stored(pg) is None, repr(txt))
+          txt.startswith('Connecté — sauvegarde automatique active') and 'adresse du compte indisponible' in txt and 'about : 403' in txt and 'dossier : 404' in txt and stored(pg) is None, repr(txt))
     ctx.close()
 
     ctx, pg, seen = scenario(br, base, (200, {'user': {}}), owner=(200, {'owners': [{}]}))
@@ -87,6 +88,27 @@ with Srv() as base, sync_playwright() as p:
     first = pg.evaluate(STATUS)
     pg.evaluate("switchTab('historique')"); pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(700)
     check("1er essai en échec, 2e essai à la réouverture de Réglages : adresse affichée", 'indisponible' in first and 'jean@example.com' in pg.evaluate(STATUS), repr(first) + ' -> ' + repr(pg.evaluate(STATUS)))
+    ctx.close()
+
+    # Google refuse TOUT l'accès à Drive (cas réel : « about : erreur 403 ; dossier : indisponible »)
+    API_OFF = (403, {'error': {'code': 403, 'errors': [{'reason': 'accessNotConfigured'}], 'status': 'PERMISSION_DENIED'}})
+    ctx, pg, seen = scenario(br, base, API_OFF, files=API_OFF)
+    txt = pg.evaluate(STATUS)
+    check("Drive refusé (403 accessNotConfigured) : la raison de Google est affichée", 'Google refuse l\'accès à Drive (403 accessNotConfigured)' in txt, repr(txt))
+    check("Drive refusé : on ne prétend plus que la sauvegarde automatique est active", 'sauvegarde automatique active' not in txt and 'ne sont pas sauvegardées' in txt, repr(txt))
+    check("Drive refusé : l'aide indique d'activer l'API Google Drive", "API Google Drive n'est pas activée" in txt, repr(txt))
+    check("Drive refusé : adresse non mémorisée, bouton Déconnecter proposé", stored(pg) is None and pg.evaluate("document.getElementById('drive-disconnect-btn').style.display===''"))
+    # le problème est réglé côté Google : le message disparaît à la réouverture de Réglages
+    pg.unroute('**/www.googleapis.com/**')
+    pg.route('**/www.googleapis.com/**', lambda r: r.fulfill(status=200, content_type='application/json', body=json.dumps({'user': {'emailAddress': 'jean@example.com'}, 'files': [{'id': 'F1'}]})))
+    pg.evaluate("switchTab('historique')"); pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(1000)
+    txt = pg.evaluate(STATUS)
+    check("accès rétabli : message d'erreur remplacé par « Connecté : adresse »", 'jean@example.com' in txt and 'refuse' not in txt, repr(txt))
+    ctx.close()
+
+    ctx, pg, seen = scenario(br, base, (403, {}), files=(403, {'error': {'errors': [{'reason': 'insufficientPermissions'}]}}))
+    txt = pg.evaluate(STATUS)
+    check("autorisation Drive non accordée : l'aide dit de se reconnecter en acceptant l'accès", 'insufficientPermissions' in txt and 'reconnecte-toi en acceptant' in txt, repr(txt))
     ctx.close()
 
     ctx, pg, seen = scenario(br, base, (200, {'user': {'emailAddress': 'x@y.z'}}), connected=False)

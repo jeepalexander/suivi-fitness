@@ -128,6 +128,13 @@ with Srv() as base, sync_playwright() as p:
     check('première connexion : souhait retenu, jeton stocké, adresse affichée',
           ls(pg, 'h49_drive_wanted') == '1' and 'jean@example.com' in status(pg), status(pg))
     ctx.close()
+    # 10) envoi refusé par Google (403) : séance gardée, Réglages le dit clairement
+    ctx, pg, up, dl = run(br, base, dict(BASE, token='valid'), upload_status=403)
+    save(pg); pg.wait_for_timeout(800)
+    txt = status(pg)
+    check("envoi refusé (403) : séance gardée en file et Réglages l'indique (pas « sauvegarde automatique active »)",
+          qlen(pg) == 1 and 'Google refuse l\'accès à Drive (403)' in txt and 'sauvegarde automatique active' not in txt, txt)
+    ctx.close()
     br.close()
 
 print(f"\n {sum(res)} / {len(res)} contrôles OK")

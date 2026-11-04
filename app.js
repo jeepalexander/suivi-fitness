@@ -163,6 +163,7 @@ const DRIVE_FOLDER_ID_KEY = 'h49_drive_folder_id';
 const DRIVE_QUEUE_KEY = 'h49_drive_queue';
 const DRIVE_ACCOUNT_KEY = 'h49_drive_account';
 const DRIVE_WANTED_KEY = 'h49_drive_wanted'; // '1' tant que l'utilisateur n'a pas cliqué « Déconnecter »
+const DRIVE_ERROR_KEY = 'h49_drive_error';   // dernière réponse d'erreur de Google pour le dossier / l'envoi (ex. « 403 accessNotConfigured »)
 
 // Mises à jour : délai minimal entre deux vérifications automatiques (retour au premier plan)
 const UPDATE_CHECK_MIN_INTERVAL_MS = 30 * 60 * 1000;
@@ -2202,6 +2203,7 @@ function switchTab(tabName) {
   if (tabName === 'reglages') {
     updateDriveUI(); // le jeton Drive a pu expirer depuis l'ouverture de l'appli
     if (isDriveConnected() && !getDriveAccount()) fetchDriveAccount(); // nouvel essai de lecture de l'adresse
+    if (isDriveConnected()) probeDriveAccess(); // vérifie que Google autorise bien l'accès à Drive
   }
 }
 
@@ -2238,6 +2240,27 @@ function clearDriveToken() {
   localStorage.removeItem(DRIVE_FOLDER_ID_KEY);
   localStorage.removeItem(DRIVE_ACCOUNT_KEY);
   localStorage.removeItem(DRIVE_WANTED_KEY);
+  localStorage.removeItem(DRIVE_ERROR_KEY);
+}
+
+// Raison courte d'une réponse d'erreur Google (« 403 accessNotConfigured »), pour l'afficher dans Réglages.
+async function driveErrorText(res) {
+  let reason = '';
+  try {
+    const e = (await res.json()).error;
+    reason = (e && ((e.errors && e.errors[0] && e.errors[0].reason) || (e.details && e.details[0] && e.details[0].reason) || e.status)) || '';
+  } catch (err) { /* corps illisible : on garde le code seul */ }
+  return res.status + (reason ? ' ' + String(reason).slice(0, 60) : '');
+}
+
+function getDriveError() {
+  try { return localStorage.getItem(DRIVE_ERROR_KEY) || ''; } catch (e) { return ''; }
+}
+function setDriveError(text) {
+  try { localStorage.setItem(DRIVE_ERROR_KEY, text); } catch (e) { /* ignoré */ }
+}
+function clearDriveError() {
+  try { localStorage.removeItem(DRIVE_ERROR_KEY); } catch (e) { /* ignoré */ }
 }
 
 // Jeton expiré ou refusé par Google (il ne dure qu'environ 1 h) : on n'oublie que le jeton ;
@@ -2288,7 +2311,7 @@ async function fetchDriveAccount() {
         const u = (await res.json()).user;
         if (u && typeof u.emailAddress === 'string' && u.emailAddress) found = { email: u.emailAddress, name: u.displayName };
         else reasons.push('about : sans adresse');
-      } else reasons.push('about : erreur ' + res.status);
+      } else reasons.push('about : ' + await driveErrorText(res));
     } catch (e) { reasons.push('about : réseau'); }
 
     if (!found) {
@@ -2299,8 +2322,8 @@ async function fetchDriveAccount() {
           const o = ((await res.json()).owners || [])[0];
           if (o && typeof o.emailAddress === 'string' && o.emailAddress) found = { email: o.emailAddress, name: o.displayName };
           else reasons.push('dossier : sans adresse');
-        } else reasons.push('dossier : erreur ' + res.status);
-      } catch (e) { reasons.push('dossier : indisponible'); }
+        } else reasons.push('dossier : ' + await driveErrorText(res));
+      } catch (e) { reasons.push('dossier : ' + (e && e.driveReason ? e.driveReason : 'indisponible')); }
     }
 
     if (found) {
@@ -2318,6 +2341,22 @@ async function fetchDriveAccount() {
   }
 }
 
+// Test léger de l'accès à Drive (liste d'un seul fichier) : met à jour la raison d'erreur affichée,
+// pour que le message disparaisse dès que le problème est réglé (nouvelle connexion, API activée...).
+let driveProbing = false;
+async function probeDriveAccess() {
+  const t = getDriveToken();
+  if (!t || driveProbing) return;
+  driveProbing = true;
+  try {
+    const res = await fetch('https://www.googleapis.com/drive/v3/files?pageSize=1&fields=files(id)', {
+      headers: { Authorization: 'Bearer ' + t.access_token }
+    });
+    if (res.ok) clearDriveError(); else setDriveError(await driveErrorText(res));
+  } catch (e) { /* hors-ligne : on garde l'état précédent */ }
+  finally { driveProbing = false; updateDriveUI(); }
+}
+
 function updateDriveUI() {
   const statusEl = document.getElementById('drive-status');
   const connectBtn = document.getElementById('drive-connect-btn');
@@ -2326,7 +2365,20 @@ function updateDriveUI() {
   const account = getDriveAccount();
   const pending = getDriveQueueLength();
   const pendingText = pending > 0 ? ' · ' + pending + ' séance' + (pending > 1 ? 's' : '') + ' en attente d\'envoi' : '';
-  if (isDriveConnected()) {
+  const driveError = getDriveError();
+  if (isDriveConnected() && driveError) {
+    // Google refuse l'accès au dossier / à l'envoi : on ne prétend pas que la sauvegarde fonctionne.
+    let hint = ' Touche « Déconnecter », puis reconnecte-toi ; si cela persiste, envoie ce message à Claude.';
+    if (/accessNotConfigured|SERVICE_DISABLED/i.test(driveError)) {
+      hint = ' L\'API Google Drive n\'est pas activée pour le projet Google de l\'application (Google Cloud, « API et services »).';
+    } else if (/insufficient|SCOPE/i.test(driveError)) {
+      hint = ' Autorisation Drive non accordée : touche « Déconnecter », puis reconnecte-toi en acceptant l\'accès à Drive.';
+    }
+    statusEl.textContent = (account ? 'Compte ' + account.email + ' : ' : '')
+      + 'Google refuse l\'accès à Drive (' + driveError + ') — les séances ne sont pas sauvegardées.' + hint + pendingText;
+    if (connectBtn) connectBtn.style.display = 'none';
+    if (disconnectBtn) disconnectBtn.style.display = '';
+  } else if (isDriveConnected()) {
     const accountIssue = !account && driveAccountError ? ' · adresse du compte indisponible (' + driveAccountError + ')' : '';
     statusEl.textContent = (account
       ? 'Connecté : ' + account.email + ' — sauvegarde automatique active'
@@ -2391,6 +2443,7 @@ function initDriveTokenClient() {
       localStorage.setItem(DRIVE_WANTED_KEY, '1');
       updateDriveUI();
       if (!getDriveAccount()) fetchDriveAccount();
+      probeDriveAccess();
       if (driveRenewPending) { driveRenewPending.finish(true); return; } // l'appelant envoie lui-même la file d'attente
       // process any queued sessions
       processDriveQueue();
@@ -2423,6 +2476,15 @@ function disconnectGoogleDrive() {
   updateDriveUI();
 }
 
+// Erreur de dossier Drive : la raison de Google est mémorisée (affichée dans Réglages) et jointe à l'erreur.
+async function driveFolderError(message, res) {
+  const reason = await driveErrorText(res);
+  setDriveError(reason);
+  const err = new Error(message + ' (' + reason + ')');
+  err.driveReason = reason;
+  return err;
+}
+
 async function ensureDriveFolder(accessToken) {
   let folderId = localStorage.getItem(DRIVE_FOLDER_ID_KEY);
   if (folderId) return folderId;
@@ -2432,8 +2494,9 @@ async function ensureDriveFolder(accessToken) {
   const search = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`, {
     headers: { Authorization: 'Bearer ' + accessToken }
   });
-  if (!search.ok) throw new Error('Recherche dossier Drive échouée');
+  if (!search.ok) throw await driveFolderError('Recherche dossier Drive échouée', search);
   const data = await search.json();
+  clearDriveError(); // Google a répondu : l'accès au dossier fonctionne
   if (data.files && data.files.length > 0) {
     folderId = data.files[0].id;
     localStorage.setItem(DRIVE_FOLDER_ID_KEY, folderId);
@@ -2452,7 +2515,7 @@ async function ensureDriveFolder(accessToken) {
       mimeType: 'application/vnd.google-apps.folder'
     })
   });
-  if (!create.ok) throw new Error('Création dossier Drive échouée');
+  if (!create.ok) throw await driveFolderError('Création dossier Drive échouée', create);
   const created = await create.json();
   folderId = created.id;
   localStorage.setItem(DRIVE_FOLDER_ID_KEY, folderId);
@@ -2500,15 +2563,19 @@ async function uploadSessionToDrive(session, options) {
       return { queued: true, reason: 'token' };
     }
     if (!res.ok) {
-      const errText = await res.text().catch(() => '');
-      console.warn('Drive upload failed', res.status, errText);
+      const reason = await driveErrorText(res);
+      console.warn('Drive upload failed', reason);
+      setDriveError(reason);
       enqueueDriveSession(session);
+      updateDriveUI();
       return { queued: true };
     }
+    clearDriveError(); // un envoi vient de réussir : l'accès à Drive fonctionne
     return { ok: true, file: await res.json() };
   } catch (e) {
     console.warn('Drive upload error', e);
     enqueueDriveSession(session);
+    updateDriveUI();
     return { queued: true, error: e };
   }
 }
