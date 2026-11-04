@@ -3034,7 +3034,9 @@ async function checkForUpdate() {
       setUpdateStatusText(`À jour · vérifié à ${t}`);
     }
   } catch (e) {
-    setUpdateStatusText('Vérification impossible (hors connexion ?).');
+    const errorMsg = e.message ? e.message : (e.name ? e.name : 'erreur inconnue');
+    console.error('checkForUpdate error:', e);
+    setUpdateStatusText('Vérification impossible : ' + errorMsg);
   }
 }
 

@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.15] - 2026-11-04
+### 🐛 Amélioration des messages d'erreur
+- **Vérification de mise à jour** : Affichage de l'erreur exacte au lieu du message générique "hors connexion ?" pour faciliter le diagnostic.
+
+---
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.15.
+
+---
+
 ## [1.6.14] - 2026-11-04
 ### 🐛 Corrections de bugs
 - **CSS** : Suppression de la duplication de `.timer-btn` qui empêchait l'affichage correct de la barre de progression.
