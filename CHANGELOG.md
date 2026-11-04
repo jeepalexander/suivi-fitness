@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.16] - 2026-11-04
+### ✨ Nouveautés
+- **Annuler une séance en cours** : nouveau bouton « Annuler la séance » (avec confirmation) sous « Valider ». Il arrête et remet à zéro le chrono, supprime le brouillon et ramène au Programme ; rien n'est enregistré.
+
+### 🔧 Divers
+- Badge de version du `README.md` aligné (il affichait 1.6.12).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.16.
+
+---
+
 ## [1.6.15] - 2026-11-04
 ### 🐛 Amélioration des messages d'erreur
 - **Vérification de mise à jour** : Affichage de l'erreur exacte au lieu du message générique "hors connexion ?" pour faciliter le diagnostic.

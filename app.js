@@ -1077,6 +1077,8 @@ function initWorkoutForm(customSession = null) {
   const isEditing = editingOriginalId !== null;
   const cancelBtn = document.getElementById('cancel-edit-btn');
   if (cancelBtn) cancelBtn.style.display = isEditing ? 'block' : 'none';
+  const cancelSessionBtn = document.getElementById('cancel-session-btn');
+  if (cancelSessionBtn) cancelSessionBtn.style.display = isEditing ? 'none' : 'block';
   const submitBtn = document.getElementById('submit-workout-btn');
   if (submitBtn) submitBtn.innerText = isEditing ? 'Enregistrer les modifications' : 'Valider & Enregistrer la séance';
 
@@ -1421,6 +1423,16 @@ function closeSessionModal() {
     modal.style.display = 'none';
   }
   selectedSessionIndex = null;
+}
+
+// Annule la séance en cours de saisie : arrête et remet à zéro le chrono, supprime le brouillon,
+// recrée un formulaire vide. Rien n'est enregistré dans l'historique.
+function cancelNewSession() {
+  if (!confirm("Annuler la séance en cours ? Les séries saisies et le chrono seront supprimés (rien n'est enregistré).")) return;
+  resetWorkoutTimer();
+  clearDraft();
+  initWorkoutForm();
+  switchTab('programme');
 }
 
 function cancelEditSession() {
