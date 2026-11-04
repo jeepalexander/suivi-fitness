@@ -33,10 +33,17 @@ with Srv() as base, sync_playwright() as p:
     pg.wait_for_timeout(2500)
     check("saisie : chrono lancé et brouillon créé", pg.evaluate("localStorage.getItem('workout_start_time')!==null") and pg.evaluate("Object.keys(localStorage).some(k=>k.indexOf('draft')>=0)"))
 
+    pg.click('#timer-btn'); pg.wait_for_timeout(1200)
+    pg.screenshot(path='/tmp/claude-0/timer_running.png', clip={'x':200,'y':0,'width':190,'height':90})
+    check("chrono de pause lancé avant l'annulation", pg.evaluate("document.getElementById('timer-btn').classList.contains('running')"))
     pg.click('#cancel-session-btn'); pg.wait_for_timeout(300)
     check("confirmation demandée ; « Annuler » dans la boîte : rien ne change", len(dialogs) == 1 and pg.evaluate("localStorage.getItem('workout_start_time')!==null"), str(dialogs))
     pg.click('#cancel-session-btn'); pg.wait_for_timeout(500)
     check("confirmé : chrono arrêté et supprimé", pg.evaluate("localStorage.getItem('workout_start_time')") is None and pg.inner_text('#workout-duration-display') == '00:00')
+    check("confirmé : chrono de pause arrêté, remis à « PAUSE m:ss », rien en mémoire",
+          pg.evaluate("localStorage.getItem('rest_end_time')") is None and pg.evaluate("document.getElementById('timer-btn').className")=='timer-btn' and pg.inner_text('#timer-display').startswith('PAUSE'), pg.inner_text('#timer-display'))
+    pg.wait_for_timeout(1500)
+    check("le décompte ne repart pas", pg.inner_text('#timer-display').startswith('PAUSE'), pg.inner_text('#timer-display'))
     check("confirmé : brouillon supprimé", pg.evaluate("!Object.keys(localStorage).some(k=>k.indexOf('draft')>=0)"))
     check("confirmé : historique inchangé", pg.evaluate("state.history.length") == hist0)
     check("confirmé : retour à l'écran Programme", pg.evaluate("document.getElementById('tab-programme').classList.contains('active')"))

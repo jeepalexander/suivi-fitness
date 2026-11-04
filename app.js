@@ -1430,8 +1430,12 @@ function closeSessionModal() {
 function cancelNewSession() {
   if (!confirm("Annuler la séance en cours ? Les séries saisies et le chrono seront supprimés (rien n'est enregistré).")) return;
   resetWorkoutTimer();
+  // Chrono de pause : arrêté lui aussi (sinon le décompte et le « GO ! » continuent)
+  if (restTimerInterval) { clearInterval(restTimerInterval); restTimerInterval = null; }
+  try { localStorage.removeItem('rest_end_time'); } catch (e) {}
   clearDraft();
   initWorkoutForm();
+  resetRestTimerUi();
   switchTab('programme');
 }
 

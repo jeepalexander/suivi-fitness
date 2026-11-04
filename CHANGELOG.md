@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.17] - 2026-11-04
+### 🐛 Corrections
+- **Annuler la séance** arrête aussi le chrono de pause (décompte et « GO ! » ne continuent plus) et le remet à « PAUSE m:ss ».
+
+### 🎨 Design
+- **Chrono de pause modernisé** : la barre blanche qui débordait est remplacée par un anneau de progression fin autour de l'icône, qui se vide en douceur ; fond vert doux pendant le décompte, chiffres à largeur fixe (plus de tremblement).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.17.
+
+---
+
 ## [1.6.16] - 2026-11-04
 ### ✨ Nouveautés
 - **Annuler une séance en cours** : nouveau bouton « Annuler la séance » (avec confirmation) sous « Valider ». Il arrête et remet à zéro le chrono, supprime le brouillon et ramène au Programme ; rien n'est enregistré.

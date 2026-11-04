@@ -177,11 +177,14 @@ header h1 { font-family: var(--font-display); font-size: 2.625rem; font-weight: 
 .hdr-btn.has-update::after { content: ''; position: absolute; top: 8px; right: 8px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--surface); }
 
 /* Chrono de repos : prêt (blanc) · en cours (vert) · terminé (rouge) */
-.timer-btn { position: absolute; top: 18px; right: calc(var(--gutter) - 6px); z-index: 110; display: none; align-items: center; gap: 6px; height: 44px; padding: 0 16px 0 12px; border: 1px solid var(--border); border-radius: 22px; background: var(--card-bg); color: var(--indigo); box-shadow: var(--sh-card); font-family: var(--font-display); font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s ease; --progress: 0%; }
-.timer-btn::before { content: ''; position: absolute; top: 0; left: 0; height: 100%; width: var(--progress); background: rgba(255, 255, 255, 0.3); transition: width 0.1s linear; z-index: 1; }
-.timer-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
-.timer-btn.running { background: var(--success); border-color: var(--success); color: var(--on-success); }
+.timer-btn { position: absolute; top: 18px; right: calc(var(--gutter) - 6px); z-index: 110; display: none; align-items: center; gap: 6px; height: 44px; padding: 0 16px 0 8px; border: 1px solid var(--border); border-radius: 22px; background: var(--card-bg); color: var(--indigo); box-shadow: var(--sh-card); font-family: var(--font-display); font-size: 1rem; font-weight: 700; cursor: pointer; transition: background 0.25s ease, color 0.25s ease; --progress: 0%; font-variant-numeric: tabular-nums; }
+/* Anneau de progression autour de l'icône : se vide en douceur pendant le décompte */
+.timer-ring { position: relative; width: 28px; height: 28px; flex: none; display: grid; place-items: center; }
+.timer-ring::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(currentColor var(--progress), color-mix(in srgb, currentColor 18%, transparent) 0); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px)); }
+.timer-btn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.timer-btn.running { background: var(--success-tint); border-color: transparent; color: var(--success); font-variant-numeric: tabular-nums; }
 .timer-btn.finished { background: var(--accent-c); border-color: var(--accent-c); color: #fff; box-shadow: none; animation: pulse 0.8s infinite alternate; }
+.timer-btn.finished .timer-ring::before { background: #fff; }
 
 @keyframes pulse {
   from { opacity: 1; transform: scale(1); }
