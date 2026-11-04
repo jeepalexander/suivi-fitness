@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.13] - 2026-11-04
+### ⏱️ Barre de progression visible
+- Correction du `z-index` sur `.timer-btn::before` pour que la barre de progression du timer de pause soit **visible au-dessus du contenu** du bouton.
+
+---
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.13.
+
+---
+
 ## [1.6.12] - 2026-11-04
 ### 🗂️ Google Drive : UNE seule sauvegarde complète (plus de fichiers par séance)
 - Le dossier « FITNESS AAP – Séances » contient désormais **un seul fichier**, `sauvegarde_complete.json`, avec tout l'état de l'application (historique, poids corporel, dernières charges) : c'est exactement le format du bouton « Restaurer » de l'Historique.
