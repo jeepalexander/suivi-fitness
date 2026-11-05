@@ -98,9 +98,3 @@ Le changement du Service Worker permet au navigateur de mettre à jour le cache 
 ## 🌙 Prérequis
 
 Aucun. L’application fonctionne avec HTML, CSS et JavaScript natifs.
-
----
-
-## 📄 Licence
-
-MIT
