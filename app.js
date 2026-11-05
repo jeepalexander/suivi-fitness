@@ -42,6 +42,7 @@ const EXERCISE_ICONS = {
   "Fentes marchées": "icons/walking_lunge.png",
   "Dips": "icons/dips.png",
   "Rowing unilatéral": "icons/dumbbell_row.png",
+  "Rameur": "icons/rowing.png",
   "Oiseau (Arrière d'épaule)": "icons/reverse_fly.png",
   "Leg Curl": "icons/leg_curl.png"
 };
