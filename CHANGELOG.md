@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.18] - 2026-11-05
+### 🎨 Design
+- **Chrono de pause** : retour à la gélule d'origine (icône + « PAUSE m:ss »). Pendant le décompte, une bande claire au bord arrondi et lumineux remplit la gélule et se rétracte vers la gauche, sur fond vert plus profond (contraste renforcé). Remplacement de l'anneau de la 1.6.17.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.18.
+
+---
+
 ## [1.6.17] - 2026-11-04
 ### 🐛 Corrections
 - **Annuler la séance** arrête aussi le chrono de pause (décompte et « GO ! » ne continuent plus) et le remet à « PAUSE m:ss ».
