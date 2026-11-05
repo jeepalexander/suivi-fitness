@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.19] - 2026-11-05
+### 🎨 Design
+- **Chrono de pause** : la frontière de la bande de progression est désormais **droite** (plus arrondie) et reste rognée par la gélule ; elle avance de **gauche à droite** (la gélule démarre foncée et se remplit de clair). Contraste nettement renforcé, en clair comme en sombre (couleurs `--timer-base` / `--timer-fill`).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.19.
+
+---
+
 ## [1.6.18] - 2026-11-05
 ### 🎨 Design
 - **Chrono de pause** : retour à la gélule d'origine (icône + « PAUSE m:ss »). Pendant le décompte, une bande claire au bord arrondi et lumineux remplit la gélule et se rétracte vers la gauche, sur fond vert plus profond (contraste renforcé). Remplacement de l'anneau de la 1.6.17.
