@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.20] - 2026-11-05
+### ✨ Nouveautés
+- **Rameur dans les séances** : exercice en première position des séances A, B et C, avec **une seule ligne** « Durée (min:ss) / Distance (m) » saisie à la main (un nombre seul est lu en minutes). Valeurs de la dernière séance reprises, « Dernière fois · 1 050 m en 4:15 », coche = lancement du chrono de pause, compté dans « x / n séries ».
+- Enregistré dans l'historique avec `seconds` et `meters` (poids/reps à 0) : **aucun impact sur le tonnage, les charges max et les records**. Absent de la liste des exercices des Graphiques.
+- Mention d'échauffement mise à jour (le rameur est désormais saisi dans la séance).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.20.
+
+---
+
 ## [1.6.19] - 2026-11-05
 ### 🎨 Design
 - **Chrono de pause** : la frontière de la bande de progression est désormais **droite** (plus arrondie) et reste rognée par la gélule ; elle avance de **gauche à droite** (la gélule démarre foncée et se remplit de clair). Contraste nettement renforcé, en clair comme en sombre (couleurs `--timer-base` / `--timer-fill`).

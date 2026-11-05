@@ -26,7 +26,7 @@ with Srv() as base, sync_playwright() as p:
     names = pg.evaluate("[...document.querySelectorAll('#exercises-list .exercise-item')].map(i=>i.dataset.ex)")
     print('  exercices de la séance :', names)
 
-    check('au chargement : le chrono annonce la durée de l\'exercice ouvert', pg.inner_text('#timer-display') == 'PAUSE 2:30', pg.inner_text('#timer-display'))
+    check('au chargement : le chrono annonce la durée de l\'exercice ouvert (le rameur ouvre la séance : repos par défaut 1:30)', pg.inner_text('#timer-display') == 'PAUSE 1:30', pg.inner_text('#timer-display'))
 
     # durées attendues (écrites en dur, indépendantes du code)
     attendu = {'Presse à cuisses': 'PAUSE 2:30', 'Développé couché': 'PAUSE 2:30', 'Développé militaire': 'PAUSE 1:30',

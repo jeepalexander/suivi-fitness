@@ -17,18 +17,18 @@ with Srv() as url, sync_playwright() as p:
     # 1 aucune série cochée
     pg.evaluate(submit); ok('aucune série cochée : refus',len(hist())==n0 and msgs and 'Aucune série' in msgs[-1][1])
     # 2 deux séries cochées de l'exercice 1, confirmation annulée
-    pg.evaluate("document.querySelectorAll('.exercise-item')[0].querySelector('.ex-toggle').click()")
-    pg.evaluate("document.querySelectorAll('.set-row')[0].querySelector('.btn-check-set').click();document.querySelectorAll('.set-row')[1].querySelector('.btn-check-set').click()")
+    pg.evaluate("document.querySelectorAll('.exercise-item')[1].querySelector('.ex-toggle').click()")
+    pg.evaluate("document.querySelectorAll('.set-row')[1].querySelector('.btn-check-set').click();document.querySelectorAll('.set-row')[2].querySelector('.btn-check-set').click()")
     total=pg.evaluate("document.querySelectorAll('.set-row').length")
     msgs.clear(); resp['confirm']=False; pg.evaluate(submit)
     ok('séance partielle : confirmation demandée',msgs and msgs[-1][0]=='confirm' and '2 séries cochées' in msgs[-1][1] and f'{total-2} séries non cochées' in msgs[-1][1],msgs[-1][1].replace('\n',' | ') if msgs else '')
     ok('confirmation refusée : rien enregistré',len(hist())==n0)
     # 3 série cochée avec poids 0
-    pg.evaluate("document.querySelectorAll('.set-row')[1].querySelector('.weight-input').value='0'")
+    pg.evaluate("document.querySelectorAll('.set-row')[2].querySelector('.weight-input').value='0'")
     msgs.clear(); resp['confirm']=True; pg.evaluate(submit)
-    foc=pg.evaluate("document.activeElement.className+'|'+(document.activeElement.closest('.set-row')===document.querySelectorAll('.set-row')[1])")
+    foc=pg.evaluate("document.activeElement.className+'|'+(document.activeElement.closest('.set-row')===document.querySelectorAll('.set-row')[2])")
     ok('série cochée invalide : refus + focus',len(hist())==n0 and msgs and 'pas valides' in msgs[-1][1] and 'weight-input' in foc,foc)
-    pg.evaluate("document.querySelectorAll('.set-row')[1].querySelector('.weight-input').value='62.5'")
+    pg.evaluate("document.querySelectorAll('.set-row')[2].querySelector('.weight-input').value='62.5'")
     # 4 enregistrement partiel accepté
     msgs.clear(); pg.evaluate(submit); pg.wait_for_timeout(300)
     h=hist(); last=h[-1] if h else None
@@ -40,7 +40,7 @@ with Srv() as url, sync_playwright() as p:
     pg.evaluate("i=>{switchTab('historique');openSessionModal(i)}",idx)
     pg.evaluate("document.getElementById('modal-edit-btn').click()"); pg.wait_for_timeout(300)
     done=pg.evaluate("[...document.querySelectorAll('.set-row')].map(r=>r.classList.contains('done'))")
-    ok('modification : 2 séries précochées seulement',sum(done)==2 and done[0] and done[1] and len(done)==total,str(sum(done)))
+    ok('modification : 2 séries précochées seulement',sum(done)==2 and done[1] and done[2] and not done[0] and len(done)==total,str(sum(done)))
     ok('compteur de progression',pg.evaluate("document.getElementById('sets-progress-text').innerText")==f'2 / {total}')
     # 6 tout coché : pas de confirmation
     pg.evaluate("document.querySelectorAll('.set-row:not(.done) .btn-check-set').forEach(b=>b.click())")

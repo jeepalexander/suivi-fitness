@@ -247,6 +247,7 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 /* Icônes d'exercice : PNG détourés, posés directement sur le fond avec une ombre dessous */
 .ex-icon-badge { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; overflow: visible; }
 .ex-icon-badge img { width: 100%; height: 100%; object-fit: contain; filter: var(--sh-icon); }
+.ex-icon-badge .rower-icon { width: 70%; height: 70%; color: var(--indigo); }
 
 /* Pastille de déload : ambre */
 .deload-pill { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; background: var(--warn-tint); border: 1px solid var(--warn-border); border-radius: 999px; color: var(--warn); font-size: 0.8625rem; font-weight: 600; }

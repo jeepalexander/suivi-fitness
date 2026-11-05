@@ -46,11 +46,18 @@ const EXERCISE_ICONS = {
   "Leg Curl": "icons/leg_curl.png"
 };
 
+// Rameur : exercice « cardio » (durée + distance, une seule ligne). Il est stocké avec weight/reps à 0
+// (donc ignoré par tonnage, charges et records) et ses valeurs propres : seconds / meters.
+const ROWER_NAME = 'Rameur';
+const ROWER_EXERCISE = { name: ROWER_NAME, cardio: true, seriesCount: 1, defaultSeconds: 270, defaultMeters: 1000 };
+const ROWER_SVG = '<svg class="rower-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="17" cy="6" r="2"/><path d="M3 18h13l3-3M7 18l3-6 4 1 2-4M10 12l-3-1M20 20H8"/></svg>';
+
 const PROGRAM = {
   'A': {
     badge: "badge-A",
     title: "Presse/Développé",
     exercises: [
+      ROWER_EXERCISE,
       { name: "Presse à cuisses", seriesCount: 4, defaultWeight: 93, defaultReps: 10 },
       { name: "Développé couché", seriesCount: 4, defaultWeight: 75, defaultReps: 8 },
       { name: "Tirage horizontal", seriesCount: 4, defaultWeight: 59, defaultReps: 10 },
@@ -63,6 +70,7 @@ const PROGRAM = {
     badge: "badge-B",
     title: "Soulevé/Développé",
     exercises: [
+      ROWER_EXERCISE,
       { name: "Soulevé de terre", seriesCount: 4, defaultWeight: 70, defaultReps: 10 },
       { name: "Développé incliné", seriesCount: 4, defaultWeight: 60, defaultReps: 10 },
       { name: "Tirage vertical", seriesCount: 4, defaultWeight: 50, defaultReps: 10 },
@@ -76,6 +84,7 @@ const PROGRAM = {
     badge: "badge-C",
     title: "Fentes/Dips",
     exercises: [
+      ROWER_EXERCISE,
       { name: "Fentes marchées", seriesCount: 4, defaultWeight: 25, defaultReps: 10 },
       { name: "Dips", seriesCount: 4, defaultWeight: 80, defaultReps: 10 },
       { name: "Rowing unilatéral", seriesCount: 3, defaultWeight: 20, defaultReps: 12 },
@@ -347,6 +356,7 @@ function updateNextTypeFromHistory() {
 }
 
 function getIcon(exName, decorative = false) {
+  if (exName === ROWER_NAME) return ROWER_SVG;
   const path = EXERCISE_ICONS[exName] || "icons/bench_press.png";
   return `<img src="${path}" alt="${decorative ? '' : exName}" onerror="this.src='icons/bench_press.png'">`;
 }
@@ -356,6 +366,29 @@ function formatDate(dateStr) {
   const parts = dateStr.split('-');
   if(parts.length === 3) return `${parts[2]}/${parts[1]}`;
   return dateStr;
+}
+
+function isCardioName(name) { return name === ROWER_NAME; }
+
+// 270 -> « 4:30 »
+function formatDurationMS(sec) {
+  sec = Math.max(0, Math.round(Number(sec) || 0));
+  const s = sec % 60;
+  return `${Math.floor(sec / 60)}:${s < 10 ? '0' : ''}${s}`;
+}
+
+// « 4:30 » -> 270 ; un nombre seul est lu en minutes (« 5 » -> 300) ; sinon NaN
+function parseDurationInput(str) {
+  const t = String(str == null ? '' : str).trim();
+  let m = t.match(/^(\d{1,3}):([0-5]\d)$/);
+  if (m) return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+  m = t.match(/^(\d{1,3})([.,]\d+)?$/);
+  if (m) return Math.round(parseFloat(t.replace(',', '.')) * 60);
+  return NaN;
+}
+
+function isPerformedCardioSet(set) {
+  return !!set && (parseFloat(set.seconds) || 0) > 0 && (parseFloat(set.meters) || 0) > 0;
 }
 
 function isPerformedSet(set) {
@@ -437,7 +470,7 @@ function renderProgramOverview() {
         </button>
       </div>
     </div>
-    <p class="warmup-note">🚣 Échauffement : Rameur 1000 m + 2 séries légères uniquement sur le 1er exercice.</p>
+    <p class="warmup-note">🚣 Échauffement : 2 séries légères sur le 1er exercice de force, après le rameur.</p>
 
     <div class="section-block">
       <h2 class="section-label">Au programme · ${next.exercises.length} exercices</h2>
@@ -731,7 +764,8 @@ function restoreDraft(type) {
       const saved = d.exercises.find(e => e.name === item.dataset.ex);
       if (!saved || !Array.isArray(saved.sets) || !saved.sets.length) return;
       const grid = item.querySelector('.sets-grid');
-      grid.innerHTML = saved.sets.map((s, i) => setRowHtml(item.dataset.ex, i + 1, clean(s.w), clean(s.r))).join('');
+      const cardio = isCardioName(item.dataset.ex);
+      grid.innerHTML = saved.sets.map((s, i) => setRowHtml(item.dataset.ex, i + 1, cardio ? String(s.w == null ? '' : s.w).replace(/[^0-9:.,]/g, '') : clean(s.w), clean(s.r))).join('');
       grid.querySelectorAll('.set-row').forEach((row, i) => {
         const s = saved.sets[i];
         const w = row.querySelector('.weight-input'), r = row.querySelector('.reps-input');
@@ -834,6 +868,16 @@ function getSuggestedSetValues(exName, setIndex, fallbackWeight, fallbackReps) {
   return foundSet;
 }
 
+// Valeurs proposées pour le rameur : la dernière séance où il a été fait, sinon les valeurs par défaut
+function getSuggestedCardioValues(exName, defSeconds, defMeters) {
+  for (let i = state.history.length - 1; i >= 0; i--) {
+    const ex = (state.history[i].exercises || []).find(e => e.name === exName);
+    const set = ex && Array.isArray(ex.sets) ? ex.sets.find(isPerformedCardioSet) : null;
+    if (set) return { seconds: set.seconds, meters: set.meters };
+  }
+  return { seconds: defSeconds, meters: defMeters };
+}
+
 function isExerciseComplete(item) {
   const rows = item.querySelectorAll('.set-row');
   return rows.length > 0 && Array.from(rows).every(r => r.classList.contains('done'));
@@ -893,6 +937,18 @@ function renumberSets(grid) {
 
 // Gabarit d'une ligne de série (utilisé à la création du formulaire et par le bouton +)
 function setRowHtml(exName, number, weightVal, repsVal, done = false) {
+  if (isCardioName(exName)) {
+    // Rameur : « weight-input » = durée (min:ss), « reps-input » = distance (m). Nombre = secondes, texte = saisie telle quelle.
+    const dur = typeof weightVal === 'number' ? formatDurationMS(weightVal) : weightVal;
+    return `
+    <div class="set-row${done ? ' done' : ''}">
+      <span class="set-label">${number}</span>
+      <input type="text" inputmode="numeric" class="set-input weight-input" data-ex="${exName}" aria-label="Durée en minutes et secondes" placeholder="min:ss" value="${dur}" oninput="markInputActive(this)">
+      <input type="number" inputmode="numeric" class="set-input reps-input" data-ex="${exName}" aria-label="Distance en mètres" placeholder="m" value="${repsVal}" oninput="markInputActive(this)">
+      <button type="button" class="btn-check-set" aria-pressed="${done ? 'true' : 'false'}" aria-label="Valider le rameur" onclick="toggleSetDone(this)">${CHECK_SVG}</button>
+    </div>
+  `;
+  }
   return `
     <div class="set-row${done ? ' done' : ''}">
       <span class="set-label">${number}</span>
@@ -950,11 +1006,18 @@ function updateSetsProgress() {
 }
 
 // Texte de la ligne repliée : « 4 séries · 32.5 → 55 kg · 2/4 faites » (ou « Terminé · 4 séries »)
+function done0(rows) { return rows.some(r => r.classList.contains('done')) ? ' · faite' : ''; }
+
 function exerciseSummaryText(item) {
   const rows = Array.from(item.querySelectorAll('.set-row'));
   const n = rows.length;
   const plural = n > 1 ? 'séries' : 'série';
   if (isExerciseComplete(item)) return `Terminé · ${n} ${plural}`;
+  if (isCardioName(item.dataset.ex)) {
+    const r0 = rows[0];
+    const d = r0 ? r0.querySelector('.weight-input').value : '', m = r0 ? r0.querySelector('.reps-input').value : '';
+    return d && m ? `${m} m en ${d}${done0(rows)}` : `${n} ${plural}`;
+  }
   const weights = rows.map(r => r.querySelector('.weight-input').value).filter(v => v !== '');
   let range = '';
   if (weights.length) {
@@ -972,6 +1035,11 @@ function exerciseLastTimeText(exName) {
     const h = history[i];
     if (editingOriginalId !== null && h.id === editingOriginalId) continue; // pas la séance en cours de modification
     const ex = (h.exercises || []).find(e => e.name === exName);
+    if (isCardioName(exName)) {
+      const cs = ex && Array.isArray(ex.sets) ? ex.sets.find(isPerformedCardioSet) : null;
+      if (cs) return `Dernière fois · ${Number(cs.meters).toLocaleString('fr-FR')} m en ${formatDurationMS(cs.seconds)}`;
+      continue;
+    }
     const performed = ex && Array.isArray(ex.sets) ? ex.sets.filter(isPerformedSet) : [];
     if (performed.length > 0) {
       const max = Math.max(...performed.map(s => parseFloat(s.weight) || 0));
@@ -1000,7 +1068,7 @@ function refreshExerciseStates() {
     item.classList.toggle('complete', isExerciseComplete(item));
     item.querySelector('.ex-toggle').setAttribute('aria-expanded', open ? 'true' : 'false');
     item.querySelector('.ex-body').hidden = !open;
-    item.querySelector('.ex-controls').hidden = !open;
+    item.querySelector('.ex-controls').hidden = !open || isCardioName(item.dataset.ex);
 
     rows.forEach(r => r.classList.remove('current'));
     if (open) {
@@ -1113,6 +1181,13 @@ function initWorkoutForm(customSession = null) {
     }
 
     let rowsHtml = '';
+    if (ex.cardio) {
+      let secVal, mVal, preChecked = false;
+      const saved = existingEx && existingEx.sets && existingEx.sets[0];
+      if (saved && isPerformedCardioSet(saved)) { secVal = saved.seconds; mVal = saved.meters; preChecked = true; }
+      else { const sg = getSuggestedCardioValues(ex.name, ex.defaultSeconds, ex.defaultMeters); secVal = sg.seconds; mVal = sg.meters; }
+      rowsHtml = setRowHtml(ex.name, 1, secVal, mVal, preChecked);
+    } else
     for (let s = 1; s <= ex.seriesCount; s++) {
       let weightVal = ex.defaultWeight;
       let repsVal = ex.defaultReps;
@@ -1149,7 +1224,7 @@ function initWorkoutForm(customSession = null) {
         </span>
       </div>
       <div class="ex-body" hidden>
-        <div class="sets-head" aria-hidden="true"><span>Série</span><span>Kg</span><span>Réps</span><span></span></div>
+        <div class="sets-head" aria-hidden="true"><span>Série</span><span>${ex.cardio ? 'Durée' : 'Kg'}</span><span>${ex.cardio ? 'Distance' : 'Réps'}</span><span></span></div>
         <div class="sets-grid" data-ex="${ex.name}">${rowsHtml}</div>
       </div>
     `;
@@ -1184,6 +1259,18 @@ function submitWorkout(e) {
   for (const row of validatedRows) {
     const wInput = row.querySelector('.weight-input');
     const rInput = row.querySelector('.reps-input');
+    if (isCardioName(wInput.dataset.ex)) {
+      const sec = parseDurationInput(wInput.value), m = Number(rInput.value);
+      if (!(sec > 0) || rInput.value === '' || !Number.isInteger(m) || m <= 0) {
+        const items = Array.from(document.querySelectorAll('#exercises-list .exercise-item'));
+        manualOpenExercise = items.indexOf(row.closest('.exercise-item'));
+        refreshExerciseStates();
+        alert(`Le rameur est coché, mais sa durée (format min:ss, ex. 4:30) ou sa distance (en mètres) n'est pas valide.`);
+        (!(sec > 0) ? wInput : rInput).focus();
+        return;
+      }
+      continue;
+    }
     const w = Number(wInput.value);
     const r = Number(rInput.value);
     if (wInput.value === '' || !Number.isFinite(w) || w <= 0 || rInput.value === '' || !Number.isInteger(r) || r <= 0) {
@@ -1209,6 +1296,13 @@ function submitWorkout(e) {
 
   validatedRows.forEach((row) => {
     const wInput = row.querySelector('.weight-input');
+    if (isCardioName(wInput.dataset.ex)) {
+      const exName = wInput.dataset.ex;
+      let exLog = exerciseLogs.find(e => e.name === exName);
+      if (!exLog) { exLog = { name: exName, cardio: true, sets: [], maxWeight: 0, totalVolume: 0 }; exerciseLogs.push(exLog); }
+      exLog.sets.push({ weight: 0, reps: 0, seconds: parseDurationInput(wInput.value), meters: Number(row.querySelector('.reps-input').value) });
+      return;
+    }
     const w = Number(wInput.value);
     const r = Number(row.querySelector('.reps-input').value);
     const exName = wInput.dataset.ex;
@@ -1456,6 +1550,7 @@ function populateExerciseSelect() {
   let allExercises = [];
   Object.values(PROGRAM).forEach(p => {
     p.exercises.forEach(e => {
+      if (e.cardio) return; // le rameur n'a pas de charge à suivre
       let exName = e.name;
       if (exName === "Mollets / Finition") {
         exName = "Mollets";
