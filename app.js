@@ -51,7 +51,6 @@ const EXERCISE_ICONS = {
 // (donc ignoré par tonnage, charges et records) et ses valeurs propres : seconds / meters.
 const ROWER_NAME = 'Rameur';
 const ROWER_EXERCISE = { name: ROWER_NAME, cardio: true, seriesCount: 1, defaultSeconds: 270, defaultMeters: 1000 };
-const ROWER_SVG = '<svg class="rower-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="17" cy="6" r="2"/><path d="M3 18h13l3-3M7 18l3-6 4 1 2-4M10 12l-3-1M20 20H8"/></svg>';
 
 const PROGRAM = {
   'A': {
@@ -195,7 +194,7 @@ let workoutTimerInterval = null;
 let workoutSeconds = 0;
 
 // Graphiques : instances Chart.js (gardées pour les détruire avant de redessiner) et état des boutons de filtre
-let tonnageChart, exerciseChart, weightChart;
+let tonnageChart, exerciseChart, weightChart, cardioChart;
 let currentVolumeFilter = 'all'; // 'all' (séances), 'month' (par mois) ou 'type' (séance A/B/C)
 let currentSessionTypeFilter = SESSION_TYPES[0];
 let currentExMetricMode = 'max';
@@ -357,7 +356,6 @@ function updateNextTypeFromHistory() {
 }
 
 function getIcon(exName, decorative = false) {
-  if (exName === ROWER_NAME) return ROWER_SVG;
   const path = EXERCISE_ICONS[exName] || "icons/bench_press.png";
   return `<img src="${path}" alt="${decorative ? '' : exName}" onerror="this.src='icons/bench_press.png'">`;
 }
@@ -386,6 +384,29 @@ function parseDurationInput(str) {
   m = t.match(/^(\d{1,3})([.,]\d+)?$/);
   if (m) return Math.round(parseFloat(t.replace(',', '.')) * 60);
   return NaN;
+}
+
+// Allure au km (secondes) : 255 s pour 1 050 m -> 243 s/km
+function paceSecPerKm(seconds, meters) {
+  const sec = Number(seconds), m = Number(meters);
+  return sec > 0 && m > 0 ? Math.round(sec * 1000 / m) : 0;
+}
+
+function cardioPaceText(durationStr, meters) {
+  const p = paceSecPerKm(parseDurationInput(durationStr), meters);
+  return p > 0 ? `${formatDurationMS(p)} /km` : '–';
+}
+
+// Saisie de la durée au pavé numérique (pas de « : » dessus) : « 430 » -> « 4:30 », « 1015 » -> « 10:15 »
+function onCardioInput(el) {
+  const row = el.closest('.set-row');
+  const dEl = row.querySelector('.weight-input');
+  if (el === dEl) {
+    const digits = dEl.value.replace(/\D/g, '').slice(-5).replace(/^0+(?=\d)/, '');
+    dEl.value = digits === '' ? '' : (digits.length <= 2 ? `0:${digits.padStart(2, '0')}` : `${digits.slice(0, -2)}:${digits.slice(-2)}`);
+  }
+  const pace = row.nextElementSibling;
+  if (pace && pace.classList.contains('cardio-pace')) pace.querySelector('b').textContent = cardioPaceText(dEl.value, row.querySelector('.reps-input').value);
 }
 
 function isPerformedCardioSet(set) {
@@ -471,10 +492,7 @@ function renderProgramOverview() {
         </button>
       </div>
     </div>
-    <p class="warmup-note">🚣 Échauffement : 2 séries légères sur le 1er exercice de force, après le rameur.</p>
-
     <div class="section-block">
-      <h2 class="section-label">Au programme · ${next.exercises.length} exercices</h2>
       <div class="tile-grid">${programTilesHtml(next)}</div>
     </div>
 
@@ -944,10 +962,11 @@ function setRowHtml(exName, number, weightVal, repsVal, done = false) {
     return `
     <div class="set-row${done ? ' done' : ''}">
       <span class="set-label">${number}</span>
-      <input type="text" inputmode="numeric" class="set-input weight-input" data-ex="${exName}" aria-label="Durée en minutes et secondes" placeholder="min:ss" value="${dur}" oninput="markInputActive(this)">
-      <input type="number" inputmode="numeric" class="set-input reps-input" data-ex="${exName}" aria-label="Distance en mètres" placeholder="m" value="${repsVal}" oninput="markInputActive(this)">
+      <input type="text" inputmode="numeric" class="set-input weight-input" data-ex="${exName}" aria-label="Durée en minutes et secondes" placeholder="min:ss" value="${dur}" oninput="onCardioInput(this); markInputActive(this)">
+      <input type="number" inputmode="numeric" class="set-input reps-input" data-ex="${exName}" aria-label="Distance en mètres" placeholder="m" value="${repsVal}" oninput="onCardioInput(this); markInputActive(this)">
       <button type="button" class="btn-check-set" aria-pressed="${done ? 'true' : 'false'}" aria-label="Valider le rameur" onclick="toggleSetDone(this)">${CHECK_SVG}</button>
     </div>
+    <div class="cardio-pace"><span>Allure</span><b>${cardioPaceText(dur, repsVal)}</b></div>
   `;
   }
   return `
@@ -1812,9 +1831,51 @@ function addWeight() {
   }
 }
 
+// Suivi cardio : allure au km (rameur) par date
+function renderCardioChart() {
+  const canvas = document.getElementById('cardioChart');
+  if (!canvas) return;
+  if (cardioChart) { cardioChart.destroy(); cardioChart = null; }
+  const points = [];
+  (state.history || []).forEach(h => {
+    const ex = (h.exercises || []).find(e => isCardioName(e.name));
+    const set = ex && Array.isArray(ex.sets) ? ex.sets.find(isPerformedCardioSet) : null;
+    if (set && h.date) points.push({ date: h.date, pace: paceSecPerKm(set.seconds, set.meters) });
+  });
+  points.sort((a, b) => new Date(a.date) - new Date(b.date));
+  const empty = document.getElementById('cardio-empty');
+  if (empty) empty.hidden = points.length > 0;
+  canvas.hidden = points.length === 0;
+  const cur = document.getElementById('cardio-current');
+  if (cur) cur.textContent = points.length ? formatDurationMS(points[points.length - 1].pace) : '–';
+  if (!points.length) return;
+  cardioChart = new Chart(canvas.getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: points.map(p => formatDate(p.date)),
+      datasets: [{
+        label: 'Allure (min/km)',
+        data: points.map(p => p.pace),
+        borderColor: CHART_COLORS.success,
+        backgroundColor: CHART_COLORS.success + '22',
+        borderWidth: 2.5, pointRadius: 3, fill: true, tension: 0.2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${formatDurationMS(c.parsed.y)} /km` } } },
+      scales: {
+        x: { ticks: { color: CHART_COLORS.tick, maxTicksLimit: 6, maxRotation: 0, minRotation: 0, autoSkip: true }, grid: { display: false } },
+        y: { ticks: { color: CHART_COLORS.tick, maxTicksLimit: 5, callback: v => formatDurationMS(v) }, grid: { color: CHART_COLORS.grid }, border: { display: false } }
+      }
+    }
+  });
+}
+
 function renderCharts() {
   renderTonnageChart();
   renderExerciseChart();
+  renderCardioChart();
   renderProgressAnalysis();
 
   const canvas = document.getElementById('weightChart');
@@ -3216,8 +3277,6 @@ async function initApp() {
 
   // Affichage de la version de l'application dans le titre
   fetch('manifest.json').then(r => r.json()).then(m => {
-    const titleEl = document.getElementById('app-title');
-    if (titleEl && m.version) titleEl.innerText = 'SUIVI FITNESS ' + m.version;
     // Version exécutée par cette page : sert à repérer qu'une version plus récente est prête
     if (m.version) { runningVersion = m.version; renderUpdateStatus(); }
   }).catch(() => {});

@@ -54,10 +54,20 @@ with Srv() as base, sync_playwright() as p:
     pg.click('#exercises-list .exercise-item .btn-check-set'); msgs.clear()
     pg.evaluate("document.getElementById('workout-form').requestSubmit()"); pg.wait_for_timeout(200)
     check('durée invalide (4:75) : refus, rien enregistré', len(hist()) == n0 + 1 and msgs and 'rameur' in msgs[-1][1].lower(), str(msgs[-1:]))
-    # un nombre seul = minutes
-    pg.fill('#exercises-list .exercise-item .weight-input', '5')
+    # saisie au pavé numérique : les chiffres se rangent en min:ss, l'allure suit
+    w = '#exercises-list .exercise-item .weight-input'
+    pg.fill(w, ''); pg.type(w, '500'); pg.wait_for_timeout(100)
+    check('saisie « 500 » -> 5:00', pg.input_value(w) == '5:00', pg.input_value(w))
+    pg.fill(w, ''); pg.type(w, '1015'); pg.wait_for_timeout(100)
+    check('saisie « 1015 » -> 10:15', pg.input_value(w) == '10:15', pg.input_value(w))
+    pg.fill(w, ''); pg.type(w, '500'); pg.wait_for_timeout(100)
+    pace = pg.inner_text('#exercises-list .exercise-item .cardio-pace')
+    check('allure affichée sous la saisie (5:00 pour 1 050 m = 4:46 /km)', '4:46 /km' in pace, repr(pace))
+    pg.fill('#exercises-list .exercise-item .reps-input', '1000'); pg.wait_for_timeout(100)
+    check('allure recalculée à la saisie de la distance (5:00 / 1 000 m = 5:00 /km)', '5:00 /km' in pg.inner_text('#exercises-list .exercise-item .cardio-pace'))
+    pg.fill('#exercises-list .exercise-item .reps-input', '1050')
     msgs.clear(); pg.evaluate("document.getElementById('workout-form').requestSubmit()"); pg.wait_for_timeout(300)
-    check('« 5 » = 5 minutes (300 s)', hist()[-1]['exercises'][0]['sets'][0]['seconds'] == 300 and len(hist()) == n0 + 2, json.dumps(hist()[-1]['exercises'][0]['sets']))
+    check('« 500 » enregistré = 300 s', hist()[-1]['exercises'][0]['sets'][0]['seconds'] == 300 and len(hist()) == n0 + 2, json.dumps(hist()[-1]['exercises'][0]['sets']))
 
     # modification d'une séance : rameur précoché
     idx = len(hist()) - 1
@@ -68,6 +78,12 @@ with Srv() as base, sync_playwright() as p:
 
     pg.evaluate("switchTab('progression')"); pg.wait_for_timeout(300)
     check('Graphiques : pas de « Rameur » dans la liste des exercices', 'Rameur' not in pg.evaluate("[...document.querySelectorAll('#exercise-filter option')].map(o=>o.value)"))
+    pg.evaluate("switchTab('progression')"); pg.wait_for_timeout(500)
+    check('Suivi cardio : graphique présent avec 2 points, allure courante 4:46', pg.evaluate("cardioChart && cardioChart.data.datasets[0].data.length") == 2 and pg.inner_text('#cardio-current') == '4:46', pg.inner_text('#cardio-current'))
+    check('Suivi cardio : valeurs = allure au km (4:15 pour 1 050 m = 243 s)', pg.evaluate("cardioChart.data.datasets[0].data[0]") == 243, str(pg.evaluate("cardioChart.data.datasets[0].data")))
+    pg.evaluate("switchTab('programme')"); pg.wait_for_timeout(300)
+    check('Programme : plus de mention « Au programme » ni d\'échauffement', 'Au programme' not in pg.inner_text('#tab-programme') and 'Échauffement' not in pg.inner_text('#tab-programme'))
+    check('Programme : icône du rameur = fichier rower.png', pg.evaluate("[...document.querySelectorAll('#tab-programme .ex-tile img')].some(i=>i.getAttribute('src')==='icons/rower.png')"))
     check('aucune erreur JS', not errs, str(errs))
     br.close()
 

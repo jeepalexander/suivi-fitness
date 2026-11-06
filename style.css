@@ -247,7 +247,6 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 /* Icônes d'exercice : PNG détourés, posés directement sur le fond avec une ombre dessous */
 .ex-icon-badge { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; overflow: visible; }
 .ex-icon-badge img { width: 100%; height: 100%; object-fit: contain; filter: var(--sh-icon); }
-.ex-icon-badge .rower-icon { width: 70%; height: 70%; color: var(--indigo); }
 
 /* Pastille de déload : ambre */
 .deload-pill { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; background: var(--warn-tint); border: 1px solid var(--warn-border); border-radius: 999px; color: var(--warn); font-size: 0.8625rem; font-weight: 600; }
@@ -346,7 +345,7 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 .set-row.current .set-label { color: var(--text); }
 .set-row.done .set-label { color: var(--text-muted); }
 
-.set-input { width: 100%; height: 50px; padding: 0 4px; background: var(--fill); border: none; border-radius: var(--radius-field); color: var(--todo); font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; text-align: center; transition: border-color 0.2s ease, background 0.2s ease; -moz-appearance: textfield; }
+.set-input { -webkit-appearance: none; appearance: none; width: 100%; height: 50px; padding: 0 4px; background: var(--fill); border: none; border-radius: var(--radius-field); color: var(--todo); font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; text-align: center; transition: border-color 0.2s ease, background 0.2s ease; -moz-appearance: textfield; }
 .set-input::-webkit-outer-spin-button, .set-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .set-input:focus { outline: none; color: var(--text); box-shadow: inset 0 0 0 2px var(--primary); }
 .set-input.active-input { color: var(--text); }
@@ -477,3 +476,7 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 .modal-meta { color: var(--text-muted); font-size: 0.9125rem; margin-bottom: 14px; }
 #modal-session-pill { display: flex; justify-content: center; }
 #modal-session-pill .type-pill { width: 56px; height: 56px; font-size: 1.75rem; }
+
+/* Rameur : allure calculée sous la saisie */
+.cardio-pace { display: flex; justify-content: space-between; align-items: center; margin: 6px 8px 2px 38px; padding: 10px 16px; border-radius: 14px; background: var(--fill); font-size: 0.85rem; color: var(--text-muted); }
+.cardio-pace b { color: var(--text); font-family: var(--font-display); font-variant-numeric: tabular-nums; font-size: 0.95rem; }

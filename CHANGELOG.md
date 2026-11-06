@@ -7,6 +7,21 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.21] - 2026-11-06
+### ✨ Nouveautés
+- **Suivi cardio** (onglet Graphiques) : courbe de l'allure au km du rameur par date, avec l'allure de la dernière séance (plus bas = plus rapide).
+- **Allure sous la saisie du rameur** (min:ss /km), recalculée en direct.
+- **Saisie de la durée au pavé numérique** : on tape les chiffres (« 430 » devient 4:30, « 1015 » devient 10:15), le pavé n'ayant pas de touche « : ».
+
+### 🎨 Design
+- Le rameur utilise l'icône `icons/rower.png`.
+- Titre sans numéro de version (il reste dans Réglages).
+- Écran Programme épuré : plus de mention d'échauffement ni de titre « Au programme », uniquement les icônes et noms des exercices.
+- Champs de saisie : `appearance: none` pour un rendu identique (gélule ombrée) sur tous les navigateurs mobiles.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.21.
+
+---
+
 ## [1.6.20] - 2026-11-05
 ### ✨ Nouveautés
 - **Rameur dans les séances** : exercice en première position des séances A, B et C, avec **une seule ligne** « Durée (min:ss) / Distance (m) » saisie à la main (un nombre seul est lu en minutes). Valeurs de la dernière séance reprises, « Dernière fois · 1 050 m en 4:15 », coche = lancement du chrono de pause, compté dans « x / n séries ».
