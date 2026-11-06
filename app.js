@@ -150,7 +150,7 @@ const HISTORY_DAYS = ['Dim.','Lun.','Mar.','Mer.','Jeu.','Ven.','Sam.'];
 const HISTORY_MONTHS_SHORT = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
 
 // Titre affiché en haut de chaque onglet
-const PAGE_TITLES = { programme: 'Programme', seance: 'Séance', progression: 'Graphiques', historique: 'Historique', reglages: 'Réglages' };
+const PAGE_TITLES = { programme: 'Programme', seance: 'Séance', progression: 'Progression', historique: 'Historique', reglages: 'Réglages' };
 
 // La saisie en cours (poids, reps, séries validées, nombre de séries, exercice ouvert, chrono)
 // est copiée dans localStorage à chaque action et restaurée au rechargement de l'application
@@ -159,7 +159,7 @@ const PAGE_TITLES = { programme: 'Programme', seance: 'Séance', progression: 'G
 const DRAFT_KEY = 'h49_draft';
 const DRAFT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
-// Le poids corporel saisi (onglet Graphiques) a son propre brouillon, indépendant de la séance :
+// Le poids corporel saisi (onglet Progression) a son propre brouillon, indépendant de la séance :
 // enregistrer une séance ne doit pas l'effacer. Même durée de validité (24 h).
 const WEIGHT_DRAFT_KEY = 'h49_draft_weight';
 
@@ -195,6 +195,7 @@ let workoutSeconds = 0;
 
 // Graphiques : instances Chart.js (gardées pour les détruire avant de redessiner) et état des boutons de filtre
 let tonnageChart, exerciseChart, weightChart, cardioChart;
+let volumeCalendarMode = false; // false : un point par séance ; true : une colonne par jour (écarts visibles, défilement horizontal)
 let currentVolumeFilter = 'all'; // 'all' (séances), 'month' (par mois) ou 'type' (séance A/B/C)
 let currentSessionTypeFilter = SESSION_TYPES[0];
 let currentExMetricMode = 'max';
@@ -807,7 +808,7 @@ function restoreDraft(type) {
   return true;
 }
 
-// --- Poids corporel (champ de l'onglet Graphiques) : brouillon séparé de celui de la séance ---
+// --- Poids corporel (champ de l'onglet Progression) : brouillon séparé de celui de la séance ---
 function clearWeightDraft() {
   try { localStorage.removeItem(WEIGHT_DRAFT_KEY); } catch (e) {}
 }
@@ -1662,7 +1663,29 @@ function updateSessionTypeButton() {
   typeBtn.innerText = currentVolumeFilter === 'type' ? `Séance ${currentSessionTypeFilter}` : 'A / B / C';
 }
 
+// Bascule entre « un point par séance » et « chaque jour écoulé » (écart entre les séances)
+function toggleVolumeCalendar() {
+  volumeCalendarMode = !volumeCalendarMode;
+  if (volumeCalendarMode && currentVolumeFilter === 'month') {
+    // la vue par jour n'a pas de sens pour des totaux mensuels : retour à la vue par séance
+    currentVolumeFilter = 'all';
+    const first = document.querySelector('.hero-card .filter-group .filter-btn');
+    if (first) highlightVolumeButton(first);
+    updateSessionTypeButton();
+  }
+  renderTonnageChart();
+}
+
+function updateVolumeCalendarButton() {
+  const b = document.getElementById('btn-vol-calendar');
+  if (!b) return;
+  b.textContent = volumeCalendarMode ? 'Par séance' : 'Par jour';
+  b.setAttribute('aria-pressed', volumeCalendarMode ? 'true' : 'false');
+  b.title = volumeCalendarMode ? 'Revenir à un point par séance' : 'Afficher chaque jour écoulé pour voir l\'écart entre les séances';
+}
+
 function setVolumeFilter(filter, btn) {
+  if (filter === 'month') volumeCalendarMode = false;
   currentVolumeFilter = filter;
   highlightVolumeButton(btn);
   updateSessionTypeButton();
@@ -1754,6 +1777,44 @@ function renderTonnageChart() {
   const lineLabel = currentVolumeFilter === 'type' ? `Tonnage séance ${currentSessionTypeFilter} (kg)` : 'Tonnage (kg)';
   const onHero = 'rgba(255, 255, 255, 0.8)';
 
+  // --- Mode « par jour » : une colonne par jour entre la 1re séance et aujourd'hui, défilement horizontal ---
+  const wrap = document.getElementById('hero-scroll');
+  const inner = document.getElementById('hero-scroll-inner');
+  const calendar = volumeCalendarMode && currentVolumeFilter !== 'month' && state.history && state.history.length > 0;
+  updateVolumeCalendarButton();
+  let dayDetails = null;
+  if (calendar) {
+    const sessions = state.history.filter(e => e.date && (currentVolumeFilter !== 'type' || e.type === currentSessionTypeFilter));
+    const byDay = {};
+    sessions.forEach(e => {
+      const d = byDay[e.date] || (byDay[e.date] = { tonnage: 0, types: [] });
+      d.tonnage += parseFloat(e.tonnage) || 0; d.types.push(e.type);
+    });
+    const keys = Object.keys(byDay).sort();
+    if (keys.length > 0) {
+      const toUtc = k => { const [y, m, d] = k.split('-').map(Number); return Date.UTC(y, m - 1, d); };
+      const iso = t => new Date(t).toISOString().slice(0, 10);
+      const now = new Date();
+      const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+      const start = toUtc(keys[0]);
+      const end = Math.max(today, toUtc(keys[keys.length - 1]));
+      labels = []; data = []; dayDetails = [];
+      for (let t = start; t <= end; t += 86400000) {
+        const k = iso(t);
+        labels.push(k);
+        data.push(byDay[k] ? byDay[k].tonnage : null);
+        dayDetails.push(byDay[k] || null);
+      }
+    }
+  }
+  const dayMode = !!dayDetails;
+  const PX_PER_DAY = 26;
+  if (wrap && inner) {
+    wrap.classList.toggle('scrollable', dayMode);
+    inner.style.width = dayMode ? Math.max(labels.length * PX_PER_DAY, wrap.clientWidth || 0) + 'px' : '';
+    inner.style.height = dayMode ? '210px' : '';
+  }
+
   tonnageChart = new Chart(ctx1, {
     type: 'line',
     data: {
@@ -1765,20 +1826,34 @@ function renderTonnageChart() {
         backgroundColor: 'rgba(255, 255, 255, 0.18)',
         borderWidth: 2.5,
         fill: true,
-        tension: 0.3,
+        tension: dayMode ? 0 : 0.3,
+        spanGaps: true, // relie les séances à travers les jours sans séance
         pointBackgroundColor: '#fff',
-        pointRadius: 3
+        pointRadius: dayMode ? 4 : 3
       }]
     },
     options: {
       responsive: true,
-      plugins: { legend: { display: false } },
+      maintainAspectRatio: !dayMode,
+      plugins: {
+        legend: { display: false },
+        tooltip: dayMode ? { callbacks: {
+          title: items => { const k = labels[items[0].dataIndex]; const [y, m, d] = k.split('-'); return `${d}/${m}/${y}`; },
+          label: c => { const det = dayDetails[c.dataIndex]; return `${det ? det.types.join(' + ') + ' · ' : ''}${Math.round(c.parsed.y).toLocaleString('fr-FR')} kg`; }
+        } } : {}
+      },
       scales: {
-        x: { ticks: { color: onHero, font: { size: 10 }, maxTicksLimit: 6, maxRotation: 0, minRotation: 0, autoSkip: true }, grid: { display: false }, border: { display: false } },
+        x: dayMode
+          ? { ticks: { color: onHero, font: { size: 10 }, maxRotation: 0, minRotation: 0, autoSkip: false,
+                callback: (v, i) => (i % 7 === 0 ? formatDate(labels[i]) : '') },
+              grid: { display: true, color: c => (c.index % 7 === 0 ? 'rgba(255, 255, 255, 0.16)' : 'transparent') }, border: { display: false } }
+          : { ticks: { color: onHero, font: { size: 10 }, maxTicksLimit: 6, maxRotation: 0, minRotation: 0, autoSkip: true }, grid: { display: false }, border: { display: false } },
         y: { ticks: { color: onHero, maxTicksLimit: 5 }, grid: { color: 'rgba(255, 255, 255, 0.15)' }, border: { display: false } }
       }
     }
   });
+  // vue par jour : on arrive sur les séances les plus récentes, on remonte le temps en défilant vers la gauche
+  if (dayMode && wrap) wrap.scrollLeft = wrap.scrollWidth;
 }
 
 function renderExerciseChart() {

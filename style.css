@@ -372,7 +372,7 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 .progress-analysis { display: flex; flex-direction: column; }
 
 /* Bloc héros indigo */
-.hero-card { margin-bottom: 30px; padding: 22px 20px 14px; background: var(--hero-bg); color: #fff; border-radius: 34px; box-shadow: var(--sh-card); }
+.hero-card { position: relative; margin-bottom: 30px; padding: 22px 20px 14px; background: var(--hero-bg); color: #fff; border-radius: 34px; box-shadow: var(--sh-card); }
 .hero-label { font-size: 0.9425rem; opacity: 0.85; }
 .hero-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin: 2px 0 6px; }
 .hero-index { font-family: var(--font-display); font-weight: 700; font-size: 73px; line-height: 1; letter-spacing: -0.02em; }
@@ -486,3 +486,11 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 .toast { position: fixed; left: 16px; right: 16px; bottom: calc(110px + env(safe-area-inset-bottom, 0px)); max-width: 420px; margin: 0 auto; padding: 14px 18px; border-radius: 22px; background: var(--text); color: var(--bg); font-size: 0.9rem; line-height: 1.45; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28); z-index: 2000; opacity: 0; transform: translateY(12px); pointer-events: none; transition: opacity 0.25s ease, transform 0.25s ease; }
 .toast.show { opacity: 1; transform: none; pointer-events: auto; }
 .toast strong { display: block; margin-bottom: 4px; font-size: 1rem; }
+
+/* Progression globale : bascule « par jour » et défilement horizontal */
+.hero-toggle { position: absolute; top: 16px; right: 16px; z-index: 2; padding: 7px 14px; border: none; border-radius: 999px; background: rgba(255, 255, 255, 0.18); color: #fff; font: inherit; font-size: 0.8125rem; font-weight: 600; cursor: pointer; }
+.hero-toggle[aria-pressed="true"] { background: #fff; color: #3730E3; }
+.hero-scroll { position: relative; }
+.hero-scroll.scrollable { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: none; overscroll-behavior-x: contain; }
+.hero-scroll.scrollable::-webkit-scrollbar { display: none; }
+.hero-scroll-inner { position: relative; }

@@ -79,7 +79,7 @@ with Srv() as base, sync_playwright() as p:
     pg.evaluate("cancelEditSession()")
 
     pg.evaluate("switchTab('progression')"); pg.wait_for_timeout(300)
-    check('Graphiques : pas de « Rameur » dans la liste des exercices', 'Rameur' not in pg.evaluate("[...document.querySelectorAll('#exercise-filter option')].map(o=>o.value)"))
+    check('Progression : pas de « Rameur » dans la liste des exercices', 'Rameur' not in pg.evaluate("[...document.querySelectorAll('#exercise-filter option')].map(o=>o.value)"))
     pg.evaluate("switchTab('progression')"); pg.wait_for_timeout(500)
     check('Suivi cardio : graphique présent avec 2 points, allure courante 4:46', pg.evaluate("cardioChart && cardioChart.data.datasets[0].data.length") == 2 and pg.inner_text('#cardio-current') == '4:46', pg.inner_text('#cardio-current'))
     check('Suivi cardio : valeurs = allure au km (4:15 pour 1 050 m = 243 s)', pg.evaluate("cardioChart.data.datasets[0].data[0]") == 243, str(pg.evaluate("cardioChart.data.datasets[0].data")))

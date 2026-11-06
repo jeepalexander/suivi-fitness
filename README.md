@@ -2,7 +2,7 @@
 
 **Application PWA de suivi d'entraînement en salle de sport**
 
-[![Version](https://img.shields.io/badge/version-1.6.24-blue)](https://github.com/jeepalexander/suivi-fitness)
+[![Version](https://img.shields.io/badge/version-1.6.25-blue)](https://github.com/jeepalexander/suivi-fitness)
 [![License](https://img.shields.io/badge/license-MIT-green)]
 
 ---
@@ -12,7 +12,7 @@
 - ✅ **Programmes d'entraînement** A/B/C avec exercices personnalisables et charges par défaut
 - ✅ **Suivi des séances** : poids, répétitions, séries, tonnage, durée et historique détaillé
 - ✅ **Brouillon de séance** : la saisie en cours est sauvegardée automatiquement et restaurée après un rechargement ou une fermeture de l’application
-- ✅ **Graphiques de progression** : volume total, progression par exercice et poids corporel
+- ✅ **Progression** : volume total, progression par exercice et poids corporel
 - ✅ **Analyse mensuelle** : records, paliers détectés par exercice et progression par séance A/B/C
 - ✅ **Gestion automatique du deload** (semaines 10-12)
 - ✅ **Chronomètre de séance** et **timer de repos** de 2 minutes avec notification sonore
@@ -48,7 +48,7 @@
 - Sauvegarde automatique du brouillon pendant la séance.
 - Seules les séries cochées sont enregistrées ; une confirmation s’affiche si la séance est partielle.
 
-### Graphiques
+### Progression
 
 - Volume total par séance, avec filtre A / B / C.
 - Progression par exercice : charge maximale ou volume cumulé.

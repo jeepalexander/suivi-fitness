@@ -1,4 +1,4 @@
-"""Brouillon du poids corporel (onglet Graphiques) : la saisie survit au rechargement."""
+"""Brouillon du poids corporel (onglet Progression) : la saisie survit au rechargement."""
 import json, sys
 from harness import *
 
