@@ -40,7 +40,17 @@ with Srv() as base, sync_playwright() as p:
     pg.evaluate("document.getElementById('hero-scroll').scrollLeft = 0"); pg.wait_for_timeout(200)
     check("on remonte dans le temps en défilant vers la gauche", pg.evaluate("document.getElementById('hero-scroll').scrollLeft") == 0)
     pg.screenshot(path='/tmp/claude-0/prog_jours.png', clip={'x': 0, 'y': 80, 'width': 390, 'height': 480})
-    check("l'axe vertical n'est pas rogné et aucune erreur JS", not errs, errs)
+    ya = lambda: pg.evaluate("(()=>{const r=document.getElementById('hero-yaxis').getBoundingClientRect();return [Math.round(r.left),Math.round(r.top),document.getElementById('hero-yaxis').classList.contains('on'),[...document.querySelectorAll('#hero-yaxis span')].map(x=>x.textContent)]})()")
+    a0 = ya()
+    nt = pg.evaluate("tonnageChart.scales.y.ticks.length")
+    check("axe vertical fixe affiché avec ses graduations (≥ 3, une par graduation du graphique)", a0[2] and len(a0[3]) >= 3 and len(a0[3]) == nt, (a0, nt))
+    check("graduations calées dans la hauteur du graphique", pg.evaluate("[...document.querySelectorAll('#hero-yaxis span')].every(s=>parseFloat(s.style.top)>=0&&parseFloat(s.style.top)<=210)"))
+    pg.evaluate("document.getElementById('hero-scroll').scrollLeft = 300"); pg.wait_for_timeout(200)
+    check("l'axe vertical ne bouge pas quand le graphique défile", ya() == a0, (a0, ya()))
+    pg.evaluate("document.getElementById('hero-scroll').scrollLeft = 0")
+    px = pg.evaluate("document.getElementById('hero-scroll-inner').offsetWidth") / N_DAYS
+    check("échelle resserrée : ~9 px par jour (au lieu de 26)", 8 <= px <= 10, px)
+    check("aucune erreur JS", not errs, errs)
 
     # filtres : séance A seule en vue par jour
     pg.click('#btn-vol-type'); pg.wait_for_timeout(400)
@@ -53,6 +63,7 @@ with Srv() as base, sync_playwright() as p:
     pg.click('#btn-vol-calendar'); pg.wait_for_timeout(400)
     check("« Par jour » depuis « Par mois » : bascule en vue par jour", n() == N_DAYS and pg.evaluate("document.querySelector('.hero-card .filter-btn.active').textContent.trim()") == 'Séances', pg.evaluate("document.querySelector('.hero-card .filter-btn.active').textContent"))
     pg.click('#btn-vol-calendar'); pg.wait_for_timeout(400)
+    check("retour « Par séance » : axe vertical fixe masqué, graduations du graphique visibles", not pg.evaluate("document.getElementById('hero-yaxis').classList.contains('on')") and pg.evaluate("tonnageChart.options.scales.y.ticks.display") is True)
     check("retour « Par séance » : graphique d'origine (6 points) sans défilement", n() == 6 and not pg.evaluate("document.getElementById('hero-scroll').classList.contains('scrollable')") and pg.evaluate("document.getElementById('hero-scroll-inner').style.width") == '')
     check("aucune erreur JS", not errs, errs)
     br.close()

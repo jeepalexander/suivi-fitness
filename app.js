@@ -1715,6 +1715,23 @@ function setExMetricMode(mode, btn) {
   renderExerciseChart();
 }
 
+// Axe vertical fixe de la vue « par jour » : le graphique défile, pas les graduations.
+// Les graduations sont celles de Chart.js, repositionnées dans une colonne à gauche qui ne défile pas.
+function renderFixedYAxis(chart) {
+  const box = document.getElementById('hero-yaxis');
+  if (!box) return;
+  box.innerHTML = '';
+  box.classList.toggle('on', !!chart);
+  if (!chart) return;
+  const y = chart.scales.y;
+  y.ticks.forEach(t => {
+    const span = document.createElement('span');
+    span.textContent = Number(t.value).toLocaleString('fr-FR');
+    span.style.top = y.getPixelForValue(t.value) + 'px';
+    box.appendChild(span);
+  });
+}
+
 function renderTonnageChart() {
   const canvas = document.getElementById('tonnageChart');
   if (!canvas) return;
@@ -1808,7 +1825,7 @@ function renderTonnageChart() {
     }
   }
   const dayMode = !!dayDetails;
-  const PX_PER_DAY = 26;
+  const PX_PER_DAY = 9; // ~3 fois plus serré qu'à 26 px : plusieurs semaines visibles d'un coup
   if (wrap && inner) {
     wrap.classList.toggle('scrollable', dayMode);
     inner.style.width = dayMode ? Math.max(labels.length * PX_PER_DAY, wrap.clientWidth || 0) + 'px' : '';
@@ -1835,6 +1852,7 @@ function renderTonnageChart() {
     options: {
       responsive: true,
       maintainAspectRatio: !dayMode,
+      layout: dayMode ? { padding: { left: 14, right: 22 } } : {}, // les dates des extrémités ne sont plus rognées
       plugins: {
         legend: { display: false },
         tooltip: dayMode ? { callbacks: {
@@ -1848,10 +1866,11 @@ function renderTonnageChart() {
                 callback: (v, i) => (i % 7 === 0 ? formatDate(labels[i]) : '') },
               grid: { display: true, color: c => (c.index % 7 === 0 ? 'rgba(255, 255, 255, 0.16)' : 'transparent') }, border: { display: false } }
           : { ticks: { color: onHero, font: { size: 10 }, maxTicksLimit: 6, maxRotation: 0, minRotation: 0, autoSkip: true }, grid: { display: false }, border: { display: false } },
-        y: { ticks: { color: onHero, maxTicksLimit: 5 }, grid: { color: 'rgba(255, 255, 255, 0.15)' }, border: { display: false } }
+        y: { ticks: { color: onHero, maxTicksLimit: 5, display: !dayMode }, grid: { color: 'rgba(255, 255, 255, 0.15)' }, border: { display: false } }
       }
     }
   });
+  renderFixedYAxis(dayMode ? tonnageChart : null);
   // vue par jour : on arrive sur les séances les plus récentes, on remonte le temps en défilant vers la gauche
   if (dayMode && wrap) wrap.scrollLeft = wrap.scrollWidth;
 }

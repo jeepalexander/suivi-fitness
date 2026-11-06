@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.26] - 2026-11-06
+### 🎨 Design
+- **Vue « Par jour » de la progression** : l'**axe vertical (kg) est désormais fixe** à gauche, seul le graphique défile ; l'**échelle est resserrée d'un facteur ~3** (9 px par jour au lieu de 26) pour voir plusieurs semaines d'un coup ; marges aux extrémités pour que les dates de début et de fin ne soient pas rognées.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.26.
+
+---
+
 ## [1.6.25] - 2026-11-06
 ### ✨ Nouveautés
 - **Progression globale : vue « Par jour »**. Bouton en haut à droite de la tuile : il bascule entre le graphique actuel (un point par séance) et une version avec **chaque jour écoulé** entre la première séance et aujourd'hui, pour visualiser l'écart entre les séances (les séances restent reliées par la courbe). Le graphique **défile horizontalement** : il s'ouvre sur les séances les plus récentes, on remonte le temps en glissant vers la gauche. Repères toutes les semaines, détail (date, séance, tonnage) au toucher d'un point. Fonctionne aussi avec le filtre A / B / C ; « Par mois » ramène à la vue par séance.
