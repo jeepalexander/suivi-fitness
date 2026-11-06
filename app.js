@@ -1390,7 +1390,7 @@ function submitWorkout(e) {
   // Actualise la bannière de déload en temps réel
   displayDeloadNotificationIfNeeded();
 
-  alert(`${isEditing ? 'Séance modifiée' : 'Séance enregistrée'} !\n• Temps : ${sessionDuration || 'N/A'}\n• Séries enregistrées : ${validatedRows.length}\n• Tonnage réel : ${Math.round(totalTonnage).toLocaleString()} kg${driveSaveNotice()}`);
+  showToast(`${isEditing ? 'Séance modifiée' : 'Séance enregistrée'} !\n• Temps : ${sessionDuration || 'N/A'}\n• Séries enregistrées : ${validatedRows.length}\n• Tonnage réel : ${Math.round(totalTonnage).toLocaleString()} kg${driveSaveNotice()}`);
 
   initWorkoutForm();
   renderHistory();
@@ -1475,6 +1475,28 @@ function historyTonnes(kg) {
   return (parseFloat(kg || 0) / 1000).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 }
 
+// Message d'information non bloquant (remplace alert() pour les confirmations : pas de case
+// « Empêcher cette page d'ouvrir des dialogues » de Chrome, aucun clic requis). Touche pour fermer.
+let toastTimer = null;
+function showToast(message, ms = 6000) {
+  try { (window.__toastLog = window.__toastLog || []).push(String(message)); window.__toastLog = window.__toastLog.slice(-20); } catch (e) { /* ignoré */ }
+  let el = document.getElementById('toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'toast'; el.className = 'toast'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite');
+    el.addEventListener('click', () => { el.classList.remove('show'); });
+    document.body.appendChild(el);
+  }
+  const lines = String(message).split('\n');
+  el.innerHTML = '';
+  const title = document.createElement('strong'); title.textContent = lines[0]; el.appendChild(title);
+  lines.slice(1).forEach(l => { const d = document.createElement('div'); d.textContent = l; el.appendChild(d); });
+  // redémarre l'animation si un message est déjà affiché
+  el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), ms);
+}
+
 function injectSessionModalHtml() {
   if (document.getElementById('session-modal')) return;
   const modalHtml = `
@@ -1507,7 +1529,7 @@ function injectSessionModalHtml() {
       closeSessionModal();
       switchTab('seance');
 
-      alert(`Séance ${sessionToEdit.type} du ${formatDate(sessionToEdit.date)} chargée dans le formulaire. Corrigez-la puis validez, ou annulez : l'originale reste intacte tant que vous n'avez pas validé.`);
+      showToast(`Séance ${sessionToEdit.type} du ${formatDate(sessionToEdit.date)} chargée dans le formulaire. Corrigez-la puis validez, ou annulez : l'originale reste intacte tant que vous n'avez pas validé.`);
     }
   });
 }

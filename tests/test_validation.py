@@ -34,7 +34,7 @@ with Srv() as url, sync_playwright() as p:
     h=hist(); last=h[-1] if h else None
     ok('séance partielle enregistrée',len(h)==n0+1 and last and len(last['exercises'])==1 and len(last['exercises'][0]['sets'])==2,json.dumps(last['exercises'])[:120] if last else '')
     ok('tonnage = séries cochées seulement',last and last['tonnage']==round(sum(s['weight']*s['reps'] for s in last['exercises'][0]['sets'])))
-    ok('message : séries enregistrées',any('Séries enregistrées : 2' in m[1] for m in msgs))
+    ok('message : séries enregistrées',any('Séries enregistrées : 2' in m for m in pg.evaluate("window.__toastLog||[]")))
     # 5 modification : seules les séries enregistrées sont précochées
     idx=len(h)-1
     pg.evaluate("i=>{switchTab('historique');openSessionModal(i)}",idx)

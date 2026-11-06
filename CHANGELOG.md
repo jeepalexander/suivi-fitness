@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.24] - 2026-11-06
+### 🐛 Corrections
+- **Message « Empêcher cette page d'ouvrir des dialogues supplémentaires »** à l'enregistrement : Chrome l'ajoute quand deux boîtes de dialogue s'enchaînent (confirmation puis « Séance enregistrée »). Le récapitulatif d'enregistrement (et celui du chargement d'une séance à modifier) s'affiche désormais dans un **bandeau non bloquant** qui disparaît seul après quelques secondes (ou au toucher), sans clic requis.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.24.
+
+---
+
 ## [1.6.23] - 2026-11-06
 ### ✨ Nouveautés
 - **Supprimer une séance de l'historique** : bouton « Supprimer la séance » dans la fiche de la séance (avec confirmation). L'historique, les graphiques, les dernières charges proposées et la prochaine séance (A/B/C) sont recalculés.

@@ -95,7 +95,7 @@ with Srv() as base, sync_playwright() as p:
     # 5) vrai formulaire : séance enregistrée
     p0, h0 = d.patches, len(local_state(pg)['history'])
     save_form(pg); pg.wait_for_timeout(2500)
-    saved = [m for (t, m) in dlg if 'Séance enregistrée' in m]
+    saved = [m for m in pg.evaluate("window.__toastLog||[]") if 'Séance enregistrée' in m]
     check("séance enregistrée (vrai formulaire) : sauvegarde mise à jour avec la nouvelle séance, sans mention de Drive", d.patches == p0 + 1 and len((d.content() or {}).get('history', [])) == h0 + 1 and saved and 'Drive' not in saved[-1], f'patch={d.patches}')
     # 6) séance modifiée : toujours le même fichier
     p0 = d.patches
@@ -132,7 +132,7 @@ with Srv() as base, sync_playwright() as p:
     ctx, pg, dlg = run(br, base, d)
     pg.wait_for_timeout(1500)
     save_form(pg); pg.wait_for_timeout(1500)
-    saved = [m for (t, m) in dlg if 'Séance enregistrée' in m]
+    saved = [m for m in pg.evaluate("window.__toastLog||[]") if 'Séance enregistrée' in m]
     check("jamais connecté : aucune requête Drive, aucune mention de Drive", not d.calls and saved and 'Drive' not in saved[-1], d.calls[:2])
     ctx.close()
 

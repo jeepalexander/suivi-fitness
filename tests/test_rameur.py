@@ -39,6 +39,8 @@ with Srv() as base, sync_playwright() as p:
 
     n0 = len(hist()); msgs.clear()
     pg.evaluate("document.getElementById('workout-form').requestSubmit()"); pg.wait_for_timeout(300)
+    check("enregistrement : plus d'alert() bloquante (seule la confirmation partielle reste), message affiché en bandeau", not [m for m in msgs if m[0] == 'alert'] and pg.evaluate("document.getElementById('toast').classList.contains('show')") and 'Séance enregistrée' in pg.inner_text('#toast'), str(msgs))
+    pg.screenshot(path='/tmp/claude-0/toast.png', clip={'x':0,'y':560,'width':390,'height':284})
     h = hist(); last = h[-1]
     ex = last['exercises'][0]
     check('enregistré : seconds=255, meters=1050, poids/reps à 0', len(h) == n0 + 1 and ex['name'] == 'Rameur' and ex['sets'] == [{'weight': 0, 'reps': 0, 'seconds': 255, 'meters': 1050}], json.dumps(ex))

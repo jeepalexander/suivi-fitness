@@ -39,6 +39,10 @@ def run(br, base, seeds=(), installed=False, patch_status=200, goto='index.html'
         # une graine ne s'applique qu'au premier chargement (la page peut être rechargée par la redirection)
         pg.add_init_script("if(!sessionStorage.getItem('seed_done')){%s}" % s)
     pg.add_init_script("sessionStorage.setItem('seed_done','1')")
+    # journal des messages (toast) qui survit à la redirection OAuth : la page est quittée juste après l'enregistrement
+    pg.add_init_script("""new MutationObserver(()=>{const t=document.getElementById('toast');if(t&&t.textContent){
+      const a=JSON.parse(sessionStorage.getItem('__tl')||'[]');const m=[...t.childNodes].map(n=>n.textContent).join('\\n');
+      if(a[a.length-1]!==m){a.push(m);sessionStorage.setItem('__tl',JSON.stringify(a));}}}).observe(document,{childList:true,subtree:true,characterData:true});""")
     log = {'calls': [], 'auth': [], 'next_id': 0, 'dialogs': []}
     pg.on('dialog', lambda d: (log['dialogs'].append(d.message), d.accept()))
 
@@ -140,7 +144,7 @@ with Srv() as base, sync_playwright() as p:
     pg.wait_for_timeout(1200)
     n_before = len(json.loads(ls(pg, 'h49_state'))['history'])
     save_form(pg); pg.wait_for_timeout(6000)
-    saved = [d for d in log['dialogs'] if 'Séance enregistrée' in d]
+    saved = [d for d in pg.evaluate("JSON.parse(sessionStorage.getItem('__tl')||'[]')") if 'Séance enregistrée' in d]
     check("installée + accès expiré : le message d'enregistrement annonce la reconnexion automatique", saved and 'Google Drive : accès expiré, reconnexion automatique' in saved[-1], str(saved[-1:])[:160])
     check("installée + accès expiré : la reconnexion part toute seule (aucune question, aucun appui)", len(log['auth']) == 1 and not any('Reconnecter' in d for d in log['dialogs']), f"{len(log['auth'])} redirection(s)")
     check("au retour : accès renouvelé, la sauvegarde (avec la séance enregistrée) part sur Drive, plus rien en attente",
@@ -162,7 +166,7 @@ with Srv() as base, sync_playwright() as p:
     ctx, pg, log = run(br, base, seeds=[EXPIRED, FOLDER], installed=False)
     pg.wait_for_timeout(1200)
     save_form(pg); pg.wait_for_timeout(3000)
-    saved = [d for d in log['dialogs'] if 'Séance enregistrée' in d]
+    saved = [d for d in pg.evaluate("JSON.parse(sessionStorage.getItem('__tl')||'[]')") if 'Séance enregistrée' in d]
     check("navigateur + accès expiré : renouvellement par la fenêtre, aucune redirection, message inchangé, séance envoyée",
           not log['auth'] and pg.evaluate("window.__reqs.length") == 1 and saved and 'reconnexion' not in saved[-1] and len(sent(log, 'POST', '/upload/drive/v3/files')) == 1)
     ctx.close()
@@ -171,7 +175,7 @@ with Srv() as base, sync_playwright() as p:
     ctx, pg, log = run(br, base, installed=True)
     pg.wait_for_timeout(1200)
     save_form(pg); pg.wait_for_timeout(2500)
-    saved = [d for d in log['dialogs'] if 'Séance enregistrée' in d]
+    saved = [d for d in pg.evaluate("JSON.parse(sessionStorage.getItem('__tl')||'[]')") if 'Séance enregistrée' in d]
     check("jamais connecté à Drive (installée) : aucune redirection, aucune mention de Drive", not log['auth'] and saved and 'Drive' not in saved[-1] and not log['calls'])
     ctx.close()
 
