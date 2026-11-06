@@ -7,6 +7,17 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.23] - 2026-11-06
+### ✨ Nouveautés
+- **Supprimer une séance de l'historique** : bouton « Supprimer la séance » dans la fiche de la séance (avec confirmation). L'historique, les graphiques, les dernières charges proposées et la prochaine séance (A/B/C) sont recalculés.
+- **La sauvegarde Google Drive est mise à jour automatiquement** : la séance supprimée est retirée de `sauvegarde_complete.json`. Une suppression volontaire n'est jamais prise pour un conflit (liste `h49_drive_deleted_ids`, vidée après envoi réussi).
+
+### 🎨 Design
+- Nouvelle icône du rameur (`icons/rower.png`).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.23.
+
+---
+
 ## [1.6.22] - 2026-11-06
 ### 🐛 Corrections
 - **Service worker** : la liste du cache hors-ligne (`sw.js`) pointait vers `icons/rowing.png`, renommé `rower.png` ; le fichier manquant faisait échouer l'installation du service worker (pas de mise à jour ni de mode hors-ligne). Corrigé.

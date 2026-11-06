@@ -1484,6 +1484,7 @@ function injectSessionModalHtml() {
         <h3 id="modal-session-title" class="modal-title">Séance</h3>
         <p id="modal-session-meta" class="modal-meta"></p>
         <button id="modal-edit-btn" class="btn">Modifier la séance</button>
+        <button id="modal-delete-btn" class="btn btn-danger" onclick="deleteSelectedSession()">Supprimer la séance</button>
         <button onclick="closeSessionModal()" class="btn btn-secondary">Fermer</button>
       </div>
     </div>
@@ -1509,6 +1510,40 @@ function injectSessionModalHtml() {
       alert(`Séance ${sessionToEdit.type} du ${formatDate(sessionToEdit.date)} chargée dans le formulaire. Corrigez-la puis validez, ou annulez : l'originale reste intacte tant que vous n'avez pas validé.`);
     }
   });
+}
+
+// Suppression d'une séance de l'historique (essai de validation, saisie par erreur...).
+// Les dernières charges sont recalculées, la prochaine séance repart de l'historique restant, et la
+// sauvegarde Google Drive est mise à jour : la séance supprimée y est retirée (voir DRIVE_DELETED_KEY).
+function deleteSelectedSession() {
+  if (selectedSessionIndex === null) return;
+  const idx = selectedSessionIndex;
+  const session = state.history[idx];
+  if (!session) return;
+  const driveOn = isDriveWanted() || !!getDriveToken();
+  if (!confirm(`Supprimer définitivement la séance ${session.type} du ${formatDate(session.date)} ?` + (driveOn ? '\nElle sera aussi retirée de la sauvegarde Google Drive.' : ''))) return;
+
+  state.history.splice(idx, 1);
+  if (session.id !== undefined && session.id !== null) rememberDeletedSessionId(session.id);
+
+  // Dernières charges : on repart de l'historique restant pour les exercices de la séance supprimée
+  if (!state.lastWeights) state.lastWeights = {};
+  (session.exercises || []).forEach(ex => {
+    if (isCardioName(ex.name)) return;
+    delete state.lastWeights[ex.name];
+    state.history.forEach(h => {
+      const e = (h.exercises || []).find(x => x.name === ex.name);
+      if (e && Array.isArray(e.sets)) e.sets.filter(isPerformedSet).forEach(st => { state.lastWeights[ex.name] = st.weight; });
+    });
+  });
+
+  updateNextTypeFromHistory();
+  saveState();
+  backupToDrive();
+  closeSessionModal();
+  renderHistory();
+  renderCharts();
+  displayDeloadNotificationIfNeeded();
 }
 
 function openSessionModal(index) {
@@ -2873,10 +2908,20 @@ async function downloadDriveBackup(accessToken, fileId) {
 }
 
 // Vrai si la sauvegarde du Drive ne contient aucune séance absente de cet appareil (on peut alors l'écraser sans rien perdre).
+// Séances supprimées volontairement dans l'historique et pas encore retirées de la sauvegarde Drive.
+const DRIVE_DELETED_KEY = 'h49_drive_deleted_ids';
+function getDeletedSessionIds() {
+  try { const a = JSON.parse(localStorage.getItem(DRIVE_DELETED_KEY) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; }
+}
+function rememberDeletedSessionId(id) {
+  try { const a = getDeletedSessionIds(); if (!a.includes(id)) a.push(id); localStorage.setItem(DRIVE_DELETED_KEY, JSON.stringify(a)); } catch (e) { /* ignoré */ }
+}
+
 function driveRemoteIsContainedInLocal(remote) {
   if (!remote || !Array.isArray(remote.history) || !state || !Array.isArray(state.history)) return false;
   const local = new Set(state.history.map(h => h && h.id));
-  return remote.history.every(h => h && local.has(h.id));
+  const deleted = new Set(getDeletedSessionIds()); // supprimées exprès : ce n'est pas un conflit, la sauvegarde doit les purger
+  return remote.history.every(h => h && (local.has(h.id) || deleted.has(h.id)));
 }
 
 // Écrit la sauvegarde : met à jour le fichier existant (fileId) ou le crée ; renvoie la réponse de Google.
@@ -2955,6 +3000,7 @@ async function syncDriveBackup() {
     clearDriveError();
     localStorage.setItem(DRIVE_LAST_HASH_KEY, driveHash(snapshot));
     localStorage.setItem(DRIVE_LAST_BACKUP_KEY, new Date().toISOString());
+    try { localStorage.removeItem(DRIVE_DELETED_KEY); } catch (e) { /* ignoré */ }
     return { ok: true };
   } catch (e) {
     console.warn('Drive : envoi de la sauvegarde interrompu', e);
