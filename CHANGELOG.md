@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.22] - 2026-11-06
+### 🐛 Corrections
+- **Service worker** : la liste du cache hors-ligne (`sw.js`) pointait vers `icons/rowing.png`, renommé `rower.png` ; le fichier manquant faisait échouer l'installation du service worker (pas de mise à jour ni de mode hors-ligne). Corrigé.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.22.
+
+---
+
 ## [1.6.21] - 2026-11-06
 ### ✨ Nouveautés
 - **Suivi cardio** (onglet Graphiques) : courbe de l'allure au km du rameur par date, avec l'allure de la dernière séance (plus bas = plus rapide).
