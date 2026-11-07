@@ -102,7 +102,7 @@
 
   <div id="tab-progression" class="container">
     <div class="hero-card">
-      <button type="button" id="btn-vol-calendar" class="hero-toggle" aria-pressed="false" onclick="toggleVolumeCalendar()">Par jour</button>
+      <button type="button" id="btn-vol-calendar" class="hero-toggle" aria-pressed="false" aria-label="Afficher chaque jour écoulé" onclick="toggleVolumeCalendar()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18h18"/><path d="M5 18v-2M8.5 18v-2M12 18v-2M15.5 18v-2M19 18v-2"/><path d="M3.5 12.5l4-4.5 4 3.5 4.5-6 4.5 4"/></svg></button>
       <div class="hero-label">Indice de progression global</div>
       <div class="hero-row">
         <span id="hero-index" class="hero-index">–</span>
@@ -111,8 +111,8 @@
       <div class="hero-sub">Volume total par séance (kg)</div>
       <div class="filter-group">
         <button class="filter-btn active" onclick="setVolumeFilter('all', this)">Séances</button>
-        <button class="filter-btn" onclick="setVolumeFilter('month', this)">Par mois</button>
         <button class="filter-btn" id="btn-vol-type" onclick="cycleSessionTypeFilter(this)" title="Appuyer pour afficher successivement la séance A, B puis C">A / B / C</button>
+        <button class="filter-btn" onclick="setVolumeFilter('month', this)">Mois</button>
       </div>
       <div class="hero-chart"><div id="hero-yaxis" class="hero-yaxis" aria-hidden="true"></div><div id="hero-scroll" class="hero-scroll"><div id="hero-scroll-inner" class="hero-scroll-inner"><canvas id="tonnageChart" height="200"></canvas></div></div></div>
     </div>

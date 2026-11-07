@@ -1,7 +1,7 @@
 {
   "name": "Application Fitness",
   "short_name": "Fitness",
-  "version": "1.6.26",
+  "version": "1.6.27",
   "start_url": "./index.html",
   "display": "fullscreen",
   "background_color": "#FFFFFF",

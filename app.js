@@ -1679,9 +1679,10 @@ function toggleVolumeCalendar() {
 function updateVolumeCalendarButton() {
   const b = document.getElementById('btn-vol-calendar');
   if (!b) return;
-  b.textContent = volumeCalendarMode ? 'Par séance' : 'Par jour';
+  const label = volumeCalendarMode ? 'Revenir à un point par séance' : 'Afficher chaque jour écoulé pour voir l\'écart entre les séances';
   b.setAttribute('aria-pressed', volumeCalendarMode ? 'true' : 'false');
-  b.title = volumeCalendarMode ? 'Revenir à un point par séance' : 'Afficher chaque jour écoulé pour voir l\'écart entre les séances';
+  b.setAttribute('aria-label', label);
+  b.title = label;
 }
 
 function setVolumeFilter(filter, btn) {
@@ -1829,7 +1830,6 @@ function renderTonnageChart() {
   if (wrap && inner) {
     wrap.classList.toggle('scrollable', dayMode);
     inner.style.width = dayMode ? Math.max(labels.length * PX_PER_DAY, wrap.clientWidth || 0) + 'px' : '';
-    inner.style.height = dayMode ? '210px' : '';
   }
 
   tonnageChart = new Chart(ctx1, {
@@ -1851,8 +1851,8 @@ function renderTonnageChart() {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: !dayMode,
-      layout: dayMode ? { padding: { left: 14, right: 22 } } : {}, // les dates des extrémités ne sont plus rognées
+      maintainAspectRatio: false, // hauteur fixe (210 px, voir .hero-scroll-inner) : identique en vue par séance, par mois et par jour
+      layout: dayMode ? { padding: { left: 14, right: 22, top: 11 } } : {}, // top : compense les graduations Y (déportées dans l'axe fixe) pour garder la même zone de tracé // les dates des extrémités ne sont plus rognées
       plugins: {
         legend: { display: false },
         tooltip: dayMode ? { callbacks: {
@@ -1862,9 +1862,10 @@ function renderTonnageChart() {
       },
       scales: {
         x: dayMode
-          ? { ticks: { color: onHero, font: { size: 10 }, maxRotation: 0, minRotation: 0, autoSkip: false,
+          ? { ticks: { color: onHero, font: { size: 10 }, maxRotation: 0, minRotation: 0, autoSkip: false, padding: 4.5,
                 callback: (v, i) => (i % 7 === 0 ? formatDate(labels[i]) : '') },
-              grid: { display: true, color: c => (c.index % 7 === 0 ? 'rgba(255, 255, 255, 0.16)' : 'transparent') }, border: { display: false } }
+              grid: { display: true, color: c => (c.index % 7 === 0 ? 'rgba(255, 255, 255, 0.16)' : 'transparent'),
+                      drawTicks: true, tickLength: 5, tickColor: c => (c.index % 7 === 0 ? 'rgba(255, 255, 255, 0.7)' : 'rgba(255, 255, 255, 0.35)') }, border: { display: false } }
           : { ticks: { color: onHero, font: { size: 10 }, maxTicksLimit: 6, maxRotation: 0, minRotation: 0, autoSkip: true }, grid: { display: false }, border: { display: false } },
         y: { ticks: { color: onHero, maxTicksLimit: 5, display: !dayMode }, grid: { color: 'rgba(255, 255, 255, 0.15)' }, border: { display: false } }
       }

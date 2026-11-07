@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.27] - 2026-11-07
+### 🎨 Design
+- **Progression globale** : hauteur du graphique (210 px) et zone de tracé **identiques** en vue par séance, par mois et par jour (plus de saut à la bascule) ; l'axe Y fixe est aligné sur les graduations.
+- **Vue par jour** : un **trait de graduation pour chaque jour** écoulé (plus marqué chaque semaine, avec sa date).
+- Boutons de la tuile : ordre **Séances · A / B / C · Mois** (« Par mois » devient « Mois »).
+- Le bouton en haut à droite devient une **icône** (courbe posée sur une règle graduée) ; état pressé en vue par jour.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.27.
+
+---
+
 ## [1.6.26] - 2026-11-06
 ### 🎨 Design
 - **Vue « Par jour » de la progression** : l'**axe vertical (kg) est désormais fixe** à gauche, seul le graphique défile ; l'**échelle est resserrée d'un facteur ~3** (9 px par jour au lieu de 26) pour voir plusieurs semaines d'un coup ; marges aux extrémités pour que les dates de début et de fin ne soient pas rognées.
