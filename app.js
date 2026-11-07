@@ -2747,10 +2747,15 @@ function updateDriveUI() {
   if (replaceBtn) replaceBtn.style.display = 'none';
   if (isDriveConnected() && conflict) {
     // Une sauvegarde existe déjà sur le Drive et contient des séances que cet appareil n'a pas : on ne l'écrase pas.
+    const empty = isDeviceEmpty();
+    const detail = '(' + (conflict.sessions != null ? conflict.sessions + ' séances, ' : '') + 'modifiée le ' + (formatDriveDate(conflict.modified) || 'date inconnue') + ')';
     statusEl.textContent = (account ? 'Compte ' + account.email + ' : ' : '')
-      + 'une sauvegarde plus complète existe déjà sur ton Drive (' + (conflict.sessions != null ? conflict.sessions + ' séances, ' : '')
-      + 'modifiée le ' + (formatDriveDate(conflict.modified) || 'date inconnue') + ') : l\'envoi est suspendu pour ne rien écraser. '
-      + 'Touche « Restaurer depuis Drive » pour la récupérer, ou « Remplacer par cet appareil » pour la remplacer.';
+      + (empty ? 'cet appareil ne contient aucune séance, alors que ta sauvegarde Drive en contient ' + detail + ' : l\'envoi est suspendu pour ne rien effacer. '
+               + 'Touche « Restaurer depuis Drive » pour les récupérer, ou « Effacer la sauvegarde Drive » pour la vider définitivement.'
+               : 'une sauvegarde plus complète existe déjà sur ton Drive ' + detail + ' : l\'envoi est suspendu pour ne rien écraser. '
+               + 'Touche « Restaurer depuis Drive » pour la récupérer, ou « Remplacer par cet appareil » pour la remplacer.');
+    if (replaceBtn) { replaceBtn.textContent = empty ? 'Effacer définitivement la sauvegarde Drive' : 'Remplacer par cet appareil'; replaceBtn.classList.toggle('btn-danger-text', empty); }
+    refreshDriveConflictDate();
     if (connectBtn) connectBtn.style.display = 'none';
     if (disconnectBtn) disconnectBtn.style.display = '';
     if (replaceBtn) replaceBtn.style.display = '';
@@ -3117,7 +3122,9 @@ async function syncDriveBackup() {
       const remote = await downloadDriveBackup(token.access_token, fileId);
       if (remote.ok && !driveRemoteIsContainedInLocal(remote.data)) {
         const n = remote.data && Array.isArray(remote.data.history) ? remote.data.history.length : null;
-        setDriveConflict({ id: fileId, modified: '', sessions: n });
+        let modified = '';
+        try { const f = await findDriveBackup(token.access_token, folderId); if (f && f.modifiedTime) modified = f.modifiedTime; } catch (e) { /* date facultative */ }
+        setDriveConflict({ id: fileId, modified, sessions: n });
         return { reason: 'conflict' };
       }
     }
@@ -3150,12 +3157,30 @@ function scheduleDriveSync() {
 
 // Conflit : la sauvegarde du Drive contient des séances absentes de cet appareil. L'utilisateur choisit de
 // la remplacer par les données de cet appareil (ce bouton) ou de la restaurer (restoreFromDrive).
+function isDeviceEmpty() { return !!state && Array.isArray(state.history) && state.history.length === 0; }
+
+// Conflit enregistré sans date (versions antérieures) : on la lit une fois sur le Drive.
+let driveConflictDateAsked = false;
+async function refreshDriveConflictDate() {
+  const c = getDriveConflict(), token = getDriveToken();
+  if (!c || c.modified || !token || driveConflictDateAsked) return;
+  driveConflictDateAsked = true;
+  try {
+    const folderId = await ensureDriveFolder(token.access_token);
+    const f = await findDriveBackup(token.access_token, folderId);
+    if (f && f.modifiedTime && getDriveConflict()) { setDriveConflict({ ...getDriveConflict(), modified: f.modifiedTime }); updateDriveUI(); }
+  } catch (e) { /* date facultative */ }
+}
+
 function replaceDriveBackupWithThisDevice() {
   const c = getDriveConflict();
   if (!c) return;
   const when = formatDriveDate(c.modified) || 'date inconnue';
-  if (!confirm('Remplacer la sauvegarde Drive (' + (c.sessions != null ? c.sessions + ' séances, ' : '') + 'modifiée le ' + when
-    + ') par les données de cet appareil ?\n\nLes séances qu\'elle contient et que cet appareil n\'a pas seront perdues.')) return;
+  const what = '(' + (c.sessions != null ? c.sessions + ' séances, ' : '') + 'modifiée le ' + when + ')';
+  const ok = isDeviceEmpty()
+    ? confirm('Effacer DÉFINITIVEMENT la sauvegarde Drive ' + what + ' ?\n\nCet appareil ne contient aucune séance : la sauvegarde sera vidée et ses séances perdues (irréversible depuis l\'application).')
+    : confirm('Remplacer la sauvegarde Drive ' + what + ' par les données de cet appareil ?\n\nLes séances qu\'elle contient et que cet appareil n\'a pas seront perdues.');
+  if (!ok) return;
   setDriveBackupId(c.id);
   setDriveConflict(null);
   localStorage.removeItem(DRIVE_LAST_HASH_KEY);

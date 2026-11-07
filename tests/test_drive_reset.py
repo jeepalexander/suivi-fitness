@@ -24,7 +24,12 @@ with Srv() as base, sync_playwright() as p:
     check("réinitialisation : la sauvegarde Drive n'est pas écrasée (aucun envoi)", d.uploads() == up0 and len((d.content() or {}).get('history', [])) == N, (d.uploads(), up0))
     pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(500)
     txt = pg.inner_text('#drive-status')
-    check("conflit signalé avec choix « Restaurer » / « Remplacer »", vis(pg, 'drive-restore-btn') and vis(pg, 'drive-replace-btn') and f'{N} séances' in txt, txt)
+    check("conflit signalé avec choix « Restaurer » / « Effacer »", vis(pg, 'drive-restore-btn') and vis(pg, 'drive-replace-btn') and f'{N} séances' in txt and 'aucune séance' in txt, txt)
+    check("bouton intitulé « Effacer définitivement la sauvegarde Drive » (appareil vide)", pg.inner_text('#drive-replace-btn').strip() == 'Effacer définitivement la sauvegarde Drive', pg.inner_text('#drive-replace-btn'))
+    check("date de la sauvegarde Drive affichée (plus de « date inconnue »)", 'date inconnue' not in txt and 'modifiée le' in txt, txt)
+    # conflit déjà enregistré sans date (ancienne version) : la date est lue sur le Drive
+    pg.evaluate("driveConflictDateAsked=false; setDriveConflict({id:'BK1',modified:'',sessions:42}); updateDriveUI();"); pg.wait_for_timeout(1500)
+    check("conflit ancien sans date : la date est récupérée et affichée", 'date inconnue' not in pg.inner_text('#drive-status'), pg.inner_text('#drive-status'))
     # restauration depuis Drive : tout revient
     pg.evaluate("restoreFromDrive()"); pg.wait_for_timeout(2500)
     check(f"« Restaurer » : les {N} séances reviennent", len(local_state(pg)['history']) == N, len(local_state(pg)['history']))
@@ -36,7 +41,9 @@ with Srv() as base, sync_playwright() as p:
     pg.wait_for_timeout(1500)
     pg.evaluate(EMPTY); pg.wait_for_timeout(3500)
     pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(300)
-    pg.evaluate("replaceDriveBackupWithThisDevice()"); pg.wait_for_timeout(3000)
+    pg.once('dialog', lambda x: None) if False else None
+    dlg.clear(); pg.evaluate("replaceDriveBackupWithThisDevice()"); pg.wait_for_timeout(3000)
+    check("confirmation « Effacer DÉFINITIVEMENT » affichée", any('DÉFINITIVEMENT' in m for t, m in dlg), dlg)
     check("« Remplacer » (choix explicite) : la sauvegarde Drive est vidée", len((d.content() or {}).get('history', ['x'])) == 0, len((d.content() or {}).get('history', ['x'])))
     pg.evaluate("state.history.push(%s); saveState();" % json.dumps(DATA['history'][0])); pg.wait_for_timeout(3000)
     check("ensuite, les nouvelles séances se sauvegardent normalement", len((d.content() or {}).get('history', [])) == 1)

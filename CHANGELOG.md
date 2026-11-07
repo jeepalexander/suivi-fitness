@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.31] - 2026-11-07
+### 🐛 Corrections
+- **Bouton honnête** : quand l'appareil ne contient aucune séance, « Remplacer par cet appareil » devient **« Effacer définitivement la sauvegarde Drive »** (en rouge), avec un message et une confirmation « Effacer DÉFINITIVEMENT… » qui disent clairement que la sauvegarde sera vidée. Appareil non vide : libellé « Remplacer par cet appareil » inchangé.
+- **« modifiée le date inconnue »** : la date réelle de la sauvegarde Drive est désormais lue et affichée (y compris pour un conflit déjà enregistré sans date).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.31.
+
+---
+
 ## [1.6.30] - 2026-11-07
 ### 🐛 Corrections
 - **La réinitialisation des données ne vide plus la sauvegarde Google Drive.** Quand cet appareil n'a plus aucune séance (réinitialisation, données effacées), la sauvegarde automatique n'écrase plus un fichier Drive qui en contient : l'envoi est suspendu et l'écran Réglages propose « Restaurer depuis Drive » ou « Remplacer » (choix explicite). Une suppression volontaire de séances reste purgée normalement.
