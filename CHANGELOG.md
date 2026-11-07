@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.36] - 2026-11-07
+### ✏️ Réglages
+- **Apparence** : texte d'explication supprimé (les boutons Clair / Sombre / Auto suffisent).
+- Texte sous la version au tutoiement, comme le reste de l'application (« Tu peux néanmoins cliquer sur « Vérifier » »).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.36.
+
+---
+
 ## [1.6.35] - 2026-11-07
 ### ✏️ Textes de la page Réglages simplifiés
 - **Apparence** : seule la première phrase d'explication est conservée.
