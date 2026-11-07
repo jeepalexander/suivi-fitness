@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
   <title>SUIVI FITNESS</title>
 
   
@@ -10,7 +11,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="theme-color" content="#F2F4F7">
+  <meta name="theme-color" content="#FFFFFF">
   <meta name="apple-mobile-web-app-title" content="SUIVI FITNESS">
 
   <!-- Thème : résolu avant le premier affichage pour éviter tout flash (clair par défaut) -->
@@ -21,7 +22,7 @@
         var dark = p === 'dark' || (p === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
         document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
         var m = document.querySelector('meta[name="theme-color"]');
-        if (m) m.setAttribute('content', dark ? '#0B0F1A' : '#F2F4F7');
+        if (m) m.setAttribute('content', dark ? '#0E0E11' : '#FFFFFF');
       } catch (e) {}
     })();
   </script>
@@ -31,6 +32,9 @@
   <!-- Chart.js & Fonts (Local for offline use) -->
   <script src="js/chart.umd.min.js"></script>
   <link href="css/fonts.css" rel="stylesheet">
+
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <!-- Liaison CSS externe -->
   <link rel="stylesheet" href="style.css">
@@ -44,20 +48,6 @@
       <h1 id="page-title">Programme</h1>
     </div>
 
-    <!-- BOUTON CHRONO REPOS (flottant, visible sur l'onglet Séance) -->
-    <button id="timer-btn" class="timer-btn" onclick="toggleRestTimer()">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5M9 3h6"/></svg>
-      <span id="timer-display">PAUSE</span>
-    </button>
-  </header>
-
-  <!-- TAB 0: PROGRAMME GLOBAL -->
-  <div id="tab-programme" class="container active">
-    <div id="program-overview"></div>
-  </div>
-
-  <!-- TAB 1: SÉANCE DU JOUR -->
-  <div id="tab-seance" class="container">
     <div id="seance-sticky" class="seance-sticky">
     <div class="session-head">
       <span id="seance-badge" class="type-pill type-pill-A">A</span>
@@ -78,74 +68,96 @@
     </div>
     </div>
 
-    <p class="warmup-note">🚣 Échauffement : Rameur 1000 m + 2 séries légères sur le 1er mouvement.</p>
+    <button id="settings-btn" class="hdr-btn" type="button" onclick="switchTab('reglages')" aria-label="Réglages">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
+    <button id="settings-back" class="hdr-btn hdr-btn-text" type="button" onclick="switchTab('historique')" aria-label="Retour à l'historique">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      <span>Retour</span>
+    </button>
 
+    <button id="timer-btn" class="timer-btn" onclick="toggleRestTimer()">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5M9 3h6"/></svg>
+      <span id="timer-display">PAUSE</span>
+    </button>
+  </header>
+
+  <main id="app-scroll">
+
+  <div id="tab-programme" class="container active">
+    <div id="program-overview"></div>
+  </div>
+
+  <div id="tab-seance" class="container">
+    <p class="warmup-note">🚣 Échauffement : 2 séries légères sur le 1er exercice de force, après le rameur.</p>
     <form id="workout-form">
       <div id="exercises-list"></div>
-
-      <div class="watch-memo">
-        ⌚ N'oublie pas d'arrêter le suivi de ta montre !
-      </div>
-
+      <div class="watch-memo">⌚ N'oublie pas d'arrêter le suivi de ta montre !</div>
+      <p class="submit-hint">Seules les séries cochées sont enregistrées.</p>
       <button type="submit" id="submit-workout-btn" class="btn">Valider & Enregistrer la séance</button>
       <button type="button" id="cancel-edit-btn" class="btn btn-secondary" style="display: none;" onclick="cancelEditSession()">Annuler la modification</button>
+      <button type="button" id="cancel-session-btn" class="btn btn-secondary" style="display: none;" onclick="cancelNewSession()">Annuler la séance</button>
     </form>
   </div>
 
-  <!-- TAB 2: PROGRESSION & ANALYSE -->
   <div id="tab-progression" class="container">
     <div class="hero-card">
+      <button type="button" id="btn-vol-calendar" class="hero-toggle" aria-pressed="false" aria-label="Afficher chaque jour écoulé" onclick="toggleVolumeCalendar()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18h18"/><path d="M5 18v-2M8.5 18v-2M12 18v-2M15.5 18v-2M19 18v-2"/><path d="M3.5 12.5l4-4.5 4 3.5 4.5-6 4.5 4"/></svg></button>
       <div class="hero-label">Indice de progression global</div>
       <div class="hero-row">
         <span id="hero-index" class="hero-index">–</span>
         <span id="hero-pill" class="hero-pill" hidden></span>
       </div>
-      <div class="hero-sub">Volume total par séance (kg)</div>
+      <div class="hero-sub">Volume total (kg) par :</div>
       <div class="filter-group">
         <button class="filter-btn active" onclick="setVolumeFilter('all', this)">Séances</button>
-        <button class="filter-btn" onclick="setVolumeFilter('month', this)">Par mois</button>
         <button class="filter-btn" id="btn-vol-type" onclick="cycleSessionTypeFilter(this)" title="Appuyer pour afficher successivement la séance A, B puis C">A / B / C</button>
+        <button class="filter-btn" onclick="setVolumeFilter('month', this)">Mois</button>
       </div>
-      <div class="hero-chart"><canvas id="tonnageChart" height="200"></canvas></div>
+      <div class="hero-chart"><div id="hero-yaxis" class="hero-yaxis" aria-hidden="true"></div><div id="hero-scroll" class="hero-scroll"><div id="hero-scroll-inner" class="hero-scroll-inner"><canvas id="tonnageChart" height="200"></canvas></div></div></div>
     </div>
-
     <div id="monthly-analysis" class="progress-analysis"></div>
-
     <div class="card">
       <h3 class="analysis-section-title">Progression par exercice</h3>
-      <select id="exercise-filter" class="filter-select" onchange="renderExerciseChart()">
-      </select>
-
+      <select id="exercise-filter" class="filter-select" onchange="renderExerciseChart()"></select>
       <div class="filter-group seg-group">
         <button class="filter-btn active" id="btn-mode-max" onclick="setExMetricMode('max', this)">Charge max</button>
         <button class="filter-btn" id="btn-mode-vol" onclick="setExMetricMode('volume', this)">Volume cumulé</button>
       </div>
-
       <canvas id="exerciseChart" height="180"></canvas>
       <p id="exercise-plateau-note" class="analysis-note" hidden>La bande ambre marque les séances sans progression (palier).</p>
     </div>
-
+    <div class="card">
+      <h3 class="analysis-section-title">Suivi cardio</h3>
+      <div class="weight-current"><span id="cardio-current" class="weight-value">–</span><span class="weight-unit">/km · Rameur</span></div>
+      <canvas id="cardioChart" height="150"></canvas>
+      <p id="cardio-empty" class="analysis-note">Pas encore de séance avec le rameur. L'allure au km s'affichera ici (plus bas = plus rapide).</p>
+    </div>
     <div class="card">
       <h3 class="analysis-section-title">Poids corporel</h3>
       <div class="weight-current"><span id="weight-current" class="weight-value">–</span><span class="weight-unit">kg</span></div>
       <canvas id="weightChart" height="150"></canvas>
       <div class="weight-form">
-        <input type="number" step="0.1" id="new-weight" placeholder="Poids (kg)" class="weight-field">
+        <input type="number" step="0.1" id="new-weight" placeholder="Poids (kg)" class="weight-field" oninput="saveWeightDraft()">
         <button onclick="addWeight()" class="btn weight-add">Ajouter</button>
       </div>
     </div>
   </div>
 
-  <!-- TAB 3: HISTORIQUE -->
   <div id="tab-historique" class="container">
     <p id="history-count" class="history-count"></p>
-
     <div class="card backup-card">
       <input type="file" id="import-file" style="display:none" onchange="importData(event)">
       <button onclick="exportData()" class="btn">Sauvegarder</button>
       <button onclick="document.getElementById('import-file').click()" class="btn btn-secondary">Restaurer</button>
     </div>
+    <div id="history-list"></div>
+    <div class="danger-zone">
+      <button onclick="resetData()" class="btn-danger-link">Réinitialiser les données d'origine</button>
+    </div>
+  </div>
 
+  <div id="tab-reglages" class="container">
     <div class="card theme-card">
       <div class="card-title">Apparence</div>
       <div class="filter-group seg-group" id="theme-choice" role="radiogroup" aria-label="Thème de l'application">
@@ -155,38 +167,54 @@
       </div>
       <p class="theme-hint">« Auto » suit le réglage clair/sombre du téléphone. Ce choix est propre à cet appareil et n'est pas inclus dans la sauvegarde.</p>
     </div>
-
-    <div id="history-list"></div>
-
-    <div class="danger-zone">
-      <button onclick="resetData()" class="btn-danger-link">Réinitialiser les données d'origine</button>
+    <div class="card" id="drive-card">
+      <div class="card-title">Sauvegarde Google Drive</div>
+      <p id="drive-status" class="theme-hint">Non connecté</p>
+      <div class="update-row" style="gap:8px;flex-wrap:wrap">
+        <button type="button" id="drive-connect-btn" class="btn" onclick="connectGoogleDrive()">Connecter Google Drive</button>
+        <button type="button" id="drive-disconnect-btn" class="btn btn-secondary" style="display:none" onclick="disconnectGoogleDrive()">Déconnecter</button>
+        <button type="button" id="drive-restore-btn" class="btn btn-secondary" style="display:none" onclick="restoreFromDrive()">Restaurer depuis Drive</button>
+        <button type="button" id="drive-replace-btn" class="btn btn-secondary" style="display:none" onclick="replaceDriveBackupWithThisDevice()">Remplacer par cet appareil</button>
+      </div>
+      <p class="theme-hint">À chaque séance enregistrée (et à chaque modification de tes données), la sauvegarde complète — historique, poids, dernières charges — est mise à jour dans le fichier <code>sauvegarde_complete.json</code> du dossier « FITNESS AAP – Séances » de ton Drive. C'est le même format que le bouton « Restaurer » de l'Historique.</p>
+    </div>
+    <div class="card update-card" id="update-card">
+      <div class="card-title">Application</div>
+      <div class="update-row">
+        <span id="update-version" class="update-version">Version …</span>
+        <button type="button" class="btn btn-secondary update-check" onclick="checkForUpdate()">Vérifier</button>
+      </div>
+      <p id="update-status" class="theme-hint" role="status" aria-live="polite">Les mises à jour s'installent d'elles-mêmes ; l'application ne se relance jamais toute seule.</p>
+      <div id="update-banner" class="update-banner" hidden>
+        <span id="update-banner-text"></span>
+        <button type="button" class="btn update-apply" onclick="applyUpdate()">Relancer maintenant</button>
+      </div>
     </div>
   </div>
 
-  <!-- NAVIGATION -->
+  </main>
+
   <nav>
-    <button onclick="switchTab('programme')" id="nav-programme" class="active">
+    <button onclick="switchTab('programme')" id="nav-programme" aria-label="Programme" class="active">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
       Programme
     </button>
-    <button onclick="switchTab('seance')" id="nav-seance">
+    <button onclick="switchTab('seance')" id="nav-seance" aria-label="Séance">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>
       Séance
     </button>
-    <button onclick="switchTab('progression')" id="nav-progression">
+    <button onclick="switchTab('progression')" id="nav-progression" aria-label="Progression">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>
-      Graphiques
+      Progression
     </button>
-    <button onclick="switchTab('historique')" id="nav-historique">
+    <button onclick="switchTab('historique')" id="nav-historique" aria-label="Historique">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l3 2"/></svg>
       Historique
     </button>
   </nav>
 
-  <!-- Liaison Script externe -->
   <script src="app.js"></script>
-
-  <!-- Enregistrement du Service Worker (mode hors-ligne) -->
+  <script src="js/security.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {

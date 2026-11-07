@@ -7,10 +7,470 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.28] - 2026-11-07
+### 🎨 Design
+- **Progression globale** : la variation « +x % vs mois précédent » n'a plus de fond (elle ressemblait à un bouton) et est remontée contre le chiffre, plus éloignée du titre du graphique.
+- Titre du graphique : « Volume total (kg) par : » (suivi des boutons Séances · A / B / C · Mois).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.28.
+
+---
+
+## [1.6.27] - 2026-11-07
+### 🎨 Design
+- **Progression globale** : hauteur du graphique (210 px) et zone de tracé **identiques** en vue par séance, par mois et par jour (plus de saut à la bascule) ; l'axe Y fixe est aligné sur les graduations.
+- **Vue par jour** : un **trait de graduation pour chaque jour** écoulé (plus marqué chaque semaine, avec sa date).
+- Boutons de la tuile : ordre **Séances · A / B / C · Mois** (« Par mois » devient « Mois »).
+- Le bouton en haut à droite devient une **icône** (courbe posée sur une règle graduée) ; état pressé en vue par jour.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.27.
+
+---
+
+## [1.6.26] - 2026-11-06
+### 🎨 Design
+- **Vue « Par jour » de la progression** : l'**axe vertical (kg) est désormais fixe** à gauche, seul le graphique défile ; l'**échelle est resserrée d'un facteur ~3** (9 px par jour au lieu de 26) pour voir plusieurs semaines d'un coup ; marges aux extrémités pour que les dates de début et de fin ne soient pas rognées.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.26.
+
+---
+
+## [1.6.25] - 2026-11-06
+### ✨ Nouveautés
+- **Progression globale : vue « Par jour »**. Bouton en haut à droite de la tuile : il bascule entre le graphique actuel (un point par séance) et une version avec **chaque jour écoulé** entre la première séance et aujourd'hui, pour visualiser l'écart entre les séances (les séances restent reliées par la courbe). Le graphique **défile horizontalement** : il s'ouvre sur les séances les plus récentes, on remonte le temps en glissant vers la gauche. Repères toutes les semaines, détail (date, séance, tonnage) au toucher d'un point. Fonctionne aussi avec le filtre A / B / C ; « Par mois » ramène à la vue par séance.
+
+### 🎨 Design
+- L'onglet **Graphiques** devient **Progression** (barre de navigation, titre de l'écran).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.25.
+
+---
+
+## [1.6.24] - 2026-11-06
+### 🐛 Corrections
+- **Message « Empêcher cette page d'ouvrir des dialogues supplémentaires »** à l'enregistrement : Chrome l'ajoute quand deux boîtes de dialogue s'enchaînent (confirmation puis « Séance enregistrée »). Le récapitulatif d'enregistrement (et celui du chargement d'une séance à modifier) s'affiche désormais dans un **bandeau non bloquant** qui disparaît seul après quelques secondes (ou au toucher), sans clic requis.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.24.
+
+---
+
+## [1.6.23] - 2026-11-06
+### ✨ Nouveautés
+- **Supprimer une séance de l'historique** : bouton « Supprimer la séance » dans la fiche de la séance (avec confirmation). L'historique, les graphiques, les dernières charges proposées et la prochaine séance (A/B/C) sont recalculés.
+- **La sauvegarde Google Drive est mise à jour automatiquement** : la séance supprimée est retirée de `sauvegarde_complete.json`. Une suppression volontaire n'est jamais prise pour un conflit (liste `h49_drive_deleted_ids`, vidée après envoi réussi).
+
+### 🎨 Design
+- Nouvelle icône du rameur (`icons/rower.png`).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.23.
+
+---
+
+## [1.6.22] - 2026-11-06
+### 🐛 Corrections
+- **Service worker** : la liste du cache hors-ligne (`sw.js`) pointait vers `icons/rowing.png`, renommé `rower.png` ; le fichier manquant faisait échouer l'installation du service worker (pas de mise à jour ni de mode hors-ligne). Corrigé.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.22.
+
+---
+
+## [1.6.21] - 2026-11-06
+### ✨ Nouveautés
+- **Suivi cardio** (onglet Graphiques) : courbe de l'allure au km du rameur par date, avec l'allure de la dernière séance (plus bas = plus rapide).
+- **Allure sous la saisie du rameur** (min:ss /km), recalculée en direct.
+- **Saisie de la durée au pavé numérique** : on tape les chiffres (« 430 » devient 4:30, « 1015 » devient 10:15), le pavé n'ayant pas de touche « : ».
+
+### 🎨 Design
+- Le rameur utilise l'icône `icons/rower.png`.
+- Titre sans numéro de version (il reste dans Réglages).
+- Écran Programme épuré : plus de mention d'échauffement ni de titre « Au programme », uniquement les icônes et noms des exercices.
+- Champs de saisie : `appearance: none` pour un rendu identique (gélule ombrée) sur tous les navigateurs mobiles.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.21.
+
+---
+
+## [1.6.20] - 2026-11-05
+### ✨ Nouveautés
+- **Rameur dans les séances** : exercice en première position des séances A, B et C, avec **une seule ligne** « Durée (min:ss) / Distance (m) » saisie à la main (un nombre seul est lu en minutes). Valeurs de la dernière séance reprises, « Dernière fois · 1 050 m en 4:15 », coche = lancement du chrono de pause, compté dans « x / n séries ».
+- Enregistré dans l'historique avec `seconds` et `meters` (poids/reps à 0) : **aucun impact sur le tonnage, les charges max et les records**. Absent de la liste des exercices des Graphiques.
+- Mention d'échauffement mise à jour (le rameur est désormais saisi dans la séance).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.20.
+
+---
+
+## [1.6.19] - 2026-11-05
+### 🎨 Design
+- **Chrono de pause** : la frontière de la bande de progression est désormais **droite** (plus arrondie) et reste rognée par la gélule ; elle avance de **gauche à droite** (la gélule démarre foncée et se remplit de clair). Contraste nettement renforcé, en clair comme en sombre (couleurs `--timer-base` / `--timer-fill`).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.19.
+
+---
+
+## [1.6.18] - 2026-11-05
+### 🎨 Design
+- **Chrono de pause** : retour à la gélule d'origine (icône + « PAUSE m:ss »). Pendant le décompte, une bande claire au bord arrondi et lumineux remplit la gélule et se rétracte vers la gauche, sur fond vert plus profond (contraste renforcé). Remplacement de l'anneau de la 1.6.17.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.18.
+
+---
+
+## [1.6.17] - 2026-11-04
+### 🐛 Corrections
+- **Annuler la séance** arrête aussi le chrono de pause (décompte et « GO ! » ne continuent plus) et le remet à « PAUSE m:ss ».
+
+### 🎨 Design
+- **Chrono de pause modernisé** : la barre blanche qui débordait est remplacée par un anneau de progression fin autour de l'icône, qui se vide en douceur ; fond vert doux pendant le décompte, chiffres à largeur fixe (plus de tremblement).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.17.
+
+---
+
+## [1.6.16] - 2026-11-04
+### ✨ Nouveautés
+- **Annuler une séance en cours** : nouveau bouton « Annuler la séance » (avec confirmation) sous « Valider ». Il arrête et remet à zéro le chrono, supprime le brouillon et ramène au Programme ; rien n'est enregistré.
+
+### 🔧 Divers
+- Badge de version du `README.md` aligné (il affichait 1.6.12).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.16.
+
+---
+
+## [1.6.15] - 2026-11-04
+### 🐛 Amélioration des messages d'erreur
+- **Vérification de mise à jour** : Affichage de l'erreur exacte au lieu du message générique "hors connexion ?" pour faciliter le diagnostic.
+
+---
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.15.
+
+---
+
+## [1.6.14] - 2026-11-04
+### 🐛 Corrections de bugs
+- **CSS** : Suppression de la duplication de `.timer-btn` qui empêchait l'affichage correct de la barre de progression.
+- **Vérification de version** : Réalignement des versions après correction du CSS.
+
+---
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.14.
+
+---
+
+## [1.6.13] - 2026-11-04
+### ⏱️ Barre de progression visible
+- Correction du `z-index` sur `.timer-btn::before` pour que la barre de progression du timer de pause soit **visible au-dessus du contenu** du bouton.
+
+---
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.13.
+
+---
+
+## [1.6.12] - 2026-11-04
+### 🗂️ Google Drive : UNE seule sauvegarde complète (plus de fichiers par séance)
+- Le dossier « FITNESS AAP – Séances » contient désormais **un seul fichier**, `sauvegarde_complete.json`, avec tout l'état de l'application (historique, poids corporel, dernières charges) : c'est exactement le format du bouton « Restaurer » de l'Historique.
+- **Première connexion :** le dossier est créé s'il n'existe pas, avec la sauvegarde complète (tout l'historique déjà présent).
+- **Ensuite :** le même fichier est **mis à jour** (jamais dupliqué) à chaque séance enregistrée ou modifiée, et à chaque modification des données (poids, suppression…) tant que l'accès est valide. Rien n'est renvoyé si rien n'a changé (empreinte des données retenue) ; les modifications faites sans accès valide partent dès qu'il revient (« modifications en attente d'envoi »). Réglages affiche la date de la dernière sauvegarde.
+- **Restaurer depuis Drive :** nouveau bouton dans Réglages (confirmation avec la date et le nombre de séances, avertissement de remplacement, contenu assaini comme l'import manuel).
+- **Protection :** si une sauvegarde existe déjà sur le Drive avec des séances que cet appareil n'a pas (réinstallation, autre appareil…), elle n'est **jamais écrasée** : l'envoi est suspendu et Réglages propose « Restaurer depuis Drive » ou « Remplacer par cet appareil ».
+- Supprimés : fichiers `seance_*.json`, file d'attente de séances, envoi de l'historique séance par séance (les anciens repères sont effacés au démarrage). Les fichiers `seance_*.json` éventuellement déjà présents sur le Drive ne sont pas touchés : tu peux les supprimer à la main.
+- Correctif : « modifiée le Invalid Date » quand Google ne renvoie pas de date.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.12.
+
+---
+
+## [1.6.11] - 2026-11-04
+### 🔁 Application installée : reconnexion automatique à l'enregistrement d'une séance
+- Si l'accès Google (≈ 1 h) a expiré quand tu enregistres une séance (ou une modification), l'application **se reconnecte toute seule** par redirection, sans question ni appui : la séance est d'abord gardée en file d'attente, puis part au retour de Google.
+- Le message « Séance enregistrée » ajoute la ligne « Google Drive : accès expiré, reconnexion automatique… » (uniquement dans ce cas).
+- Garde-fou : une seule reconnexion automatique toutes les 2 minutes ; si Google refuse au retour, la raison s'affiche dans Réglages (« Connexion Google refusée (…) ») et les séances restent en attente, sans boucle d'allers-retours.
+- Dans le navigateur, rien ne change (renouvellement silencieux par la fenêtre). Si Drive n'a jamais été connecté : aucune redirection, aucune mention.
+- Correctif : la raison d'un refus de Google au retour s'affiche aussi quand Drive avait déjà été connecté.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.11.
+
+---
+
+## [1.6.10] - 2026-11-04
+### 📲 Google Drive : connexion possible depuis l'application installée (plein écran) + séances modifiées mises à jour
+- **Constat sur téléphone :** installée sur l'écran d'accueil, l'application ouvrait la fenêtre de connexion Google dans un onglet séparé, qui restait sur une page blanche (le résultat ne revenait jamais à l'application).
+- **Application installée :** la connexion se fait maintenant **par redirection** (la page va chez Google puis revient avec l'accès, lu au démarrage, adresse nettoyée, « state » anti-falsification vérifié). Dans le navigateur, la fenêtre habituelle est conservée.
+- ⚠️ **À faire une fois dans Google Cloud :** ajouter `https://jeepalexander.github.io/suivi-fitness/` aux « URI de redirection autorisés » de l'identifiant client OAuth.
+- Dans l'application installée, le renouvellement silencieux n'est pas possible : si l'accès (≈ 1 h) a expiré, la séance reste en file d'attente et Réglages propose « Reconnecter maintenant ».
+- **Séance modifiée :** son fichier Drive est **mis à jour** au lieu d'en créer un second du même nom. L'identifiant du fichier est retenu pour chaque séance (retrouvé par son nom pour les fichiers envoyés avant) ; si le fichier a été supprimé du Drive, il est recréé.
+- Retour dans l'application : l'état de Drive est relu ; la file d'attente ne peut plus être envoyée deux fois en parallèle.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.10.
+
+---
+
+## [1.6.9] - 2026-11-04
+### 📦 Google Drive : envoi de tout l'historique à la première connexion
+- Si le dossier « FITNESS AAP – Séances » **n'existe pas** sur le Drive, l'application le crée puis y envoie **tout l'historique déjà présent** (une séance = un fichier `seance_AAAA-MM-JJ.json` ; si plusieurs séances le même jour : `_1`, `_2`…).
+- Se déclenche tout seul : à la connexion, à l'ouverture de l'application, à l'ouverture de Réglages et après un enregistrement de séance. Si le dossier existe déjà, rien n'est renvoyé.
+- Reprise automatique : si l'envoi s'interrompt (jeton expiré, réseau coupé, refus de Google), les séances déjà envoyées sont retenues et seules les autres partent ensuite, sans doublon.
+- Réglages affiche l'avancement (« envoi de l'historique vers Drive (12/33)… ») puis « historique envoyé (33 séances) ».
+- Une seule création de dossier à la fois (plus de risque de dossiers en double).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.9.
+
+---
+
+## [1.6.8] - 2026-11-04
+### 🔎 Google Drive : l'application dit la vérité quand Google refuse l'accès
+- Constat sur téléphone : Google répondait « 403 » à **toutes** les requêtes Drive (lecture de l'adresse et du dossier). L'ancien texte « sauvegarde automatique active » était donc trompeur.
+- Réglages affiche maintenant la **raison donnée par Google** (ex. « Google refuse l'accès à Drive (403 accessNotConfigured) — les séances ne sont pas sauvegardées ») avec une aide adaptée (API Drive non activée, autorisation non accordée...).
+- Même message si l'envoi d'une séance est refusé ; la séance reste en file d'attente.
+- Test d'accès à Drive à chaque connexion et à chaque ouverture de Réglages : le message disparaît tout seul dès que le problème est réglé.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.8.
+
+---
+
+## [1.6.7] - 2026-11-04
+### 👤 Compte Google : lecture de l'adresse fiabilisée
+- Si l'API Drive « about » ne donne pas l'adresse, une **seconde méthode** la lit sur le propriétaire du dossier de sauvegarde créé par l'application (aucune permission supplémentaire, aucune nouvelle autorisation à donner).
+- Si aucune des deux ne répond, Réglages **affiche la raison** (ex. « adresse du compte indisponible (about : erreur 403 ; dossier : erreur 404) ») au lieu de ne rien montrer.
+- Nouvel essai de lecture à chaque ouverture de Réglages tant que l'adresse est inconnue.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.7.
+
+---
+
+## [1.6.6] - 2026-11-03
+### 🔄 Google Drive : plus besoin de se reconnecter toutes les heures
+- Le jeton Google ne dure qu'environ 1 h. À chaque « Enregistrer la séance », s'il a expiré, l'application en redemande **un nouveau toute seule** (demande silencieuse, sans choix de compte grâce à l'adresse déjà connue), envoie la séance, puis les séances restées en attente.
+- Le souhait de sauvegarde est retenu (`h49_drive_wanted`) jusqu'à un clic sur « Déconnecter » ; l'expiration du jeton n'oublie plus le compte ni le dossier.
+- Si Google demande quand même une confirmation (fenêtre refusée, session Google fermée), rien n'est perdu : la séance reste en file d'attente et Réglages l'indique (« N séances en attente d'envoi », bouton « Reconnecter maintenant »).
+- Réglages : l'état est rafraîchi à chaque ouverture de la page.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.6.
+
+---
+
+## [1.6.5] - 2026-11-03
+### 👤 Compte Google affiché dans Réglages
+- Une fois Google Drive connecté, la carte « Sauvegarde Google Drive » indique l'adresse du compte (« Connecté : adresse — sauvegarde automatique active »).
+- L'adresse est lue via l'API Drive (déjà autorisée), stockée sur l'appareil seulement (`h49_drive_account`, hors sauvegarde exportée), affichée en texte brut et effacée à la déconnexion.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.5.
+
+---
+
+## [1.6.4] - 2026-11-03
+### 🛠️ Correctif : l'application démarre de nouveau (et fonctionne hors-ligne)
+- `app.js` est de nouveau le **code complet de l'application** (v1.6.0 avec sauvegarde Google Drive). Le chargeur qui allait chercher le code sur jsDelivr est supprimé : il empêchait `initApp` de s'exécuter (écran Programme vide) et rendait l'application inutilisable sans réseau.
+- `security.js` assainit de nouveau les sauvegardes importées (il s'exécute après `app.js`, donc `importData` existe).
+- Politique de sécurité (CSP) resserrée : `cdn.jsdelivr.net` et `raw.githubusercontent.com` retirés ; seuls les domaines Google nécessaires à la sauvegarde Drive restent autorisés.
+- Fichier orphelin `app-part1.js` supprimé.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.4.
+- Non restauré : l'affichage du compte Google connecté dans Réglages (prévu en 1.6.1, code perdu), à refaire si souhaité.
+
+---
+
+## [1.6.3] - 2026-11-03
+### ⚠️ Version défectueuse (corrigée en 1.6.4)
+- Tentative de réparation par un chargeur `app.js` chargeant le code depuis jsDelivr (CSP élargie). Application non initialisée et hors-ligne impossible.
+
+---
+
+## [1.6.2] - 2026-11-03
+### ⚠️ Version défectueuse (corrigée en 1.6.4)
+- `app.js` scindé en parties (`app-part1.js`) et premières tentatives de chargeur. Non fonctionnel.
+
+---
+
+## [1.6.1] - 2026-11-03
+### ⚠️ Version défectueuse (corrigée en 1.6.4)
+- Tentative d'affichage du compte Google dans Réglages ; `app.js` a été écrasé par un contenu vide. Fonctionnalité perdue.
+
+---
+
+## [1.6.0] - 2026-11-03
+### ☁️ Sauvegarde automatique Google Drive
+- Carte « Sauvegarde Google Drive » dans Réglages : à chaque séance enregistrée, un fichier `seance_AAAA-MM-JJ.json` est créé dans le dossier « FITNESS AAP – Séances » (portée `drive.file`).
+- CSP étendue à Google Identity Services et aux API Google.
+
+---
+
+## [1.5.9] - 2026-11-03
+### ⏱️ Barre de progression propre
+- La barre de progression du timer utilise désormais un **pseudo-élément CSS** (`::before`) au lieu d'une div supplémentaire, pour une intégration plus propre et sans débordement.
+
+---
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.5.9.
+
+---
+
+## [1.5.8] - 2026-11-03
+### ⏱️ Barre de progression droite
+- La barre de progression du timer est maintenant **droite** (sans bordure arrondie) à l'intérieur de la pastille.
+
+---
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.5.8.
+
+---
+
+## [1.5.7] - 2026-11-03
+### ⏱️ Barre de progression du timer
+- **La pastille du timer de repos se vide progressivement** pendant le décompte, pour visualiser le temps restant.
+
+---
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.5.7.
+
+---
+
+## [1.5.6] - 2026-11-03
+### ⏱️ Timer de repos automatique
+- **Le timer de repos se relance automatiquement à chaque validation de série** avec la durée adaptée à l'exercice en cours. Plus besoin de cliquer manuellement sur la pastille de pause.
+
+---
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.5.6.
+
+---
+
+## [1.5.4] - 2026-11-01
+### 🧹 Nettoyage du CSS (aucun changement visuel)
+- Le bloc « BLANC MINIMALISTE (v1.4.0) », qui surchargeait les règles d'origine, est **fusionné dans les règles de chaque composant** : une seule valeur par propriété, plus de règle écrasée par une autre. `style.css` passe de 803 à 473 lignes (40,8 → 31,7 Ko) et est réorganisé en 11 sections (jetons, base, en-tête, navigation, composants communs, Programme, Séance, Graphiques, Historique, Réglages, fenêtre de séance).
+- **Règles mortes supprimées :** `.workout-meta-bar`, `.program-ex-row`, `.analysis-block`, `.type-pill.small` (identique à `.type-pill`), `#tab-seance .session-head` (la bannière est dans l'en-tête), `#deload-subtitle` en doublon, rayures de bordures jamais visibles (`border: none` appliqué par-dessus).
+- **Variables inutilisées supprimées :** `--accent-text`, `--pill-chip`, `--pill-track`, `--primary-tint`, `--line`, `--primary-soft`, `--success-border`, `--radius-card`, `--shadow-card`, `--shadow-float`, `--shadow-nav`, `--shadow-sticky`. `--gutter` et `--sh-btn` rejoignent les jetons.
+- **Vérification :** instantané des styles calculés de tous les éléments dans 20 états (5 pages, exercice ouvert, séries cochées, chrono prêt / en cours / terminé, modale, avis de mise à jour, records, paliers, conseils, déload) × 3 largeurs (360, 390, 600 px) × 2 thèmes, avant et après : **0 écart** à part `grid-template-columns` sur la barre de navigation, qui est en flex et l'ignorait déjà.
+
+---
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.5.4.
+
+---
+
+## [1.5.3] - 2026-11-01
+### ⏱️ Temps de repos raccourcis
+- Les repos proposés par le chrono étaient trop longs : **2:30** pour les mouvements lourds (soulevé de terre, presse, développés couché et incliné), **1:30** pour les autres mouvements polyarticulaires et par défaut, **1:00** pour l'isolation (avant : 3:00 / 2:00 / 1:30).
+- Valeurs modifiables dans `REST_BY_EXERCISE` (`app.js`).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.5.3.
+
+---
+
+## [1.5.2] - 2026-11-01
+### 🎨 Nouvelles icônes d'exercices
+- Les icônes d'exercices sont remplacées par de nouveaux visuels (`icons/*.png`).
+- Elles sont plus détaillées donc plus lourdes (≈ 2,2 Mo au total, contre ≈ 0,5 Mo avant) : la première installation / mise à jour télécharge davantage ; ensuite tout est servi hors-ligne depuis le cache.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.5.2.
+
+---
+
+## [1.5.1] - 2026-11-01
+### ⚙️ Nouvelle page « Réglages »
+- Les cartes **Apparence** (Clair / Sombre / Auto) et **Application** (version, « Vérifier », avis « version prête ») quittent l'onglet Historique, qui est désormais plus court : il garde Sauvegarder / Restaurer, la liste des séances et la réinitialisation.
+- Un **bouton roue dentée en haut à droite de l'Historique** ouvre la page Réglages ; un bouton **« Retour »** à la même place revient à l'Historique. La page n'a pas d'icône propre dans la barre du bas (l'icône Historique reste allumée).
+- La **pastille rouge « mise à jour »** apparaît maintenant aussi sur la roue dentée, pour que l'avis reste visible depuis l'Historique.
+- Aucune donnée touchée : le choix de thème et la sauvegarde fonctionnent comme avant.
+
+### 🧪 Tests
+- Nouveau `test_reglages.py` (17 contrôles) ; `test_mise_a_jour.py` et `test_mise_en_page.py` suivent la nouvelle page (5 pages × 2 largeurs × 2 thèmes). Total : 90 contrôles.
+
+---
+
+## [1.5.0] - 2026-11-01
+### 🔔 Indicateur de mise à jour
+- Nouvelle carte **« Application »** dans l'onglet Historique : version exécutée, bouton « Vérifier » (« À jour · vérifié à hh:mm », « Vérification impossible » si le réseau est coupé).
+- Quand une nouvelle version vient d'être installée en arrière-plan, un avis « La version X est prête » apparaît dans cette carte, avec une **pastille rouge sur l'icône Historique** et un bouton **« Relancer maintenant »** (la saisie en cours est conservée par les brouillons).
+- **L'application ne se recharge jamais toute seule** : l'avis ne s'affiche que si la version installée diffère de celle qui tourne. Vérification silencieuse au retour au premier plan (au plus toutes les 30 min).
+- Correctif du service worker : à l'installation, les fichiers sont désormais réclamés au réseau (`cache: 'reload'`) au lieu du cache HTTP du navigateur, qui pouvait enregistrer d'anciens fichiers sous le numéro de la nouvelle version (le téléphone restait alors sur l'ancien code). Le service worker prévient aussi les pages ouvertes (`SW_ACTIVATED`).
+
+### 💾 Poids corporel dans le brouillon
+- Le poids tapé dans l'onglet Graphiques est conservé (rechargement, application fermée par le système) pendant 24 h, dans un brouillon séparé de celui de la séance : enregistrer une séance ne l'efface pas.
+- Vidé à « Ajouter », à la réinitialisation et à l'import d'une sauvegarde ; valeur strictement validée à la restauration (nombre de 1 à 3 chiffres, 2 décimales au plus) ; jamais inclus dans la sauvegarde exportée.
+
+### ⏱️ Chrono de repos adapté à l'exercice
+- Le chrono propose la durée de l'**exercice ouvert** : « PAUSE 3:00 » (soulevé de terre, presse, développés couché et incliné), « PAUSE 2:00 » (autres mouvements polyarticulaires, durée par défaut), « PAUSE 1:30 » (exercices d'isolation). Il se met à jour tout seul quand on change d'exercice ou qu'on passe au suivant.
+- Le décompte en cours et le « GO ! » ne changent jamais quand on ouvre un autre exercice ; le décompte s'affiche dès l'appui.
+- Les durées sont regroupées dans `REST_BY_EXERCISE` (`app.js`) : un seul endroit à modifier.
+
+### 🧪 Tests
+- 3 nouveaux fichiers (`test_poids_brouillon.py`, `test_chrono.py`, `test_mise_a_jour.py`) ; `test_mise_en_page.py` couvre l'avis « version prête ». Total : 73 contrôles.
+
+---
+
+## [1.4.4] - 2026-11-01
+### 🧹 Rangement de `app.js` (aucun changement de comportement ni de design)
+- Sommaire en tête de fichier et 16 sections aux séparateurs uniformes (constantes, état, thème, données, déload, Programme, chronos, brouillon, Séance, Historique, Graphiques, analyse, navigation, import/export, démarrage).
+- Variables globales regroupées dans une seule section « État », avec leur rôle commenté.
+- Fonctions remises dans un ordre logique ; le gestionnaire d'enregistrement de séance devient une fonction nommée, `submitWorkout`.
+- Vérifié : le code est identique ligne à ligne, hors cette fonction nommée.
+
+---
+
+## [1.4.3] - 2026-11-01
+### ✅ Seules les séries cochées sont enregistrées
+- Les valeurs suggérées mais non validées ne sont plus ajoutées à l'historique : tonnage, records et paliers ne comptent que les séries cochées. Un exercice sans série cochée n'apparaît pas dans la séance enregistrée.
+- Aucune série cochée : l'enregistrement est refusé.
+- Série cochée avec un poids ou des répétitions invalides (vide, 0, répétitions non entières) : refus, l'exercice s'ouvre et le champ à corriger prend le focus.
+- **Séance partielle : confirmation** (« Enregistrer N séries cochées ? M séries non cochées seront ignorées »).
+- Modification d'une ancienne séance : les séries déjà enregistrées reviennent cochées, les autres restent à cocher.
+- Les dernières charges ne mémorisent que les séries cochées ; message de fin avec le nombre de séries enregistrées ; courte phrase d'aide au-dessus du bouton d'enregistrement.
+- Aucun changement de design.
+
+---
+
+## [1.4.2] - 2026-11-01
+### 🎨 Retour aux couleurs d'origine sur trois éléments de la Séance
+- Rappel « N'oublie pas d'arrêter le suivi de ta montre ! » : ambre d'origine.
+- Badge du chrono de repos : fond de carte avec bordure et texte indigo (prêt), vert (en cours), rouge de séance C (terminé), comme avant.
+- Barre de progression des séries de la séance : indigo d'origine (`--indigo`, `#3730E3` en clair, `#9AA1FF` en sombre).
+
+---
+
+## [1.4.1] - 2026-11-01
+### 🎯 Ajustements du design après usage
+- **Titre d'exercice sur une seule ligne** : l'exercice ouvert n'est plus enfermé dans une carte (icône 52 px, nom 18 px, boutons − / + 40 px), ce qui laisse la place au nom, même « Développé militaire », à 360 et 390 px.
+- **Séries : le vert signale une série validée** (comme avant), le rouge n'est plus utilisé pour les séries. Série en cours = ligne surélevée avec case cerclée d'encre ; série validée = case verte avec coche.
+- **Valeurs d'une série à faire en pâle** (suggestions non saisies, contraste volontairement bas) ; elles passent en encre dès qu'on les saisit ou que la série devient la série en cours. Valable en thème clair et sombre.
+- **Badges Déload** : retour aux couleurs ambre d'origine (accueil, séance, historique), l'éclair suit la couleur du texte.
+
+---
+
+## [1.4.0] - 2026-10-31
+### 🎨 Nouveau design « Blanc minimaliste » (thèmes clair et sombre)
+- Fond uni, très peu de couleurs : encre noire (blanc cassé en sombre), rouge pour l'action, violet pour le bloc de progression globale. Plus de cartes ni de bordures ; des ombres basses et denses là où elles aident la lecture.
+- **Programme** : grand bloc « Prochaine séance » (noir en clair, **blanc cassé en sombre**) avec bouton rouge rond ; exercices en grille 3 × 2 d'icônes sans cadre, avec ombre portée.
+- **Navigation** : pastille flottante, l'onglet actif affiche son libellé (libellés accessibles conservés pour les lecteurs d'écran).
+- **Séance** : champs en pastilles, série en cours surélevée avec validation rouge, séries validées en grisé ; chrono de repos prêt / en cours / terminé.
+- **Pastilles A / B / C** en cercles de couleur ; pastille et tag **Déload** avec éclair rouge (accueil, séance, historique).
+- **Graphiques** : bloc violet conservé dans les deux thèmes ; courbes et graduations aux couleurs du thème.
+- Gris secondaire assombri pour respecter le contraste 4,5:1. Aucun changement de données ni de logique.
+
+---
+
+## [1.3.9] - 2026-10-30
+### 🛡️ Durcissement sécurité
+- Ajout d’une **Content-Security-Policy** limitant scripts, styles, images, polices et connexions à la même origine.
+- Ajout de `js/security.js` : les sauvegardes JSON importées sont analysées et les caractères `<` / `>` sont retirés de toutes les chaînes afin de prévenir l’injection HTML ou JavaScript.
+- `js/security.js` est préchargé par le service worker pour rester actif hors-ligne.
+
+---
+
+## [1.3.8] - 2026-10-29
+### 🧭 Navigation du bas immobile dans le navigateur
+- Seule une **zone centrale défile** (`#app-scroll`) ; le document lui-même ne défile plus. Dans Chrome (onglet normal), la barre d'adresse ne se replie donc plus et la barre de navigation du bas ne « saute » plus pendant le défilement.
+- L'en-tête (et la bannière de séance) est maintenant fixe par construction, hors de la zone défilante. Le tirer-pour-rafraîchir reste désactivé (`overscroll-behavior: contain`).
+- Le défilement revient en haut à chaque changement d'onglet.
+
+---
+
+## [1.3.7] - 2026-10-29
+### 📌 En-tête fixe sur tous les onglets
+- Le **nom de l'application avec son numéro de version et le titre de l'onglet** (Programme, Graphiques, Historique) restent désormais collés en haut de l'écran pendant le défilement, comme sur l'onglet Séance.
+
+---
+
+## [1.3.6] - 2026-10-29
+### 📌 Bannière de séance stable
+- L'**en-tête (titre) et la bannière** (nom de la séance, déload, progression, durée) forment désormais **un seul bloc collé en haut** de l'onglet Séance : plus de décalage de 15 px au premier défilement, plus de deux éléments collants indépendants qui pouvaient se désynchroniser (Android / barre d'adresse).
+- La marge de défilement des exercices s'appuie sur la hauteur de ce bloc unique.
+
+---
+
+## [1.3.5] - 2026-10-29
+### 🔠 Polices +1 px
+- **Toutes les tailles de police augmentent d'1 px** (59 règles CSS : titres, chiffres, libellés, boutons, navigation, pastilles ; texte de base 17 px) ainsi que les textes des **graphiques** (légendes 13 px, dates de l'axe 10 px).
+- Contrôle automatisé à 360 px et 390 px, thèmes clair et sombre, sur les 4 onglets (exercices ouverts, chrono lancé, fenêtre de modification, valeurs à 3 chiffres) : **aucun texte rogné, aucun débordement, pas de défilement horizontal**.
+- Ajustements pour que rien ne se dégrade : dates de l'axe des graphiques toujours à l'horizontale (certaines sont sautées plutôt qu'inclinées) ; sur écran étroit (≤ 380 px), icône de l'exercice ouvert et boutons − / + légèrement réduits (44 px et 40 px) pour que « Presse à cuisses » reste sur une ligne.
+
+---
+
+## [1.3.4] - 2026-10-29
+### 🛡️ La saisie en cours n'est plus perdue
+- **Brouillon de séance** : poids, répétitions, séries validées, nombre de séries, exercice ouvert et chrono sont copiés dans la mémoire de l'appareil à chaque action, et **restaurés automatiquement** si l'application se recharge (tirer pour rafraîchir par erreur, application fermée par le système, mise à jour...). Le brouillon est effacé à l'enregistrement de la séance et abandonné au bout de 24 h. Il survit aussi à la modification d'une ancienne séance.
+- **Plus de « tirer pour rafraîchir »** : le geste du navigateur qui rechargeait l'application est désactivé (`overscroll-behavior`).
+- Le chrono de séance affiche tout de suite la bonne durée au lieu de repartir de 00:00 pendant une seconde.
+
+---
+
 ## [1.3.3] - 2026-10-29
-### 🚀 Mise en production
-- Fusion de `dev` dans `main` : la branche principale reprend le design v1.2.0 (thème indigo, navigation flottante, écrans refaits), la police Chakra Petch (v1.3.0), le thème sombre Clair / Sombre / Auto (v1.3.1) et les icônes d'exercices détourées (v1.3.2).
-- Aucun changement fonctionnel par rapport à la v1.3.2 ; seuls les numéros de version (`manifest.json`, `APP_VERSION` du service worker) sont incrémentés pour forcer la mise à jour sur le smartphone.
+### 🔤 Police des titres : Saira Semi Condensed
+- **Titres et chiffres** passent de Chakra Petch à **Saira Semi Condensed** (600 / 700) : sportive et technique, plus discrète et plus étroite. Le texte courant reste en Figtree.
+- Police embarquée en local (licence SIL OFL 1.1) et préchargée par le service worker : fonctionne hors-ligne. Les fichiers Chakra Petch sont supprimés.
+
+---
 
 ## [1.3.2] - 2026-10-28
 ### 🖼️ Icônes d'exercices sans fond
@@ -106,7 +566,7 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [1.1.12] - 2026-10-20
 ### 🎨 Nouveau design - étape 1/7 : polices et thème clair
-- Thème clair indigo (fond clair, cartes blanches, couleur principale indigo) appliqué à toute l'application,
+- Thème clair indigo (fond clair, cartes blanches, couleur principale indigo) appliquée à toute l'application,
   via des variables CSS (jetons de design) réutilisables pour les étapes suivantes.
 - Nouvelles polices embarquées en local (fonctionnent hors-ligne) : Bricolage Grotesque (titres et chiffres)
   et Figtree (texte). Remplace Inter.
@@ -251,7 +711,7 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [1.0.3] - 2026-10-17
 ### 🐛 Corrections
-- Modification d'une séance : le compteur de durée n'affiche plus un « 00:00 » trompeur. Il indique désormais la durée enregistrée de la séance (libellé « Durée enregistrée »), ou « N/A » si elle n'était pas renseignée.
+- Modification d'une séance : le compteur de durée n'affiche plus un « 00:00 » trompeur. Il indique désormais la durée enregistrée de la séance (libellé « Durée enregistrée »), ou « N/A » si la durée n'était pas renseignée.
 - Le chrono ne démarre plus tout seul lors de la saisie d'une série pendant une modification, ce qui évite d'écraser la durée d'origine par « < 1 min ».
 
 ---
@@ -260,7 +720,7 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ### 🐛 Corrections
 - Modification d'une séance : l'originale n'est plus supprimée de l'historique dès l'ouverture du formulaire. Elle n'est remplacée qu'à la validation, ce qui évite toute perte de données si l'on quitte l'application en cours de modification.
 - La durée et le statut de déload d'origine sont conservés lors de la modification d'une séance.
-- La modification d'une ancienne séance ne change plus les dernières charges utilisées pour les suggestions.
+- La modification d'une ancienne séance ne change pas les dernières charges utilisées pour les suggestions.
 - Correction de la date de la version 1.0.0 dans ce changelog (11/10/2024 → 31/10/2025, date du premier dépôt).
 
 ### 🪶 Ajouts
