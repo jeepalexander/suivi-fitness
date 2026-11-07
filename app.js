@@ -2910,10 +2910,32 @@ function chromeIntentUrl(url) {
   return 'intent://' + url.replace(/^https:\/\//, '').split('#')[0]
     + '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(url) + ';end';
 }
+// L'application installée partage son stockage avec le navigateur qui l'a installée, et SEULEMENT avec lui :
+// le jeton doit donc être obtenu dans ce même navigateur (1.6.34, co-auteur : Claude). Chrome : intent vers le vrai
+// Chrome (inchangé). Firefox et les autres navigateurs : nouvel onglet de ce navigateur (un jeton obtenu dans Chrome
+// resterait invisible pour une application installée avec Firefox).
+function isChromeAndroid() {
+  const ua = navigator.userAgent || '';
+  return isAndroid() && /Chrome\//.test(ua) && !/SamsungBrowser|EdgA|OPR\/|YaBrowser|Firefox|; wv\)/.test(ua);
+}
 function openGoogleAuth(url) {
-  navigateTo(isInstalledApp() && isAndroid() ? chromeIntentUrl(url) : url);
+  if (!isInstalledApp() || !isAndroid()) { navigateTo(url); return; }
+  if (isChromeAndroid()) { navigateTo(chromeIntentUrl(url)); return; }
+  if (!openBrowserTab(url)) {
+    // ouverture refusée (fenêtres bloquées, ex. reconnexion automatique sans appui) : rien n'est perdu
+    showToast('Connexion Google non ouverte : touche « Reconnecter maintenant » dans Réglages.', 6000);
+    updateDriveUI();
+  }
 }
 function navigateTo(url) { location.assign(url); }
+function openBrowserTab(url) {
+  try {
+    const w = window.open(url, '_blank');
+    if (!w) return false;
+    try { w.opener = null; } catch (e) { /* ignoré */ }
+    return true;
+  } catch (e) { return false; }
+}
 
 // Au démarrage : récupère le jeton renvoyé par Google dans l'adresse. Renvoie 'ok', 'error' ou null
 // (rien à faire). L'adresse est nettoyée ; un retour dont le « state » ne correspond pas est ignoré.
