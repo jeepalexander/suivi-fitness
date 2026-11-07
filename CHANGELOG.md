@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.29] - 2026-11-07
+### 🔧 Divers
+- **`data.json` vidé** : plus aucune séance, pesée ni charge d'exemple dans l'application (33 séances d'essai supprimées). Un nouvel appareil, ou « Réinitialiser les données », démarre sur un historique vide (la sauvegarde Google Drive se restaure depuis les Réglages).
+- Les tests utilisent désormais leur propre jeu d'essai `tests/fixture_data.json`.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.29.
+
+---
+
 ## [1.6.28] - 2026-11-07
 ### 🎨 Design
 - **Progression globale** : la variation « +x % vs mois précédent » n'a plus de fond (elle ressemblait à un bouton) et est remontée contre le chiffre, plus éloignée du titre du graphique.

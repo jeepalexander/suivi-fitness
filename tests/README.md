@@ -1,6 +1,6 @@
 # Tests automatiques
 
-Ils ouvrent l'application dans un vrai navigateur (Chromium piloté par Playwright), avec les données de `data.json`, et vérifient les comportements qui ont déjà posé problème.
+Ils ouvrent l'application dans un vrai navigateur (Chromium piloté par Playwright), avec le jeu d'essai `tests/fixture_data.json` (le `data.json` de l'application est vide), et vérifient les comportements qui ont déjà posé problème.
 
 ## Lancer
 ```bash
