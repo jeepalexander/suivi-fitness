@@ -3075,6 +3075,7 @@ function driveNeedsBackup() {
 }
 
 let driveSyncing = false;
+let driveForceOverwrite = false; // « Remplacer la sauvegarde Drive » : contourne la protection contre l'écrasement par des données vides
 let driveSyncAgain = false;
 
 // Envoie la sauvegarde complète si elle est à envoyer. Renvoie { ok } ou { reason } :
@@ -3110,7 +3111,17 @@ async function syncDriveBackup() {
         }
         fileId = found.id;
       }
+    } else if (!driveForceOverwrite && state && Array.isArray(state.history) && state.history.length === 0) {
+      // Protection : cet appareil n'a plus aucune séance (réinitialisation, données effacées). On n'écrase pas une
+      // sauvegarde Drive qui en contient : l'utilisateur choisit de la restaurer ou de la remplacer.
+      const remote = await downloadDriveBackup(token.access_token, fileId);
+      if (remote.ok && !driveRemoteIsContainedInLocal(remote.data)) {
+        const n = remote.data && Array.isArray(remote.data.history) ? remote.data.history.length : null;
+        setDriveConflict({ id: fileId, modified: '', sessions: n });
+        return { reason: 'conflict' };
+      }
     }
+    driveForceOverwrite = false;
     const res = await writeDriveBackup(token.access_token, folderId, payload, fileId);
     if (res.status === 401) { expireDriveToken(); return { reason: 'token' }; }
     if (!res.ok) { setDriveError(await driveErrorText(res)); return { reason: 'error' }; }
@@ -3148,6 +3159,7 @@ function replaceDriveBackupWithThisDevice() {
   setDriveBackupId(c.id);
   setDriveConflict(null);
   localStorage.removeItem(DRIVE_LAST_HASH_KEY);
+  driveForceOverwrite = true;
   syncDriveBackup();
 }
 
@@ -3170,6 +3182,10 @@ async function restoreFromDrive() {
     }
     const when = formatDriveDate(file.modifiedTime) || 'date inconnue';
     const n = dl.data.history.length;
+    if (n === 0) {
+      alert('La sauvegarde Drive du ' + when + ' ne contient aucune séance : rien à restaurer, tes données n\'ont pas été modifiées.\n\nSi tu as un fichier de sauvegarde manuel, utilise « Restaurer » dans l\'Historique.');
+      return;
+    }
     const local = state && Array.isArray(state.history) ? state.history.length : 0;
     if (!confirm('Restaurer la sauvegarde Drive du ' + when + ' (' + n + ' séance' + (n > 1 ? 's' : '') + ') ?\n\n'
       + 'Cela remplace les données de cet appareil (' + local + ' séance' + (local > 1 ? 's' : '') + ').')) return;

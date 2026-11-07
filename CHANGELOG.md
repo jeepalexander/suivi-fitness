@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.30] - 2026-11-07
+### 🐛 Corrections
+- **La réinitialisation des données ne vide plus la sauvegarde Google Drive.** Quand cet appareil n'a plus aucune séance (réinitialisation, données effacées), la sauvegarde automatique n'écrase plus un fichier Drive qui en contient : l'envoi est suspendu et l'écran Réglages propose « Restaurer depuis Drive » ou « Remplacer » (choix explicite). Une suppression volontaire de séances reste purgée normalement.
+- « Restaurer depuis Drive » avec une sauvegarde **vide** : message explicatif, aucune donnée locale modifiée.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.30.
+
+---
+
 ## [1.6.29] - 2026-11-07
 ### 🔧 Divers
 - **`data.json` vidé** : plus aucune séance, pesée ni charge d'exemple dans l'application (33 séances d'essai supprimées). Un nouvel appareil, ou « Réinitialiser les données », démarre sur un historique vide (la sauvegarde Google Drive se restaure depuis les Réglages).
