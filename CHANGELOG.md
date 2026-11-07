@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.28] - 2026-11-07
+### 🎨 Design
+- **Progression globale** : la variation « +x % vs mois précédent » n'a plus de fond (elle ressemblait à un bouton) et est remontée contre le chiffre, plus éloignée du titre du graphique.
+- Titre du graphique : « Volume total (kg) par : » (suivi des boutons Séances · A / B / C · Mois).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.28.
+
+---
+
 ## [1.6.27] - 2026-11-07
 ### 🎨 Design
 - **Progression globale** : hauteur du graphique (210 px) et zone de tracé **identiques** en vue par séance, par mois et par jour (plus de saut à la bascule) ; l'axe Y fixe est aligné sur les graduations.
