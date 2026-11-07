@@ -2893,8 +2893,21 @@ function connectDriveByRedirect() {
   });
   const account = getDriveAccount();
   if (account) p.set('login_hint', account.email);
-  location.assign('https://accounts.google.com/o/oauth2/v2/auth?' + p.toString());
+  openGoogleAuth('https://accounts.google.com/o/oauth2/v2/auth?' + p.toString());
 }
+
+// Application installée sur Android : la page de connexion Google ouverte depuis l'application plein écran
+// (onglet intégré) reste blanche. On l'ouvre donc dans le vrai Chrome (intent), qui renvoie vers l'application ;
+// le jeton est mémorisé dans le stockage partagé et repris au retour dans l'application (voir storage / visibilitychange).
+function isAndroid() { return /Android/i.test(navigator.userAgent || ''); }
+function chromeIntentUrl(url) {
+  return 'intent://' + url.replace(/^https:\/\//, '').split('#')[0]
+    + '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(url) + ';end';
+}
+function openGoogleAuth(url) {
+  navigateTo(isInstalledApp() && isAndroid() ? chromeIntentUrl(url) : url);
+}
+function navigateTo(url) { location.assign(url); }
 
 // Au démarrage : récupère le jeton renvoyé par Google dans l'adresse. Renvoie 'ok', 'error' ou null
 // (rien à faire). L'adresse est nettoyée ; un retour dont le « state » ne correspond pas est ignoré.
@@ -2916,6 +2929,8 @@ function handleDriveRedirectReturn() {
     localStorage.setItem(DRIVE_WANTED_KEY, '1');
     clearDriveError();
     driveRedirectError = '';
+    // Retour dans un onglet Chrome (et non dans l'application plein écran) : on l'indique, l'application reprendra le jeton.
+    if (!isInstalledApp()) setTimeout(() => showToast('Connexion à Google Drive réussie ✅\nTu peux fermer cet onglet et revenir à l\'application plein écran.', 15000), 1200);
     return 'ok';
   } catch (e) { return null; }
 }
@@ -3450,11 +3465,15 @@ async function initApp() {
     if (isDriveConnected() && !getDriveAccount()) fetchDriveAccount();
     if (driveReturn) switchTab('reglages'); // on revient sur Réglages pour voir le résultat de la connexion
   }, 800);
+  // Jeton écrit par un autre onglet (connexion faite dans Chrome pendant que l'application plein écran attend)
+  window.addEventListener('storage', (e) => {
+    if (e.key === DRIVE_TOKEN_KEY || e.key === DRIVE_WANTED_KEY) { updateDriveUI(); if (isDriveConnected()) { syncDriveBackup(); if (!getDriveAccount()) fetchDriveAccount(); } }
+  });
   // Retour dans l'application (ex. après une connexion faite dans un onglet voisin) : on relit l'état de Drive
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) return;
     updateDriveUI();
-    if (isDriveConnected()) syncDriveBackup();
+    if (isDriveConnected()) { syncDriveBackup(); if (!getDriveAccount()) fetchDriveAccount(); }
   });
   const saved = localStorage.getItem('h49_state');
   if (saved) {

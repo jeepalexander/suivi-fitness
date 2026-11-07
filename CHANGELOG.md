@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.32] - 2026-11-07
+### 🐛 Corrections
+- **Connexion Google Drive depuis l'application plein écran (Android)** : la page de connexion Google ouverte dans l'onglet intégré de l'application restait blanche. Elle s'ouvre maintenant dans le **vrai Chrome** (intent, avec repli sur l'ouverture habituelle si Chrome est absent). Au retour, l'onglet Chrome affiche « Connexion réussie, tu peux fermer cet onglet », et l'application plein écran **reprend automatiquement le jeton** (stockage partagé : événement `storage` + retour au premier plan).
+- Navigateur (non installé) et bureau : comportement inchangé.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.32.
+
+---
+
 ## [1.6.31] - 2026-11-07
 ### 🐛 Corrections
 - **Bouton honnête** : quand l'appareil ne contient aucune séance, « Remplacer par cet appareil » devient **« Effacer définitivement la sauvegarde Drive »** (en rouge), avec un message et une confirmation « Effacer DÉFINITIVEMENT… » qui disent clairement que la sauvegarde sera vidée. Appareil non vide : libellé « Remplacer par cet appareil » inchangé.
