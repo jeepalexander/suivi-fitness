@@ -90,7 +90,7 @@ with Srv() as base, sync_playwright() as p:
     check("UN seul fichier créé, nommé fitness-backup-AAAA-MM-JJ-HH-MM-SS.json", d.posts == 1 and len(uploads) == 1 and NAME_RE.match(d.post_names[0]), f'{len(uploads)} création(s) {d.post_names}')
     check(f"le fichier contient tout l'état : {N} séances, poids, dernières charges, prochaine séance",
           len(c.get('history', [])) == N and len(c.get('weights', [])) == len(DATA['weights']) and c.get('lastWeights') == DATA['lastWeights'] and c.get('nextType') == local_state(pg)['nextType'], f"{len(c.get('history', []))} séances")
-    check("identifiant du fichier et empreinte retenus, date de dernière sauvegarde affichée", ls(pg, 'h49_drive_backup_id') == 'BK1' and ls(pg, 'h49_drive_last_hash') and 'dernière sauvegarde' in pg.evaluate(STATUS), pg.evaluate(STATUS))
+    check("identifiant du fichier et empreinte retenus, date de dernière sauvegarde affichée", ls(pg, 'h49_drive_backup_id') == 'BK1' and ls(pg, 'h49_drive_last_hash') and 'Dernière sauvegarde' in pg.evaluate(STATUS), pg.evaluate(STATUS))
     # 2) rien n'a changé : rien n'est renvoyé
     n0 = len(d.calls)
     r = pg.evaluate("syncDriveBackup()")
@@ -140,7 +140,7 @@ with Srv() as base, sync_playwright() as p:
     ctx, pg, dlg = run(br, base, d, seeds=[EXPIRED, FOLDER])
     pg.wait_for_timeout(1200)
     pg.evaluate("state.weights.push({date:'2026-11-06', weight:83}); saveState()"); pg.wait_for_timeout(2000)
-    check("accès expiré : aucune requête, Réglages indique « modifications en attente d'envoi »", d.uploads() == 0 and "modifications en attente d'envoi" in pg.evaluate(STATUS), pg.evaluate(STATUS))
+    check("accès expiré : aucune requête, Réglages indique « modifications en attente d'envoi »", d.uploads() == 0 and "odifications en attente d'envoi" in pg.evaluate(STATUS), pg.evaluate(STATUS))
     ctx.close()
 
     # 11) jamais connecté : aucune requête Drive, aucun message

@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.35] - 2026-11-07
+### ✏️ Textes de la page Réglages simplifiés
+- **Apparence** : seule la première phrase d'explication est conservée.
+- **Sauvegarde Google Drive** (connecté) : une information par ligne — « Sauvegarde automatique activée », le compte, « Dernière sauvegarde : date » (ou « Envoi en cours… » / « Modifications en attente d'envoi »). Les messages d'accès expiré, de conflit et d'erreur sont inchangés.
+- Texte sous « Restaurer depuis Drive » raccourci (sauvegarde à chaque séance ou modification, 5 dernières conservées et restaurables).
+- Texte sous la version : vérification à chaque lancement, bouton « Vérifier », aucune installation automatique.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.35.
+
+---
+
 ## [1.6.34] - 2026-11-07
 ### 🐛 Corrections
 - **« Reconnecter maintenant » dans l'application installée avec Firefox (Android)** : la connexion Google s'ouvrait toujours dans **Chrome**. Chrome recevait l'accès, mais l'application installée avec Firefox ne partage pas le stockage de Chrome : elle ne le voyait jamais, même en suivant la procédure. La connexion s'ouvre maintenant dans un **nouvel onglet du navigateur qui a installé l'application** (Firefox, Samsung Internet…). Au retour, cet onglet affiche « Connexion réussie, tu peux fermer cet onglet » et l'application reprend l'accès automatiquement.

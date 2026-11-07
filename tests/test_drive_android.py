@@ -57,7 +57,7 @@ with Srv() as base, sync_playwright() as p:
     pg2.evaluate("t=>{localStorage.setItem('h49_drive_token', JSON.stringify(t)); localStorage.setItem('h49_drive_wanted','1')}", tok)
     pg.wait_for_timeout(2500)
     st = pg.inner_text('#drive-status')
-    check("jeton écrit par un autre onglet : l'application plein écran passe à « Connecté » sans rien faire", st.startswith('Connecté') or 'jean@example.com' in st, st)
+    check("jeton écrit par un autre onglet : l'application plein écran passe à « Connecté » sans rien faire", st.startswith('Sauvegarde automatique activée') or 'jean@example.com' in st, st)
     ctx.close()
 
     # retour dans un onglet Chrome (hors plein écran) : message explicite
@@ -88,7 +88,7 @@ with Srv() as base, sync_playwright() as p:
     check("retour OAuth dans l'onglet Firefox : jeton mémorisé, message « fermer cet onglet »", pg2.evaluate("(JSON.parse(localStorage.getItem('h49_drive_token'))||{}).access_token") == 'tokF' and 'fermer cet onglet' in pg2.inner_text('#toast'))
     pg.wait_for_timeout(1500)
     st = pg.inner_text('#drive-status')
-    check("Firefox : l'application plein écran reprend le jeton et passe à « Connecté »", st.startswith('Connecté') or 'jean@example.com' in st, st)
+    check("Firefox : l'application plein écran reprend le jeton et passe à « Connecté »", st.startswith('Sauvegarde automatique activée') or 'jean@example.com' in st, st)
     ctx.close()
     # onglet refusé par Firefox (ex. reconnexion automatique sans appui) : pas de page blanche, message clair
     ctx, pg, errs = page(br, base, ua=UA_FF, installed=True)

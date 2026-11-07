@@ -2732,6 +2732,12 @@ async function probeDriveAccess() {
   finally { driveProbing = false; updateDriveUI(); }
 }
 
+// Statut Drive sur plusieurs lignes (texte seul, séparé par des retours à la ligne <br>).
+function setDriveStatusLines(el, lines) {
+  el.textContent = '';
+  lines.forEach((t, i) => { if (i) el.appendChild(document.createElement('br')); el.appendChild(document.createTextNode(t)); });
+}
+
 function updateDriveUI() {
   const statusEl = document.getElementById('drive-status');
   const connectBtn = document.getElementById('drive-connect-btn');
@@ -2778,10 +2784,14 @@ function updateDriveUI() {
     if (connectBtn) connectBtn.style.display = 'none';
     if (disconnectBtn) disconnectBtn.style.display = '';
   } else if (isDriveConnected()) {
-    const accountIssue = !account && driveAccountError ? ' · adresse du compte indisponible (' + driveAccountError + ')' : '';
-    statusEl.textContent = (account
-      ? 'Connecté : ' + account.email + ' — sauvegarde automatique active'
-      : 'Connecté — sauvegarde automatique active') + accountIssue + pendingText;
+    // Une information par ligne (1.6.35) : état, compte, dernière sauvegarde (ou envoi en cours / en attente).
+    const lines = ['Sauvegarde automatique activée'];
+    if (account) lines.push(account.email);
+    else if (driveAccountError) lines.push('Adresse du compte indisponible (' + driveAccountError + ')');
+    if (driveSyncing) lines.push('Envoi en cours…');
+    else if (driveNeedsBackup()) lines.push('Modifications en attente d\'envoi');
+    else if (last) lines.push('Dernière sauvegarde : ' + formatDriveDate(last));
+    setDriveStatusLines(statusEl, lines);
     if (connectBtn) connectBtn.style.display = 'none';
     if (disconnectBtn) disconnectBtn.style.display = '';
   } else if (isDriveWanted()) {
