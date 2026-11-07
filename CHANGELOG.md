@@ -7,6 +7,18 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.33] - 2026-11-07
+### ✨ Nouveautés
+- **Versions de la sauvegarde Google Drive** : chaque sauvegarde automatique crée désormais un **nouveau fichier** `fitness-backup-AAAA-MM-JJ-HH-MM-SS.json` (heure de l'appareil) dans le dossier « FITNESS AAP – Séances », au lieu d'écraser le précédent. Rien n'est envoyé si les données n'ont pas changé (inchangé).
+- **5 versions conservées** : après chaque envoi réussi, les sauvegardes au-delà des 5 plus récentes sont mises à la **corbeille du Drive** (récupérables 30 jours). L'ancien fichier `sauvegarde_complete.json` compte comme une version : il reste restaurable tant qu'il fait partie des 5 plus récentes. Les autres fichiers du dossier ne sont jamais touchés.
+- **Échec de suppression non bloquant** : si la mise à la corbeille d'une vieille sauvegarde échoue, la sauvegarde principale reste réussie ; l'erreur est seulement notée dans la console.
+- **Restaurer depuis Drive** : affiche la liste des **5 dernières sauvegardes** avec leur date et heure ; chacune a son bouton « Restaurer » (même confirmation et même import assaini qu'avant). Sauvegarde disparue entre-temps : message et liste rafraîchie.
+- Protection « appareil vide » renforcée : une sauvegarde vide n'est jamais envoyée par-dessus la sauvegarde la plus récente du Drive si celle-ci contient des séances.
+- Format du JSON sauvegardé inchangé.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.33.
+
+---
+
 ## [1.6.32] - 2026-11-07
 ### 🐛 Corrections
 - **Connexion Google Drive depuis l'application plein écran (Android)** : la page de connexion Google ouverte dans l'onglet intégré de l'application restait blanche. Elle s'ouvre maintenant dans le **vrai Chrome** (intent, avec repli sur l'ouverture habituelle si Chrome est absent). Au retour, l'onglet Chrome affiche « Connexion réussie, tu peux fermer cet onglet », et l'application plein écran **reprend automatiquement le jeton** (stockage partagé : événement `storage` + retour au premier plan).

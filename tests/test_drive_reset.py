@@ -2,7 +2,7 @@
 import json, sys
 from harness import *
 from drive_mock import FakeDrive
-from test_drive_sauvegarde_helpers import run, VALID, FOLDER, BKID, N, DATA, local_state
+from test_drive_sauvegarde_helpers import run, restore_pick, VALID, FOLDER, BKID, N, DATA, local_state
 
 res = []
 
@@ -31,7 +31,7 @@ with Srv() as base, sync_playwright() as p:
     pg.evaluate("driveConflictDateAsked=false; setDriveConflict({id:'BK1',modified:'',sessions:42}); updateDriveUI();"); pg.wait_for_timeout(1500)
     check("conflit ancien sans date : la date est récupérée et affichée", 'date inconnue' not in pg.inner_text('#drive-status'), pg.inner_text('#drive-status'))
     # restauration depuis Drive : tout revient
-    pg.evaluate("restoreFromDrive()"); pg.wait_for_timeout(2500)
+    restore_pick(pg, 0)
     check(f"« Restaurer » : les {N} séances reviennent", len(local_state(pg)['history']) == N, len(local_state(pg)['history']))
     ctx.close()
 
@@ -55,7 +55,7 @@ with Srv() as base, sync_playwright() as p:
     pg.wait_for_timeout(1500)
     d2.backup = json.dumps({'nextType': 'A', 'history': [], 'weights': [], 'lastWeights': {}})  # la sauvegarde Drive est (devenue) vide
     n0 = len(local_state(pg)['history']); dlg.clear()
-    pg.evaluate("restoreFromDrive()"); pg.wait_for_timeout(2000)
+    restore_pick(pg, 0, 2000)
     check("sauvegarde Drive vide : « Restaurer » refuse et ne touche pas aux données locales", len(local_state(pg)['history']) == n0 and any('aucune séance' in m for t, m in dlg), dlg)
     ctx.close(); br.close()
 

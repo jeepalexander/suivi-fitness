@@ -2,7 +2,7 @@
 
 **Application PWA de suivi d'entraînement en salle de sport**
 
-[![Version](https://img.shields.io/badge/version-1.6.32-blue)](https://github.com/jeepalexander/suivi-fitness)
+[![Version](https://img.shields.io/badge/version-1.6.33-blue)](https://github.com/jeepalexander/suivi-fitness)
 [![License](https://img.shields.io/badge/license-MIT-green)]
 
 ---
@@ -19,6 +19,7 @@
 - ✅ **Design « Blanc minimaliste »** : fond uni, peu de couleurs, ombres légères, en thème **clair, sombre ou automatique** (mémorisé sur l’appareil)
 - ✅ **Interface mobile optimisée** : en-tête fixe, navigation basse stable et zone de contenu défilante
 - ✅ **Mode hors-ligne complet** (PWA avec Service Worker)
+- ✅ **Sauvegarde Google Drive automatique** avec versions : un fichier `fitness-backup-AAAA-MM-JJ-HH-MM-SS.json` par sauvegarde, les 5 plus récentes conservées et restaurables au choix depuis les Réglages
 - ✅ **Export / Import** des données au format JSON, avec assainissement des fichiers importés et Content-Security-Policy
 
 ---

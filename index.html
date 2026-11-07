@@ -176,7 +176,8 @@
         <button type="button" id="drive-restore-btn" class="btn btn-secondary" style="display:none" onclick="restoreFromDrive()">Restaurer depuis Drive</button>
         <button type="button" id="drive-replace-btn" class="btn btn-secondary" style="display:none" onclick="replaceDriveBackupWithThisDevice()">Remplacer par cet appareil</button>
       </div>
-      <p class="theme-hint">À chaque séance enregistrée (et à chaque modification de tes données), la sauvegarde complète — historique, poids, dernières charges — est mise à jour dans le fichier <code>sauvegarde_complete.json</code> du dossier « FITNESS AAP – Séances » de ton Drive. C'est le même format que le bouton « Restaurer » de l'Historique.</p>
+      <div id="drive-backups" hidden></div>
+      <p class="theme-hint">À chaque séance enregistrée (et à chaque modification de tes données), une nouvelle sauvegarde complète — historique, poids, dernières charges — est créée dans le dossier « FITNESS AAP – Séances » de ton Drive (<code>fitness-backup-AAAA-MM-JJ-HH-MM-SS.json</code>). Les 5 plus récentes sont conservées : « Restaurer depuis Drive » permet de choisir laquelle restaurer. C'est le même format que le bouton « Restaurer » de l'Historique.</p>
     </div>
     <div class="card update-card" id="update-card">
       <div class="card-title">Application</div>
