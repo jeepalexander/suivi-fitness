@@ -89,6 +89,7 @@ with Srv() as base, sync_playwright() as p:
     c = d.content() or {}
     uploads = [u for (m, u) in d.calls if m == 'POST' and '/upload/' in u]
     check("dossier absent : créé une seule fois", d.folders_created == 1, d.folders_created)
+    check("dossier créé sous le nom « MON CARNET DE SALLE » (aucun renommage nécessaire)", d.folder_name == 'MON CARNET DE SALLE' and d.folder_renames == 0, (d.folder_name, d.folder_renames))
     check("UN seul fichier créé, nommé fitness-backup-AAAA-MM-JJ-HH-MM-SS.json", d.posts == 1 and len(uploads) == 1 and NAME_RE.match(d.post_names[0]), f'{len(uploads)} création(s) {d.post_names}')
     check(f"le fichier contient tout l'état : {N} séances, poids, dernières charges, prochaine séance, programmes",
           len(c.get('history', [])) == N and len(c.get('weights', [])) == len(DATA['weights']) and c.get('lastWeights') == local_state(pg)['lastWeights'] and len(c.get('lastWeights', {})) == len(DATA['lastWeights']) and c.get('nextType') == local_state(pg)['nextType'] and [p['name'] for p in c.get('programs', [])] == ['Hypertrophie'], f"{len(c.get('history', []))} séances")
@@ -261,6 +262,20 @@ with Srv() as base, sync_playwright() as p:
     ctx, pg, dlg = run(br, base, d, seeds=["['h49_drive_queue','h49_drive_uploaded','h49_drive_files','h49_drive_history_todo'].forEach(k=>localStorage.setItem(k,'[]'));"])
     pg.wait_for_timeout(1500)
     check("anciens repères (file d'attente, fichiers par séance) supprimés au démarrage", all(ls(pg, k) is None for k in ('h49_drive_queue', 'h49_drive_uploaded', 'h49_drive_files', 'h49_drive_history_todo')))
+    ctx.close()
+    # ---------- 1.7.6 : ancien dossier « FITNESS AAP – Séances » renommé « MON CARNET DE SALLE » ----------
+    d = FakeDrive(folder=True, versions=[('fitness-backup-2026-11-07-18-42-00.json', '2026-11-07T17:42:00.000Z', DATA)])
+    ctx, pg, dlg = run(br, base, d, seeds=[VALID])
+    pg.wait_for_timeout(3000)
+    check("ancien dossier retrouvé : renommé une seule fois en « MON CARNET DE SALLE », ses sauvegardes restent et aucun dossier n'est créé",
+          d.folder_name == 'MON CARNET DE SALLE' and d.folder_renames == 1 and d.folders_created == 0 and any(f['name'].startswith('fitness-backup-2026-11-07') for f in d.live()), (d.folder_name, d.folder_renames, d.folders_created))
+    pg.reload(); pg.wait_for_timeout(2500)
+    check("renommage mémorisé : pas de nouveau renommage au lancement suivant", d.folder_renames == 1, d.folder_renames)
+    ctx.close()
+    d = FakeDrive(folder=True)
+    ctx, pg, dlg = run(br, base, d, seeds=[VALID, FOLDER])
+    pg.wait_for_timeout(3000)
+    check("dossier déjà connu de l'appareil (ancienne version) : renommé aussi", d.folder_renames == 1 and d.folder_name == 'MON CARNET DE SALLE', (d.folder_renames, d.folder_name))
     ctx.close()
     br.close()
 

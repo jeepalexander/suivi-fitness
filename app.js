@@ -108,7 +108,10 @@ const WEIGHT_DRAFT_KEY = 'h49_draft_weight';
 // Google Drive backup (co-auteur : Grok)
 const GOOGLE_CLIENT_ID = '903120094308-phdlfg1rug8v6hn231n8b4uu7vfj65uf.apps.googleusercontent.com';
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
-const DRIVE_FOLDER_NAME = 'FITNESS AAP – Séances';
+const DRIVE_FOLDER_NAME = 'MON CARNET DE SALLE';
+// Ancien nom du dossier (jusqu'à 1.7.5) : le dossier existant est renommé, ses sauvegardes restent dedans (1.7.6)
+const DRIVE_FOLDER_LEGACY_NAMES = ['FITNESS AAP – Séances'];
+const DRIVE_FOLDER_RENAMED_KEY = 'h49_drive_folder_renamed'; // identifiant du dossier déjà renommé sur cet appareil
 const DRIVE_BACKUP_NAME = 'sauvegarde_complete.json';      // ancien fichier unique (jusqu'à 1.6.32) : encore lu et restaurable
 // Versions (1.6.33, co-auteur : Claude) : chaque envoi crée un NOUVEAU fichier fitness-backup-AAAA-MM-JJ-HH-MM-SS.json,
 // les DRIVE_BACKUP_KEEP plus récents sont conservés, les plus anciens sont mis à la corbeille du Drive.
@@ -3323,9 +3326,21 @@ async function probeDriveAccess() {
 }
 
 // Statut Drive sur plusieurs lignes (texte seul, séparé par des retours à la ligne <br>).
-function setDriveStatusLines(el, lines) {
+function setDriveStatusLines(el, lines, live = false) {
   el.textContent = '';
-  lines.forEach((t, i) => { if (i) el.appendChild(document.createElement('br')); el.appendChild(document.createTextNode(t)); });
+  lines.forEach((t, i) => {
+    if (i) el.appendChild(document.createElement('br'));
+    if (i === 0 && live) {
+      const head = document.createElement('span');
+      head.className = 'drive-live';
+      const dot = document.createElement('span');
+      dot.className = 'prog-dot on';
+      dot.setAttribute('aria-hidden', 'true');
+      head.appendChild(dot);
+      head.appendChild(document.createTextNode(t));
+      el.appendChild(head);
+    } else el.appendChild(document.createTextNode(t));
+  });
 }
 
 function updateDriveUI() {
@@ -3376,13 +3391,13 @@ function updateDriveUI() {
     if (disconnectBtn) disconnectBtn.style.display = '';
   } else if (isDriveConnected()) {
     // Une information par ligne (1.6.35) : état, compte, dernière sauvegarde (ou envoi en cours / en attente).
-    const lines = ['Sauvegarde automatique activée'];
+    const lines = ['Sauvegarde automatique'];
     if (account) lines.push(account.email);
     else if (driveAccountError) lines.push('Adresse du compte indisponible (' + driveAccountError + ')');
     if (driveSyncing) lines.push('Envoi en cours…');
     else if (driveNeedsBackup()) lines.push('Modifications en attente d\'envoi');
     else if (last) lines.push('Dernière sauvegarde : ' + formatDriveDate(last));
-    setDriveStatusLines(statusEl, lines);
+    setDriveStatusLines(statusEl, lines, true);
     if (connectBtn) connectBtn.style.display = 'none';
     if (disconnectBtn) disconnectBtn.style.display = '';
   } else if (isDriveWanted()) {
@@ -3609,12 +3624,28 @@ function ensureDriveFolder(accessToken) {
   return driveFolderLock;
 }
 
+// Renomme le dossier de l'application en « MON CARNET DE SALLE » (une fois par dossier et par appareil).
+// Jamais bloquant : en cas d'échec, les sauvegardes continuent dans le dossier tel qu'il est.
+async function renameDriveFolderIfNeeded(accessToken, folderId, currentName) {
+  try {
+    if (!folderId || currentName === DRIVE_FOLDER_NAME || localStorage.getItem(DRIVE_FOLDER_RENAMED_KEY) === folderId) return;
+    const res = await fetch('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(folderId) + '?fields=id,name', {
+      method: 'PATCH',
+      headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: DRIVE_FOLDER_NAME })
+    });
+    if (res.ok) localStorage.setItem(DRIVE_FOLDER_RENAMED_KEY, folderId);
+    else console.warn('Drive : renommage du dossier impossible', res.status);
+  } catch (e) { console.warn('Drive : renommage du dossier impossible', e); }
+}
+
 async function ensureDriveFolderOnce(accessToken) {
   let folderId = localStorage.getItem(DRIVE_FOLDER_ID_KEY);
-  if (folderId) return folderId;
+  if (folderId) { await renameDriveFolderIfNeeded(accessToken, folderId); return folderId; }
 
-  // Search existing folder
-  const q = encodeURIComponent(`name='${DRIVE_FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+  // Search existing folder (nouveau nom ou ancien nom)
+  const names = [DRIVE_FOLDER_NAME].concat(DRIVE_FOLDER_LEGACY_NAMES).map(n => `name='${n}'`).join(' or ');
+  const q = encodeURIComponent(`(${names}) and mimeType='application/vnd.google-apps.folder' and trashed=false`);
   const search = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)`, {
     headers: { Authorization: 'Bearer ' + accessToken }
   });
@@ -3622,8 +3653,10 @@ async function ensureDriveFolderOnce(accessToken) {
   const data = await search.json();
   clearDriveError(); // Google a répondu : l'accès au dossier fonctionne
   if (data.files && data.files.length > 0) {
-    folderId = data.files[0].id;
+    const found = data.files.find(f => f.name === DRIVE_FOLDER_NAME) || data.files[0];
+    folderId = found.id;
     localStorage.setItem(DRIVE_FOLDER_ID_KEY, folderId);
+    await renameDriveFolderIfNeeded(accessToken, folderId, found.name);
     return folderId;
   }
 
@@ -3643,6 +3676,7 @@ async function ensureDriveFolderOnce(accessToken) {
   const created = await create.json();
   folderId = created.id;
   localStorage.setItem(DRIVE_FOLDER_ID_KEY, folderId);
+  localStorage.setItem(DRIVE_FOLDER_RENAMED_KEY, folderId);
   // Le dossier n'existait pas : il vient d'être créé vide, la sauvegarde complète doit y être (re)créée.
   localStorage.removeItem(DRIVE_BACKUP_ID_KEY);
   localStorage.removeItem(DRIVE_LAST_HASH_KEY);

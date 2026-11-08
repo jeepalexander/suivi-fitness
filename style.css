@@ -767,3 +767,8 @@ body[data-pview="choose"] .choose-lead { margin-top: 0; }
 .backup-item .mem-ico { background: var(--primary-strong); color: var(--on-strong); }
 .backup-item.file .mem-ico { background: var(--card-bg); color: var(--text); box-shadow: inset 0 0 0 1.5px var(--border); }
 .sheet-text.small { margin-top: 12px; font-size: 0.875rem; }
+
+/* Réglages › Sauvegarde Google Drive (1.7.6) : bouton d'abord, état dessous, pastille verte quand c'est actif */
+.drive-actions .btn:first-child, .drive-actions .btn[style*="display: none"] + .btn { margin-top: 0; }
+#drive-card .drive-status { margin-top: 12px; line-height: 1.45; }
+.drive-live { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; color: var(--text); }

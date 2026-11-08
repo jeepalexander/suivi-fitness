@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.6] - 2026-11-08
+### ✏️ Sauvegarde Google Drive (co-auteur : Claude)
+- **Dossier Drive renommé « MON CARNET DE SALLE »** (au lieu de « FITNESS AAP – Séances »). Le dossier existant est **renommé** automatiquement à la première sauvegarde (une seule fois par appareil) : les 5 sauvegardes restent dedans, rien n'est déplacé ni recréé. Un nouvel appareil retrouve le dossier sous l'un ou l'autre nom. En cas d'échec du renommage, les sauvegardes continuent normalement.
+- **Réglages, bloc simplifié** : le bouton (Connecter / Déconnecter) d'abord ; dessous, l'état avec une pastille verte devant « Sauvegarde automatique », le compte et la date de dernière sauvegarde ; puis : « Chaque séance validée déclenche une sauvegarde dans le dossier « MON CARNET DE SALLE ». 5 sauvegardes y sont conservées. Pour en reprendre une, touche « Restaurer » dans l'Historique. »
+- Tests : renommage du dossier (ancien nom retrouvé, dossier déjà connu, une seule fois) ; textes alignés.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.6.
+
+---
+
 ## [1.7.5] - 2026-11-08
 ### 🐛 Fenêtre « Restaurer une sauvegarde » (co-auteur : Claude)
 - **Choisir une sauvegarde ne rouvre plus la fenêtre** : la ligne cochée et le bouton se mettent à jour sur place (plus d'animation d'ouverture à chaque appui, défilement conservé). Même chose à l'arrivée de la liste Drive.

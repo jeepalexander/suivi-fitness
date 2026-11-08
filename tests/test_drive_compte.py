@@ -55,10 +55,10 @@ with Srv() as base, sync_playwright() as p:
 
     ctx, pg, seen = scenario(br, base, OK_USER)
     txt = pg.evaluate(STATUS)
-    check('connecté : adresse affichée', 'jean@example.com' in txt and txt.startswith('Sauvegarde automatique activée'), repr(txt))
+    check('connecté : adresse affichée', 'jean@example.com' in txt and txt.startswith('Sauvegarde automatique'), repr(txt))
     lines = pg.evaluate("document.getElementById('drive-status').innerText.split('\\n')")
-    check("connecté : 3 lignes — « Sauvegarde automatique activée » / compte / « Dernière sauvegarde : date »",
-          len(lines) == 3 and lines[0] == 'Sauvegarde automatique activée' and lines[1] == 'jean@example.com' and lines[2].startswith('Dernière sauvegarde : '), lines)
+    check("connecté : 3 lignes — « Sauvegarde automatique » (pastille verte) / compte / « Dernière sauvegarde : date »",
+          len(lines) == 3 and lines[0] == 'Sauvegarde automatique' and lines[1] == 'jean@example.com' and lines[2].startswith('Dernière sauvegarde : '), lines)
     check("l'API Drive est appelée avec le jeton", seen[:1] == ['Bearer tok123'], str(seen[:1]))
     check("adresse mémorisée sur l'appareil", json.loads(stored(pg))['email'] == 'jean@example.com')
     check('bouton Déconnecter visible, Connecter masqué', pg.evaluate("document.getElementById('drive-disconnect-btn').style.display===''&&document.getElementById('drive-connect-btn').style.display==='none'"))
@@ -68,7 +68,7 @@ with Srv() as base, sync_playwright() as p:
 
     evil = '<img src=x onerror=window.__x=1>@a.fr'
     ctx, pg, seen = scenario(br, base, (200, {'user': {'displayName': 'x', 'emailAddress': evil}}))
-    check('adresse piégée : affichée en texte, aucun élément injecté', pg.evaluate("[...document.querySelectorAll('#drive-status *')].every(e=>e.tagName==='BR')") and pg.evaluate("document.querySelectorAll('#drive-status img').length") == 0 and evil in pg.evaluate("document.getElementById('drive-status').textContent") and pg.evaluate("window.__x") is None)
+    check('adresse piégée : affichée en texte, aucun élément injecté', pg.evaluate("[...document.querySelectorAll('#drive-status *')].every(e=>e.tagName==='BR'||(e.tagName==='SPAN'&&/drive-live|prog-dot/.test(e.className)))") and pg.evaluate("document.querySelectorAll('#drive-status img').length") == 0 and evil in pg.evaluate("document.getElementById('drive-status').textContent") and pg.evaluate("window.__x") is None)
     ctx.close()
 
     # « about » refusé : seconde méthode (propriétaire du dossier)
@@ -82,7 +82,7 @@ with Srv() as base, sync_playwright() as p:
     ctx, pg, seen = scenario(br, base, (403, {'error': {}}), owner=(404, {}))
     txt = pg.evaluate(STATUS)
     check("les deux méthodes en erreur : raison affichée (about 403 + dossier 404), rien de mémorisé",
-          txt.startswith('Sauvegarde automatique activée') and 'Adresse du compte indisponible' in txt and 'about : 403' in txt and 'dossier : 404' in txt and stored(pg) is None, repr(txt))
+          txt.startswith('Sauvegarde automatique') and 'Adresse du compte indisponible' in txt and 'about : 403' in txt and 'dossier : 404' in txt and stored(pg) is None, repr(txt))
     ctx.close()
 
     ctx, pg, seen = scenario(br, base, (200, {'user': {}}), owner=(200, {'owners': [{}]}))

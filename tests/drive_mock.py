@@ -22,6 +22,8 @@ class FakeDrive:
         self.files = []     # {'id', 'name', 'modifiedTime', 'body', 'trashed'}
         self.fail = dict(fail or {})
         self.folders_created = 0
+        self.folder_name = 'FITNESS AAP – Séances'  # nom d'avant 1.7.6
+        self.folder_renames = 0
         self.posts = 0      # créations de fichiers de sauvegarde
         self.patches = 0    # anciennes mises à jour en place (ne doivent plus avoir lieu)
         self.trashes = 0    # sauvegardes mises à la corbeille
@@ -114,6 +116,14 @@ class FakeDrive:
                 self.fail['search'] = self.fail['list_after_post']
             return self._json(route, 200, {'id': fid, 'name': name})
         mt = re.search(r'/drive/v3/files/([^/?]+)', u)
+        if mt and m == 'PATCH' and mt.group(1) in ('EXIST', 'NEWF', 'F1'):
+            # renommage du dossier de l'application (1.7.6)
+            try:
+                self.folder_name = json.loads(r.post_data or '{}').get('name', self.folder_name)
+            except ValueError:
+                pass
+            self.folder_renames += 1
+            return self._json(route, 200, {'id': mt.group(1), 'name': self.folder_name})
         if mt and m in ('PATCH', 'DELETE') and '/upload/' not in u:
             self.trash_attempts += 1
             st = self.fail.get('trash', 200)
@@ -126,6 +136,10 @@ class FakeDrive:
             return self._json(route, 200, {'id': f['id']})
         if m == 'POST' and u.rstrip('/').endswith('/drive/v3/files'):
             self.folders_created += 1; self.folder = True
+            try:
+                self.folder_name = json.loads(r.post_data or '{}').get('name', self.folder_name)
+            except ValueError:
+                pass
             return self._json(route, 200, {'id': 'NEWF'})
         if 'alt=media' in u:
             st = self.fail.get('download', 200)
@@ -139,7 +153,7 @@ class FakeDrive:
             st = self.fail.get('folder', 200)
             if st != 200:
                 return self._json(route, st, err)
-            return self._json(route, 200, {'files': [{'id': 'EXIST'}] if self.folder else []})
+            return self._json(route, 200, {'files': [{'id': 'EXIST', 'name': self.folder_name}] if self.folder else []})
         if ' in parents' in u:
             st = self.fail.get('search', 200)
             if st != 200:

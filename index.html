@@ -182,14 +182,14 @@
     </div>
     <div class="card" id="drive-card">
       <div class="card-title">Sauvegarde Google Drive</div>
-      <p id="drive-status" class="theme-hint">Non connecté</p>
-      <div class="update-row" style="gap:8px;flex-wrap:wrap">
+      <div class="update-row drive-actions" style="gap:8px;flex-wrap:wrap">
         <button type="button" id="drive-connect-btn" class="btn" onclick="connectGoogleDrive()">Connecter Google Drive</button>
         <button type="button" id="drive-disconnect-btn" class="btn btn-secondary" style="display:none" onclick="disconnectGoogleDrive()">Déconnecter</button>
         <button type="button" id="drive-restore-btn" class="btn btn-secondary" style="display:none" onclick="openBackupRestore()">Restaurer</button>
         <button type="button" id="drive-replace-btn" class="btn btn-secondary" style="display:none" onclick="replaceDriveBackupWithThisDevice()">Remplacer par cet appareil</button>
       </div>
-      <p class="theme-hint">Chaque enregistrement de séance (ou modification) déclenche une sauvegarde sur le compte Drive dans le dossier « FITNESS AAP – Séances ». Par sécurité, les 5 dernières sauvegardes sont conservées : pour en reprendre une, touche « Restaurer » dans l'Historique.</p>
+      <p id="drive-status" class="theme-hint drive-status">Non connecté</p>
+      <p class="theme-hint">Chaque séance validée déclenche une sauvegarde dans le dossier « MON CARNET DE SALLE ». 5 sauvegardes y sont conservées. Pour en reprendre une, touche « Restaurer » dans l'Historique.</p>
     </div>
     <div class="card update-card" id="update-card">
       <div class="card-title">Application</div>
