@@ -772,3 +772,48 @@ body[data-pview="choose"] .choose-lead { margin-top: 0; }
 .drive-actions .btn:first-child, .drive-actions .btn[style*="display: none"] + .btn { margin-top: 0; }
 #drive-card .drive-status { margin-top: 12px; line-height: 1.45; }
 .drive-live { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; color: var(--text); }
+
+/* ============================================
+   Fond d'écran (1.7.7) : image choisie dans Réglages › Fond d'écran, sous un voile clair (ou sombre)
+   qui garde le texte lisible. <html data-wallpaper="…"> est posé avant le premier affichage par index.html.
+   ============================================ */
+#app-wallpaper { display: none; position: fixed; inset: 0; z-index: -1; pointer-events: none; background-color: var(--bg); background-size: cover; background-position: center; background-repeat: no-repeat; }
+#app-wallpaper::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255, 255, 255, 0.86) 0%, rgba(255, 255, 255, 0.78) 45%, rgba(255, 255, 255, 0.86) 100%); }
+:root[data-theme="dark"] #app-wallpaper::after { background: linear-gradient(180deg, rgba(14, 14, 17, 0.88) 0%, rgba(14, 14, 17, 0.8) 45%, rgba(14, 14, 17, 0.88) 100%); }
+:root[data-wallpaper] #app-wallpaper { display: block; }
+:root[data-wallpaper="course"] #app-wallpaper { background-image: url('wallpapers/course.jpg'); background-position: center 30%; }
+:root[data-wallpaper="barre"] #app-wallpaper { background-image: url('wallpapers/barre.jpg'); background-position: center 55%; }
+:root[data-wallpaper="halteres"] #app-wallpaper { background-image: url('wallpapers/halteres.jpg'); background-position: center 45%; }
+:root[data-wallpaper="kettlebell"] #app-wallpaper { background-image: url('wallpapers/kettlebell.jpg'); background-position: center 45%; }
+:root[data-wallpaper="studio"] #app-wallpaper { background-image: url('wallpapers/studio.jpg'); background-position: center 40%; }
+:root[data-wallpaper] header, :root[data-wallpaper] .ed-row { background: transparent; }
+:root[data-wallpaper] .ed-row.dragging { background: var(--bg); }
+
+/* En-tête : bouton retour à gauche du titre, sur la page Fond d'écran seulement */
+.page-title-row { display: flex; align-items: center; gap: 14px; min-width: 0; }
+#fond-back { display: none; }
+body[data-tab="fond"] #fond-back { display: flex; }
+body[data-tab="fond"] header h1 { font-size: 2.125rem; }
+body[data-tab="fond"] .page-title-row { margin-top: 10px; }
+
+/* Réglages › ligne « Fond d'écran » */
+.wallpaper-row { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 72px; padding: 8px 16px 8px 8px; border: none; border-radius: 24px; background: var(--fill); color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.wallpaper-row-thumb { flex: none; position: relative; width: 40px; height: 56px; border-radius: 10px; overflow: hidden; background: var(--card-bg); box-shadow: 0 4px 8px -4px rgba(17, 17, 20, 0.35); }
+.wallpaper-row-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.wallpaper-row-thumb img[hidden] { display: none; }
+.wallpaper-row-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.wallpaper-row-name { font-size: 1rem; font-weight: 600; }
+.wallpaper-row-sub { font-size: 0.8425rem; color: var(--text-muted); }
+.wallpaper-row-chev { flex: none; width: 20px; height: 20px; fill: none; stroke: var(--text-muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Page Fond d'écran : grille de vignettes */
+.wallpaper-lead { margin: 4px 0 0; font-size: 0.9375rem; line-height: 1.45; color: var(--text-muted); }
+.wallpaper-grid { list-style: none; margin: 20px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 12px; }
+.wallpaper-opt { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; padding: 0; border: none; background: transparent; color: var(--text); font: inherit; cursor: pointer; }
+.wallpaper-thumb { position: relative; display: block; width: 100%; aspect-ratio: 9 / 16; border-radius: 18px; overflow: hidden; background: var(--card-bg); border: 1px solid var(--border); box-shadow: 0 8px 14px -8px rgba(17, 17, 20, 0.35); }
+.wallpaper-opt[aria-checked="true"] .wallpaper-thumb { border: 3px solid var(--primary-strong); }
+.wallpaper-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.wallpaper-check { position: absolute; right: 8px; bottom: 8px; width: 26px; height: 26px; border-radius: 50%; background: var(--primary-strong); color: var(--on-strong); display: none; align-items: center; justify-content: center; }
+.wallpaper-opt[aria-checked="true"] .wallpaper-check { display: flex; }
+.wallpaper-check svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.wallpaper-name { font-size: 0.8425rem; font-weight: 600; text-align: center; line-height: 1.2; }

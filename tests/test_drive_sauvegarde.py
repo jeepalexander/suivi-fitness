@@ -93,7 +93,7 @@ with Srv() as base, sync_playwright() as p:
     check("UN seul fichier créé, nommé fitness-backup-AAAA-MM-JJ-HH-MM-SS.json", d.posts == 1 and len(uploads) == 1 and NAME_RE.match(d.post_names[0]), f'{len(uploads)} création(s) {d.post_names}')
     check(f"le fichier contient tout l'état : {N} séances, poids, dernières charges, prochaine séance, programmes",
           len(c.get('history', [])) == N and len(c.get('weights', [])) == len(DATA['weights']) and c.get('lastWeights') == local_state(pg)['lastWeights'] and len(c.get('lastWeights', {})) == len(DATA['lastWeights']) and c.get('nextType') == local_state(pg)['nextType'] and [p['name'] for p in c.get('programs', [])] == ['Hypertrophie'], f"{len(c.get('history', []))} séances")
-    check("identifiant du fichier et empreinte retenus, date de dernière sauvegarde affichée", ls(pg, 'h49_drive_backup_id') == 'BK1' and ls(pg, 'h49_drive_last_hash') and 'Dernière sauvegarde' in pg.evaluate(STATUS), pg.evaluate(STATUS))
+    check("identifiant du fichier et empreinte retenus, « Sauvegarde automatique : date et heure » affiché", ls(pg, 'h49_drive_backup_id') == 'BK1' and ls(pg, 'h49_drive_last_hash') and re.match(r'^Sauvegarde automatique : \d\d/\d\d \d\d:\d\d', pg.evaluate(STATUS)), pg.evaluate(STATUS))
     # 2) rien n'a changé : rien n'est renvoyé
     n0 = len(d.calls)
     r = pg.evaluate("syncDriveBackup()")

@@ -92,7 +92,7 @@ const HISTORY_DAYS = ['Dim.','Lun.','Mar.','Mer.','Jeu.','Ven.','Sam.'];
 const HISTORY_MONTHS_SHORT = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
 
 // Titre affiché en haut de chaque onglet
-const PAGE_TITLES = { programme: 'Programmes', seance: 'Séance', progression: 'Progression', historique: 'Historique', reglages: 'Réglages' };
+const PAGE_TITLES = { programme: 'Programmes', seance: 'Séance', progression: 'Progression', historique: 'Historique', reglages: 'Réglages', fond: 'Fond d\'écran' };
 
 // La saisie en cours (poids, reps, séries validées, nombre de séries, exercice ouvert, chrono)
 // est copiée dans localStorage à chaque action et restaurée au rechargement de l'application
@@ -239,6 +239,65 @@ function initTheme() {
     if (themeMediaQuery.addEventListener) themeMediaQuery.addEventListener('change', onChange);
     else if (themeMediaQuery.addListener) themeMediaQuery.addListener(onChange);
   }
+}
+
+// Fond d'écran (1.7.7) : préférence de l'appareil (h49_wallpaper), hors des données exportées, comme le thème.
+// Aucun par défaut. Le script de index.html pose data-wallpaper avant le premier affichage.
+const WALLPAPER_KEY = 'h49_wallpaper';
+const WALLPAPERS = [
+  { id: 'course', name: 'Course', pos: 'center 30%' },
+  { id: 'barre', name: 'Barre', pos: 'center 55%' },
+  { id: 'halteres', name: 'Haltères', pos: 'center 45%' },
+  { id: 'kettlebell', name: 'Kettlebell', pos: 'center 45%' },
+  { id: 'studio', name: 'Studio', pos: 'center 40%' },
+  { id: 'none', name: 'Aucun' }
+];
+
+function getWallpaper() {
+  let v = null;
+  try { v = localStorage.getItem(WALLPAPER_KEY); } catch (e) {}
+  return WALLPAPERS.some(w => w.id === v && w.id !== 'none') ? v : 'none';
+}
+
+function wallpaperThumb(id) { return 'wallpapers/' + id + '-mini.jpg'; }
+
+function applyWallpaper() {
+  const id = getWallpaper();
+  if (id === 'none') document.documentElement.removeAttribute('data-wallpaper');
+  else document.documentElement.setAttribute('data-wallpaper', id);
+  const cur = WALLPAPERS.find(w => w.id === id);
+  const name = document.getElementById('wallpaper-row-name');
+  if (name) name.textContent = cur.name;
+  const row = document.getElementById('wallpaper-row');
+  if (row) row.setAttribute('aria-label', 'Fond d\'écran : ' + cur.name + '. Changer');
+  const img = document.getElementById('wallpaper-row-img');
+  if (img) {
+    if (id === 'none') { img.hidden = true; img.removeAttribute('src'); }
+    else { img.src = wallpaperThumb(id); img.style.objectPosition = cur.pos; img.hidden = false; }
+  }
+  document.querySelectorAll('#wallpaper-grid .wallpaper-opt').forEach(btn => {
+    btn.setAttribute('aria-checked', btn.dataset.wallpaper === id ? 'true' : 'false');
+  });
+}
+
+function setWallpaper(id) {
+  if (!WALLPAPERS.some(w => w.id === id)) return;
+  try {
+    if (id === 'none') localStorage.removeItem(WALLPAPER_KEY);
+    else localStorage.setItem(WALLPAPER_KEY, id);
+  } catch (e) {}
+  applyWallpaper();
+}
+
+function renderWallpaperGrid() {
+  const grid = document.getElementById('wallpaper-grid');
+  if (!grid) return;
+  const cur = getWallpaper();
+  grid.innerHTML = WALLPAPERS.map(w => `
+    <li><button type="button" class="wallpaper-opt" role="radio" data-wallpaper="${w.id}" aria-checked="${w.id === cur}" onclick="setWallpaper('${w.id}')">
+      <span class="wallpaper-thumb">${w.id === 'none' ? '' : `<img src="${wallpaperThumb(w.id)}" alt="" loading="lazy" style="object-position:${w.pos}">`}<span class="wallpaper-check">${CHECK_SVG}</span></span>
+      <span class="wallpaper-name">${w.name}</span>
+    </button></li>`).join('');
 }
 
 // ============================================================
@@ -3102,7 +3161,7 @@ function switchTab(tabName) {
 
   const targetContainer = document.getElementById(`tab-${tabName}`);
   // « Réglages » est une page secondaire de l'Historique : c'est l'icône Historique qui reste allumée
-  const targetNav = document.getElementById(`nav-${tabName === 'reglages' ? 'historique' : tabName}`);
+  const targetNav = document.getElementById(`nav-${(tabName === 'reglages' || tabName === 'fond') ? 'historique' : tabName}`);
   if(targetContainer) targetContainer.classList.add('active');
   const scroller = document.getElementById('app-scroll');
   if (scroller) scroller.scrollTop = 0;
@@ -3129,6 +3188,7 @@ function switchTab(tabName) {
   if (tabName === 'programme') renderProgramOverview();
   updateProgramHeader();
   if (tabName === 'progression') { populateExerciseSelect(); renderCharts(); }
+  if (tabName === 'fond') renderWallpaperGrid();
   if (tabName === 'reglages') {
     updateDriveUI(); // le jeton Drive a pu expirer depuis l'ouverture de l'appli
     if (isDriveConnected() && !getDriveAccount()) fetchDriveAccount(); // nouvel essai de lecture de l'adresse
@@ -3390,13 +3450,15 @@ function updateDriveUI() {
     if (connectBtn) connectBtn.style.display = 'none';
     if (disconnectBtn) disconnectBtn.style.display = '';
   } else if (isDriveConnected()) {
-    // Une information par ligne (1.6.35) : état, compte, dernière sauvegarde (ou envoi en cours / en attente).
-    const lines = ['Sauvegarde automatique'];
+    // Une information par ligne : état (avec la date de la dernière sauvegarde), compte.
+    // 1.7.7 : « Sauvegarde automatique : date et heure » sur la première ligne, le compte dessous.
+    let head = 'Sauvegarde automatique';
+    if (driveSyncing) head += ' : envoi en cours…';
+    else if (driveNeedsBackup()) head += ' : modifications en attente d\'envoi';
+    else if (last && formatDriveDate(last)) head += ' : ' + formatDriveDate(last);
+    const lines = [head];
     if (account) lines.push(account.email);
     else if (driveAccountError) lines.push('Adresse du compte indisponible (' + driveAccountError + ')');
-    if (driveSyncing) lines.push('Envoi en cours…');
-    else if (driveNeedsBackup()) lines.push('Modifications en attente d\'envoi');
-    else if (last) lines.push('Dernière sauvegarde : ' + formatDriveDate(last));
     setDriveStatusLines(statusEl, lines, true);
     if (connectBtn) connectBtn.style.display = 'none';
     if (disconnectBtn) disconnectBtn.style.display = '';
@@ -4283,6 +4345,7 @@ function initUpdateIndicator() {
 async function initApp() {
   if (!document.body.dataset.tab) document.body.dataset.tab = 'programme';
   initTheme();
+  applyWallpaper();
   initUpdateIndicator();
   // Google Drive : retour d'une connexion par redirection (application installée), puis statut + sauvegarde à envoyer
   cleanupLegacyDriveKeys();

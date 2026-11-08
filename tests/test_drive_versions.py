@@ -91,7 +91,7 @@ with Srv() as base, sync_playwright() as p:
     st = pg.evaluate(STATUS)
     warn = [t for (ty, t) in logs if ty == 'warning' and 'ancienne sauvegarde' in t]
     check("suppression refusée (500) : nouvelle sauvegarde envoyée et enregistrée comme réussie", d.posts == 1 and d.trash_attempts == 1 and ls(pg, 'h49_drive_last_hash') and ls(pg, 'h49_drive_last_backup'), (d.posts, d.trash_attempts))
-    check("suppression refusée : aucune erreur affichée dans Réglages, juste « dernière sauvegarde »", 'Dernière sauvegarde' in st and 'Google refuse' not in st and not ls(pg, 'h49_drive_error'), st)
+    check("suppression refusée : aucune erreur affichée dans Réglages, juste « Sauvegarde automatique : date »", re.match(r'^Sauvegarde automatique : \d\d/\d\d \d\d:\d\d', st) and 'Google refuse' not in st and not ls(pg, 'h49_drive_error'), st)
     check("suppression refusée : l'erreur est journalisée dans la console", warn, warn)
     r = pg.evaluate("state.weights.push({date:'2026-11-07', weight:79}); syncDriveBackup()")
     check("suppression refusée : les sauvegardes suivantes continuent de partir", r.get('ok') and d.posts == 2, r)

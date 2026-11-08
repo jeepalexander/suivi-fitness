@@ -2,7 +2,7 @@
 
 **Application PWA de suivi d'entraînement en salle de sport** (dépôt `suivi-fitness`)
 
-[![Version](https://img.shields.io/badge/version-1.7.6-blue)](https://github.com/jeepalexander/suivi-fitness)
+[![Version](https://img.shields.io/badge/version-1.7.7-blue)](https://github.com/jeepalexander/suivi-fitness)
 [![License](https://img.shields.io/badge/license-MIT-green)]
 
 ---
@@ -84,6 +84,7 @@ Le détail est dans [CHANGELOG.md](CHANGELOG.md).
 
 - Accès par la roue crantée de l’Historique.
 - Choix du thème : clair, sombre ou automatique.
+- Fond d’écran : 5 images (Course, Barre, Haltères, Kettlebell, Studio) ou aucun, propre à l’appareil.
 - Sauvegarde Google Drive (connexion, état, déconnexion) et vérification des mises à jour.
 
 ---
@@ -98,6 +99,7 @@ suivi-fitness/
 ├── sw.js               # Service Worker (PWA)
 ├── manifest.json       # Configuration PWA
 ├── data.json           # Données par défaut
+├── wallpapers/         # Fonds d’écran (images + vignettes)
 ├── CHANGELOG.md        # Historique des versions
 ├── tests/              # Tests automatiques (voir tests/README.md)
 ├── js/                 # catalogue.js (exercices), programmes.js (onglet Programme), Chart.js et security.js

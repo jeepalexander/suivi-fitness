@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.7] - 2026-11-08
+### ✨ Fond d'écran et bloc Drive (co-auteur : Claude)
+- **Réglages › Fond d'écran** (sous Apparence) : une ligne avec la vignette et le nom du fond choisi ouvre la page « Fond d'écran » (bouton retour, grille de vignettes). 5 images : Course, Barre, Haltères, Kettlebell, Studio, plus « Aucun » (par défaut, fond blanc comme avant). Le choix s'applique tout de suite sur toutes les pages, sous un voile clair (ou sombre en thème sombre) qui garde le texte lisible.
+- Le choix est propre à l'appareil, comme le thème : il ne fait pas partie des sauvegardes. Il est posé avant le premier affichage (pas de flash au lancement). Les images (`wallpapers/`, 1000 px + vignettes) sont mises en cache pour fonctionner hors connexion.
+- **Sauvegarde Google Drive** : « Sauvegarde automatique : JJ/MM HH:MM » sur la première ligne (ou « : envoi en cours… » / « : modifications en attente d'envoi »), le compte dessous ; la ligne « Dernière sauvegarde » disparaît.
+- Tests : nouveau `test_fond_ecran.py` (20 contrôles) ; textes Drive alignés.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.7.
+
+---
+
 ## [1.7.6] - 2026-11-08
 ### ✏️ Sauvegarde Google Drive (co-auteur : Claude)
 - **Dossier Drive renommé « MON CARNET DE SALLE »** (au lieu de « FITNESS AAP – Séances »). Le dossier existant est **renommé** automatiquement à la première sauvegarde (une seule fois par appareil) : les 5 sauvegardes restent dedans, rien n'est déplacé ni recréé. Un nouvel appareil retrouve le dossier sous l'un ou l'autre nom. En cas d'échec du renommage, les sauvegardes continuent normalement.

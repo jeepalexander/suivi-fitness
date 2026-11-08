@@ -23,6 +23,8 @@
         document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
         var m = document.querySelector('meta[name="theme-color"]');
         if (m) m.setAttribute('content', dark ? '#0E0E11' : '#FFFFFF');
+        var w = localStorage.getItem('h49_wallpaper');
+        if (/^(course|barre|halteres|kettlebell|studio)$/.test(w || '')) document.documentElement.setAttribute('data-wallpaper', w);
       } catch (e) {}
     })();
   </script>
@@ -42,10 +44,18 @@
 </head>
 <body>
 
+  <!-- Fond d'écran choisi dans Réglages (image + voile), derrière tout le reste -->
+  <div id="app-wallpaper" aria-hidden="true"></div>
+
   <header>
     <div class="page-header">
       <p id="app-title" class="app-kicker">MON CARNET DE SALLE</p>
-      <h1 id="page-title">Programmes</h1>
+      <div class="page-title-row">
+        <button id="fond-back" class="ed-back" type="button" onclick="switchTab('reglages')" aria-label="Retour aux réglages">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+        </button>
+        <h1 id="page-title">Programmes</h1>
+      </div>
     </div>
 
     <div id="seance-sticky" class="seance-sticky">
@@ -180,6 +190,14 @@
         <button type="button" class="filter-btn" role="radio" data-theme-choice="auto" onclick="setThemePreference('auto')">Auto</button>
       </div>
     </div>
+    <div class="card wallpaper-card">
+      <div class="card-title">Fond d'écran</div>
+      <button type="button" id="wallpaper-row" class="wallpaper-row" onclick="switchTab('fond')" aria-label="Fond d'écran : Aucun. Changer">
+        <span class="wallpaper-row-thumb" aria-hidden="true"><img id="wallpaper-row-img" alt="" hidden></span>
+        <span class="wallpaper-row-text"><span id="wallpaper-row-name" class="wallpaper-row-name">Aucun</span><span class="wallpaper-row-sub">Image affichée derrière tes écrans</span></span>
+        <svg class="wallpaper-row-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+    </div>
     <div class="card" id="drive-card">
       <div class="card-title">Sauvegarde Google Drive</div>
       <div class="update-row drive-actions" style="gap:8px;flex-wrap:wrap">
@@ -203,6 +221,11 @@
         <button type="button" class="btn update-apply" onclick="applyUpdate()">Relancer maintenant</button>
       </div>
     </div>
+  </div>
+
+  <div id="tab-fond" class="container">
+    <p class="wallpaper-lead">Choisis l'image affichée derrière tes écrans. Elle s'applique tout de suite, partout dans l'app.</p>
+    <ul id="wallpaper-grid" class="wallpaper-grid" role="radiogroup" aria-label="Fonds disponibles"></ul>
   </div>
 
   </main>

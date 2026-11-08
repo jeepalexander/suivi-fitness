@@ -1,7 +1,7 @@
 """Sauvegarde Google Drive : le compte connecté s'affiche dans Réglages.
 Adresse lue via l'API Drive « about », à défaut via le propriétaire du dossier de sauvegarde ;
 si rien ne répond, la raison s'affiche. API simulée (aucun appel réseau réel)."""
-import json, sys
+import re, json, sys
 from harness import *
 
 res = []
@@ -57,8 +57,8 @@ with Srv() as base, sync_playwright() as p:
     txt = pg.evaluate(STATUS)
     check('connecté : adresse affichée', 'jean@example.com' in txt and txt.startswith('Sauvegarde automatique'), repr(txt))
     lines = pg.evaluate("document.getElementById('drive-status').innerText.split('\\n')")
-    check("connecté : 3 lignes — « Sauvegarde automatique » (pastille verte) / compte / « Dernière sauvegarde : date »",
-          len(lines) == 3 and lines[0] == 'Sauvegarde automatique' and lines[1] == 'jean@example.com' and lines[2].startswith('Dernière sauvegarde : '), lines)
+    check("connecté : 2 lignes — « Sauvegarde automatique : date et heure » (pastille verte) / compte",
+          len(lines) == 2 and re.match(r'^Sauvegarde automatique : \d\d/\d\d \d\d:\d\d$', lines[0]) and lines[1] == 'jean@example.com' and 'Dernière sauvegarde' not in txt, lines)
     check("l'API Drive est appelée avec le jeton", seen[:1] == ['Bearer tok123'], str(seen[:1]))
     check("adresse mémorisée sur l'appareil", json.loads(stored(pg))['email'] == 'jean@example.com')
     check('bouton Déconnecter visible, Connecter masqué', pg.evaluate("document.getElementById('drive-disconnect-btn').style.display===''&&document.getElementById('drive-connect-btn').style.display==='none'"))
