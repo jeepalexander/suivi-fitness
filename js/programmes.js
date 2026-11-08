@@ -803,6 +803,16 @@ function openSheet(html, opts = {}) {
     document.body.appendChild(overlay);
   }
   if (opts.onClose) sheetOnClose = opts.onClose;
+  // update : la feuille déjà ouverte est mise à jour sur place (pas de nouvelle animation, défilement conservé)
+  const current = overlay.classList.contains('open') ? overlay.querySelector('.sheet') : null;
+  if (opts.update && current) {
+    const scroller = current.querySelector('.backup-scroll');
+    const top = scroller ? scroller.scrollTop : 0;
+    current.innerHTML = `<span class="sheet-grip" aria-hidden="true"></span>${html}`;
+    const again = current.querySelector('.backup-scroll');
+    if (again) again.scrollTop = top;
+    return;
+  }
   overlay.innerHTML = `<div class="sheet${opts.tall ? ' tall' : ''}" role="dialog" aria-modal="true"><span class="sheet-grip" aria-hidden="true"></span>${html}</div>`;
   overlay.classList.add('open');
 }

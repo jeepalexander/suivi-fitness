@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.5] - 2026-11-08
+### 🐛 Fenêtre « Restaurer une sauvegarde » (co-auteur : Claude)
+- **Choisir une sauvegarde ne rouvre plus la fenêtre** : la ligne cochée et le bouton se mettent à jour sur place (plus d'animation d'ouverture à chaque appui, défilement conservé). Même chose à l'arrivée de la liste Drive.
+- **Dates** : « Aujourd'hui à 18:42:00 », « Hier à 19:15:00 », sinon la date (« 05/11/2026 à 19:15:00 »). La confirmation garde la date complète.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.5.
+
+---
+
 ## [1.7.4] - 2026-11-08
 ### 🐛 Corrections (co-auteur : Claude)
 - **« Reconnecter maintenant » (application installée avec Firefox)** : le bouton ouvrait la page Google dans un onglet Firefox séparé, qui revenait sur l'application sans lui rendre l'accès. Il suit maintenant exactement le même chemin que la reconnexion automatique après l'enregistrement d'une séance (qui, elle, reste dans l'application et fonctionne) : connexion par redirection lancée environ 0,4 s après l'appui. Même chose pour « Connecter Google Drive » et le lien de la fenêtre « Restaurer une sauvegarde ». Navigateur (non installé) : inchangé.

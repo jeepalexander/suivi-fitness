@@ -3887,6 +3887,18 @@ function formatDriveBackupDate(iso) {
   } catch (e) { return 'date inconnue'; }
 }
 
+// Fenêtre de restauration : « Aujourd'hui à 18:42:00 », « Hier à 19:15:00 », sinon « 05/11/2026 à 19:15:00 »
+function formatBackupDayLabel(iso, now = new Date()) {
+  const d = new Date(iso);
+  if (!iso || isNaN(d.getTime())) return 'date inconnue';
+  const dayKey = x => x.getFullYear() * 10000 + (x.getMonth() + 1) * 100 + x.getDate();
+  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+  const time = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  if (dayKey(d) === dayKey(now)) return "Aujourd'hui à " + time;
+  if (dayKey(d) === dayKey(yesterday)) return 'Hier à ' + time;
+  return formatDriveBackupDate(iso);
+}
+
 // --- Fenêtre « Restaurer une sauvegarde » (Historique, et Réglages en cas de conflit) ---------------------
 // Les 5 dernières sauvegardes Google Drive (si connecté) et un fichier de cet appareil ; un seul choix.
 // Rien n'est remplacé avant la confirmation de restoreDriveBackup / le choix du fichier.
@@ -3917,7 +3929,7 @@ function renderBackupRestoreSheet() {
     else if (st.error) drive += `<p class="sheet-text">${escapeHtml(st.error)}</p>`;
     else if (!st.files.length) drive += `<p class="sheet-text">Aucune sauvegarde dans le dossier « ${escapeHtml(DRIVE_FOLDER_NAME)} » de ton Drive.</p>`;
     else drive += `<div class="restore-list" role="radiogroup" aria-label="Sauvegardes Google Drive">` + st.files.map((f, i) =>
-      backupRestoreRow(i, formatDriveBackupDate(f.modifiedTime), i === 0 ? 'La plus récente' : (f.name === DRIVE_BACKUP_NAME ? 'Ancienne sauvegarde unique' : 'Version précédente'), true)).join('') + `</div>`;
+      backupRestoreRow(i, formatBackupDayLabel(f.modifiedTime), i === 0 ? 'La plus récente' : (f.name === DRIVE_BACKUP_NAME ? 'Ancienne sauvegarde unique' : 'Version précédente'), true)).join('') + `</div>`;
   }
   const file = `<div class="sheet-section">Sur cet appareil</div><div class="restore-list">${backupRestoreRow(-2, 'Choisir un fichier…', 'Fichier créé avec « Sauvegarder »', false)}</div>`;
   const connect = getDriveToken() ? '' : `<p class="sheet-text small">Tes sauvegardes Google Drive apparaîtront ici. <button type="button" class="link-btn" onclick="closeSheet(); backupRestore = null; connectGoogleDrive()">${isDriveWanted() ? 'Reconnecter Google Drive' : 'Se connecter à Google Drive'}</button></p>`;
@@ -3927,7 +3939,7 @@ function renderBackupRestoreSheet() {
     <p class="sheet-text">Choisis la sauvegarde à reprendre. Elle remplacera toutes les données de cet appareil : séances, programmes et pesées.</p>
     <div class="backup-scroll">${drive}${file}${connect}</div>
     <div class="sheet-actions">${action}<button type="button" class="btn btn-secondary" onclick="hideDriveBackupList()">Annuler</button></div>`,
-    { tall: false, onClose: () => { backupRestore = null; } });
+    { update: true, onClose: () => { backupRestore = null; } });
 }
 
 function pickBackupRestore(i) {
