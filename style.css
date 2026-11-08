@@ -751,3 +751,9 @@ body[data-seance="empty"] .seance-sticky { display: none; }
 .modal-origin { margin: -2px 0 2px; font-size: 0.9425rem; font-weight: 600; }
 .modal-origin[hidden] { display: none; }
 #modal-session-pill .type-pill-libre { font-size: 1.25rem; }
+
+/* Accueil Programme et écran « Choisis comment t'entraîner » : contenu aligné vers le bas, au-dessus de la navigation */
+#tab-programme.active { display: flex; flex-direction: column; min-height: 100%; }
+#program-overview { flex: 1 0 auto; display: flex; flex-direction: column; }
+.prog-spacer { flex: 1 1 auto; min-height: 12px; }
+body[data-pview="choose"] .choose-lead { margin-top: 0; }

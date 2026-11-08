@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.1] - 2026-11-08
+### 🐛 Corrections (co-auteur : Claude)
+- **Onglet Programme** : la tuile active, « En mémoire » et le texte d'aide sont alignés vers le bas de l'écran, au-dessus de la barre de navigation, comme sur la maquette (ils restaient collés en haut). Le détail déplié fait défiler la page normalement.
+- **Créer un programme ou une séance libre** (écran « Choisis comment t'entraîner ») : le texte et les deux cartes sont alignés vers le bas ; le bouton retour reste en haut.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.1.
+
+---
+
 ## [1.7.0] - 2026-11-08
 ### ✨ Programmes sur mesure (co-auteur : Claude)
 Spécification « Programmes sur mesure » et maquette « Programme nouvel usager » (écrans 1 à 30).

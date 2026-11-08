@@ -78,7 +78,8 @@ function renderProgramOverview() {
 
   const active = getActiveProgram();
   const others = programs.filter(p => p !== active);
-  let html = '';
+  // Les tuiles sont alignées vers le bas de l'écran, au-dessus de la barre de navigation (maquette)
+  let html = '<div class="prog-spacer" aria-hidden="true"></div>';
   if (active) {
     html += `<div class="prog-status"><span class="prog-dot on"></span>${isLibre(active) ? 'Séance libre active' : 'Programme actif'} · ${escapeHtml(active.name)}</div>`;
     html += activeTileHtml(active);
@@ -224,6 +225,7 @@ function openProgramChooser() {
 function chooserHtml() {
   return `
     <div class="ed-top"><button type="button" class="ed-back" aria-label="Retour" onclick="setProgramView('home')">${BACK_SVG}</button></div>
+    <div class="prog-spacer" aria-hidden="true"></div>
     <p class="choose-lead">Choisis comment t'entraîner</p>
     <button type="button" class="choose-card" onclick="startProgramEditor('program')">
       <span class="choose-over">Séances qui reviennent</span>
