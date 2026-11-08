@@ -55,7 +55,10 @@ with Srv() as base, sync_playwright() as p:
 
     ctx, pg, seen = scenario(br, base, OK_USER)
     txt = pg.evaluate(STATUS)
-    check('connecté : adresse affichée', 'jean@example.com' in txt and txt.startswith('Connecté'), repr(txt))
+    check('connecté : adresse affichée', 'jean@example.com' in txt and txt.startswith('Sauvegarde automatique activée'), repr(txt))
+    lines = pg.evaluate("document.getElementById('drive-status').innerText.split('\\n')")
+    check("connecté : 3 lignes — « Sauvegarde automatique activée » / compte / « Dernière sauvegarde : date »",
+          len(lines) == 3 and lines[0] == 'Sauvegarde automatique activée' and lines[1] == 'jean@example.com' and lines[2].startswith('Dernière sauvegarde : '), lines)
     check("l'API Drive est appelée avec le jeton", seen[:1] == ['Bearer tok123'], str(seen[:1]))
     check("adresse mémorisée sur l'appareil", json.loads(stored(pg))['email'] == 'jean@example.com')
     check('bouton Déconnecter visible, Connecter masqué', pg.evaluate("document.getElementById('drive-disconnect-btn').style.display===''&&document.getElementById('drive-connect-btn').style.display==='none'"))
@@ -65,7 +68,7 @@ with Srv() as base, sync_playwright() as p:
 
     evil = '<img src=x onerror=window.__x=1>@a.fr'
     ctx, pg, seen = scenario(br, base, (200, {'user': {'displayName': 'x', 'emailAddress': evil}}))
-    check('adresse piégée : affichée en texte, aucun élément injecté', pg.evaluate("document.querySelectorAll('#drive-status *').length") == 0 and pg.evaluate("window.__x") is None)
+    check('adresse piégée : affichée en texte, aucun élément injecté', pg.evaluate("[...document.querySelectorAll('#drive-status *')].every(e=>e.tagName==='BR')") and pg.evaluate("document.querySelectorAll('#drive-status img').length") == 0 and evil in pg.evaluate("document.getElementById('drive-status').textContent") and pg.evaluate("window.__x") is None)
     ctx.close()
 
     # « about » refusé : seconde méthode (propriétaire du dossier)
@@ -79,7 +82,7 @@ with Srv() as base, sync_playwright() as p:
     ctx, pg, seen = scenario(br, base, (403, {'error': {}}), owner=(404, {}))
     txt = pg.evaluate(STATUS)
     check("les deux méthodes en erreur : raison affichée (about 403 + dossier 404), rien de mémorisé",
-          txt.startswith('Connecté — sauvegarde automatique active') and 'adresse du compte indisponible' in txt and 'about : 403' in txt and 'dossier : 404' in txt and stored(pg) is None, repr(txt))
+          txt.startswith('Sauvegarde automatique activée') and 'Adresse du compte indisponible' in txt and 'about : 403' in txt and 'dossier : 404' in txt and stored(pg) is None, repr(txt))
     ctx.close()
 
     ctx, pg, seen = scenario(br, base, (200, {'user': {}}), owner=(200, {'owners': [{}]}))
@@ -99,7 +102,7 @@ with Srv() as base, sync_playwright() as p:
     ctx, pg, seen = scenario(br, base, API_OFF, files=API_OFF)
     txt = pg.evaluate(STATUS)
     check("Drive refusé (403 accessNotConfigured) : la raison de Google est affichée", 'Google refuse l\'accès à Drive (403 accessNotConfigured)' in txt, repr(txt))
-    check("Drive refusé : on ne prétend plus que la sauvegarde automatique est active", 'sauvegarde automatique active' not in txt and 'ne sont pas sauvegardées' in txt, repr(txt))
+    check("Drive refusé : on ne prétend plus que la sauvegarde automatique est active", 'sauvegarde automatique activ' not in txt.lower() and 'ne sont pas sauvegardées' in txt, repr(txt))
     check("Drive refusé : l'aide indique d'activer l'API Google Drive", "API Google Drive n'est pas activée" in txt, repr(txt))
     check("Drive refusé : adresse non mémorisée, bouton Déconnecter proposé", stored(pg) is None and pg.evaluate("document.getElementById('drive-disconnect-btn').style.display===''"))
     # le problème est réglé côté Google : le message disparaît à la réouverture de Réglages

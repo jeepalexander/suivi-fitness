@@ -7,6 +7,77 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.6.36] - 2026-11-07
+### ✏️ Réglages
+- **Apparence** : texte d'explication supprimé (les boutons Clair / Sombre / Auto suffisent).
+- Texte sous la version au tutoiement, comme le reste de l'application (« Tu peux néanmoins cliquer sur « Vérifier » »).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.36.
+
+---
+
+## [1.6.35] - 2026-11-07
+### ✏️ Textes de la page Réglages simplifiés
+- **Apparence** : seule la première phrase d'explication est conservée.
+- **Sauvegarde Google Drive** (connecté) : une information par ligne — « Sauvegarde automatique activée », le compte, « Dernière sauvegarde : date » (ou « Envoi en cours… » / « Modifications en attente d'envoi »). Les messages d'accès expiré, de conflit et d'erreur sont inchangés.
+- Texte sous « Restaurer depuis Drive » raccourci (sauvegarde à chaque séance ou modification, 5 dernières conservées et restaurables).
+- Texte sous la version : vérification à chaque lancement, bouton « Vérifier », aucune installation automatique.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.35.
+
+---
+
+## [1.6.34] - 2026-11-07
+### 🐛 Corrections
+- **« Reconnecter maintenant » dans l'application installée avec Firefox (Android)** : la connexion Google s'ouvrait toujours dans **Chrome**. Chrome recevait l'accès, mais l'application installée avec Firefox ne partage pas le stockage de Chrome : elle ne le voyait jamais, même en suivant la procédure. La connexion s'ouvre maintenant dans un **nouvel onglet du navigateur qui a installé l'application** (Firefox, Samsung Internet…). Au retour, cet onglet affiche « Connexion réussie, tu peux fermer cet onglet » et l'application reprend l'accès automatiquement.
+- Application installée avec Chrome : comportement inchangé (intent vers le vrai Chrome).
+- Ouverture d'onglet refusée par le navigateur (ex. reconnexion automatique) : plus de départ vers une page blanche, un message invite à toucher « Reconnecter maintenant ».
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.34.
+
+---
+
+## [1.6.33] - 2026-11-07
+### ✨ Nouveautés
+- **Versions de la sauvegarde Google Drive** : chaque sauvegarde automatique crée désormais un **nouveau fichier** `fitness-backup-AAAA-MM-JJ-HH-MM-SS.json` (heure de l'appareil) dans le dossier « FITNESS AAP – Séances », au lieu d'écraser le précédent. Rien n'est envoyé si les données n'ont pas changé (inchangé).
+- **5 versions conservées** : après chaque envoi réussi, les sauvegardes au-delà des 5 plus récentes sont mises à la **corbeille du Drive** (récupérables 30 jours). L'ancien fichier `sauvegarde_complete.json` compte comme une version : il reste restaurable tant qu'il fait partie des 5 plus récentes. Les autres fichiers du dossier ne sont jamais touchés.
+- **Échec de suppression non bloquant** : si la mise à la corbeille d'une vieille sauvegarde échoue, la sauvegarde principale reste réussie ; l'erreur est seulement notée dans la console.
+- **Restaurer depuis Drive** : affiche la liste des **5 dernières sauvegardes** avec leur date et heure ; chacune a son bouton « Restaurer » (même confirmation et même import assaini qu'avant). Sauvegarde disparue entre-temps : message et liste rafraîchie.
+- Protection « appareil vide » renforcée : une sauvegarde vide n'est jamais envoyée par-dessus la sauvegarde la plus récente du Drive si celle-ci contient des séances.
+- Format du JSON sauvegardé inchangé.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.33.
+
+---
+
+## [1.6.32] - 2026-11-07
+### 🐛 Corrections
+- **Connexion Google Drive depuis l'application plein écran (Android)** : la page de connexion Google ouverte dans l'onglet intégré de l'application restait blanche. Elle s'ouvre maintenant dans le **vrai Chrome** (intent, avec repli sur l'ouverture habituelle si Chrome est absent). Au retour, l'onglet Chrome affiche « Connexion réussie, tu peux fermer cet onglet », et l'application plein écran **reprend automatiquement le jeton** (stockage partagé : événement `storage` + retour au premier plan).
+- Navigateur (non installé) et bureau : comportement inchangé.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.32.
+
+---
+
+## [1.6.31] - 2026-11-07
+### 🐛 Corrections
+- **Bouton honnête** : quand l'appareil ne contient aucune séance, « Remplacer par cet appareil » devient **« Effacer définitivement la sauvegarde Drive »** (en rouge), avec un message et une confirmation « Effacer DÉFINITIVEMENT… » qui disent clairement que la sauvegarde sera vidée. Appareil non vide : libellé « Remplacer par cet appareil » inchangé.
+- **« modifiée le date inconnue »** : la date réelle de la sauvegarde Drive est désormais lue et affichée (y compris pour un conflit déjà enregistré sans date).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.31.
+
+---
+
+## [1.6.30] - 2026-11-07
+### 🐛 Corrections
+- **La réinitialisation des données ne vide plus la sauvegarde Google Drive.** Quand cet appareil n'a plus aucune séance (réinitialisation, données effacées), la sauvegarde automatique n'écrase plus un fichier Drive qui en contient : l'envoi est suspendu et l'écran Réglages propose « Restaurer depuis Drive » ou « Remplacer » (choix explicite). Une suppression volontaire de séances reste purgée normalement.
+- « Restaurer depuis Drive » avec une sauvegarde **vide** : message explicatif, aucune donnée locale modifiée.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.30.
+
+---
+
+## [1.6.29] - 2026-11-07
+### 🔧 Divers
+- **`data.json` vidé** : plus aucune séance, pesée ni charge d'exemple dans l'application (33 séances d'essai supprimées). Un nouvel appareil, ou « Réinitialiser les données », démarre sur un historique vide (la sauvegarde Google Drive se restaure depuis les Réglages).
+- Les tests utilisent désormais leur propre jeu d'essai `tests/fixture_data.json`.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.6.29.
+
+---
+
 ## [1.6.28] - 2026-11-07
 ### 🎨 Design
 - **Progression globale** : la variation « +x % vs mois précédent » n'a plus de fond (elle ressemblait à un bouton) et est remontée contre le chiffre, plus éloignée du titre du graphique.

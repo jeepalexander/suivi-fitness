@@ -4,7 +4,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright  # noqa: F401  (réexporté pour les tests)
 
 REPO = Path(__file__).resolve().parent.parent
-DATA = json.load(open(REPO / 'data.json', encoding='utf-8'))
+DATA = json.load(open(REPO / 'tests' / 'fixture_data.json', encoding='utf-8'))  # jeu d'essai (le data.json de l'app est vide)
 
 # Éléments dont le texte déborde de leur boîte (hors graphiques et SVG) : doit rester vide
 OVERFLOW_JS = """()=>{const out=[];document.querySelectorAll('body *').forEach(e=>{const r=e.getBoundingClientRect();if(r.width&&e.offsetParent!==null&&(e.scrollWidth>e.clientWidth+1)&&getComputedStyle(e).overflow==='visible'&&e.tagName!=='svg'&&!e.closest('svg')&&!e.closest('canvas'))out.push(e.tagName+'.'+e.className+' '+e.scrollWidth+'>'+e.clientWidth+' '+(e.textContent||'').trim().slice(0,30))});return {docW:document.documentElement.scrollWidth,vw:innerWidth,out:out.slice(0,10)}}"""
@@ -30,7 +30,7 @@ class Srv:
 
 
 def newpage(br, w=390, h=844, scheme='light', sw='block', pref=None, seed=True):
-    """Page neuve avec les données de data.json dans localStorage ; pref = thème forcé ('light' / 'dark' / 'auto')."""
+    """Page neuve avec les données du jeu d'essai (tests/fixture_data.json) dans localStorage ; pref = thème forcé ('light' / 'dark' / 'auto')."""
     ctx = br.new_context(viewport={'width': w, 'height': h}, device_scale_factor=2, service_workers=sw, color_scheme=scheme)
     # Le script Google Identity (sauvegarde Drive) n'est jamais chargé pour de vrai dans les tests.
     ctx.route('**/accounts.google.com/**', lambda r: r.fulfill(status=200, content_type='application/javascript', body=''))

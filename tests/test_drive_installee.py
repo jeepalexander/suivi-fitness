@@ -96,7 +96,7 @@ with Srv() as base, sync_playwright() as p:
     check("redirection : « state » aléatoire de 32 caractères", re.fullmatch(r'[0-9a-f]{32}', q.get('state', [''])[0]) is not None)
     check("retour : jeton lu et mémorisé, souhait de sauvegarde retenu", ls(pg, 'h49_drive_token') and json.loads(ls(pg, 'h49_drive_token'))['access_token'] == 'tokR' and ls(pg, 'h49_drive_wanted') == '1')
     check("retour : adresse nettoyée (plus de jeton dans l'URL), « state » consommé", '#' not in pg.url and 'access_token' not in pg.url and ls(pg, 'h49_drive_oauth_state') is None, pg.url)
-    check("retour : l'application revient sur Réglages, « Connecté »", pg.evaluate("document.body.dataset.tab") == 'reglages' and pg.evaluate("document.getElementById('drive-status').textContent").startswith('Connecté'), pg.evaluate("document.getElementById('drive-status').textContent"))
+    check("retour : l'application revient sur Réglages, « Connecté »", pg.evaluate("document.body.dataset.tab") == 'reglages' and pg.evaluate("document.getElementById('drive-status').textContent").startswith('Sauvegarde automatique activée'), pg.evaluate("document.getElementById('drive-status').textContent"))
     check("retour : dossier créé et UNE sauvegarde complète envoyée (tout l'historique dans un seul fichier)", len(sent(log, 'POST', '/upload/drive/v3/files')) == 1, f"{len(sent(log, 'POST', '/upload/drive/v3/files'))} envoi(s)")
     ctx.close()
 

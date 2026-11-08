@@ -167,8 +167,13 @@ const WEIGHT_DRAFT_KEY = 'h49_draft_weight';
 const GOOGLE_CLIENT_ID = '903120094308-phdlfg1rug8v6hn231n8b4uu7vfj65uf.apps.googleusercontent.com';
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 const DRIVE_FOLDER_NAME = 'FITNESS AAP – Séances';
-const DRIVE_BACKUP_NAME = 'sauvegarde_complete.json';      // UN seul fichier : tout l'état de l'application
-const DRIVE_BACKUP_ID_KEY = 'h49_drive_backup_id';         // identifiant de ce fichier sur le Drive
+const DRIVE_BACKUP_NAME = 'sauvegarde_complete.json';      // ancien fichier unique (jusqu'à 1.6.32) : encore lu et restaurable
+// Versions (1.6.33, co-auteur : Claude) : chaque envoi crée un NOUVEAU fichier fitness-backup-AAAA-MM-JJ-HH-MM-SS.json,
+// les DRIVE_BACKUP_KEEP plus récents sont conservés, les plus anciens sont mis à la corbeille du Drive.
+const DRIVE_BACKUP_PREFIX = 'fitness-backup-';
+const DRIVE_BACKUP_NAME_RE = /^fitness-backup-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}\.json$/;
+const DRIVE_BACKUP_KEEP = 5;
+const DRIVE_BACKUP_ID_KEY = 'h49_drive_backup_id';         // identifiant de la dernière sauvegarde connue de cet appareil
 const DRIVE_LAST_HASH_KEY = 'h49_drive_last_hash';         // empreinte des données au dernier envoi réussi
 const DRIVE_LAST_BACKUP_KEY = 'h49_drive_last_backup';     // date du dernier envoi réussi
 const DRIVE_CONFLICT_KEY = 'h49_drive_conflict';           // une sauvegarde plus complète existe déjà sur le Drive
@@ -2727,6 +2732,12 @@ async function probeDriveAccess() {
   finally { driveProbing = false; updateDriveUI(); }
 }
 
+// Statut Drive sur plusieurs lignes (texte seul, séparé par des retours à la ligne <br>).
+function setDriveStatusLines(el, lines) {
+  el.textContent = '';
+  lines.forEach((t, i) => { if (i) el.appendChild(document.createElement('br')); el.appendChild(document.createTextNode(t)); });
+}
+
 function updateDriveUI() {
   const statusEl = document.getElementById('drive-status');
   const connectBtn = document.getElementById('drive-connect-btn');
@@ -2744,13 +2755,19 @@ function updateDriveUI() {
   const driveError = getDriveError();
   const showRestore = isDriveConnected() || isDriveWanted();
   if (restoreBtn) restoreBtn.style.display = showRestore ? '' : 'none';
+  if (!showRestore) hideDriveBackupList(); // liste des sauvegardes : seulement quand le Drive est connecté
   if (replaceBtn) replaceBtn.style.display = 'none';
   if (isDriveConnected() && conflict) {
     // Une sauvegarde existe déjà sur le Drive et contient des séances que cet appareil n'a pas : on ne l'écrase pas.
+    const empty = isDeviceEmpty();
+    const detail = '(' + (conflict.sessions != null ? conflict.sessions + ' séances, ' : '') + 'modifiée le ' + (formatDriveDate(conflict.modified) || 'date inconnue') + ')';
     statusEl.textContent = (account ? 'Compte ' + account.email + ' : ' : '')
-      + 'une sauvegarde plus complète existe déjà sur ton Drive (' + (conflict.sessions != null ? conflict.sessions + ' séances, ' : '')
-      + 'modifiée le ' + (formatDriveDate(conflict.modified) || 'date inconnue') + ') : l\'envoi est suspendu pour ne rien écraser. '
-      + 'Touche « Restaurer depuis Drive » pour la récupérer, ou « Remplacer par cet appareil » pour la remplacer.';
+      + (empty ? 'cet appareil ne contient aucune séance, alors que ta sauvegarde Drive en contient ' + detail + ' : l\'envoi est suspendu pour ne rien effacer. '
+               + 'Touche « Restaurer depuis Drive » pour les récupérer, ou « Effacer la sauvegarde Drive » pour la vider définitivement.'
+               : 'une sauvegarde plus complète existe déjà sur ton Drive ' + detail + ' : l\'envoi est suspendu pour ne rien écraser. '
+               + 'Touche « Restaurer depuis Drive » pour la récupérer, ou « Remplacer par cet appareil » pour la remplacer.');
+    if (replaceBtn) { replaceBtn.textContent = empty ? 'Effacer définitivement la sauvegarde Drive' : 'Remplacer par cet appareil'; replaceBtn.classList.toggle('btn-danger-text', empty); }
+    refreshDriveConflictDate();
     if (connectBtn) connectBtn.style.display = 'none';
     if (disconnectBtn) disconnectBtn.style.display = '';
     if (replaceBtn) replaceBtn.style.display = '';
@@ -2767,10 +2784,14 @@ function updateDriveUI() {
     if (connectBtn) connectBtn.style.display = 'none';
     if (disconnectBtn) disconnectBtn.style.display = '';
   } else if (isDriveConnected()) {
-    const accountIssue = !account && driveAccountError ? ' · adresse du compte indisponible (' + driveAccountError + ')' : '';
-    statusEl.textContent = (account
-      ? 'Connecté : ' + account.email + ' — sauvegarde automatique active'
-      : 'Connecté — sauvegarde automatique active') + accountIssue + pendingText;
+    // Une information par ligne (1.6.35) : état, compte, dernière sauvegarde (ou envoi en cours / en attente).
+    const lines = ['Sauvegarde automatique activée'];
+    if (account) lines.push(account.email);
+    else if (driveAccountError) lines.push('Adresse du compte indisponible (' + driveAccountError + ')');
+    if (driveSyncing) lines.push('Envoi en cours…');
+    else if (driveNeedsBackup()) lines.push('Modifications en attente d\'envoi');
+    else if (last) lines.push('Dernière sauvegarde : ' + formatDriveDate(last));
+    setDriveStatusLines(statusEl, lines);
     if (connectBtn) connectBtn.style.display = 'none';
     if (disconnectBtn) disconnectBtn.style.display = '';
   } else if (isDriveWanted()) {
@@ -2888,7 +2909,42 @@ function connectDriveByRedirect() {
   });
   const account = getDriveAccount();
   if (account) p.set('login_hint', account.email);
-  location.assign('https://accounts.google.com/o/oauth2/v2/auth?' + p.toString());
+  openGoogleAuth('https://accounts.google.com/o/oauth2/v2/auth?' + p.toString());
+}
+
+// Application installée sur Android : la page de connexion Google ouverte depuis l'application plein écran
+// (onglet intégré) reste blanche. On l'ouvre donc dans le vrai Chrome (intent), qui renvoie vers l'application ;
+// le jeton est mémorisé dans le stockage partagé et repris au retour dans l'application (voir storage / visibilitychange).
+function isAndroid() { return /Android/i.test(navigator.userAgent || ''); }
+function chromeIntentUrl(url) {
+  return 'intent://' + url.replace(/^https:\/\//, '').split('#')[0]
+    + '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(url) + ';end';
+}
+// L'application installée partage son stockage avec le navigateur qui l'a installée, et SEULEMENT avec lui :
+// le jeton doit donc être obtenu dans ce même navigateur (1.6.34, co-auteur : Claude). Chrome : intent vers le vrai
+// Chrome (inchangé). Firefox et les autres navigateurs : nouvel onglet de ce navigateur (un jeton obtenu dans Chrome
+// resterait invisible pour une application installée avec Firefox).
+function isChromeAndroid() {
+  const ua = navigator.userAgent || '';
+  return isAndroid() && /Chrome\//.test(ua) && !/SamsungBrowser|EdgA|OPR\/|YaBrowser|Firefox|; wv\)/.test(ua);
+}
+function openGoogleAuth(url) {
+  if (!isInstalledApp() || !isAndroid()) { navigateTo(url); return; }
+  if (isChromeAndroid()) { navigateTo(chromeIntentUrl(url)); return; }
+  if (!openBrowserTab(url)) {
+    // ouverture refusée (fenêtres bloquées, ex. reconnexion automatique sans appui) : rien n'est perdu
+    showToast('Connexion Google non ouverte : touche « Reconnecter maintenant » dans Réglages.', 6000);
+    updateDriveUI();
+  }
+}
+function navigateTo(url) { location.assign(url); }
+function openBrowserTab(url) {
+  try {
+    const w = window.open(url, '_blank');
+    if (!w) return false;
+    try { w.opener = null; } catch (e) { /* ignoré */ }
+    return true;
+  } catch (e) { return false; }
 }
 
 // Au démarrage : récupère le jeton renvoyé par Google dans l'adresse. Renvoie 'ok', 'error' ou null
@@ -2911,6 +2967,8 @@ function handleDriveRedirectReturn() {
     localStorage.setItem(DRIVE_WANTED_KEY, '1');
     clearDriveError();
     driveRedirectError = '';
+    // Retour dans un onglet Chrome (et non dans l'application plein écran) : on l'indique, l'application reprendra le jeton.
+    if (!isInstalledApp()) setTimeout(() => showToast('Connexion à Google Drive réussie ✅\nTu peux fermer cet onglet et revenir à l\'application plein écran.', 15000), 1200);
     return 'ok';
   } catch (e) { return null; }
 }
@@ -3001,15 +3059,61 @@ async function ensureDriveFolderOnce(accessToken) {
 // dès que les données changent. L'application retient l'empreinte des données envoyées : rien n'est renvoyé
 // si rien n'a changé, et les modifications faites sans accès valide partent dès que l'accès revient.
 
-// Cherche le fichier de sauvegarde dans le dossier (le plus récent) ; null s'il n'existe pas.
-async function findDriveBackup(accessToken, folderId) {
-  const q = encodeURIComponent(`name='${DRIVE_BACKUP_NAME}' and '${folderId}' in parents and trashed=false`);
-  const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,modifiedTime)&orderBy=modifiedTime%20desc&pageSize=1`, {
+// Versions (1.6.33) : le contenu et le format JSON ne changent pas ; seul le stockage change. Chaque envoi crée un
+// nouveau fichier horodaté, puis seuls les DRIVE_BACKUP_KEEP plus récents sont gardés (l'ancien fichier unique
+// « sauvegarde_complete.json » compte comme une version tant qu'il fait partie des plus récentes).
+
+// Nom d'une nouvelle sauvegarde : fitness-backup-AAAA-MM-JJ-HH-MM-SS.json (heure de l'appareil).
+function driveBackupFileName(date) {
+  const d = date || new Date();
+  const p = (n) => String(n).padStart(2, '0');
+  return DRIVE_BACKUP_PREFIX + d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate())
+    + '-' + p(d.getHours()) + '-' + p(d.getMinutes()) + '-' + p(d.getSeconds()) + '.json';
+}
+
+function isDriveBackupName(name) {
+  return typeof name === 'string' && (name === DRIVE_BACKUP_NAME || DRIVE_BACKUP_NAME_RE.test(name));
+}
+
+// Toutes les sauvegardes du dossier, de la plus récente à la plus ancienne : [{ id, name, modifiedTime }].
+// quiet : en cas d'échec, ne pas afficher d'erreur dans Réglages (nettoyage des anciennes versions).
+async function listDriveBackups(accessToken, folderId, quiet) {
+  const q = encodeURIComponent(`'${folderId}' in parents and trashed=false and (name contains '${DRIVE_BACKUP_PREFIX}' or name='${DRIVE_BACKUP_NAME}')`);
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name,modifiedTime)&orderBy=modifiedTime%20desc&pageSize=100`, {
     headers: { Authorization: 'Bearer ' + accessToken }
   });
-  if (!res.ok) throw await driveFolderError('Recherche de la sauvegarde Drive échouée', res);
-  const f = ((await res.json()).files || [])[0];
-  return f && typeof f.id === 'string' ? f : null;
+  if (!res.ok) {
+    if (quiet) throw new Error('Recherche des sauvegardes Drive échouée (' + res.status + ')');
+    throw await driveFolderError('Recherche de la sauvegarde Drive échouée', res);
+  }
+  const files = ((await res.json()).files || []).filter(f => f && typeof f.id === 'string' && isDriveBackupName(f.name));
+  const time = (f) => { const t = new Date(f.modifiedTime || 0).getTime(); return isNaN(t) ? 0 : t; };
+  return files.sort((a, b) => time(b) - time(a) || String(b.name).localeCompare(String(a.name)));
+}
+
+// Sauvegarde la plus récente du dossier ; null s'il n'y en a aucune.
+async function findDriveBackup(accessToken, folderId) {
+  return (await listDriveBackups(accessToken, folderId))[0] || null;
+}
+
+// Après un envoi réussi : met à la corbeille les sauvegardes au-delà des DRIVE_BACKUP_KEEP plus récentes.
+// Un échec (liste ou suppression) est seulement noté dans la console : la sauvegarde principale reste réussie.
+async function pruneDriveBackups(accessToken, folderId) {
+  let files;
+  try { files = await listDriveBackups(accessToken, folderId, true); }
+  catch (e) { console.warn('Drive : liste des anciennes sauvegardes impossible', e); return; }
+  for (const f of files.slice(DRIVE_BACKUP_KEEP)) {
+    try {
+      const res = await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(f.id)}?fields=id`, {
+        method: 'PATCH',
+        headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ trashed: true })
+      });
+      if (!res.ok) console.warn('Drive : suppression de l\'ancienne sauvegarde ' + f.name + ' échouée (' + res.status + ')');
+    } catch (e) {
+      console.warn('Drive : suppression de l\'ancienne sauvegarde ' + f.name + ' échouée', e);
+    }
+  }
 }
 
 // Télécharge la sauvegarde : { ok, text, data } (data = null si le contenu n'est pas du JSON).
@@ -3041,19 +3145,9 @@ function driveRemoteIsContainedInLocal(remote) {
   return remote.history.every(h => h && (local.has(h.id) || deleted.has(h.id)));
 }
 
-// Écrit la sauvegarde : met à jour le fichier existant (fileId) ou le crée ; renvoie la réponse de Google.
-async function writeDriveBackup(accessToken, folderId, payload, fileId) {
-  if (fileId) {
-    const upd = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${encodeURIComponent(fileId)}?uploadType=media&fields=id,name`, {
-      method: 'PATCH',
-      headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
-      body: payload
-    });
-    if (upd.ok) { setDriveBackupId(fileId); return upd; }
-    if (upd.status !== 404) return upd; // 401, 403... : traités par l'appelant
-    setDriveBackupId(null);             // fichier supprimé du Drive : on le recrée ci-dessous
-  }
-  const metadata = { name: DRIVE_BACKUP_NAME, parents: [folderId], mimeType: 'application/json' };
+// Écrit la sauvegarde dans un NOUVEAU fichier horodaté (jamais d'écrasement) ; renvoie la réponse de Google.
+async function writeDriveBackup(accessToken, folderId, payload) {
+  const metadata = { name: driveBackupFileName(), parents: [folderId], mimeType: 'application/json' };
   const form = new FormData();
   form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
   form.append('file', new Blob([payload], { type: 'application/json' }));
@@ -3075,6 +3169,7 @@ function driveNeedsBackup() {
 }
 
 let driveSyncing = false;
+let driveForceOverwrite = false; // « Remplacer la sauvegarde Drive » : contourne la protection contre l'écrasement par des données vides
 let driveSyncAgain = false;
 
 // Envoie la sauvegarde complète si elle est à envoyer. Renvoie { ok } ou { reason } :
@@ -3110,14 +3205,29 @@ async function syncDriveBackup() {
         }
         fileId = found.id;
       }
+    } else if (!driveForceOverwrite && state && Array.isArray(state.history) && state.history.length === 0) {
+      // Protection : cet appareil n'a plus aucune séance (réinitialisation, données effacées). On n'envoie pas une
+      // sauvegarde vide par-dessus la plus récente du Drive si elle en contient : l'utilisateur choisit de la
+      // restaurer ou de la remplacer (sinon quelques envois vides chasseraient les bonnes versions).
+      let latest = null;
+      try { latest = await findDriveBackup(token.access_token, folderId); } catch (e) { latest = null; }
+      const remote = latest ? await downloadDriveBackup(token.access_token, latest.id) : { ok: false };
+      if (remote.ok && !driveRemoteIsContainedInLocal(remote.data)) {
+        const n = remote.data && Array.isArray(remote.data.history) ? remote.data.history.length : null;
+        setDriveConflict({ id: latest.id, modified: latest.modifiedTime || '', sessions: n });
+        return { reason: 'conflict' };
+      }
     }
-    const res = await writeDriveBackup(token.access_token, folderId, payload, fileId);
+    driveForceOverwrite = false;
+    const res = await writeDriveBackup(token.access_token, folderId, payload);
     if (res.status === 401) { expireDriveToken(); return { reason: 'token' }; }
     if (!res.ok) { setDriveError(await driveErrorText(res)); return { reason: 'error' }; }
     clearDriveError();
     localStorage.setItem(DRIVE_LAST_HASH_KEY, driveHash(snapshot));
     localStorage.setItem(DRIVE_LAST_BACKUP_KEY, new Date().toISOString());
     try { localStorage.removeItem(DRIVE_DELETED_KEY); } catch (e) { /* ignoré */ }
+    // Versions : ne garder que les plus récentes. Jamais bloquant : un échec est seulement noté dans la console.
+    try { await pruneDriveBackups(token.access_token, folderId); } catch (e) { console.warn('Drive : nettoyage des anciennes sauvegardes impossible', e); }
     return { ok: true };
   } catch (e) {
     console.warn('Drive : envoi de la sauvegarde interrompu', e);
@@ -3139,20 +3249,90 @@ function scheduleDriveSync() {
 
 // Conflit : la sauvegarde du Drive contient des séances absentes de cet appareil. L'utilisateur choisit de
 // la remplacer par les données de cet appareil (ce bouton) ou de la restaurer (restoreFromDrive).
+function isDeviceEmpty() { return !!state && Array.isArray(state.history) && state.history.length === 0; }
+
+// Conflit enregistré sans date (versions antérieures) : on la lit une fois sur le Drive.
+let driveConflictDateAsked = false;
+async function refreshDriveConflictDate() {
+  const c = getDriveConflict(), token = getDriveToken();
+  if (!c || c.modified || !token || driveConflictDateAsked) return;
+  driveConflictDateAsked = true;
+  try {
+    const folderId = await ensureDriveFolder(token.access_token);
+    const f = await findDriveBackup(token.access_token, folderId);
+    if (f && f.modifiedTime && getDriveConflict()) { setDriveConflict({ ...getDriveConflict(), modified: f.modifiedTime }); updateDriveUI(); }
+  } catch (e) { /* date facultative */ }
+}
+
 function replaceDriveBackupWithThisDevice() {
   const c = getDriveConflict();
   if (!c) return;
   const when = formatDriveDate(c.modified) || 'date inconnue';
-  if (!confirm('Remplacer la sauvegarde Drive (' + (c.sessions != null ? c.sessions + ' séances, ' : '') + 'modifiée le ' + when
-    + ') par les données de cet appareil ?\n\nLes séances qu\'elle contient et que cet appareil n\'a pas seront perdues.')) return;
+  const what = '(' + (c.sessions != null ? c.sessions + ' séances, ' : '') + 'modifiée le ' + when + ')';
+  const ok = isDeviceEmpty()
+    ? confirm('Effacer DÉFINITIVEMENT la sauvegarde Drive ' + what + ' ?\n\nCet appareil ne contient aucune séance : la sauvegarde sera vidée et ses séances perdues (irréversible depuis l\'application).')
+    : confirm('Remplacer la sauvegarde Drive ' + what + ' par les données de cet appareil ?\n\nLes séances qu\'elle contient et que cet appareil n\'a pas seront perdues.');
+  if (!ok) return;
   setDriveBackupId(c.id);
   setDriveConflict(null);
   localStorage.removeItem(DRIVE_LAST_HASH_KEY);
+  driveForceOverwrite = true;
   syncDriveBackup();
 }
 
-// Restaure les données depuis la sauvegarde complète du Drive, par le même chemin que le bouton « Restaurer »
-// de l'Historique (importData, avec l'assainissement de security.js).
+// Date et heure complètes d'une sauvegarde (liste de restauration) : « 07/11/2026 à 15:47:12 ».
+function formatDriveBackupDate(iso) {
+  try {
+    const d = new Date(iso);
+    if (!iso || isNaN(d.getTime())) return 'date inconnue';
+    return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      + ' à ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  } catch (e) { return 'date inconnue'; }
+}
+
+function hideDriveBackupList() {
+  const box = document.getElementById('drive-backups');
+  if (box) { box.hidden = true; box.textContent = ''; }
+}
+
+// Liste des DRIVE_BACKUP_KEEP dernières sauvegardes (Réglages), chacune avec sa date et un bouton « Restaurer ».
+// Construite avec textContent : un nom de fichier venu du Drive n'est jamais interprété comme du HTML.
+function renderDriveBackupList(files) {
+  const box = document.getElementById('drive-backups');
+  if (!box) return;
+  box.textContent = '';
+  const intro = document.createElement('p');
+  intro.className = 'theme-hint';
+  intro.textContent = files.length > 1
+    ? 'Choisis la sauvegarde à restaurer (les ' + files.length + ' plus récentes) :'
+    : 'Une seule sauvegarde disponible :';
+  box.appendChild(intro);
+  files.forEach((f, i) => {
+    const row = document.createElement('div');
+    row.className = 'update-row drive-backup-row';
+    row.style.marginTop = '10px';
+    const text = document.createElement('div');
+    text.className = 'ex-text';
+    const name = document.createElement('span');
+    name.className = 'ex-name';
+    name.textContent = formatDriveBackupDate(f.modifiedTime);
+    const sub = document.createElement('span');
+    sub.className = 'ex-sub';
+    sub.textContent = i === 0 ? 'La plus récente' : (f.name === DRIVE_BACKUP_NAME ? 'Ancienne sauvegarde unique' : 'Version précédente');
+    text.appendChild(name); text.appendChild(sub);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn btn-secondary update-check';
+    btn.textContent = 'Restaurer';
+    btn.addEventListener('click', () => restoreDriveBackup(f));
+    row.appendChild(text); row.appendChild(btn);
+    box.appendChild(row);
+  });
+  box.hidden = false;
+}
+
+// « Restaurer depuis Drive » : affiche la liste des dernières sauvegardes ; la restauration se fait ensuite
+// depuis la ligne choisie (restoreDriveBackup).
 async function restoreFromDrive() {
   const token = getDriveToken();
   if (!token) {
@@ -3161,22 +3341,48 @@ async function restoreFromDrive() {
   }
   try {
     const folderId = await ensureDriveFolder(token.access_token);
-    const file = await findDriveBackup(token.access_token, folderId);
-    if (!file) { alert('Aucune sauvegarde complète trouvée dans le dossier « ' + DRIVE_FOLDER_NAME + ' » de ton Drive.'); return; }
+    const files = (await listDriveBackups(token.access_token, folderId)).slice(0, DRIVE_BACKUP_KEEP);
+    if (!files.length) { hideDriveBackupList(); alert('Aucune sauvegarde complète trouvée dans le dossier « ' + DRIVE_FOLDER_NAME + ' » de ton Drive.'); return; }
+    renderDriveBackupList(files);
+  } catch (e) {
+    alert('Restauration impossible : ' + (e && e.message ? e.message : 'erreur réseau') + '.');
+  }
+}
+
+// Restaure les données depuis une sauvegarde du Drive (n'importe laquelle de la liste), par le même chemin que
+// le bouton « Restaurer » de l'Historique (importData, avec l'assainissement de security.js).
+async function restoreDriveBackup(file) {
+  const token = getDriveToken();
+  if (!token) {
+    alert(isInstalledApp() ? 'Accès Google expiré : touche d\'abord « Reconnecter maintenant ».' : 'Connecte-toi d\'abord à Google Drive.');
+    return;
+  }
+  if (!file || typeof file.id !== 'string') return;
+  try {
     const dl = await downloadDriveBackup(token.access_token, file.id);
+    if (!dl.ok && dl.status === 404) {
+      alert('Cette sauvegarde n\'existe plus sur le Drive : la liste a été mise à jour, rien n\'a été modifié.');
+      restoreFromDrive();
+      return;
+    }
     if (!dl.ok || !dl.data || !Array.isArray(dl.data.history) || !dl.data.nextType) {
       alert('La sauvegarde Drive est illisible ou invalide : rien n\'a été modifié.');
       return;
     }
-    const when = formatDriveDate(file.modifiedTime) || 'date inconnue';
+    const when = formatDriveBackupDate(file.modifiedTime);
     const n = dl.data.history.length;
+    if (n === 0) {
+      alert('La sauvegarde Drive du ' + when + ' ne contient aucune séance : rien à restaurer, tes données n\'ont pas été modifiées.\n\nSi tu as un fichier de sauvegarde manuel, utilise « Restaurer » dans l\'Historique.');
+      return;
+    }
     const local = state && Array.isArray(state.history) ? state.history.length : 0;
     if (!confirm('Restaurer la sauvegarde Drive du ' + when + ' (' + n + ' séance' + (n > 1 ? 's' : '') + ') ?\n\n'
       + 'Cela remplace les données de cet appareil (' + local + ' séance' + (local > 1 ? 's' : '') + ').')) return;
     setDriveBackupId(file.id);
     setDriveConflict(null);
-    const f = new File([dl.text], DRIVE_BACKUP_NAME, { type: 'application/json' });
+    const f = new File([dl.text], file.name || DRIVE_BACKUP_NAME, { type: 'application/json' });
     await window.importData({ target: { files: [f], value: '' } });
+    hideDriveBackupList();
     updateDriveUI();
   } catch (e) {
     alert('Restauration impossible : ' + (e && e.message ? e.message : 'erreur réseau') + '.');
@@ -3409,11 +3615,15 @@ async function initApp() {
     if (isDriveConnected() && !getDriveAccount()) fetchDriveAccount();
     if (driveReturn) switchTab('reglages'); // on revient sur Réglages pour voir le résultat de la connexion
   }, 800);
+  // Jeton écrit par un autre onglet (connexion faite dans Chrome pendant que l'application plein écran attend)
+  window.addEventListener('storage', (e) => {
+    if (e.key === DRIVE_TOKEN_KEY || e.key === DRIVE_WANTED_KEY) { updateDriveUI(); if (isDriveConnected()) { syncDriveBackup(); if (!getDriveAccount()) fetchDriveAccount(); } }
+  });
   // Retour dans l'application (ex. après une connexion faite dans un onglet voisin) : on relit l'état de Drive
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) return;
     updateDriveUI();
-    if (isDriveConnected()) syncDriveBackup();
+    if (isDriveConnected()) { syncDriveBackup(); if (!getDriveAccount()) fetchDriveAccount(); }
   });
   const saved = localStorage.getItem('h49_state');
   if (saved) {

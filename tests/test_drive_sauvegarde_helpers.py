@@ -1,5 +1,5 @@
-"""Google Drive : UNE sauvegarde complète (sauvegarde_complete.json) mise à jour à chaque modification, jamais dupliquée ;
-protection contre l'écrasement d'une sauvegarde plus complète ; restauration depuis Drive.
+"""Outils communs aux tests Google Drive : sauvegardes versionnées (fitness-backup-*.json), protection contre
+l'écrasement d'une sauvegarde plus complète, restauration depuis Drive (liste des dernières sauvegardes).
 Google Identity et l'API Drive sont simulés (aucun appel réseau réel)."""
 import json, sys
 from harness import *
@@ -46,3 +46,11 @@ def run(br, base, drive, seeds=(), confirm=True, history=None):
     return ctx, pg, dialogs
 
 
+def restore_pick(pg, i=0, wait=2500):
+    """« Restaurer depuis Drive » puis « Restaurer » sur la i-ème sauvegarde de la liste ; renvoie le nombre de lignes."""
+    pg.evaluate("restoreFromDrive()"); pg.wait_for_timeout(1200)
+    n = pg.evaluate("document.querySelectorAll('#drive-backups .drive-backup-row button').length")
+    if n > i:
+        pg.evaluate("i=>document.querySelectorAll('#drive-backups .drive-backup-row button')[i].click()", i)
+        pg.wait_for_timeout(wait)
+    return n

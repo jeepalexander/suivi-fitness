@@ -37,7 +37,7 @@ with Srv() as base, sync_playwright() as p:
     check(f'séance supprimée de l\'historique local ({N} -> {N-1})', len(st['history']) == N - 1 and all(h['id'] != sid for h in st['history']))
     c = d.content() or {}
     check('sauvegarde Drive mise à jour : la séance en a disparu', len(c.get('history', [])) == N - 1 and all(h['id'] != sid for h in c.get('history', [])), len(c.get('history', [])))
-    check('toujours UN seul fichier (mise à jour, pas de doublon)', d.posts == 0 and d.patches >= 1, (d.posts, d.patches))
+    check('une nouvelle version envoyée, l\'ancienne n\'est pas écrasée', d.posts >= 1 and d.patches == 0 and any(f['id'] == 'BK1' for f in d.live()), (d.posts, d.patches))
     check('prochaine séance recalculée depuis l\'historique restant', st['nextType'] == {'A': 'B', 'B': 'C', 'C': 'A'}[st['history'][-1]['type']], st['nextType'])
     check('l\'écran Historique est rafraîchi', f'{N-1} séance' in pg.inner_text('#history-count'), pg.inner_text('#history-count'))
     check('liste des suppressions en attente vidée après envoi réussi', pg.evaluate("localStorage.getItem('h49_drive_deleted_ids')") is None)
