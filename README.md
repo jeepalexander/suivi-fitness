@@ -25,6 +25,17 @@
 
 ---
 
+## 🆕 Version 1.7.0 : programmes sur mesure
+
+- Le programme fixe A/B/C laisse la place à des **programmes créés par l’usager** (2 à 6 séances, A à F) et à des **séances libres**.
+- **Migration automatique** au premier lancement : tout l’historique existant est rattaché au programme « Hypertrophie » (les séances A, B, C d’avant), qui devient le programme actif. Nombre de séances, tonnage et records sont vérifiés identiques ; une copie des données d’origine reste sur l’appareil.
+- Les temps de repos et réglages par défaut viennent du **catalogue d’exercices** (`js/catalogue.js`), le rameur s’affiche en allure /500 m.
+- La sauvegarde Google Drive fonctionne comme avant (un fichier complet, 5 versions) et contient désormais les programmes.
+
+Le détail est dans [CHANGELOG.md](CHANGELOG.md).
+
+---
+
 ## 🚀 Installation
 
 1. **En ligne** : ouvrir [l’application](https://jeepalexander.github.io/suivi-fitness) dans un navigateur mobile.
@@ -66,8 +77,14 @@
 
 - Liste des séances groupée par mois, filtrable par programme ; chaque séance indique son programme d’origine.
 - Consultation et modification des séances passées.
+- Détail d'une séance (programme d'origine), modification ou suppression.
 - Sauvegarde et restauration des données en JSON.
+
+### Réglages
+
+- Accès par la roue crantée de l’Historique.
 - Choix du thème : clair, sombre ou automatique.
+- Sauvegarde Google Drive (connexion, 5 dernières versions restaurables) et vérification des mises à jour.
 
 ---
 
