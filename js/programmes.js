@@ -81,7 +81,7 @@ function renderProgramOverview() {
   // Les tuiles sont alignées vers le bas de l'écran, au-dessus de la barre de navigation (maquette)
   let html = '<div class="prog-spacer" aria-hidden="true"></div>';
   if (active) {
-    html += `<div class="prog-status"><span class="prog-dot on"></span>${isLibre(active) ? 'Séance libre active' : 'Programme actif'} · ${escapeHtml(active.name)}</div>`;
+    html += `<div class="prog-status"><span class="prog-dot on"></span>${isLibre(active) ? 'Séance libre active' : 'Programme actif'}</div>`;
     html += activeTileHtml(active);
     if (programDetailOpen) html += activeDetailHtml(active);
   } else {
@@ -115,13 +115,16 @@ function activeTileHtml(p) {
   const nSets = sessionSetCount(session);
   const BOLT_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>';
   const deloadHtml = checkDeloadStatus() ? `<span class="deload-pill">${BOLT_SVG}Déload actif · −20 %</span>` : '';
-  const top = libre
-    ? `<span class="prog-ico libre">1×</span><span class="prog-tile-kind">Séance libre</span>`
-    : `<span class="prog-ico">${SWAP_SVG}</span><span class="prog-tile-next">Prochaine séance ${programPillHtml(p, session.key, 'tiny')}</span>`;
+  // Tuile : pictogramme du type + nom du programme (ou de la séance libre) en grand ; pastille et nom de la
+  // prochaine séance en petit (programme seulement) ; exercices et séries ; « + de détail » et démarrer.
+  const nextLine = libre ? '' : `
+      <div class="prog-tile-next">${programPillHtml(p, session.key, 'tiny')}<span>${escapeHtml(sessionLabel(p, session))}</span></div>`;
   return `
     <div class="next-card prog-tile${libre ? ' libre' : ''}" data-lp="${escapeHtml(p.id)}">
-      <div class="prog-tile-top">${top}</div>
-      <span class="session-name">${escapeHtml(sessionLabel(p, session))}</span>
+      <div class="prog-tile-top">
+        ${libre ? '<span class="prog-ico libre">1×</span>' : `<span class="prog-ico">${SWAP_SVG}</span>`}
+        <span class="session-name prog-tile-name">${escapeHtml(p.name)}</span>
+      </div>${nextLine}
       <span class="next-card-count">${nEx} exercice${nEx > 1 ? 's' : ''} · ${nSets} série${nSets > 1 ? 's' : ''}</span>
       ${deloadHtml}
       <div class="next-card-row">

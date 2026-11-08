@@ -34,11 +34,13 @@ NAME_RE = re.compile(r'^fitness-backup-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}\.json
 
 
 def restore_pick(pg, i=0, wait=2500):
-    """« Restaurer depuis Drive » puis « Restaurer » sur la i-ème sauvegarde de la liste."""
+    """Fenêtre « Restaurer une sauvegarde » (1.7.3) : choisir la i-ème sauvegarde Drive puis « Restaurer cette sauvegarde » ;
+    renvoie le nombre de sauvegardes Drive proposées."""
     pg.evaluate("restoreFromDrive()"); pg.wait_for_timeout(1200)
-    n = pg.evaluate("document.querySelectorAll('#drive-backups .drive-backup-row button').length")
+    n = pg.evaluate("document.querySelectorAll('.sheet .backup-item.drive').length")
     if n > i:
-        pg.evaluate("i=>document.querySelectorAll('#drive-backups .drive-backup-row button')[i].click()", i)
+        pg.evaluate("i=>{if(backupRestore.sel!==i)document.querySelectorAll('.sheet .backup-item.drive')[i].click()}", i)
+        pg.evaluate("document.getElementById('backup-restore-go').click()")
         pg.wait_for_timeout(wait)
     return n
 
@@ -182,13 +184,13 @@ with Srv() as base, sync_playwright() as p:
     pg.wait_for_timeout(2500)
     rows = restore_pick(pg, 0)
     conf = [m for (t, m) in dlg if t == 'confirm' and 'Restaurer la sauvegarde Drive' in m]
-    check("« Restaurer depuis Drive » : liste des sauvegardes affichée avant toute restauration", rows == 1, rows)
-    check("« Restaurer depuis Drive » : confirmation avec le nombre de séances et l'avertissement de remplacement", conf and f'({N + 1} séances)' in conf[-1] and f'cet appareil ({N} séances)' in conf[-1], conf[-1:] )
+    check("« Restaurer » : fenêtre avec la liste des sauvegardes affichée avant toute restauration", rows == 1, rows)
+    check("« Restaurer » : confirmation avec le nombre de séances et l'avertissement de remplacement", conf and f'({N + 1} séances)' in conf[-1] and f'cet appareil ({N} séances)' in conf[-1], conf[-1:] )
     st = local_state(pg)
     check("restauration : les données de l'appareil deviennent celles du Drive (séance en plus incluse), conflit levé", len(st['history']) == N + 1 and any(h['id'] == 999999 for h in st['history']) and ls(pg, 'h49_drive_conflict') is None and ls(pg, 'h49_drive_backup_id') in {f['id'] for f in d.live()})
     check("restauration : message « Sauvegarde importée avec succès »", any('importée avec succès' in m for (t, m) in dlg))
     check("restauration : la sauvegarde restaurée reste sur le Drive, la plus récente version = données restaurées", any(f['id'] == 'BK1' for f in d.live()) and len((d.content() or {}).get('history', [])) == N + 1)
-    check("restauration : la liste des sauvegardes se referme", pg.evaluate("document.getElementById('drive-backups').hidden"))
+    check("restauration : la fenêtre des sauvegardes se referme", not pg.evaluate("!!document.querySelector('#sheet-overlay.open')"))
     ctx.close()
 
     # restauration refusée
@@ -205,7 +207,7 @@ with Srv() as base, sync_playwright() as p:
     pg.wait_for_timeout(2500)
     d.backup = None
     restore_pick(pg, 0, 1500)
-    check("restauration sans fichier sur le Drive : message clair, rien ne change", any('Aucune sauvegarde complète trouvée' in m for (t, m) in dlg) and len(local_state(pg)['history']) == N)
+    check("restauration sans fichier sur le Drive : message clair dans la fenêtre, rien ne change", 'Aucune sauvegarde dans le dossier' in pg.inner_text('.sheet') and len(local_state(pg)['history']) == N)
     ctx.close()
 
     # fichier illisible

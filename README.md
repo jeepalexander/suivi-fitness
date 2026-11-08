@@ -2,7 +2,7 @@
 
 **Application PWA de suivi d'entraînement en salle de sport** (dépôt `suivi-fitness`)
 
-[![Version](https://img.shields.io/badge/version-1.7.2-blue)](https://github.com/jeepalexander/suivi-fitness)
+[![Version](https://img.shields.io/badge/version-1.7.3-blue)](https://github.com/jeepalexander/suivi-fitness)
 [![License](https://img.shields.io/badge/license-MIT-green)]
 
 ---
@@ -20,7 +20,7 @@
 - ✅ **Design « Blanc minimaliste »** : fond uni, peu de couleurs, ombres légères, en thème **clair, sombre ou automatique** (mémorisé sur l’appareil)
 - ✅ **Interface mobile optimisée** : en-tête fixe, navigation basse stable et zone de contenu défilante
 - ✅ **Mode hors-ligne complet** (PWA avec Service Worker)
-- ✅ **Sauvegarde Google Drive automatique** avec versions : un fichier `fitness-backup-AAAA-MM-JJ-HH-MM-SS.json` par sauvegarde, les 5 plus récentes conservées et restaurables au choix depuis les Réglages
+- ✅ **Sauvegarde Google Drive automatique** avec versions : un fichier `fitness-backup-AAAA-MM-JJ-HH-MM-SS.json` par sauvegarde, les 5 plus récentes conservées et restaurables au choix depuis l’Historique
 - ✅ **Export / Import** des données au format JSON, avec assainissement des fichiers importés et Content-Security-Policy
 
 ---
@@ -78,13 +78,13 @@ Le détail est dans [CHANGELOG.md](CHANGELOG.md).
 - Liste des séances groupée par mois, filtrable par programme ; chaque séance indique son programme d’origine.
 - Consultation et modification des séances passées.
 - Détail d'une séance (programme d'origine), modification ou suppression.
-- Sauvegarde et restauration des données en JSON.
+- « Sauvegarder » (fichier JSON) et « Restaurer » : fenêtre de choix entre les 5 dernières sauvegardes Google Drive et un fichier de l’appareil.
 
 ### Réglages
 
 - Accès par la roue crantée de l’Historique.
 - Choix du thème : clair, sombre ou automatique.
-- Sauvegarde Google Drive (connexion, 5 dernières versions restaurables) et vérification des mises à jour.
+- Sauvegarde Google Drive (connexion, état, déconnexion) et vérification des mises à jour.
 
 ---
 

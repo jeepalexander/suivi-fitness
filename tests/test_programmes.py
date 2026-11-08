@@ -65,7 +65,8 @@ with Srv() as base, sync_playwright() as p:
 
     # Accueil Programme
     txt = pg.inner_text('#program-overview')
-    check('accueil : « Programme actif · Hypertrophie » et tuile de la prochaine séance', 'Programme actif · Hypertrophie' in txt and 'Prochaine séance' in txt, txt[:120])
+    check('accueil : « Programme actif » (sans nom), tuile au nom du programme', 'Programme actif' in txt and 'Programme actif ·' not in txt and 'Hypertrophie' in pg.inner_text('.prog-tile-name') and pg.inner_text('.prog-tile-next .type-pill') == attendu and 'Presse' in pg.inner_text('.prog-tile-next') if attendu == 'A' else 'Hypertrophie' in pg.inner_text('.prog-tile-name') and pg.inner_text('.prog-tile-next .type-pill') == attendu, txt[:120])
+    check('onglet et titre « Programmes »', pg.inner_text('#page-title') == 'Programmes' and pg.inner_text('#nav-programme').strip() == 'Programmes')
     check('accueil : bouton + visible dans l\'en-tête', pg.is_visible('#add-program-btn'))
     gap = pg.evaluate("document.querySelector('nav').getBoundingClientRect().top - document.querySelector('.prog-hint').getBoundingClientRect().bottom")
     check('accueil : tuiles alignées vers le bas, juste au-dessus de la navigation', 0 <= gap <= 60, f'{gap:.0f} px')
@@ -154,7 +155,7 @@ with Srv() as base, sync_playwright() as p:
     # ---------- 6. Séance libre : activée, reste active après la séance, jamais « En pause » ----------
     pg.evaluate("switchTab('programme')"); pg.wait_for_timeout(200)
     pg.click('.mem-tile.libre .mem-btn'); pg.wait_for_timeout(300)
-    check('séance libre activée : tuile sable « Séance libre active · Dorsaux »', 'Séance libre active · Dorsaux' in pg.inner_text('#program-overview') and pg.locator('.prog-tile.libre').count() == 1)
+    check('séance libre activée : « Séance libre active », tuile sable « Dorsaux » sans ligne de prochaine séance', 'Séance libre active' in pg.inner_text('.prog-status') and pg.inner_text('.prog-tile-name') == 'Dorsaux' and not pg.locator('.prog-tile .prog-tile-next').count() and pg.locator('.prog-tile.libre').count() == 1)
     pg.evaluate("switchTab('seance')"); pg.wait_for_timeout(300)
     check('Séance : pastille 1×, « Séance libre », Dorsaux', pg.inner_text('#seance-badge') == '1×' and pg.inner_text('#seance-overline') == 'Séance libre' and pg.inner_text('#seance-type-title') == 'Dorsaux')
     check_set(pg, 'Tirage vertical', 0, 50, 10)
@@ -236,6 +237,13 @@ with Srv() as base, sync_playwright() as p:
     pg.click('.prog-empty-restore .link-btn'); pg.wait_for_timeout(200)
     check('Restaurer sans Google Drive : écran 2 « Se connecter à Google Drive »', 'Se connecter à Google Drive' in pg.inner_text('.sheet'))
     pg.evaluate("closeSheet()")
+    pg.evaluate("switchTab('historique')"); pg.click('#tab-historique .backup-card .btn-secondary'); pg.wait_for_timeout(300)
+    check('Historique « Restaurer » sans Drive : fenêtre « Restaurer une sauvegarde », seulement « Choisir un fichier… » et le lien de connexion', 'Restaurer une sauvegarde' in pg.inner_text('.sheet') and pg.locator('.sheet .backup-item.drive').count() == 0 and pg.locator('.sheet .backup-item.file').count() == 1 and 'Se connecter à Google Drive' in pg.inner_text('.sheet') and not pg.locator('#backup-restore-go').count())
+    pg.click('.sheet .backup-item.file')
+    with pg.expect_file_chooser() as fc:
+        pg.click('#backup-restore-go')
+    check('« Choisir le fichier » : ouvre le choix de fichier de l\'appareil, fenêtre refermée', fc.value is not None and not pg.evaluate("!!document.querySelector('#sheet-overlay.open')"))
+    pg.evaluate("switchTab('programme')")
     # écran 3 : liste à cocher (données préparées directement, sans Drive)
     pg.evaluate("""restoreCandidates=[{id:'x1',name:'Prise de masse',kind:'program',status:'active',savedAt:'2026-11-07T18:42:00Z',nextKey:'A',sessions:[{key:'A',name:'',exercises:[{exId:39,sets:3}]},{key:'B',name:'',exercises:[{exId:25,sets:3}]}]},
                     {id:'x2',name:'Dorsaux',kind:'libre',status:'new',savedAt:'2026-11-05T19:03:00Z',nextKey:'',sessions:[{key:'',name:'Dorsaux',exercises:[{exId:26,sets:3}]}]}];

@@ -7,6 +7,19 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.3] - 2026-11-08
+### ✨ Restaurer une sauvegarde (co-auteur : Claude)
+- **Historique › Restaurer** ouvre la fenêtre **« Restaurer une sauvegarde »** (planche de concept, écran 27b) : les 5 dernières sauvegardes Google Drive (date et heure, « La plus récente » / « Version précédente ») et « Choisir un fichier… » pour un fichier créé avec « Sauvegarder ». Un seul choix (la plus récente cochée par défaut) ; bouton « Restaurer cette sauvegarde » ou « Choisir le fichier », puis la confirmation habituelle avant tout remplacement. Sans connexion Drive : le fichier seul et un lien « Se connecter à Google Drive ».
+- **Réglages** : « Restaurer depuis Drive » et la liste dans la page sont supprimés (redondants). Le bouton « Restaurer » ne reste qu'en cas de conflit de sauvegarde, et ouvre la même fenêtre. Texte d'aide : « pour en reprendre une, touche « Restaurer » dans l'Historique ».
+### ✏️ Onglet Programmes
+- Onglet et titre renommés **« Programmes »**.
+- Pastille verte : « Programme actif » ou « Séance libre active », sans le nom.
+- Tuile de l'élément actif : pictogramme du type et **nom du programme (ou de la séance libre) en grand** ; pastille et nom de la prochaine séance en petit (programme seulement) ; exercices et séries ; « + de détail » et démarrer.
+- Tests : `test_programmes` (84 contrôles), `test_drive_versions`, `test_drive_sauvegarde` et `test_reglages` alignés sur la fenêtre de restauration.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.3.
+
+---
+
 ## [1.7.2] - 2026-11-08
 ### ✏️ Nom de l'application (co-auteur : Claude)
 - L'application s'appelle **Mon Carnet de Salle**, comme sur la maquette : en-tête de toutes les pages (« MON CARNET DE SALLE »), titre de l'onglet du navigateur, nom à l'installation (`manifest.json` : « Mon Carnet de Salle », raccourci « Mon Carnet » sous l'icône) et titre du partage de la sauvegarde.
