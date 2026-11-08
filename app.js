@@ -21,108 +21,50 @@
 //  15. SAUVEGARDE, IMPORT ET RÉINITIALISATION
 //  16. MISES À JOUR DE L'APPLICATION
 //  17. DÉMARRAGE
+//
+// Fichiers associés (1.7.0) : js/catalogue.js (catalogue des exercices, chargé avant ce fichier) et
+// js/programmes.js (onglet Programme : programmes sur mesure et séances libres, chargé après).
 
 // ============================================================
 // 1. CONSTANTES ET DONNÉES DU PROGRAMME
 // ============================================================
-const EXERCISE_ICONS = {
-  "Presse à cuisses": "icons/leg_press.png",
-  "Développé couché": "icons/bench_press.png",
-  "Tirage horizontal": "icons/seated_row.png",
-  "Développé militaire": "icons/overhead_press.png",
-  "Curl biceps": "icons/biceps_curl.png",
-  "Mollets": "icons/calf_raise.png",
-  "Soulevé de terre": "icons/deadlift.png",
-  "Développé incliné": "icons/incline_bench.png",
-  "Tirage vertical": "icons/lat_pulldown.png",
-  "Tractions": "icons/pull_up.png",
-  "Élévations latérales": "icons/lateral_raise.png",
-  "Extension triceps": "icons/triceps_extension.png",
-  "Leg Extension": "icons/leg_extension.png",
-  "Fentes marchées": "icons/walking_lunge.png",
-  "Dips": "icons/dips.png",
-  "Rowing unilatéral": "icons/dumbbell_row.png",
-  "Rameur": "icons/rower.png",
-  "Oiseau (Arrière d'épaule)": "icons/reverse_fly.png",
-  "Leg Curl": "icons/leg_curl.png"
+// Exercices : le catalogue (js/catalogue.js, chargé avant ce fichier) fait référence. Chaque exercice a un
+// identifiant stable (exId), un mode de saisie et ses réglages par défaut (séries, répétitions, repos).
+// Anciens noms de l'application (jusqu'à 1.6.36) -> nom du catalogue, utilisés par la migration et l'import.
+const EXERCISE_ALIASES = {
+  "Leg Extension": "Leg extension",
+  "Leg Curl": "Leg curl",
+  "Oiseau (Arrière d'épaule)": "Oiseau",
+  "Mollets / Finition": "Mollets"
 };
+const CATALOGUE_BY_ID = {};
+const CATALOGUE_BY_NAME = {};
+(typeof CATALOGUE !== 'undefined' ? CATALOGUE : []).forEach(e => { CATALOGUE_BY_ID[e.id] = e; CATALOGUE_BY_NAME[e.name] = e; });
 
 // Rameur : exercice « cardio » (durée + distance, une seule ligne). Il est stocké avec weight/reps à 0
 // (donc ignoré par tonnage, charges et records) et ses valeurs propres : seconds / meters.
 const ROWER_NAME = 'Rameur';
-const ROWER_EXERCISE = { name: ROWER_NAME, cardio: true, seriesCount: 1, defaultSeconds: 270, defaultMeters: 1000 };
+const ROWER_DEFAULTS = { seconds: 270, meters: 1000 }; // proposés au tout premier rameur
 
-const PROGRAM = {
-  'A': {
-    badge: "badge-A",
-    title: "Presse/Développé",
-    exercises: [
-      ROWER_EXERCISE,
-      { name: "Presse à cuisses", seriesCount: 4, defaultWeight: 93, defaultReps: 10 },
-      { name: "Développé couché", seriesCount: 4, defaultWeight: 75, defaultReps: 8 },
-      { name: "Tirage horizontal", seriesCount: 4, defaultWeight: 59, defaultReps: 10 },
-      { name: "Développé militaire", seriesCount: 3, defaultWeight: 32, defaultReps: 10 },
-      { name: "Curl biceps", seriesCount: 3, defaultWeight: 28, defaultReps: 10 },
-      { name: "Mollets", seriesCount: 3, defaultWeight: 40, defaultReps: 12 }
-    ]
-  },
-  'B': {
-    badge: "badge-B",
-    title: "Soulevé/Développé",
-    exercises: [
-      ROWER_EXERCISE,
-      { name: "Soulevé de terre", seriesCount: 4, defaultWeight: 70, defaultReps: 10 },
-      { name: "Développé incliné", seriesCount: 4, defaultWeight: 60, defaultReps: 10 },
-      { name: "Tirage vertical", seriesCount: 4, defaultWeight: 50, defaultReps: 10 },
-      { name: "Tractions", seriesCount: 3, defaultWeight: 80, defaultReps: 8 },
-      { name: "Élévations latérales", seriesCount: 3, defaultWeight: 20, defaultReps: 12 },
-      { name: "Extension triceps", seriesCount: 3, defaultWeight: 27, defaultReps: 10 },
-      { name: "Leg Extension", seriesCount: 3, defaultWeight: 40, defaultReps: 12 }
-    ]
-  },
-  'C': {
-    badge: "badge-C",
-    title: "Fentes/Dips",
-    exercises: [
-      ROWER_EXERCISE,
-      { name: "Fentes marchées", seriesCount: 4, defaultWeight: 25, defaultReps: 10 },
-      { name: "Dips", seriesCount: 4, defaultWeight: 80, defaultReps: 10 },
-      { name: "Rowing unilatéral", seriesCount: 3, defaultWeight: 20, defaultReps: 12 },
-      { name: "Oiseau (Arrière d'épaule)", seriesCount: 3, defaultWeight: 20, defaultReps: 12 },
-      { name: "Mollets", seriesCount: 3, defaultWeight: 40, defaultReps: 12 },
-      { name: "Leg Curl", seriesCount: 3, defaultWeight: 40, defaultReps: 12 }
-    ]
-  }
+// Programme fixe A/B/C de l'application jusqu'à 1.6.36 : sert uniquement à créer le programme
+// « Hypertrophie » lors de la migration (voir migrateState), avec le même nombre de séries par exercice.
+const LEGACY_PROGRAM = {
+  A: { title: "Presse / Développé", exercises: [["Rameur", 1], ["Presse à cuisses", 4], ["Développé couché", 4], ["Tirage horizontal", 4], ["Développé militaire", 3], ["Curl biceps", 3], ["Mollets", 3]] },
+  B: { title: "Soulevé / Développé", exercises: [["Rameur", 1], ["Soulevé de terre", 4], ["Développé incliné", 4], ["Tirage vertical", 4], ["Tractions", 3], ["Élévations latérales", 3], ["Extension triceps", 3], ["Leg extension", 3]] },
+  C: { title: "Fentes / Dips", exercises: [["Rameur", 1], ["Fentes marchées", 4], ["Dips", 4], ["Rowing unilatéral", 3], ["Oiseau", 3], ["Mollets", 3], ["Leg curl", 3]] }
 };
+const LEGACY_PROGRAM_ID = 'hypertrophie';
+const LEGACY_PROGRAM_NAME = 'Hypertrophie';
 
-const SESSION_TYPES = ['A', 'B', 'C'];
-const SESSION_TYPE_COLORS = { A: '#1B6FD8', B: '#C2570C', C: '#C62B35' };
-const SESSION_ORDER = ['A', 'B', 'C'];
-const REST_DURATION = 90; // repos par défaut (s), pour un exercice absent de la liste ci-dessous
+// Séances d'un programme : 2 à 6, lettres A à F, chacune sa couleur (pastilles, graphiques)
+const SESSION_KEYS = ['A', 'B', 'C', 'D', 'E', 'F'];
+const SESSION_MIN = 2;
+const SESSION_MAX = 6;
+const SESSION_TYPE_COLORS = { A: '#1B6FD8', B: '#C2570C', C: '#C62B35', D: '#2E8B5E', E: '#6D5BD0', F: '#B8327A' };
+const REST_DURATION = 90; // repos par défaut (s), pour un exercice hors catalogue
 
-// Repos (en secondes) proposé par le chrono selon l'exercice ouvert dans la Séance :
-// 150 s pour les mouvements lourds, 90 s pour les autres mouvements polyarticulaires, 60 s pour l'isolation.
-// Pour ajuster un temps : modifier la valeur ici (aucun autre fichier à toucher).
-const REST_BY_EXERCISE = {
-  "Soulevé de terre": 150,
-  "Presse à cuisses": 150,
-  "Développé couché": 150,
-  "Développé incliné": 150,
-  "Développé militaire": 90,
-  "Tirage horizontal": 90,
-  "Tirage vertical": 90,
-  "Tractions": 90,
-  "Dips": 90,
-  "Rowing unilatéral": 90,
-  "Fentes marchées": 90,
-  "Curl biceps": 60,
-  "Extension triceps": 60,
-  "Élévations latérales": 60,
-  "Oiseau (Arrière d'épaule)": 60,
-  "Leg Extension": 60,
-  "Leg Curl": 60,
-  "Mollets": 60
-};
+// Groupes proposés en filtre dans « Ajouter un exercice »
+const EXERCISE_FILTERS = ['Tous', 'Cardio', 'Pectoraux', 'Dos', 'Épaules', 'Jambes', 'Bras', 'Abdos'];
 
 // Couleurs des graphiques : valeurs de repli (thème clair). Elles sont relues depuis
 // les variables --chart-* de style.css à chaque changement de thème (voir readChartColors).
@@ -202,7 +144,7 @@ let workoutSeconds = 0;
 let tonnageChart, exerciseChart, weightChart, cardioChart;
 let volumeCalendarMode = false; // false : un point par séance ; true : une colonne par jour (écarts visibles, défilement horizontal)
 let currentVolumeFilter = 'all'; // 'all' (séances), 'month' (par mois) ou 'type' (séance A/B/C)
-let currentSessionTypeFilter = SESSION_TYPES[0];
+let currentSessionTypeFilter = 'A';
 let currentExMetricMode = 'max';
 
 // Thème : écouteur du réglage clair/sombre du téléphone
@@ -221,6 +163,10 @@ let editingOriginalIsDeload = false;
 let manualOpenExercise;
 let scrollOnNextRefresh = false;
 let lastOpenExerciseIdx = null;
+
+// Séance affichée dans l'onglet Séance : { programId, programName, kind, key, sessionName, draftKey,
+// exercises: [{ name, exId, seriesCount }] } ; null = rien d'actif (écran « Aucune séance prévue »)
+let workoutDef = null;
 
 // Brouillon : verrou posé pendant la restauration (évite d'écrire un brouillon en le relisant)
 let draftRestoring = false;
@@ -346,24 +292,197 @@ function recalculateHistoryTonnages() {
   saveState();
 }
 
-function updateNextTypeFromHistory() {
-  if (state.history && state.history.length > 0) {
-    const lastSession = state.history[state.history.length - 1];
-    if (lastSession.type === 'A') {
-      state.nextType = 'B';
-    } else if (lastSession.type === 'B') {
-      state.nextType = 'C';
-    } else if (lastSession.type === 'C') {
-      state.nextType = 'A';
-    }
-  } else {
-    state.nextType = 'A';
+// --- Exercices du catalogue ---
+function canonicalExerciseName(name) {
+  return EXERCISE_ALIASES[name] || name;
+}
+
+// Fiche d'un exercice (par identifiant ou par nom) ; un nom hors catalogue reçoit des réglages neutres
+function exInfo(ref) {
+  if (typeof ref === 'number' && CATALOGUE_BY_ID[ref]) return CATALOGUE_BY_ID[ref];
+  const name = canonicalExerciseName(String(ref == null ? '' : ref));
+  return CATALOGUE_BY_NAME[name] || { id: null, name, group: '', mode: 'weight', sets: 3, reps: '8–12', rest: REST_DURATION };
+}
+
+function exMode(name) { return exInfo(name).mode; }
+function isCardioName(name) { return !!exInfo(name).cardio; }
+function isCardioDistName(name) { const e = exInfo(name); return !!e.cardio && e.mode === 'dist'; }
+
+// Valeur proposée la première fois, dans la fourchette du catalogue (« 6–10 » -> 8, « 8–12 » -> 10…) ;
+// pour un exercice en durée (gainage « 20–45 s »), une durée en secondes.
+const DEFAULT_REPS = { '6–10': 8, '8–12': 10, '10–15': 12, '12–15': 12, '8–15': 10, '15–20': 15, '20–30': 20, '20–45 s': 30 };
+function defaultRepsFor(name) {
+  const r = exInfo(name).reps || '';
+  if (DEFAULT_REPS[r] !== undefined) return DEFAULT_REPS[r];
+  const m = /^(\d+)/.exec(r);
+  return m ? +m[1] : '';
+}
+
+// Icône d'un exercice : PNG de l'application, sinon pictogramme générique (pouls pour le cardio, haltère sinon)
+const GENERIC_CARDIO_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2.5-6 4 12 2.5-6H21"/></svg>';
+const GENERIC_STRENGTH_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>';
+function getIcon(exName, decorative = false) {
+  const e = exInfo(exName);
+  if (e.icon) return `<img src="${e.icon}" alt="${decorative ? '' : escapeHtml(e.name)}">`;
+  const cardio = e.group === 'Cardio';
+  return `<span class="ex-generic${cardio ? ' cardio' : ''}"${decorative ? ' aria-hidden="true"' : ` role="img" aria-label="${escapeHtml(e.name)}"`}>${cardio ? GENERIC_CARDIO_SVG : GENERIC_STRENGTH_SVG}</span>`;
+}
+
+function escapeHtml(str) {
+  return String(str == null ? '' : str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// --- Programmes et séances libres ---
+// state.programs : [{ id, name, kind: 'program' | 'libre', status: 'active' | 'paused' | 'new', createdAt, activatedAt,
+//   pausedAt, savedAt, nextKey, sessions: [{ key: 'A'..'F' ('' pour une séance libre), name, exercises: [{ exId, sets }] }] }]
+// Un seul élément est actif à la fois. Chaque séance de l'historique garde une copie du nom de son programme.
+function getPrograms() { return (state && Array.isArray(state.programs)) ? state.programs : []; }
+function getProgram(id) { return getPrograms().find(p => p.id === id) || null; }
+function getActiveProgram() { return getPrograms().find(p => p.status === 'active') || null; }
+function newProgramId() { return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function isLibre(p) { return !!p && p.kind === 'libre'; }
+
+function programExerciseCount(p) {
+  return (p.sessions || []).reduce((n, s) => n + (s.exercises || []).length, 0);
+}
+function sessionSetCount(session) {
+  return (session.exercises || []).reduce((n, e) => n + (exInfo(e.exId).cardio ? 1 : (e.sets || 1)), 0);
+}
+
+function sessionLabel(p, session) {
+  if (!session) return '';
+  if (isLibre(p)) return p.name;
+  return session.name && session.name.trim() ? session.name.trim() : `Séance ${session.key}`;
+}
+
+// Séance suivante de la rotation : celle qui suit la dernière séance faite de ce programme
+function nextKeyFromHistory(p) {
+  if (!p || isLibre(p) || !p.sessions.length) return p && p.sessions[0] ? p.sessions[0].key : '';
+  const keys = p.sessions.map(s => s.key);
+  const hist = (state.history || []).filter(h => h.programId === p.id && keys.includes(h.sessionKey));
+  if (!hist.length) return keys.includes(p.nextKey) ? p.nextKey : keys[0];
+  const last = hist.slice().sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : (a.id || 0) - (b.id || 0))).pop();
+  return keys[(keys.indexOf(last.sessionKey) + 1) % keys.length];
+}
+
+// Séance que l'onglet Séance doit charger : celle de l'élément actif (null si rien n'est actif)
+function currentSessionDef() {
+  const p = getActiveProgram();
+  if (!p || !p.sessions || !p.sessions.length) return null;
+  const session = isLibre(p) ? p.sessions[0] : (p.sessions.find(s => s.key === p.nextKey) || p.sessions[0]);
+  return { program: p, session, key: isLibre(p) ? '' : session.key };
+}
+
+// Compatibilité : nextType reste renseigné (anciennes sauvegardes, import) avec la séance suivante du programme actif
+function syncNextType() {
+  const p = getActiveProgram();
+  state.nextType = p && !isLibre(p) && p.nextKey ? p.nextKey : 'A';
+}
+
+// Pastille d'une séance de l'historique (lettre de couleur ou « 1× » sable)
+function sessionPillHtml(h, small = true) {
+  if (h && h.kind === 'libre') return `<span class="type-pill type-pill-libre${small ? ' small' : ''}">1×</span>`;
+  const k = h && SESSION_KEYS.includes(h.sessionKey || h.type) ? (h.sessionKey || h.type) : 'A';
+  return `<span class="type-pill type-pill-${k}${small ? ' small' : ''}">${k}</span>`;
+}
+function programPillHtml(p, key, cls = '') {
+  if (isLibre(p)) return `<span class="type-pill type-pill-libre ${cls}">1×</span>`;
+  return `<span class="type-pill type-pill-${key} ${cls}">${key}</span>`;
+}
+
+// --- Migration (une seule fois, à l'ouverture de la nouvelle version ou à l'import d'une ancienne sauvegarde) ---
+// L'historique existant est rattaché au programme « Hypertrophie » (séances A, B, C du programme fixe), les noms
+// d'exercices passent à ceux du catalogue (avec leur exId). Contrôle : nombre de séances, tonnage total et records
+// identiques avant et après ; sinon on revient à la copie d'origine et l'erreur est signalée.
+function historyFingerprint(s) {
+  const hist = Array.isArray(s.history) ? s.history : [];
+  let tonnage = 0;
+  const records = {};
+  hist.forEach(h => {
+    (h.exercises || []).forEach(ex => {
+      const name = canonicalExerciseName(ex.name);
+      (ex.sets || []).forEach(set => {
+        const w = parseFloat(set.weight) || 0, r = parseFloat(set.reps) || 0;
+        tonnage += w * r;
+        if (w > (records[name] || 0)) records[name] = w;
+      });
+    });
+  });
+  return JSON.stringify({ n: hist.length, t: Math.round(tonnage), r: Object.keys(records).sort().map(k => k + ':' + records[k]) });
+}
+
+function legacyProgramFromHistory(s) {
+  const sessions = SESSION_KEYS.slice(0, 3).map(k => ({
+    key: k,
+    name: LEGACY_PROGRAM[k].title,
+    exercises: LEGACY_PROGRAM[k].exercises.map(([name, sets]) => ({ exId: exInfo(name).id, sets }))
+  }));
+  const now = new Date().toISOString();
+  return {
+    id: LEGACY_PROGRAM_ID, name: LEGACY_PROGRAM_NAME, kind: 'program', status: 'active',
+    createdAt: now, activatedAt: now, pausedAt: null, savedAt: now,
+    nextKey: ['A', 'B', 'C'].includes(s.nextType) ? s.nextType : 'A',
+    sessions
+  };
+}
+
+// Renvoie { state, migrated, error }. Ne touche pas à localStorage.
+function migrateState(s) {
+  if (!s || typeof s !== 'object') return { state: s, migrated: false };
+  if (!Array.isArray(s.history)) s.history = [];
+  if (!Array.isArray(s.weights)) s.weights = [];
+  if (!s.lastWeights || typeof s.lastWeights !== 'object') s.lastWeights = {};
+  if (s.schema >= 2 && Array.isArray(s.programs)) return { state: s, migrated: false };
+
+  const original = JSON.stringify(s);
+  const before = historyFingerprint(s);
+  try {
+    const m = JSON.parse(original);
+    const hasHistory = m.history.length > 0;
+    m.programs = Array.isArray(m.programs) ? m.programs : [];
+    if (hasHistory && !m.programs.some(p => p.id === LEGACY_PROGRAM_ID)) m.programs.push(legacyProgramFromHistory(m));
+    m.history.forEach(h => {
+      const key = ['A', 'B', 'C'].includes(h.type) ? h.type : 'A';
+      if (!h.programId) {
+        h.programId = LEGACY_PROGRAM_ID; h.programName = LEGACY_PROGRAM_NAME; h.kind = 'program';
+        h.sessionKey = key; h.sessionName = LEGACY_PROGRAM[key].title;
+      }
+      (h.exercises || []).forEach(ex => {
+        ex.name = canonicalExerciseName(ex.name);
+        const info = exInfo(ex.name);
+        if (info.id) ex.exId = info.id;
+      });
+    });
+    const lw = {};
+    Object.keys(m.lastWeights).forEach(k => { lw[canonicalExerciseName(k)] = m.lastWeights[k]; });
+    m.lastWeights = lw;
+    if (!m.deload || typeof m.deload !== 'object') m.deload = { shift: 0, postponedAt: null };
+    m.schema = 2;
+    const after = historyFingerprint(m);
+    if (after !== before) throw new Error('contrôle après migration différent : ' + before + ' / ' + after);
+    return { state: m, migrated: true };
+  } catch (e) {
+    console.error('Migration des programmes annulée', e);
+    return { state: JSON.parse(original), migrated: false, error: e };
   }
 }
 
-function getIcon(exName, decorative = false) {
-  const path = EXERCISE_ICONS[exName] || "icons/bench_press.png";
-  return `<img src="${path}" alt="${decorative ? '' : exName}" onerror="this.src='icons/bench_press.png'">`;
+// Programmes cohérents : un seul actif, rotation valide, séances libres avec une seule séance
+function normalizePrograms() {
+  if (!state) return;
+  if (!Array.isArray(state.programs)) state.programs = [];
+  if (!state.deload || typeof state.deload !== 'object') state.deload = { shift: 0, postponedAt: null };
+  let seenActive = false;
+  state.programs.forEach(p => {
+    if (!Array.isArray(p.sessions)) p.sessions = [];
+    if (p.status === 'active') { if (seenActive) p.status = 'paused'; seenActive = true; }
+    if (!['active', 'paused', 'new'].includes(p.status)) p.status = 'paused';
+    if (!isLibre(p)) {
+      p.sessions.forEach((s, i) => { s.key = SESSION_KEYS[i]; });
+      if (!p.sessions.some(s => s.key === p.nextKey)) p.nextKey = p.sessions[0] ? p.sessions[0].key : 'A';
+    }
+  });
+  syncNextType();
 }
 
 function formatDate(dateStr) {
@@ -372,8 +491,6 @@ function formatDate(dateStr) {
   if(parts.length === 3) return `${parts[2]}/${parts[1]}`;
   return dateStr;
 }
-
-function isCardioName(name) { return name === ROWER_NAME; }
 
 // 270 -> « 4:30 »
 function formatDurationMS(sec) {
@@ -398,39 +515,130 @@ function paceSecPerKm(seconds, meters) {
   return sec > 0 && m > 0 ? Math.round(sec * 1000 / m) : 0;
 }
 
+// Cardio : valeur calculée sous la saisie, selon l'usage courant de l'appareil
+//   pace500 : allure /500 m (rameur, ski trainer) · pacekm : allure /km (tapis) · kmh : vitesse (vélos) · floorsmin : étages/min
+// Le nombre renvoyé sert aux graphiques (plus bas = mieux pour une allure, plus haut = mieux pour une vitesse).
+const CARDIO_UNITS = {
+  pace500: { label: 'Allure', suffix: '/500 m', lowerIsBetter: true, value: (sec, amt) => (sec > 0 && amt > 0 ? sec * 500 / amt : 0), fmt: v => formatDurationMS(v) },
+  pacekm: { label: 'Allure', suffix: '/km', lowerIsBetter: true, value: (sec, amt) => (sec > 0 && amt > 0 ? sec * 1000 / amt : 0), fmt: v => formatDurationMS(v) },
+  kmh: { label: 'Vitesse', suffix: 'km/h', lowerIsBetter: false, value: (sec, amt) => (sec > 0 && amt > 0 ? (amt / 1000) / (sec / 3600) : 0), fmt: v => v.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) },
+  floorsmin: { label: 'Rythme', suffix: 'étages/min', lowerIsBetter: false, value: (sec, amt) => (sec > 0 && amt > 0 ? amt / (sec / 60) : 0), fmt: v => v.toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }
+};
+function cardioUnit(name) { return CARDIO_UNITS[exInfo(name).unit] || null; }
+// Distance saisie en kilomètres pour le tapis et les vélos, en mètres pour le rameur et le ski trainer
+function distanceInKm(name) { const u = exInfo(name).unit; return u === 'pacekm' || u === 'kmh'; }
+function cardioAmount(name, set) { return exInfo(name).mode === 'floors' ? Number(set.floors) || 0 : Number(set.meters) || 0; }
+function cardioMetric(name, set) {
+  const u = cardioUnit(name);
+  return u ? u.value(Number(set.seconds) || 0, cardioAmount(name, set)) : 0;
+}
+function cardioMetricText(name, v) {
+  const u = cardioUnit(name);
+  return u && v > 0 ? `${u.fmt(v)} ${u.suffix}` : '–';
+}
+// Montant saisi (champ de droite) -> mètres ou étages
+function parseCardioAmount(name, str) {
+  const v = parseFloat(String(str == null ? '' : str).replace(',', '.'));
+  if (!(v > 0)) return NaN;
+  if (exInfo(name).mode === 'floors') return Math.round(v);
+  return distanceInKm(name) ? Math.round(v * 1000) : Math.round(v);
+}
+function formatCardioAmountInput(name, set) {
+  if (exInfo(name).mode === 'floors') return set.floors != null ? String(set.floors) : '';
+  if (set.meters == null || set.meters === '') return '';
+  return distanceInKm(name) ? String(Math.round(Number(set.meters) / 10) / 100) : String(set.meters);
+}
+function cardioRowText(name, durationStr, amountStr) {
+  const sec = parseDurationInput(durationStr), amt = parseCardioAmount(name, amountStr);
+  const u = cardioUnit(name);
+  return u ? cardioMetricText(name, u.value(sec, amt)) : '–';
+}
 function cardioPaceText(durationStr, meters) {
-  const p = paceSecPerKm(parseDurationInput(durationStr), meters);
-  return p > 0 ? `${formatDurationMS(p)} /km` : '–';
+  return cardioRowText(ROWER_NAME, durationStr, meters);
 }
 
 // Saisie de la durée au pavé numérique (pas de « : » dessus) : « 430 » -> « 4:30 », « 1015 » -> « 10:15 »
+function formatDurationDigits(value) {
+  const digits = String(value).replace(/\D/g, '').slice(-5).replace(/^0+(?=\d)/, '');
+  return digits === '' ? '' : (digits.length <= 2 ? `0:${digits.padStart(2, '0')}` : `${digits.slice(0, -2)}:${digits.slice(-2)}`);
+}
+function onDurationInput(el) { el.value = formatDurationDigits(el.value); }
 function onCardioInput(el) {
   const row = el.closest('.set-row');
   const dEl = row.querySelector('.weight-input');
-  if (el === dEl) {
-    const digits = dEl.value.replace(/\D/g, '').slice(-5).replace(/^0+(?=\d)/, '');
-    dEl.value = digits === '' ? '' : (digits.length <= 2 ? `0:${digits.padStart(2, '0')}` : `${digits.slice(0, -2)}:${digits.slice(-2)}`);
-  }
+  if (el === dEl) dEl.value = formatDurationDigits(dEl.value);
   const pace = row.nextElementSibling;
-  if (pace && pace.classList.contains('cardio-pace')) pace.querySelector('b').textContent = cardioPaceText(dEl.value, row.querySelector('.reps-input').value);
+  const rEl = row.querySelector('.reps-input');
+  if (pace && pace.classList.contains('cardio-pace')) pace.querySelector('b').textContent = cardioRowText(dEl.dataset.ex, dEl.value, rEl ? rEl.value : '');
 }
 
 function isPerformedCardioSet(set) {
-  return !!set && (parseFloat(set.seconds) || 0) > 0 && (parseFloat(set.meters) || 0) > 0;
+  if (!set || !((parseFloat(set.seconds) || 0) > 0)) return false;
+  if (set.meters !== undefined) return (parseFloat(set.meters) || 0) > 0;
+  if (set.floors !== undefined) return (parseFloat(set.floors) || 0) > 0;
+  return true; // durée seule (corde à sauter)
 }
 
+// Série réellement faite : poids × réps, poids du corps + lest (« lest » présent), réps seules (« free ») ou durée (« hold »)
 function isPerformedSet(set) {
-  return !!set && (parseFloat(set.weight) || 0) > 0 && (parseFloat(set.reps) || 0) > 0;
+  if (!set) return false;
+  const w = parseFloat(set.weight) || 0, r = parseFloat(set.reps) || 0;
+  if (set.hold) return (parseFloat(set.seconds) || 0) > 0;
+  if (set.free || set.lest !== undefined) return r > 0;
+  return w > 0 && r > 0;
+}
+
+// Poids corporel le plus récent (onglet Progression), ou null
+function latestBodyWeight() {
+  const w = state && Array.isArray(state.weights) ? state.weights.filter(x => (parseFloat(x.weight) || 0) > 0) : [];
+  return w.length ? parseFloat(w[w.length - 1].weight) : null;
+}
+// « PDC », « PDC +10 kg », « PDC −20 kg »
+function lestText(lest) {
+  const l = parseFloat(lest) || 0;
+  if (l === 0) return 'PDC';
+  return `PDC ${l > 0 ? '+' : '−'}${String(Math.abs(l)).replace('.', ',')} kg`;
 }
 
 // ============================================================
 // 5. DÉLOAD (SEMAINE DE RELÂCHE)
 // ============================================================
+// Déload global (tous programmes confondus) : séances 10, 11 et 12 de chaque cycle de 12.
+// « Reporter à la prochaine séance » décale le cycle d'une séance (state.deload.shift) ; tant que la séance en
+// cours n'est pas enregistrée (postponedAt = nombre de séances au moment du report), le report peut être annulé.
+function deloadCycleNumber() {
+  const shift = state && state.deload ? (parseInt(state.deload.shift, 10) || 0) : 0;
+  return (state && state.history ? state.history.length : 0) + 1 - shift;
+}
 function checkDeloadStatus() {
   if (!state || !state.history) return false;
-  // On se base sur le numéro de la PROCHAINE séance à venir
-  const nextSessionNumber = state.history.length + 1;
-  return nextSessionNumber > 0 && (nextSessionNumber % 12 === 0 || (nextSessionNumber % 12 >= 10));
+  const n = deloadCycleNumber();
+  return n > 0 && (n % 12 === 0 || (n % 12 >= 10));
+}
+function isDeloadPostponed() {
+  return !!(state && state.deload && state.deload.postponedAt !== null && state.deload.postponedAt !== undefined
+    && state.deload.postponedAt === state.history.length);
+}
+function postponeDeload() {
+  if (!state || !checkDeloadStatus() || editingOriginalId !== null) return;
+  if (!state.deload) state.deload = { shift: 0, postponedAt: null };
+  state.deload.shift = (parseInt(state.deload.shift, 10) || 0) + 1;
+  state.deload.postponedAt = state.history.length;
+  saveState();
+  refreshDeloadUi();
+}
+function cancelDeloadPostpone() {
+  if (!isDeloadPostponed()) return;
+  state.deload.shift = Math.max(0, (parseInt(state.deload.shift, 10) || 0) - 1);
+  state.deload.postponedAt = null;
+  saveState();
+  refreshDeloadUi();
+}
+// Les charges proposées dépendent du déload : on recrée le formulaire (le brouillon garde la saisie déjà faite)
+function refreshDeloadUi() {
+  saveDraft();
+  initWorkoutForm();
+  if (document.body.dataset.tab === 'programme') renderProgramOverview();
 }
 
 function isDeloadActive() {
@@ -449,73 +657,7 @@ function displayDeloadNotificationIfNeeded() {
 // ============================================================
 // 6. ÉCRAN PROGRAMME
 // ============================================================
-function programTilesHtml(prog) {
-  return prog.exercises.map(ex => `
-    <div class="ex-tile">
-      <div class="ex-icon-badge">${getIcon(ex.name)}</div>
-      <span>${ex.name}</span>
-    </div>
-  `).join('');
-}
-
-function renderProgramOverview() {
-  const container = document.getElementById('program-overview');
-  if (!container) return;
-
-  const nextType = PROGRAM[state.nextType] ? state.nextType : 'A';
-  const next = PROGRAM[nextType];
-  const startIdx = SESSION_ORDER.indexOf(nextType);
-  const others = [1, 2].map(i => SESSION_ORDER[(startIdx + i) % SESSION_ORDER.length]);
-
-  const BOLT_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>';
-  const deloadHtml = checkDeloadStatus()
-    ? `<span class="deload-pill">${BOLT_SVG}Déload actif · −20 %</span>`
-    : '';
-  const totalSets = next.exercises.reduce((n, ex) => n + ex.seriesCount, 0);
-
-  const othersHtml = others.map(type => `
-    <div class="next-row-wrap">
-      <button type="button" class="next-row" aria-expanded="false" onclick="toggleProgramRow(this)">
-        <span class="type-pill type-pill-${type} small">${type}</span>
-        <span class="next-row-name">${PROGRAM[type].title.replace('/', ' / ')}</span>
-        <span class="next-row-chevron">${CHEVRON_SVG}</span>
-      </button>
-      <div class="tile-grid next-row-panel" hidden>${programTilesHtml(PROGRAM[type])}</div>
-    </div>
-  `).join('');
-
-  container.innerHTML = `
-    <div class="next-card">
-      <span class="overline">Prochaine séance · <span class="type-letter type-letter-${nextType}">${nextType}</span></span>
-      <span class="session-name">${next.title.replace('/', ' / ')}</span>
-      <div class="next-card-row">
-        <div class="next-card-info">
-          <span class="next-card-count">${next.exercises.length} exercices · ${totalSets} séries</span>
-          ${deloadHtml}
-        </div>
-        <button type="button" class="btn-start" aria-label="Démarrer la séance" onclick="switchTab('seance')">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </button>
-      </div>
-    </div>
-    <div class="section-block">
-      <div class="tile-grid">${programTilesHtml(next)}</div>
-    </div>
-
-    <div class="section-block">
-      <h2 class="section-label">Ensuite</h2>
-      ${othersHtml}
-    </div>
-  `;
-}
-
-// Déplie / replie la liste des exercices d'une séance dans « Ensuite »
-function toggleProgramRow(btn) {
-  const panel = btn.nextElementSibling;
-  const open = btn.getAttribute('aria-expanded') === 'true';
-  btn.setAttribute('aria-expanded', open ? 'false' : 'true');
-  if (panel) panel.hidden = open;
-}
+// L'écran Programme (programmes sur mesure, séances libres) est dans js/programmes.js.
 
 // ============================================================
 // 7. CHRONOS : REPOS ET DURÉE DE SÉANCE
@@ -587,8 +729,9 @@ function runRestTimer(endTime) {
 }
 
 // Repos adapté à l'exercice : durée (s) associée à un exercice, ou repos par défaut
+// (repos du catalogue : 3:00 polyarticulaire lourd, 2:00 polyarticulaire, 1:30 isolation, 1:00 abdos / gainage)
 function restDurationFor(exName) {
-  return REST_BY_EXERCISE[exName] || REST_DURATION;
+  return exInfo(exName).rest || REST_DURATION;
 }
 
 // Durée du prochain repos : celle de l'exercice actuellement ouvert dans la Séance
@@ -742,17 +885,15 @@ function clearDraft() {
 }
 
 function saveDraft() {
-  if (draftRestoring || editingOriginalId !== null || !state) return;
+  if (draftRestoring || editingOriginalId !== null || !state || !workoutDef) return;
   const items = Array.from(document.querySelectorAll('#exercises-list .exercise-item'));
   if (!items.length) return;
 
-  const type = (document.getElementById('seance-badge') || {}).innerText;
-  const prog = PROGRAM[(type || '').trim()];
   let dirty = false;
   const exercises = items.map(item => {
     const rows = Array.from(item.querySelectorAll('.set-row'));
-    const progEx = prog ? prog.exercises.find(e => e.name === item.dataset.ex) : null;
-    if (progEx && rows.length !== progEx.seriesCount) dirty = true;
+    const defEx = workoutDef.exercises.find(e => e.name === item.dataset.ex);
+    if (defEx && rows.length !== defEx.seriesCount) dirty = true;
     return {
       name: item.dataset.ex,
       sets: rows.map(row => {
@@ -770,7 +911,7 @@ function saveDraft() {
 
   const draft = {
     v: 1,
-    type: (type || '').trim(),
+    type: workoutDef.draftKey,
     updatedAt: Date.now(),
     startedAt: parseInt(localStorage.getItem('workout_start_time'), 10) || null,
     manualOpen: manualOpenExercise === undefined ? null : manualOpenExercise,
@@ -782,15 +923,17 @@ function saveDraft() {
 function restoreDraft(type) {
   const d = readDraft();
   if (!d || d.type !== type) return false;
-  const clean = v => String(v == null ? '' : v).replace(/[^0-9.,\-]/g, '');
+  const clean = v => String(v == null ? '' : v).replace(/[^0-9.,\-+]/g, '');
+  const cleanDuration = v => String(v == null ? '' : v).replace(/[^0-9:.,]/g, '');
   draftRestoring = true;
   try {
     document.querySelectorAll('#exercises-list .exercise-item').forEach(item => {
       const saved = d.exercises.find(e => e.name === item.dataset.ex);
       if (!saved || !Array.isArray(saved.sets) || !saved.sets.length) return;
       const grid = item.querySelector('.sets-grid');
-      const cardio = isCardioName(item.dataset.ex);
-      grid.innerHTML = saved.sets.map((s, i) => setRowHtml(item.dataset.ex, i + 1, cardio ? String(s.w == null ? '' : s.w).replace(/[^0-9:.,]/g, '') : clean(s.w), clean(s.r))).join('');
+      const mode = exMode(item.dataset.ex);
+      const durFirst = mode === 'dist' || mode === 'floors' || mode === 'time';
+      grid.innerHTML = saved.sets.map((s, i) => setRowHtml(item.dataset.ex, i + 1, durFirst ? cleanDuration(s.w) : clean(s.w), clean(s.r))).join('');
       grid.querySelectorAll('.set-row').forEach((row, i) => {
         const s = saved.sets[i];
         const w = row.querySelector('.weight-input'), r = row.querySelector('.reps-input');
@@ -854,29 +997,45 @@ function restoreWeightDraft() {
 // ============================================================
 // 9. ÉCRAN SÉANCE : SÉRIES ET EXERCICES
 // ============================================================
+// Mode de saisie (catalogue) -> contenu des deux champs d'une ligne de série :
+//   weight : kg · réps          bw : lest (kg, vide = PDC) · réps        reps : réps seules
+//   time : durée (min:ss)        dist : durée · distance (m ou km)        floors : durée · étages
+function sameExercise(a, b) { return canonicalExerciseName(a) === canonicalExerciseName(b); }
+
 function getSuggestedSetValues(exName, setIndex, fallbackWeight, fallbackReps) {
+  const mode = exMode(exName);
   let foundSet = null;
 
-  // On parcourt l'historique du plus récent au plus ancien
+  // On parcourt l'historique du plus récent au plus ancien, en ignorant les séances de déload
+  // (on va chercher la dernière vraie charge normale)
   for (let i = state.history.length - 1; i >= 0; i--) {
     const h = state.history[i];
-    
-    // Détermine mathématiquement si cette séance historique était une séance de déload
-    const sessionNum = i + 1;
-    const wasDeload = (sessionNum % 12 === 0 || (sessionNum % 12 >= 10));
-    
-    // On ignore les séances de déload pour aller chercher la dernière vraie charge normale
-    if (!wasDeload && h.exercises) {
-      const foundEx = h.exercises.find(e => e.name === exName);
-      // On ne reprend qu'une série réellement faite : les séries non faites sont ignorées
-      // et on remonte à la dernière séance où cette série a vraiment été réalisée.
-      if (foundEx && foundEx.sets && isPerformedSet(foundEx.sets[setIndex])) {
-        foundSet = { ...foundEx.sets[setIndex] };
-        break;
-      }
+    if (h.isDeload || !h.exercises) continue;
+    const foundEx = h.exercises.find(e => sameExercise(e.name, exName));
+    // On ne reprend qu'une série réellement faite : les séries non faites sont ignorées
+    // et on remonte à la dernière séance où cette série a vraiment été réalisée.
+    if (foundEx && foundEx.sets && isPerformedSet(foundEx.sets[setIndex])) {
+      foundSet = { ...foundEx.sets[setIndex] };
+      break;
     }
   }
-  
+
+  if (mode === 'bw') {
+    let lest = 0;
+    if (foundSet) {
+      if (foundSet.lest !== undefined) lest = parseFloat(foundSet.lest) || 0;
+      else {
+        // Ancienne séance (charge totale saisie) : lest = charge − poids corporel, jamais négatif
+        const bwKg = latestBodyWeight();
+        lest = bwKg ? Math.max(0, Math.round(((parseFloat(foundSet.weight) || 0) - bwKg) / 2.5) * 2.5) : 0;
+      }
+    }
+    if (isDeloadActive() && lest > 0) lest = Math.round((lest * 0.8) / 2.5) * 2.5;
+    return { weight: lest, reps: foundSet ? foundSet.reps : fallbackReps };
+  }
+  if (mode === 'time') return { weight: foundSet && foundSet.seconds ? foundSet.seconds : fallbackReps, reps: '' };
+  if (mode === 'reps') return { weight: '', reps: foundSet ? foundSet.reps : fallbackReps };
+
   if (!foundSet) {
     if (state.lastWeights && state.lastWeights[exName]) {
       foundSet = { weight: state.lastWeights[exName], reps: fallbackReps };
@@ -884,21 +1043,22 @@ function getSuggestedSetValues(exName, setIndex, fallbackWeight, fallbackReps) {
       foundSet = { weight: fallbackWeight, reps: fallbackReps };
     }
   }
-  
+
   // Si le déload est actif pour la prochaine séance, on applique la réduction de 20%
   if (isDeloadActive() && foundSet.weight) {
     foundSet.weight = Math.round((foundSet.weight * 0.8) / 2.5) * 2.5; // Arrondi au palier de 2.5kg
   }
-  
+
   return foundSet;
 }
 
-// Valeurs proposées pour le rameur : la dernière séance où il a été fait, sinon les valeurs par défaut
+// Valeurs proposées pour un cardio : la dernière séance où il a été fait, sinon les valeurs par défaut
+// (rameur : 4:30 et 1 000 m ; autres appareils : champs vides la première fois)
 function getSuggestedCardioValues(exName, defSeconds, defMeters) {
   for (let i = state.history.length - 1; i >= 0; i--) {
-    const ex = (state.history[i].exercises || []).find(e => e.name === exName);
+    const ex = (state.history[i].exercises || []).find(e => sameExercise(e.name, exName));
     const set = ex && Array.isArray(ex.sets) ? ex.sets.find(isPerformedCardioSet) : null;
-    if (set) return { seconds: set.seconds, meters: set.meters };
+    if (set) return { seconds: set.seconds, meters: set.meters, floors: set.floors };
   }
   return { seconds: defSeconds, meters: defMeters };
 }
@@ -946,11 +1106,7 @@ function markInputActive(input) {
 }
 
 function findProgramExercise(name) {
-  for (const t of Object.keys(PROGRAM)) {
-    const found = PROGRAM[t].exercises.find(e => e.name === name);
-    if (found) return found;
-  }
-  return null;
+  return workoutDef ? workoutDef.exercises.find(e => e.name === name) || null : null;
 }
 
 function renumberSets(grid) {
@@ -960,36 +1116,97 @@ function renumberSets(grid) {
   });
 }
 
+// En-têtes de colonnes selon le mode de saisie
+function setsHeadHtml(exName) {
+  const e = exInfo(exName);
+  let cols;
+  switch (e.mode) {
+    case 'bw': cols = ['Lest (kg)', 'Réps']; break;
+    case 'reps': cols = ['Réps']; break;
+    case 'time': cols = ['Durée']; break;
+    case 'dist': cols = ['Durée', distanceInKm(exName) ? 'Distance (km)' : 'Distance (m)']; break;
+    case 'floors': cols = ['Durée', 'Étages']; break;
+    default: cols = ['Kg', 'Réps'];
+  }
+  return `<div class="sets-head${cols.length === 1 ? ' single' : ''}" aria-hidden="true"><span>Série</span>${cols.map(c => `<span>${c}</span>`).join('')}<span></span></div>`;
+}
+
 // Gabarit d'une ligne de série (utilisé à la création du formulaire et par le bouton +)
 function setRowHtml(exName, number, weightVal, repsVal, done = false) {
-  if (isCardioName(exName)) {
-    // Rameur : « weight-input » = durée (min:ss), « reps-input » = distance (m). Nombre = secondes, texte = saisie telle quelle.
-    const dur = typeof weightVal === 'number' ? formatDurationMS(weightVal) : weightVal;
+  const e = exInfo(exName);
+  const ex = escapeHtml(exName);
+  const check = (label) => `<button type="button" class="btn-check-set" aria-pressed="${done ? 'true' : 'false'}" aria-label="${label}" onclick="toggleSetDone(this)">${CHECK_SVG}</button>`;
+  const dur = v => (typeof v === 'number' ? formatDurationMS(v) : (v == null ? '' : v));
+  if (e.mode === 'dist' || e.mode === 'floors') {
+    // Cardio : « weight-input » = durée (min:ss), « reps-input » = distance ou étages. Nombre = secondes, texte = saisie telle quelle.
+    const d = dur(weightVal);
+    const km = distanceInKm(exName);
+    const amountLabel = e.mode === 'floors' ? 'Étages montés' : (km ? 'Distance en kilomètres' : 'Distance en mètres');
+    const u = cardioUnit(exName);
     return `
     <div class="set-row${done ? ' done' : ''}">
       <span class="set-label">${number}</span>
-      <input type="text" inputmode="numeric" class="set-input weight-input" data-ex="${exName}" aria-label="Durée en minutes et secondes" placeholder="min:ss" value="${dur}" oninput="onCardioInput(this); markInputActive(this)">
-      <input type="number" inputmode="numeric" class="set-input reps-input" data-ex="${exName}" aria-label="Distance en mètres" placeholder="m" value="${repsVal}" oninput="onCardioInput(this); markInputActive(this)">
-      <button type="button" class="btn-check-set" aria-pressed="${done ? 'true' : 'false'}" aria-label="Valider le rameur" onclick="toggleSetDone(this)">${CHECK_SVG}</button>
+      <input type="text" inputmode="numeric" class="set-input weight-input" data-ex="${ex}" aria-label="Durée en minutes et secondes" placeholder="min:ss" value="${escapeHtml(d)}" oninput="onCardioInput(this); markInputActive(this)">
+      <input type="text" inputmode="${km ? 'decimal' : 'numeric'}" class="set-input reps-input" data-ex="${ex}" aria-label="${amountLabel}" placeholder="${e.mode === 'floors' ? 'étages' : (km ? 'km' : 'm')}" value="${escapeHtml(repsVal)}" oninput="onCardioInput(this); markInputActive(this)">
+      ${check(`Valider : ${ex}`)}
     </div>
-    <div class="cardio-pace"><span>Allure</span><b>${cardioPaceText(dur, repsVal)}</b></div>
+    ${u ? `<div class="cardio-pace"><span>${u.label}</span><b>${cardioRowText(exName, d, repsVal)}</b></div>` : ''}
+  `;
+  }
+  if (e.mode === 'time') {
+    return `
+    <div class="set-row single${done ? ' done' : ''}">
+      <span class="set-label">${number}</span>
+      <input type="text" inputmode="numeric" class="set-input weight-input" data-ex="${ex}" aria-label="Série ${number}, durée en minutes et secondes" placeholder="min:ss" value="${escapeHtml(dur(weightVal))}" oninput="onDurationInput(this); markInputActive(this)">
+      <input type="hidden" class="reps-input" data-ex="${ex}" value="">
+      ${check(`Valider la série ${number}`)}
+    </div>
+  `;
+  }
+  if (e.mode === 'reps') {
+    return `
+    <div class="set-row single${done ? ' done' : ''}">
+      <span class="set-label">${number}</span>
+      <input type="hidden" class="weight-input" data-ex="${ex}" value="">
+      <input type="number" inputmode="numeric" class="set-input reps-input" data-ex="${ex}" aria-label="Série ${number}, répétitions" placeholder="reps" value="${escapeHtml(repsVal)}" oninput="markInputActive(this)">
+      ${check(`Valider la série ${number}`)}
+    </div>
+  `;
+  }
+  if (e.mode === 'bw') {
+    const l = parseFloat(String(weightVal).replace(',', '.').replace('−', '-'));
+    const lestVal = !l ? '' : (l > 0 ? '+' + l : String(l));
+    return `
+    <div class="set-row${done ? ' done' : ''}">
+      <span class="set-label">${number}</span>
+      <input type="text" class="set-input weight-input lest-input" data-ex="${ex}" aria-label="Série ${number}, lest en kg (vide = poids du corps, négatif = assistance)" placeholder="PDC" value="${escapeHtml(lestVal)}" oninput="markInputActive(this)">
+      <input type="number" inputmode="numeric" class="set-input reps-input" data-ex="${ex}" aria-label="Série ${number}, répétitions" placeholder="reps" value="${escapeHtml(repsVal)}" oninput="markInputActive(this)">
+      ${check(`Valider la série ${number}`)}
+    </div>
   `;
   }
   return `
     <div class="set-row${done ? ' done' : ''}">
       <span class="set-label">${number}</span>
-      <input type="number" step="0.5" inputmode="decimal" class="set-input weight-input" data-ex="${exName}" aria-label="Série ${number}, poids en kg" placeholder="kg" value="${weightVal}" oninput="markInputActive(this)">
-      <input type="number" inputmode="numeric" class="set-input reps-input" data-ex="${exName}" aria-label="Série ${number}, répétitions" placeholder="reps" value="${repsVal}" oninput="markInputActive(this)">
-      <button type="button" class="btn-check-set" aria-pressed="${done ? 'true' : 'false'}" aria-label="Valider la série ${number}" onclick="toggleSetDone(this)">${CHECK_SVG}</button>
+      <input type="number" step="0.5" inputmode="decimal" class="set-input weight-input" data-ex="${ex}" aria-label="Série ${number}, poids en kg" placeholder="kg" value="${escapeHtml(weightVal)}" oninput="markInputActive(this)">
+      <input type="number" inputmode="numeric" class="set-input reps-input" data-ex="${ex}" aria-label="Série ${number}, répétitions" placeholder="reps" value="${escapeHtml(repsVal)}" oninput="markInputActive(this)">
+      ${check(`Valider la série ${number}`)}
     </div>
   `;
+}
+
+// Lest saisi : « +10 », « 10 », « -20 », « −20 », vide = 0 (poids du corps)
+function parseLest(str) {
+  const t = String(str == null ? '' : str).trim().replace(',', '.').replace('−', '-');
+  if (t === '' || t === '+' || t === '-') return 0;
+  return /^[+-]?\d+(\.\d+)?$/.test(t) ? parseFloat(t) : NaN;
 }
 
 function addSet(btn) {
   const grid = btn.closest('.exercise-item').querySelector('.sets-grid');
   const rows = grid.querySelectorAll('.set-row');
   const last = rows[rows.length - 1];
-  const exName = grid.dataset.ex || (last ? last.querySelector('.weight-input').dataset.ex : '');
+  const exName = btn.closest('.exercise-item').dataset.ex;
 
   // La nouvelle série reprend les valeurs de la dernière ;
   // à défaut (aucune série), on utilise la suggestion du programme.
@@ -998,8 +1215,7 @@ function addSet(btn) {
     weightVal = last.querySelector('.weight-input').value;
     repsVal = last.querySelector('.reps-input').value;
   } else {
-    const progEx = findProgramExercise(exName);
-    const suggested = getSuggestedSetValues(exName, 0, progEx ? progEx.defaultWeight : 0, progEx ? progEx.defaultReps : 0);
+    const suggested = getSuggestedSetValues(exName, 0, '', defaultRepsFor(exName));
     weightVal = suggested.weight;
     repsVal = suggested.reps;
   }
@@ -1022,8 +1238,8 @@ function removeSet(btn) {
 }
 
 function updateSetsProgress() {
-  const totalRows = document.querySelectorAll('.set-row').length;
-  const doneRows = document.querySelectorAll('.set-row.done').length;
+  const totalRows = document.querySelectorAll('#exercises-list .set-row').length;
+  const doneRows = document.querySelectorAll('#exercises-list .set-row.done').length;
   const textEl = document.getElementById('sets-progress-text');
   if(textEl) textEl.innerText = `${doneRows} / ${totalRows}`;
   const barEl = document.getElementById('sets-progress-bar');
@@ -1039,40 +1255,67 @@ function exerciseSummaryText(item) {
   const n = rows.length;
   const plural = n > 1 ? 'séries' : 'série';
   if (isExerciseComplete(item)) return `Terminé · ${n} ${plural}`;
-  if (isCardioName(item.dataset.ex)) {
+  const name = item.dataset.ex;
+  const mode = exMode(name);
+  if (mode === 'dist' || mode === 'floors') {
     const r0 = rows[0];
     const d = r0 ? r0.querySelector('.weight-input').value : '', m = r0 ? r0.querySelector('.reps-input').value : '';
-    return d && m ? `${m} m en ${d}${done0(rows)}` : `${n} ${plural}`;
-  }
-  const weights = rows.map(r => r.querySelector('.weight-input').value).filter(v => v !== '');
-  let range = '';
-  if (weights.length) {
-    const first = weights[0], last = weights[weights.length - 1];
-    range = first === last ? ` · ${first} kg` : ` · ${first} → ${last} kg`;
+    const unit = mode === 'floors' ? 'étages' : (distanceInKm(name) ? 'km' : 'm');
+    return d && m ? `${m} ${unit} en ${d}${done0(rows)}` : `${n} ${plural}`;
   }
   const done = rows.filter(r => r.classList.contains('done')).length;
-  return `${n} ${plural}${range}${done > 0 ? ` · ${done}/${n} faites` : ''}`;
+  const doneText = done > 0 ? ` · ${done}/${n} faites` : '';
+  if (mode === 'weight') {
+    const weights = rows.map(r => r.querySelector('.weight-input').value).filter(v => v !== '');
+    let range = '';
+    if (weights.length) {
+      const first = weights[0], last = weights[weights.length - 1];
+      range = first === last ? ` · ${first} kg` : ` · ${first} → ${last} kg`;
+    }
+    return `${n} ${plural}${range}${doneText}`;
+  }
+  if (mode === 'bw') {
+    const l = parseLest(rows[0] ? rows[0].querySelector('.weight-input').value : '');
+    return `${n} ${plural} · ${lestText(Number.isNaN(l) ? 0 : l)}${doneText}`;
+  }
+  return `${n} ${plural}${doneText}`;
 }
 
-// Ligne de l'exercice ouvert : « Dernière fois · 86 kg max » (charge max de la dernière séance où il a été fait)
+// Ligne de l'exercice ouvert : « Dernière fois · 86 kg max », « Dernière fois · PDC +10 kg »,
+// ou la première fois « Première fois · 3 × 6–10 réps »
 function exerciseLastTimeText(exName) {
+  const info = exInfo(exName);
   const history = (state && state.history) ? state.history : [];
   for (let i = history.length - 1; i >= 0; i--) {
     const h = history[i];
     if (editingOriginalId !== null && h.id === editingOriginalId) continue; // pas la séance en cours de modification
-    const ex = (h.exercises || []).find(e => e.name === exName);
-    if (isCardioName(exName)) {
-      const cs = ex && Array.isArray(ex.sets) ? ex.sets.find(isPerformedCardioSet) : null;
-      if (cs) return `Dernière fois · ${Number(cs.meters).toLocaleString('fr-FR')} m en ${formatDurationMS(cs.seconds)}`;
-      continue;
+    const ex = (h.exercises || []).find(e => sameExercise(e.name, exName));
+    if (!ex || !Array.isArray(ex.sets)) continue;
+    if (info.cardio) {
+      const cs = ex.sets.find(isPerformedCardioSet);
+      if (!cs) continue;
+      if (info.mode === 'floors') return `Dernière fois · ${cs.floors} étages en ${formatDurationMS(cs.seconds)}`;
+      if (info.mode === 'time') return `Dernière fois · ${formatDurationMS(cs.seconds)}`;
+      const dist = distanceInKm(exName)
+        ? `${(Number(cs.meters) / 1000).toLocaleString('fr-FR', { maximumFractionDigits: 2 })} km`
+        : `${Number(cs.meters).toLocaleString('fr-FR')} m`;
+      return `Dernière fois · ${dist} en ${formatDurationMS(cs.seconds)}`;
     }
-    const performed = ex && Array.isArray(ex.sets) ? ex.sets.filter(isPerformedSet) : [];
-    if (performed.length > 0) {
-      const max = Math.max(...performed.map(s => parseFloat(s.weight) || 0));
-      return `Dernière fois · ${max} kg max`;
+    const performed = ex.sets.filter(isPerformedSet);
+    if (!performed.length) continue;
+    if (info.mode === 'bw') {
+      const withLest = performed.filter(s => s.lest !== undefined);
+      if (withLest.length) return `Dernière fois · ${lestText(Math.max(...withLest.map(s => parseFloat(s.lest) || 0)))}`;
+      return `Dernière fois · ${Math.max(...performed.map(s => parseFloat(s.weight) || 0))} kg max`;
     }
+    if (info.mode === 'reps') return `Dernière fois · ${Math.max(...performed.map(s => parseFloat(s.reps) || 0))} réps max`;
+    if (info.mode === 'time') return `Dernière fois · ${formatDurationMS(Math.max(...performed.map(s => parseFloat(s.seconds) || 0)))} max`;
+    return `Dernière fois · ${Math.max(...performed.map(s => parseFloat(s.weight) || 0))} kg max`;
   }
-  return 'Première fois';
+  if (info.cardio || !info.reps) return 'Première fois';
+  const defEx = findProgramExercise(exName);
+  const n = defEx ? defEx.seriesCount : (info.sets || 3);
+  return `Première fois · ${n} × ${info.reps}${info.mode === 'time' ? '' : ' réps'}`;
 }
 
 // Ouvre un seul exercice à la fois, met en évidence la série en cours et met à jour les libellés
@@ -1130,42 +1373,112 @@ function toggleExercise(btn) {
 // ============================================================
 // 10. ÉCRAN SÉANCE : FORMULAIRE ET ENREGISTREMENT
 // ============================================================
-function initWorkoutForm(customSession = null) { 
-  resetWorkoutTimer(); 
+function defExercise(exId, sets) {
+  const info = exInfo(exId);
+  return { name: info.name, exId: info.id, seriesCount: info.cardio ? 1 : Math.max(1, sets || info.sets || 3) };
+}
+
+// Séance de l'élément actif (programme : séance de la rotation ; séance libre : elle-même)
+function buildWorkoutDef() {
+  const cur = currentSessionDef();
+  if (!cur) return null;
+  const p = cur.program;
+  return {
+    programId: p.id, programName: p.name, kind: p.kind, key: cur.key,
+    sessionName: sessionLabel(p, cur.session),
+    draftKey: `${p.id}:${cur.key}`,
+    exercises: (cur.session.exercises || []).map(e => defExercise(e.exId, e.sets))
+  };
+}
+
+// Modification d'une ancienne séance : sa séance d'origine (si le programme existe encore) + ses exercices
+function workoutDefFromHistory(h) {
+  const p = h.programId ? getProgram(h.programId) : null;
+  const session = p ? (isLibre(p) ? p.sessions[0] : p.sessions.find(s => s.key === h.sessionKey)) : null;
+  const list = session ? (session.exercises || []).map(e => defExercise(e.exId, e.sets)) : [];
+  (h.exercises || []).forEach(ex => {
+    const name = canonicalExerciseName(ex.name);
+    const n = Array.isArray(ex.sets) ? ex.sets.length : 0;
+    const found = list.find(e => e.name === name);
+    if (found) { if (!exInfo(name).cardio) found.seriesCount = Math.max(found.seriesCount, n); }
+    else list.push({ name, exId: exInfo(name).id, seriesCount: exInfo(name).cardio ? 1 : Math.max(1, n) });
+  });
+  return {
+    programId: h.programId || null, programName: h.programName || '', kind: h.kind === 'libre' ? 'libre' : 'program',
+    key: h.kind === 'libre' ? '' : (h.sessionKey || h.type || 'A'),
+    sessionName: h.sessionName || h.programName || 'Séance',
+    draftKey: null,
+    exercises: list
+  };
+}
+
+// En-tête de l'onglet Séance : pastille, « Séance du jour · programme », nom, déload et report
+function renderSeanceHead(def, customSession) {
+  const badge = document.getElementById('seance-badge');
+  if (badge) {
+    const libre = def.kind === 'libre';
+    badge.innerText = libre ? '1×' : def.key;
+    badge.className = `type-pill type-pill-${libre ? 'libre' : def.key}`;
+  }
+  const titleEl = document.getElementById('seance-type-title');
+  if (titleEl) titleEl.innerText = def.sessionName;
+  const overlineEl = document.getElementById('seance-overline');
+  if (overlineEl) {
+    overlineEl.innerText = customSession
+      ? `Modification · ${formatDate(customSession.date)}`
+      : (def.kind === 'libre' ? 'Séance libre' : `Séance du jour · ${def.programName}`);
+  }
+
+  const deloadSubEl = document.getElementById('deload-subtitle');
+  const actionsEl = document.getElementById('deload-actions');
+  const BOLT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>';
+  if (deloadSubEl) {
+    if (isDeloadActive()) {
+      deloadSubEl.innerHTML = BOLT + 'Déload actif · −20 % sur les charges';
+      deloadSubEl.style.display = 'inline-flex';
+    } else {
+      deloadSubEl.innerHTML = '';
+      deloadSubEl.style.display = 'none';
+    }
+  }
+  if (actionsEl) {
+    if (customSession) actionsEl.innerHTML = '';
+    else if (isDeloadActive()) actionsEl.innerHTML = '<button type="button" class="link-btn deload-link" onclick="postponeDeload()">Reporter à la prochaine séance</button>';
+    else if (isDeloadPostponed()) actionsEl.innerHTML = '<span class="deload-postponed">Déload reporté à la prochaine séance</span> <button type="button" class="link-btn deload-link" onclick="cancelDeloadPostpone()">Annuler</button>';
+    else actionsEl.innerHTML = '';
+    actionsEl.hidden = !actionsEl.innerHTML;
+  }
+}
+
+function initWorkoutForm(customSession = null) {
+  resetWorkoutTimer();
   if(!state) return;
 
-  const type = customSession ? customSession.type : state.nextType; 
-  const prog = PROGRAM[type];
+  const def = customSession ? workoutDefFromHistory(customSession) : buildWorkoutDef();
+  workoutDef = def;
 
-  // Le titre principal reste simple (ex: "Séance A (Presse / Couché)")
   manualOpenExercise = undefined;
   lastOpenExerciseIdx = null;
   scrollOnNextRefresh = false;
 
-  const titleEl = document.getElementById('seance-type-title'); 
-  if(titleEl) {
-    titleEl.innerText = prog.title.replace('/', ' / ');
-  }
-  const overlineEl = document.getElementById('seance-overline');
-  if (overlineEl) overlineEl.innerText = customSession ? `Modification · ${formatDate(customSession.date)}` : 'Séance du jour';
-
-  // --- GESTION DU SOUS-TITRE DELOAD ---
-  const deloadSubEl = document.getElementById('deload-subtitle');
-  if (deloadSubEl) {
-    if (isDeloadActive()) {
-      deloadSubEl.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>Déload actif · −20 % sur les charges';
-      deloadSubEl.style.display = "inline-flex";
-    } else {
-      deloadSubEl.innerHTML = "";
-      deloadSubEl.style.display = "none";
-    }
+  // Rien d'actif : écran « Aucune séance prévue » (écran 24)
+  const empty = !def;
+  document.body.dataset.seance = empty ? 'empty' : 'ready';
+  const emptyEl = document.getElementById('seance-empty');
+  if (emptyEl) emptyEl.hidden = !empty;
+  const form = document.getElementById('workout-form');
+  if (form) form.hidden = empty;
+  const container = document.getElementById('exercises-list');
+  if (empty) {
+    if (container) container.innerHTML = '';
+    updateSetsProgress();
+    updateStickyOffsets();
+    return;
   }
 
-  const badge = document.getElementById('seance-badge');
-  if(badge) {
-    badge.innerText = type;
-    badge.className = `type-pill type-pill-${type}`;
-  }
+  renderSeanceHead(def, customSession);
+  const warm = document.getElementById('warmup-note');
+  if (warm) warm.hidden = !(def.exercises[0] && def.exercises[0].name === ROWER_NAME);
 
   // Bouton Annuler + libellé du bouton de validation selon le mode (création / modification)
   const isEditing = editingOriginalId !== null;
@@ -1193,44 +1506,51 @@ function initWorkoutForm(customSession = null) {
     }
   }
 
-  const container = document.getElementById('exercises-list'); 
-  if(!container) return; 
+  if(!container) return;
   container.innerHTML = '';
 
-  prog.exercises.forEach((ex) => { 
-    const div = document.createElement('div'); 
+  def.exercises.forEach((ex) => {
+    const info = exInfo(ex.name);
+    const div = document.createElement('div');
     div.className = 'exercise-item';
 
     let existingEx = null;
     if (customSession && customSession.exercises) {
-      existingEx = customSession.exercises.find(e => e.name === ex.name);
+      existingEx = customSession.exercises.find(e => sameExercise(e.name, ex.name));
     }
 
     let rowsHtml = '';
-    if (ex.cardio) {
-      let secVal, mVal, preChecked = false;
+    if (info.cardio) {
+      let secVal, amtVal = '', preChecked = false;
       const saved = existingEx && existingEx.sets && existingEx.sets[0];
-      if (saved && isPerformedCardioSet(saved)) { secVal = saved.seconds; mVal = saved.meters; preChecked = true; }
-      else { const sg = getSuggestedCardioValues(ex.name, ex.defaultSeconds, ex.defaultMeters); secVal = sg.seconds; mVal = sg.meters; }
-      rowsHtml = setRowHtml(ex.name, 1, secVal, mVal, preChecked);
-    } else
-    for (let s = 1; s <= ex.seriesCount; s++) {
-      let weightVal = ex.defaultWeight;
-      let repsVal = ex.defaultReps;
-
-      let preChecked = false;
-      if (existingEx && existingEx.sets && existingEx.sets[s - 1]) {
-        weightVal = existingEx.sets[s - 1].weight;
-        repsVal = existingEx.sets[s - 1].reps;
-        // En modification : une série déjà enregistrée (valeurs positives) revient cochée
-        preChecked = Number(weightVal) > 0 && Number(repsVal) > 0;
+      if (saved && isPerformedCardioSet(saved)) {
+        secVal = saved.seconds; amtVal = formatCardioAmountInput(ex.name, saved); preChecked = true;
       } else {
-        const lastSet = getSuggestedSetValues(ex.name, s - 1, ex.defaultWeight, ex.defaultReps);
-        weightVal = lastSet.weight;
-        repsVal = lastSet.reps;
+        const isRower = ex.name === ROWER_NAME;
+        const sg = getSuggestedCardioValues(ex.name, isRower ? ROWER_DEFAULTS.seconds : '', isRower ? ROWER_DEFAULTS.meters : undefined);
+        secVal = sg.seconds; amtVal = formatCardioAmountInput(ex.name, sg);
       }
-
-      rowsHtml += setRowHtml(ex.name, s, weightVal, repsVal, preChecked);
+      if (info.mode === 'time') rowsHtml = setRowHtml(ex.name, 1, secVal, '', preChecked);
+      else rowsHtml = setRowHtml(ex.name, 1, secVal, amtVal, preChecked);
+    } else {
+      for (let s = 1; s <= ex.seriesCount; s++) {
+        let weightVal, repsVal, preChecked = false;
+        const saved = existingEx && existingEx.sets && existingEx.sets[s - 1];
+        if (saved) {
+          // En modification : une série déjà enregistrée revient cochée
+          preChecked = isPerformedSet(saved);
+          if (info.mode === 'bw') weightVal = saved.lest !== undefined ? saved.lest : saved.weight;
+          else if (info.mode === 'time') weightVal = saved.seconds || '';
+          else if (info.mode === 'reps') weightVal = '';
+          else weightVal = saved.weight;
+          repsVal = info.mode === 'time' ? '' : saved.reps;
+        } else {
+          const lastSet = getSuggestedSetValues(ex.name, s - 1, '', defaultRepsFor(ex.name));
+          weightVal = lastSet.weight;
+          repsVal = lastSet.reps;
+        }
+        rowsHtml += setRowHtml(ex.name, s, weightVal, repsVal, preChecked);
+      }
     }
 
     div.dataset.ex = ex.name;
@@ -1239,7 +1559,7 @@ function initWorkoutForm(customSession = null) {
         <button type="button" class="ex-toggle" aria-expanded="false" onclick="toggleExercise(this)">
           <span class="ex-icon-badge">${getIcon(ex.name, true)}</span>
           <span class="ex-text">
-            <span class="ex-name">${ex.name}</span>
+            <span class="ex-name">${escapeHtml(ex.name)}</span>
             <span class="ex-sub"></span>
           </span>
           <span class="ex-chevron">${CHEVRON_SVG}</span>
@@ -1250,27 +1570,30 @@ function initWorkoutForm(customSession = null) {
         </span>
       </div>
       <div class="ex-body" hidden>
-        <div class="sets-head" aria-hidden="true"><span>Série</span><span>${ex.cardio ? 'Durée' : 'Kg'}</span><span>${ex.cardio ? 'Distance' : 'Réps'}</span><span></span></div>
-        <div class="sets-grid" data-ex="${ex.name}">${rowsHtml}</div>
+        ${setsHeadHtml(ex.name)}
+        <div class="sets-grid" data-ex="${escapeHtml(ex.name)}">${rowsHtml}</div>
       </div>
     `;
     container.appendChild(div);
   });
 
   // Saisie en cours retrouvée après un rechargement (jamais en modification d'une ancienne séance)
-  if (!customSession && editingOriginalId === null) restoreDraft(type);
+  if (!customSession && editingOriginalId === null) restoreDraft(def.draftKey);
 
-  updateSetsProgress(); 
+  updateSetsProgress();
+  updateStickyOffsets();
 }
 
 // Enregistrement de la séance (formulaire de l'onglet Séance) : seules les séries cochées sont conservées
 function submitWorkout(e) {
   e.preventDefault();
+  if (!workoutDef) return;
   let totalTonnage = 0;
   let exerciseLogs = [];
 
   if (!state.lastWeights) state.lastWeights = {};
   const isEditing = editingOriginalId !== null;
+  const bodyKg = latestBodyWeight();
 
   // Seules les séries cochées sont enregistrées (v1.4.3)
   const setRows = Array.from(document.querySelectorAll('#exercises-list .set-row'));
@@ -1281,32 +1604,48 @@ function submitWorkout(e) {
     return;
   }
 
-  // Une série cochée doit avoir un poids et un nombre de répétitions valides
+  const items = Array.from(document.querySelectorAll('#exercises-list .exercise-item'));
+  const refuse = (row, input, message) => {
+    manualOpenExercise = items.indexOf(row.closest('.exercise-item'));
+    refreshExerciseStates();
+    alert(message);
+    if (input) input.focus();
+  };
+
+  // Une série cochée doit avoir des valeurs valides (selon le mode de saisie de l'exercice)
   for (const row of validatedRows) {
     const wInput = row.querySelector('.weight-input');
     const rInput = row.querySelector('.reps-input');
-    if (isCardioName(wInput.dataset.ex)) {
-      const sec = parseDurationInput(wInput.value), m = Number(rInput.value);
-      if (!(sec > 0) || rInput.value === '' || !Number.isInteger(m) || m <= 0) {
-        const items = Array.from(document.querySelectorAll('#exercises-list .exercise-item'));
-        manualOpenExercise = items.indexOf(row.closest('.exercise-item'));
-        refreshExerciseStates();
-        alert(`Le rameur est coché, mais sa durée (format min:ss, ex. 4:30) ou sa distance (en mètres) n'est pas valide.`);
-        (!(sec > 0) ? wInput : rInput).focus();
+    const exName = wInput.dataset.ex;
+    const mode = exMode(exName);
+    const number = Array.from(row.parentElement.querySelectorAll('.set-row')).indexOf(row) + 1;
+    if (mode === 'dist' || mode === 'floors') {
+      const sec = parseDurationInput(wInput.value), amt = parseCardioAmount(exName, rInput.value);
+      if (!(sec > 0) || !(amt > 0)) {
+        const what = mode === 'floors' ? 'son nombre d\'étages' : `sa distance (en ${distanceInKm(exName) ? 'kilomètres' : 'mètres'})`;
+        refuse(row, !(sec > 0) ? wInput : rInput, `« ${exName} » est coché, mais sa durée (format min:ss, ex. 4:30) ou ${what} n'est pas valide.`);
         return;
       }
       continue;
     }
-    const w = Number(wInput.value);
+    if (mode === 'time') {
+      if (!(parseDurationInput(wInput.value) > 0)) { refuse(row, wInput, `La série ${number} de « ${exName} » est cochée, mais sa durée (format min:ss, ex. 0:45) n'est pas valide.`); return; }
+      continue;
+    }
     const r = Number(rInput.value);
-    if (wInput.value === '' || !Number.isFinite(w) || w <= 0 || rInput.value === '' || !Number.isInteger(r) || r <= 0) {
-      const item = row.closest('.exercise-item');
-      const items = Array.from(document.querySelectorAll('#exercises-list .exercise-item'));
-      const number = Array.from(row.parentElement.children).indexOf(row) + 1;
-      manualOpenExercise = items.indexOf(item);
-      refreshExerciseStates();
-      alert(`La série ${number} de « ${item.dataset.ex} » est cochée, mais son poids ou ses répétitions ne sont pas valides.`);
-      (wInput.value === '' || !Number.isFinite(w) || w <= 0 ? wInput : rInput).focus();
+    const repsOk = rInput.value !== '' && Number.isInteger(r) && r > 0;
+    if (mode === 'reps') {
+      if (!repsOk) { refuse(row, rInput, `La série ${number} de « ${exName} » est cochée, mais ses répétitions ne sont pas valides.`); return; }
+      continue;
+    }
+    if (mode === 'bw') {
+      const l = parseLest(wInput.value);
+      if (Number.isNaN(l) || !repsOk) { refuse(row, Number.isNaN(l) ? wInput : rInput, `La série ${number} de « ${exName} » est cochée, mais son lest (ex. +10, vide = poids du corps) ou ses répétitions ne sont pas valides.`); return; }
+      continue;
+    }
+    const w = Number(wInput.value);
+    if (wInput.value === '' || !Number.isFinite(w) || w <= 0 || !repsOk) {
+      refuse(row, (wInput.value === '' || !Number.isFinite(w) || w <= 0) ? wInput : rInput, `La série ${number} de « ${exName} » est cochée, mais son poids ou ses répétitions ne sont pas valides.`);
       return;
     }
   }
@@ -1320,36 +1659,53 @@ function submitWorkout(e) {
     if (!confirm(`Enregistrer ${validatedRows.length} série${okS} cochée${okS} ?\n\n${uncheckedCount} série${noS} non cochée${noS} ${ignored}.`)) return;
   }
 
-  validatedRows.forEach((row) => {
-    const wInput = row.querySelector('.weight-input');
-    if (isCardioName(wInput.dataset.ex)) {
-      const exName = wInput.dataset.ex;
-      let exLog = exerciseLogs.find(e => e.name === exName);
-      if (!exLog) { exLog = { name: exName, cardio: true, sets: [], maxWeight: 0, totalVolume: 0 }; exerciseLogs.push(exLog); }
-      exLog.sets.push({ weight: 0, reps: 0, seconds: parseDurationInput(wInput.value), meters: Number(row.querySelector('.reps-input').value) });
-      return;
-    }
-    const w = Number(wInput.value);
-    const r = Number(row.querySelector('.reps-input').value);
-    const exName = wInput.dataset.ex;
-    const setVolume = w * r;
-
-    totalTonnage += setVolume;
-
-    let exLog = exerciseLogs.find(e => e.name === exName);
-    if(!exLog) {
+  const logFor = (exName, cardio) => {
+    let exLog = exerciseLogs.find(x => x.name === exName);
+    if (!exLog) {
       exLog = { name: exName, sets: [], maxWeight: 0, totalVolume: 0 };
+      const id = exInfo(exName).id;
+      if (id) exLog.exId = id;
+      if (cardio) exLog.cardio = true;
       exerciseLogs.push(exLog);
     }
+    return exLog;
+  };
 
-    exLog.sets.push({ weight: w, reps: r });
-    exLog.totalVolume += setVolume;
-    if(w > exLog.maxWeight) {
-      exLog.maxWeight = w;
+  validatedRows.forEach((row) => {
+    const wInput = row.querySelector('.weight-input');
+    const rInput = row.querySelector('.reps-input');
+    const exName = wInput.dataset.ex;
+    const mode = exMode(exName);
+    if (mode === 'dist' || mode === 'floors' || (mode === 'time' && isCardioName(exName))) {
+      const set = { weight: 0, reps: 0, seconds: parseDurationInput(wInput.value) };
+      if (mode === 'dist') set.meters = parseCardioAmount(exName, rInput.value);
+      if (mode === 'floors') set.floors = parseCardioAmount(exName, rInput.value);
+      logFor(exName, true).sets.push(set);
+      return;
     }
+    if (mode === 'time') { logFor(exName).sets.push({ weight: 0, reps: 0, seconds: parseDurationInput(wInput.value), hold: true }); return; }
+    const r = Number(rInput.value);
+    if (mode === 'reps') { logFor(exName).sets.push({ weight: 0, reps: r, free: true }); return; }
+
+    let w, set;
+    if (mode === 'bw') {
+      // Charge réelle = dernière pesée + lest (sans pesée : le lest seul)
+      const lest = parseLest(wInput.value);
+      w = Math.max(0, Math.round(((bodyKg || 0) + lest) * 10) / 10);
+      set = { weight: w, reps: r, lest };
+    } else {
+      w = Number(wInput.value);
+      set = { weight: w, reps: r };
+    }
+    const setVolume = w * r;
+    totalTonnage += setVolume;
+    const exLog = logFor(exName);
+    exLog.sets.push(set);
+    exLog.totalVolume += setVolume;
+    if (w > exLog.maxWeight) exLog.maxWeight = w;
 
     // On ne touche pas aux dernières charges quand on corrige une ancienne séance
-    if (!isEditing) state.lastWeights[exName] = w;
+    if (!isEditing && mode === 'weight') state.lastWeights[exName] = w;
   });
 
   // En modification sans chrono lancé, on garde la durée d'origine (même si elle n'était pas renseignée)
@@ -1357,21 +1713,27 @@ function submitWorkout(e) {
   const sessionDuration = keepOriginalDuration
     ? (editingOriginalDuration || undefined)
     : getFormattedWorkoutDuration();
-  const typeBadgeEl = document.getElementById('seance-badge');
-  const type = typeBadgeEl ? typeBadgeEl.innerText.trim().slice(-1) : state.nextType;
 
+  const def = workoutDef;
   const sessionDate = editingOriginalDate || new Date().toISOString().slice(0, 10);
   const sessionId = editingOriginalId || Date.now();
+  const original = isEditing ? state.history.find(h => h.id === editingOriginalId) : null;
 
   const entry = {
     id: sessionId,
     date: sessionDate,
-    type: type,
+    type: def.kind === 'libre' ? '1×' : def.key,
     isDeload: isDeloadActive(),
     tonnage: Math.round(totalTonnage),
     duration: sessionDuration,
+    programId: def.programId,
+    programName: def.programName,
+    kind: def.kind,
+    sessionKey: def.key,
+    sessionName: def.sessionName,
     exercises: exerciseLogs
   };
+  if (original) ['programId', 'programName', 'kind', 'sessionKey', 'sessionName', 'type'].forEach(k => { if (original[k] !== undefined) entry[k] = original[k]; });
 
   // En modification, la séance d'origine est encore dans l'historique : on la remplace
   if (isEditing) {
@@ -1381,7 +1743,24 @@ function submitWorkout(e) {
 
   state.history.push(entry);
   state.history.sort((a, b) => new Date(a.date) - new Date(b.date));
-  updateNextTypeFromHistory();
+
+  // Programme : le nombre de séries fait devient la référence ; la rotation passe à la séance suivante.
+  // Une séance libre reste active.
+  const p = def.programId ? getProgram(def.programId) : null;
+  if (p && !isEditing) {
+    const session = isLibre(p) ? p.sessions[0] : p.sessions.find(s => s.key === def.key);
+    if (session) {
+      items.forEach(item => {
+        const info = exInfo(item.dataset.ex);
+        if (info.cardio) return;
+        const pe = session.exercises.find(x => x.exId === info.id);
+        if (pe) pe.sets = item.querySelectorAll('.set-row').length;
+      });
+    }
+  }
+  getPrograms().forEach(pr => { if (!isLibre(pr)) pr.nextKey = nextKeyFromHistory(pr); });
+  if (state.deload && !isEditing) state.deload.postponedAt = null; // le report est consommé par cette séance
+  syncNextType();
 
   clearEditState();
   localStorage.removeItem('workout_start_time');
@@ -1396,7 +1775,9 @@ function submitWorkout(e) {
   // Actualise la bannière de déload en temps réel
   displayDeloadNotificationIfNeeded();
 
-  showToast(`${isEditing ? 'Séance modifiée' : 'Séance enregistrée'} !\n• Temps : ${sessionDuration || 'N/A'}\n• Séries enregistrées : ${validatedRows.length}\n• Tonnage réel : ${Math.round(totalTonnage).toLocaleString()} kg${driveSaveNotice()}`);
+  const usedBodyweight = exerciseLogs.some(x => x.sets.some(st => st.lest !== undefined));
+  const weighNotice = usedBodyweight && !bodyKg ? '\n• Poids du corps non renseigné : seul le lest est compté (ajoute ta pesée dans Progression)' : '';
+  showToast(`${isEditing ? 'Séance modifiée' : 'Séance enregistrée'} !\n• Temps : ${sessionDuration || 'N/A'}\n• Séries enregistrées : ${validatedRows.length}\n• Tonnage réel : ${Math.round(totalTonnage).toLocaleString()} kg${weighNotice}${driveSaveNotice()}`);
 
   initWorkoutForm();
   renderHistory();
@@ -1411,17 +1792,56 @@ document.addEventListener('submit', function(e) {
 // ============================================================
 // 11. ÉCRAN HISTORIQUE ET MODIFICATION D'UNE SÉANCE
 // ============================================================
+// Filtre par programme (« Tout » ou un programme / une séance libre ayant des séances, même supprimé)
+let historyFilter = 'all';
+
+// Programmes présents dans l'historique, dans l'ordre de leur dernière séance (le plus récent d'abord)
+function historyProgramList() {
+  const seen = new Map();
+  (state.history || []).forEach(h => {
+    if (!h.programId) return;
+    const p = getProgram(h.programId);
+    seen.set(h.programId, { id: h.programId, name: p ? p.name : (h.programName || 'Programme'), last: h.date || '' });
+  });
+  return Array.from(seen.values()).sort((a, b) => (a.last < b.last ? 1 : a.last > b.last ? -1 : 0));
+}
+
+function setHistoryFilter(id) {
+  historyFilter = id;
+  renderHistory();
+}
+
+function renderHistoryFilters() {
+  const box = document.getElementById('history-filters');
+  if (!box) return;
+  const list = historyProgramList();
+  if (historyFilter !== 'all' && !list.some(p => p.id === historyFilter)) historyFilter = 'all';
+  if (list.length < 2) { box.hidden = true; box.innerHTML = ''; historyFilter = 'all'; return; }
+  box.hidden = false;
+  box.innerHTML = [{ id: 'all', name: 'Tout' }].concat(list).map(p =>
+    `<button type="button" class="filter-btn${historyFilter === p.id ? ' active' : ''}" onclick="setHistoryFilter('${escapeHtml(p.id)}')">${escapeHtml(p.name)}</button>`).join('');
+}
+
+// Nom du programme d'une séance de l'historique (nom actuel s'il existe encore, sinon le nom recopié)
+function historyProgramName(h) {
+  const p = h.programId ? getProgram(h.programId) : null;
+  return p ? p.name : (h.programName || '');
+}
+
 function renderHistory() {
   const container = document.getElementById('history-list');
   if(!container) return;
   container.innerHTML = '';
+  renderHistoryFilters();
 
   const history = state.history || [];
+  const visible = i => historyFilter === 'all' || history[i].programId === historyFilter;
+  const shownCount = history.filter((h, i) => visible(i)).length;
   const countEl = document.getElementById('history-count');
-  if (countEl) countEl.textContent = `${history.length} séance${history.length > 1 ? 's' : ''} enregistrée${history.length > 1 ? 's' : ''}`;
+  if (countEl) countEl.textContent = `${shownCount} séance${shownCount > 1 ? 's' : ''} enregistrée${shownCount > 1 ? 's' : ''}`;
 
   // Index réels triés du plus récent au plus ancien, regroupés par mois
-  const order = history.map((h, i) => i).sort((x, y) => {
+  const order = history.map((h, i) => i).filter(visible).sort((x, y) => {
     const a = history[x], b = history[y];
     return a.date < b.date ? 1 : a.date > b.date ? -1 : (b.id || 0) - (a.id || 0);
   });
@@ -1449,16 +1869,18 @@ function renderHistory() {
     g.items.forEach(realIndex => {
       const h = history[realIndex];
       const hasDuration = h.duration && h.duration !== 'N/A';
+      const origin = historyProgramName(h);
+      const sub = [origin, hasDuration ? h.duration : 'Durée non enregistrée'].filter(Boolean).join(' · ');
       const row = document.createElement('button');
       row.type = 'button';
       row.className = 'history-item';
-      row.setAttribute('aria-label', `Séance ${h.type} du ${formatDate(h.date)} : modifier`);
+      row.setAttribute('aria-label', `${historySessionTitle(h)} : modifier`);
       row.onclick = () => openSessionModal(realIndex);
       row.innerHTML = `
-        <span class="type-pill type-pill-${h.type} small">${h.type}</span>
+        ${sessionPillHtml(h)}
         <span class="history-main">
           <span class="history-date">${formatHistoryDate(h.date)}${h.isDeload ? ' <span class="deload-tag"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>Déload</span>' : ''}</span>
-          <span class="history-duration">${hasDuration ? h.duration : 'Durée non enregistrée'}</span>
+          <span class="history-duration">${escapeHtml(sub)}</span>
         </span>
         <span class="history-tonnage">${historyTonnes(h.tonnage)} T</span>
         <span class="history-chevron">${CHEVRON_SVG}</span>`;
@@ -1467,6 +1889,12 @@ function renderHistory() {
     section.appendChild(card);
     container.appendChild(section);
   });
+}
+
+// « Séance C du 04/11 » ou « Dorsaux du 05/11 » (séance libre)
+function historySessionTitle(h) {
+  if (h.kind === 'libre') return `${historyProgramName(h) || h.sessionName || 'Séance libre'} du ${formatDate(h.date)}`;
+  return `Séance ${h.sessionKey || h.type} du ${formatDate(h.date)}`;
 }
 
 // « Sam. 10 oct. »
@@ -1510,6 +1938,7 @@ function injectSessionModalHtml() {
       <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="modal-session-title">
         <div id="modal-session-pill"></div>
         <h3 id="modal-session-title" class="modal-title">Séance</h3>
+        <p id="modal-session-origin" class="modal-origin"></p>
         <p id="modal-session-meta" class="modal-meta"></p>
         <button id="modal-edit-btn" class="btn">Modifier la séance</button>
         <button id="modal-delete-btn" class="btn btn-danger" onclick="deleteSelectedSession()">Supprimer la séance</button>
@@ -1522,7 +1951,7 @@ function injectSessionModalHtml() {
   document.getElementById('modal-edit-btn').addEventListener('click', () => {
     if (selectedSessionIndex !== null) {
       const sessionToEdit = state.history[selectedSessionIndex];
-      
+
       // La séance reste dans l'historique tant que la modification n'est pas validée :
       // rien n'est perdu si on quitte ou si on annule.
       editingOriginalDate = sessionToEdit.date;
@@ -1535,7 +1964,7 @@ function injectSessionModalHtml() {
       closeSessionModal();
       switchTab('seance');
 
-      showToast(`Séance ${sessionToEdit.type} du ${formatDate(sessionToEdit.date)} chargée dans le formulaire. Corrigez-la puis validez, ou annulez : l'originale reste intacte tant que vous n'avez pas validé.`);
+      showToast(`${historySessionTitle(sessionToEdit)} chargée dans le formulaire. Corrigez-la puis validez, ou annulez : l'originale reste intacte tant que vous n'avez pas validé.`);
     }
   });
 }
@@ -1549,7 +1978,7 @@ function deleteSelectedSession() {
   const session = state.history[idx];
   if (!session) return;
   const driveOn = isDriveWanted() || !!getDriveToken();
-  if (!confirm(`Supprimer définitivement la séance ${session.type} du ${formatDate(session.date)} ?` + (driveOn ? '\nElle sera aussi retirée de la sauvegarde Google Drive.' : ''))) return;
+  if (!confirm(`Supprimer définitivement la ${historySessionTitle(session).replace(/^Séance /, 'séance ')} ?` + (driveOn ? '\nElle sera aussi retirée de la sauvegarde Google Drive.' : ''))) return;
 
   state.history.splice(idx, 1);
   if (session.id !== undefined && session.id !== null) rememberDeletedSessionId(session.id);
@@ -1557,7 +1986,7 @@ function deleteSelectedSession() {
   // Dernières charges : on repart de l'historique restant pour les exercices de la séance supprimée
   if (!state.lastWeights) state.lastWeights = {};
   (session.exercises || []).forEach(ex => {
-    if (isCardioName(ex.name)) return;
+    if (exMode(ex.name) !== 'weight') return;
     delete state.lastWeights[ex.name];
     state.history.forEach(h => {
       const e = (h.exercises || []).find(x => x.name === ex.name);
@@ -1565,10 +1994,12 @@ function deleteSelectedSession() {
     });
   });
 
-  updateNextTypeFromHistory();
+  getPrograms().forEach(p => { if (!isLibre(p)) p.nextKey = nextKeyFromHistory(p); });
+  syncNextType();
   saveState();
   backupToDrive();
   closeSessionModal();
+  initWorkoutForm();
   renderHistory();
   renderCharts();
   displayDeloadNotificationIfNeeded();
@@ -1578,11 +2009,16 @@ function openSessionModal(index) {
   selectedSessionIndex = index;
   const session = state.history[index];
   const titleEl = document.getElementById('modal-session-title');
-  if (titleEl) {
-    titleEl.innerText = `Séance ${session.type} du ${formatDate(session.date)}`;
-  }
+  if (titleEl) titleEl.innerText = historySessionTitle(session);
   const pillEl = document.getElementById('modal-session-pill');
-  if (pillEl) pillEl.innerHTML = `<span class="type-pill type-pill-${session.type}">${session.type}</span>`;
+  if (pillEl) pillEl.innerHTML = sessionPillHtml(session, false);
+  // Ligne d'origine : « Prise de masse · Jambes · mollets » ou « Séance libre »
+  const originEl = document.getElementById('modal-session-origin');
+  if (originEl) {
+    const name = historyProgramName(session);
+    originEl.textContent = session.kind === 'libre' ? 'Séance libre' : [name, session.sessionName].filter(Boolean).join(' · ');
+    originEl.hidden = !originEl.textContent;
+  }
   const metaEl = document.getElementById('modal-session-meta');
   if (metaEl) {
     const hasDuration = session.duration && session.duration !== 'N/A';
@@ -1625,31 +2061,123 @@ function cancelEditSession() {
 // ============================================================
 // 12. ÉCRAN GRAPHIQUES : FILTRES ET COURBES
 // ============================================================
+// --- Périmètre des statistiques (écrans 25 et 26) ---
+// null = élément actif par défaut ; sinon l'identifiant d'un programme / d'une séance libre, ou 'all'
+let statsScope = null;
+
+function currentStatsScope() {
+  if (statsScope === 'all') return 'all';
+  if (statsScope && (getProgram(statsScope) || (state.history || []).some(h => h.programId === statsScope))) return statsScope;
+  const active = getActiveProgram();
+  return active ? active.id : 'all';
+}
+function statsHistory(scope = currentStatsScope()) {
+  const hist = state.history || [];
+  return scope === 'all' ? hist : hist.filter(h => h.programId === scope);
+}
+function statsScopeIsLibre(scope = currentStatsScope()) {
+  if (scope === 'all') return false;
+  const p = getProgram(scope);
+  if (p) return isLibre(p);
+  const h = (state.history || []).find(x => x.programId === scope);
+  return !!h && h.kind === 'libre';
+}
+function statsScopeName(scope = currentStatsScope()) {
+  if (scope === 'all') return 'Tous les programmes';
+  const p = getProgram(scope);
+  if (p) return p.name;
+  const h = (state.history || []).slice().reverse().find(x => x.programId === scope);
+  return h ? h.programName || 'Programme' : 'Programme';
+}
+// Lettres de séance du périmètre choisi (A / B, A / … / F) ; aucune pour une séance libre ou « Tous »
+function statsLetters(scope = currentStatsScope()) {
+  if (scope === 'all' || statsScopeIsLibre(scope)) return [];
+  const p = getProgram(scope);
+  const keys = new Set(p ? p.sessions.map(x => x.key) : []);
+  statsHistory(scope).forEach(h => { if (SESSION_KEYS.includes(h.sessionKey)) keys.add(h.sessionKey); });
+  return SESSION_KEYS.filter(k => keys.has(k));
+}
+
+function statsScopeStatusText(scope) {
+  if (scope === 'all') return 'Programmes et séances libres';
+  const p = getProgram(scope);
+  if (!p) return 'Supprimé · séances conservées';
+  if (p.status === 'active') return 'En cours';
+  if (isLibre(p)) return 'Séance libre';
+  if (p.status === 'new') return 'Pas encore de séance';
+  return p.pausedAt ? `En pause depuis le ${formatShortDate(p.pausedAt)}` : 'En pause';
+}
+
+function renderStatsScopeButton() {
+  const btn = document.getElementById('stats-scope-btn');
+  if (!btn) return;
+  const scope = currentStatsScope();
+  const libre = statsScopeIsLibre(scope);
+  const active = scope !== 'all' && getProgram(scope) && getProgram(scope).status === 'active';
+  btn.innerHTML = `
+    <span class="mem-ico${libre ? ' libre' : ''}${scope === 'all' ? ' grid' : ''}">${scope === 'all' ? GRID_SVG : (libre ? '1×' : SWAP_SVG)}</span>
+    <span class="scope-text"><span class="scope-name">${escapeHtml(statsScopeName(scope))}</span><span class="scope-sub">${active ? '<span class="prog-dot on"></span>' : ''}${escapeHtml(statsScopeStatusText(scope))}</span></span>
+    <span class="scope-chevron">${CHEVRON_SVG}</span>`;
+  const label = document.querySelector('#tab-progression .hero-label');
+  if (label) label.textContent = scope === 'all' ? 'Indice de progression global' : (libre ? 'Indice de progression de la séance libre' : 'Indice de progression du programme');
+  const typeBtn = document.getElementById('btn-vol-type');
+  if (typeBtn) typeBtn.hidden = statsLetters(scope).length === 0;
+}
+
+function openStatsScopeSheet() {
+  const scope = currentStatsScope();
+  const items = [];
+  getPrograms().forEach(p => items.push({ id: p.id, name: p.name, libre: isLibre(p), has: statsHistory(p.id).length > 0 }));
+  historyProgramList().forEach(x => { if (!getProgram(x.id)) items.push({ id: x.id, name: x.name, libre: statsScopeIsLibre(x.id), has: true }); });
+  const row = (it) => {
+    const on = it.id === scope;
+    return `
+      <button type="button" class="restore-item scope-item${on ? ' on' : ''}${it.libre ? ' libre' : ''}" ${it.has ? '' : 'disabled'} onclick="setStatsScope('${escapeHtml(it.id)}')">
+        <span class="mem-ico${it.id === 'all' ? ' grid' : ''}">${it.id === 'all' ? GRID_SVG : (it.libre ? '1×' : SWAP_SVG)}</span>
+        <span class="restore-text"><span class="restore-name"><b>${escapeHtml(it.name)}</b></span><span class="restore-when">${it.has ? escapeHtml(statsScopeStatusText(it.id)) : 'Pas encore de séance'}</span></span>
+        <span class="restore-box round">${on ? CHECK_SVG : ''}</span>
+      </button>`;
+  };
+  openSheet(`<h3 class="sheet-title">Voir les statistiques de</h3><div class="restore-list">${items.map(row).join('')}${row({ id: 'all', name: 'Tous les programmes', has: true })}</div>`, { tall: true });
+}
+
+function setStatsScope(id) {
+  statsScope = id;
+  currentVolumeFilter = 'all';
+  const first = document.querySelector('.hero-card .filter-group .filter-btn');
+  if (first) highlightVolumeButton(first);
+  updateSessionTypeButton();
+  closeSheet();
+  renderCharts();
+}
+
+// Exercices à charge (catalogue + historique, hors cardio), ceux du programme actif d'abord
 function populateExerciseSelect() {
   const select = document.getElementById('exercise-filter');
   if(!select) return;
+  const previous = select.value;
   select.innerHTML = '';
-  
-  let allExercises = [];
-  Object.values(PROGRAM).forEach(p => {
-    p.exercises.forEach(e => {
-      if (e.cardio) return; // le rameur n'a pas de charge à suivre
-      let exName = e.name;
-      if (exName === "Mollets / Finition") {
-        exName = "Mollets";
-      }
-      if(!allExercises.find(x => x === exName)) {
-        allExercises.push(exName);
-      }
-    });
-  });
 
-  allExercises.forEach(exName => {
+  const names = [];
+  const add = name => {
+    const n = canonicalExerciseName(name);
+    const m = exMode(n);
+    if ((m === 'weight' || m === 'bw') && !names.includes(n)) names.push(n);
+  };
+  const active = getActiveProgram();
+  if (active) active.sessions.forEach(s => (s.exercises || []).forEach(e => add(exInfo(e.exId).name)));
+  const others = [];
+  getPrograms().forEach(p => p.sessions.forEach(s => (s.exercises || []).forEach(e => others.push(exInfo(e.exId).name))));
+  (state.history || []).forEach(h => (h.exercises || []).forEach(ex => { if (!ex.cardio) others.push(ex.name); }));
+  others.map(canonicalExerciseName).sort((a, b) => a.localeCompare(b, 'fr')).forEach(add);
+
+  names.forEach(exName => {
     const opt = document.createElement('option');
     opt.value = exName;
     opt.innerText = exName;
     select.appendChild(opt);
   });
+  if (names.includes(previous)) select.value = previous;
 }
 
 // Met en surbrillance le bouton choisi parmi les filtres du graphique de volume
@@ -1665,7 +2193,8 @@ function highlightVolumeButton(btn) {
 function updateSessionTypeButton() {
   const typeBtn = document.getElementById('btn-vol-type');
   if (!typeBtn) return;
-  typeBtn.innerText = currentVolumeFilter === 'type' ? `Séance ${currentSessionTypeFilter}` : 'A / B / C';
+  const letters = statsLetters();
+  typeBtn.innerText = currentVolumeFilter === 'type' ? `Séance ${currentSessionTypeFilter}` : (letters.length > 3 ? `${letters[0]} / … / ${letters[letters.length - 1]}` : letters.join(' / ') || 'A / B / C');
 }
 
 // Bascule entre « un point par séance » et « chaque jour écoulé » (écart entre les séances)
@@ -1701,12 +2230,14 @@ function setVolumeFilter(filter, btn) {
 // Chaque appui fait défiler les séances : A, puis B, puis C, puis A...
 // (le premier appui, depuis un autre filtre, démarre toujours sur A)
 function cycleSessionTypeFilter(btn) {
-  if (currentVolumeFilter === 'type') {
-    const idx = SESSION_TYPES.indexOf(currentSessionTypeFilter);
-    currentSessionTypeFilter = SESSION_TYPES[(idx + 1) % SESSION_TYPES.length];
+  const letters = statsLetters();
+  if (!letters.length) return;
+  if (currentVolumeFilter === 'type' && letters.includes(currentSessionTypeFilter)) {
+    const idx = letters.indexOf(currentSessionTypeFilter);
+    currentSessionTypeFilter = letters[(idx + 1) % letters.length];
   } else {
     currentVolumeFilter = 'type';
-    currentSessionTypeFilter = SESSION_TYPES[0];
+    currentSessionTypeFilter = letters[0];
   }
   highlightVolumeButton(btn);
   updateSessionTypeButton();
@@ -1746,14 +2277,17 @@ function renderTonnageChart() {
 
   let labels = [];
   let data = [];
+  const hist = statsHistory();
+  if (currentVolumeFilter === 'type' && !statsLetters().includes(currentSessionTypeFilter)) { currentVolumeFilter = 'all'; updateSessionTypeButton(); }
+  const keyOf = e => e.sessionKey || e.type;
 
-  if (!state.history || state.history.length === 0) {
+  if (hist.length === 0) {
     labels = ['Aucune donnée'];
     data = [0];
   } else if (currentVolumeFilter === 'month') {
     // --- VUE PAR MOIS ---
     let monthlyData = {};
-    state.history.forEach(e => {
+    hist.forEach(e => {
       if (!e.date) return;
       const monthKey = e.date.substring(0, 7); // Format 'AAAA-MM'
       if (!monthlyData[monthKey]) monthlyData[monthKey] = 0;
@@ -1777,8 +2311,8 @@ function renderTonnageChart() {
     });
   } else if (currentVolumeFilter === 'type') {
     // --- VUE PAR TYPE DE SÉANCE (A, B ou C) ---
-    const typedHistory = [...state.history]
-      .filter(e => e.type === currentSessionTypeFilter)
+    const typedHistory = [...hist]
+      .filter(e => keyOf(e) === currentSessionTypeFilter)
       .sort((a, b) => new Date(a.date) - new Date(b.date));
 
     if (typedHistory.length === 0) {
@@ -1790,7 +2324,7 @@ function renderTonnageChart() {
     }
   } else {
     // --- VUE PAR SÉANCE (toutes les séances) ---
-    const sortedHistory = [...state.history].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const sortedHistory = [...hist].sort((a, b) => new Date(a.date) - new Date(b.date));
 
     labels = sortedHistory.map(e => `${e.type} (${formatDate(e.date)})`);
     data = sortedHistory.map(e => parseFloat(e.tonnage) || 0);
@@ -1803,11 +2337,11 @@ function renderTonnageChart() {
   // --- Mode « par jour » : une colonne par jour entre la 1re séance et aujourd'hui, défilement horizontal ---
   const wrap = document.getElementById('hero-scroll');
   const inner = document.getElementById('hero-scroll-inner');
-  const calendar = volumeCalendarMode && currentVolumeFilter !== 'month' && state.history && state.history.length > 0;
+  const calendar = volumeCalendarMode && currentVolumeFilter !== 'month' && hist.length > 0;
   updateVolumeCalendarButton();
   let dayDetails = null;
   if (calendar) {
-    const sessions = state.history.filter(e => e.date && (currentVolumeFilter !== 'type' || e.type === currentSessionTypeFilter));
+    const sessions = hist.filter(e => e.date && (currentVolumeFilter !== 'type' || keyOf(e) === currentSessionTypeFilter));
     const byDay = {};
     sessions.forEach(e => {
       const d = byDay[e.date] || (byDay[e.date] = { tonnage: 0, types: [] });
@@ -1889,9 +2423,7 @@ function renderExerciseChart() {
 
   const selectEl = document.getElementById('exercise-filter');
   const selectedEx = selectEl ? selectEl.value : '';
-  const isSelected = name => selectedEx === "Mollets"
-    ? (name === "Mollets" || name === "Mollets / Finition")
-    : name === selectedEx;
+  const isSelected = name => canonicalExerciseName(name) === selectedEx;
   let labels = [];
   let chartData = [];
   let dates = [];
@@ -1923,7 +2455,7 @@ function renderExerciseChart() {
   // Bande ambre : séances du palier en cours pour cet exercice (règle des 4 dernières séances)
   let plateauStart = -1;
   try {
-    const plateau = analyzeMonthlyProgress().plateaus.find(p => isSelected(p.exercise));
+    const plateau = analyzeMonthlyProgress(state.history).plateaus.find(p => isSelected(p.exercise));
     if (plateau) plateauStart = dates.findIndex(d => d >= plateau.sinceDate);
   } catch (e) { plateauStart = -1; }
   const note = document.getElementById('exercise-plateau-note');
@@ -1988,31 +2520,58 @@ function addWeight() {
   }
 }
 
-// Suivi cardio : allure au km (rameur) par date
+// Suivi cardio : exercices cardio du périmètre choisi (menu), valeur selon l'appareil (allure, vitesse, rythme)
+function statsCardioNames(scope = currentStatsScope()) {
+  const names = [];
+  const add = n => { n = canonicalExerciseName(n); const e = exInfo(n); if (e.cardio && cardioUnit(n) && !names.includes(n)) names.push(n); };
+  const progs = scope === 'all' ? getPrograms() : [getProgram(scope)].filter(Boolean);
+  progs.forEach(p => p.sessions.forEach(s => (s.exercises || []).forEach(e => add(exInfo(e.exId).name))));
+  statsHistory(scope).forEach(h => (h.exercises || []).forEach(ex => add(ex.name)));
+  return names;
+}
+
 function renderCardioChart() {
   const canvas = document.getElementById('cardioChart');
   if (!canvas) return;
   if (cardioChart) { cardioChart.destroy(); cardioChart = null; }
+  const card = document.getElementById('cardio-card');
+  const select = document.getElementById('cardio-filter');
+  const names = statsCardioNames();
+  if (card) card.hidden = names.length === 0;
+  if (!names.length) return;
+  if (select) {
+    const prev = select.value;
+    select.innerHTML = names.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)} · ${cardioUnit(n).suffix}</option>`).join('');
+    select.value = names.includes(prev) ? prev : names[0];
+    select.hidden = names.length < 2;
+  }
+  const name = select && select.value ? select.value : names[0];
+  const unit = cardioUnit(name);
   const points = [];
-  (state.history || []).forEach(h => {
-    const ex = (h.exercises || []).find(e => isCardioName(e.name));
+  statsHistory().forEach(h => {
+    const ex = (h.exercises || []).find(e => sameExercise(e.name, name));
     const set = ex && Array.isArray(ex.sets) ? ex.sets.find(isPerformedCardioSet) : null;
-    if (set && h.date) points.push({ date: h.date, pace: paceSecPerKm(set.seconds, set.meters) });
+    if (set && h.date) points.push({ date: h.date, v: cardioMetric(name, set) });
   });
   points.sort((a, b) => new Date(a.date) - new Date(b.date));
   const empty = document.getElementById('cardio-empty');
-  if (empty) empty.hidden = points.length > 0;
+  if (empty) {
+    empty.hidden = points.length > 0;
+    empty.textContent = `Pas encore de séance avec « ${name} ». ${unit.label === 'Allure' ? `L'allure ${unit.suffix} s'affichera ici (plus bas = plus rapide).` : `${unit.label === 'Vitesse' ? 'La vitesse' : 'Le rythme'} (${unit.suffix}) s'affichera ici.`}`;
+  }
   canvas.hidden = points.length === 0;
   const cur = document.getElementById('cardio-current');
-  if (cur) cur.textContent = points.length ? formatDurationMS(points[points.length - 1].pace) : '–';
+  if (cur) cur.textContent = points.length ? unit.fmt(points[points.length - 1].v) : '–';
+  const unitEl = document.getElementById('cardio-unit');
+  if (unitEl) unitEl.textContent = `${unit.suffix} · ${name}`;
   if (!points.length) return;
   cardioChart = new Chart(canvas.getContext('2d'), {
     type: 'line',
     data: {
       labels: points.map(p => formatDate(p.date)),
       datasets: [{
-        label: 'Allure (min/km)',
-        data: points.map(p => p.pace),
+        label: `${unit.label} (${unit.suffix})`,
+        data: points.map(p => Math.round(p.v * 10) / 10),
         borderColor: CHART_COLORS.success,
         backgroundColor: CHART_COLORS.success + '22',
         borderWidth: 2.5, pointRadius: 3, fill: true, tension: 0.2
@@ -2020,16 +2579,18 @@ function renderCardioChart() {
     },
     options: {
       responsive: true,
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${formatDurationMS(c.parsed.y)} /km` } } },
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${unit.fmt(c.parsed.y)} ${unit.suffix}` } } },
       scales: {
         x: { ticks: { color: CHART_COLORS.tick, maxTicksLimit: 6, maxRotation: 0, minRotation: 0, autoSkip: true }, grid: { display: false } },
-        y: { ticks: { color: CHART_COLORS.tick, maxTicksLimit: 5, callback: v => formatDurationMS(v) }, grid: { color: CHART_COLORS.grid }, border: { display: false } }
+        y: { ticks: { color: CHART_COLORS.tick, maxTicksLimit: 5, callback: v => unit.fmt(v) }, grid: { color: CHART_COLORS.grid }, border: { display: false } }
       }
     }
   });
 }
 
 function renderCharts() {
+  renderStatsScopeButton();
+  updateSessionTypeButton();
   renderTonnageChart();
   renderExerciseChart();
   renderCardioChart();
@@ -2075,8 +2636,9 @@ function renderCharts() {
 // ============================================================
 // 13. ANALYSE MENSUELLE DE PROGRESSION
 // ============================================================
-function analyzeMonthlyProgress() {
-  if (!state.history || state.history.length === 0) {
+// hist : séances du périmètre choisi (par défaut celui de l'onglet Progression) ; scope : son identifiant
+function analyzeMonthlyProgress(hist = statsHistory(), scope = currentStatsScope()) {
+  if (!hist || hist.length === 0) {
     return {
       monthlyData: [],
       currentMonthRecords: [],
@@ -2096,7 +2658,7 @@ function analyzeMonthlyProgress() {
   const monthlyData = {};
   const allExercises = new Set();
 
-  state.history.forEach(session => {
+  hist.forEach(session => {
     if (!session.date) return;
     const monthKey = session.date.substring(0, 7);
     if (!monthlyData[monthKey]) {
@@ -2108,28 +2670,30 @@ function analyzeMonthlyProgress() {
         sessionCount: 0,
         sessions: [],
         exercises: {},
-        sessionTypes: { A: 0, B: 0, C: 0 }
+        sessionTypes: {}
       };
     }
     monthlyData[monthKey].totalTonnage += parseFloat(session.tonnage) || 0;
     monthlyData[monthKey].sessionCount++;
     monthlyData[monthKey].sessions.push(session);
-    if (session.type && ['A', 'B', 'C'].includes(session.type)) {
-      monthlyData[monthKey].sessionTypes[session.type]++;
+    const sKey = session.sessionKey || session.type;
+    if (session.kind !== 'libre' && SESSION_KEYS.includes(sKey)) {
+      monthlyData[monthKey].sessionTypes[sKey] = (monthlyData[monthKey].sessionTypes[sKey] || 0) + 1;
     }
 
     if (session.exercises) {
       session.exercises.forEach(ex => {
-        if (ex.name) {
-          allExercises.add(ex.name);
-          if (!monthlyData[monthKey].exercises[ex.name]) {
-            monthlyData[monthKey].exercises[ex.name] = { maxWeights: [], volumes: [] };
+        const exName = ex.name ? canonicalExerciseName(ex.name) : '';
+        if (exName) {
+          allExercises.add(exName);
+          if (!monthlyData[monthKey].exercises[exName]) {
+            monthlyData[monthKey].exercises[exName] = { maxWeights: [], volumes: [] };
           }
           if (ex.maxWeight) {
-            monthlyData[monthKey].exercises[ex.name].maxWeights.push(parseFloat(ex.maxWeight) || 0);
+            monthlyData[monthKey].exercises[exName].maxWeights.push(parseFloat(ex.maxWeight) || 0);
           }
           if (ex.totalVolume) {
-            monthlyData[monthKey].exercises[ex.name].volumes.push(parseFloat(ex.totalVolume) || 0);
+            monthlyData[monthKey].exercises[exName].volumes.push(parseFloat(ex.totalVolume) || 0);
           }
         }
       });
@@ -2162,7 +2726,7 @@ function analyzeMonthlyProgress() {
       sessionCount: 0,
       sessions: [],
       exercises: {},
-      sessionTypes: { A: 0, B: 0, C: 0 }
+      sessionTypes: {}
     });
   }
 
@@ -2205,7 +2769,7 @@ function analyzeMonthlyProgress() {
   const PLATEAU_WINDOW = 4;
   const exerciseSessions = {};
 
-  state.history
+  hist
     .filter(session => session.date && session.exercises)
     .slice()
     .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : (a.id || 0) - (b.id || 0)))
@@ -2213,12 +2777,13 @@ function analyzeMonthlyProgress() {
       const perExercise = {};
       session.exercises.forEach(ex => {
         const maxWeight = parseFloat(ex.maxWeight) || 0;
-        if (!ex.name || maxWeight <= 0) return; // exercice non réalisé
-        if (!perExercise[ex.name]) {
-          perExercise[ex.name] = { date: session.date, maxWeight: 0, totalVolume: 0 };
+        const exName = ex.name ? canonicalExerciseName(ex.name) : '';
+        if (!exName || maxWeight <= 0) return; // exercice non réalisé
+        if (!perExercise[exName]) {
+          perExercise[exName] = { date: session.date, maxWeight: 0, totalVolume: 0 };
         }
-        perExercise[ex.name].maxWeight = Math.max(perExercise[ex.name].maxWeight, maxWeight);
-        perExercise[ex.name].totalVolume += parseFloat(ex.totalVolume) || 0;
+        perExercise[exName].maxWeight = Math.max(perExercise[exName].maxWeight, maxWeight);
+        perExercise[exName].totalVolume += parseFloat(ex.totalVolume) || 0;
       });
       Object.keys(perExercise).forEach(name => {
         if (!exerciseSessions[name]) exerciseSessions[name] = [];
@@ -2270,60 +2835,76 @@ function analyzeMonthlyProgress() {
     }
   }
 
-  // 5b. Progression par séance (A/B/C) sur l'ensemble de l'historique, sans tenir compte des mois :
+  // 5b. Progression par séance (A, B…) sur l'ensemble de l'historique de l'élément, sans tenir compte des mois :
   // médiane du tonnage des (jusqu'à) 3 dernières séances vs les 3 premières, séances de décharge exclues.
+  // Séance libre : sur ses propres occurrences. « Tous » : une ligne par programme, l'indice est la moyenne des programmes.
   const median = values => {
     const sorted = values.slice().sort((a, b) => a - b);
     const mid = Math.floor(sorted.length / 2);
     return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
   };
-
-  const sessionProgress = {};
-  const typePercents = [];
-  ['A', 'B', 'C'].forEach(type => {
-    const tonnages = state.history
-      .filter(session => session.date && session.type === type && !session.isDeload && (parseFloat(session.tonnage) || 0) > 0)
+  const progressOf = sessions => {
+    const tonnages = sessions
+      .filter(session => session.date && !session.isDeload && (parseFloat(session.tonnage) || 0) > 0)
       .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : (a.id || 0) - (b.id || 0)))
       .map(session => parseFloat(session.tonnage));
-
     let percent = null;
     if (tonnages.length >= 2) {
       const n = Math.min(3, Math.floor(tonnages.length / 2));
       const first = median(tonnages.slice(0, n));
       const last = median(tonnages.slice(-n));
-      if (first > 0) {
-        percent = Math.round(((last - first) / first) * 100);
-        typePercents.push(percent);
-      }
+      if (first > 0) percent = Math.round(((last - first) / first) * 100);
     }
-    sessionProgress[type] = { percent: percent, sessions: tonnages.length };
-  });
+    return { percent, sessions: tonnages.length };
+  };
+  const average = list => (list.length ? Math.round(list.reduce((sum, v) => sum + v, 0) / list.length) : null);
+  // Indice d'un programme (moyenne de ses séances) ou d'une séance libre (ses occurrences)
+  const programIndex = (sessions, libre) => {
+    if (libre) return progressOf(sessions).percent;
+    const keys = SESSION_KEYS.filter(k => sessions.some(x => (x.sessionKey || x.type) === k));
+    return average(keys.map(k => progressOf(sessions.filter(x => (x.sessionKey || x.type) === k)).percent).filter(v => v !== null));
+  };
 
-  // 5c. Indice de progression global : moyenne des progressions A, B et C disponibles
-  const globalProgressIndex = typePercents.length > 0
-    ? Math.round(typePercents.reduce((sum, value) => sum + value, 0) / typePercents.length)
-    : null;
+  const sessionProgress = {};
+  const programProgress = [];
+  let globalProgressIndex = null;
+  if (scope === 'all') {
+    const ids = [];
+    hist.forEach(h => { if (h.programId && !ids.includes(h.programId)) ids.push(h.programId); });
+    ids.forEach(id => {
+      const sessions = hist.filter(h => h.programId === id);
+      const libre = sessions[0] && sessions[0].kind === 'libre';
+      const p = getProgram(id);
+      programProgress.push({ id, name: p ? p.name : (sessions[sessions.length - 1].programName || 'Programme'), libre, percent: programIndex(sessions, libre) });
+    });
+    globalProgressIndex = average(programProgress.filter(x => !x.libre && x.percent !== null).map(x => x.percent));
+  } else if (statsScopeIsLibre(scope)) {
+    globalProgressIndex = programIndex(hist, true);
+  } else {
+    statsLetters(scope).forEach(k => { sessionProgress[k] = progressOf(hist.filter(x => (x.sessionKey || x.type) === k)); });
+    globalProgressIndex = average(Object.values(sessionProgress).map(x => x.percent).filter(v => v !== null));
+  }
 
   const overallStats = {
     lastVsPreviousDiffPercent: lastVsPreviousDiffPercent,
     globalProgressIndex: globalProgressIndex,
-    sessionProgress: sessionProgress
+    sessionProgress: sessionProgress,
+    programProgress: programProgress
   };
 
   // 6. Conseils personnalisés
   const advice = [];
 
-  // Détecter déséquilibre entre séances A/B/C
-  if (currentMonthData.sessionTypes.A > 0 || currentMonthData.sessionTypes.B > 0 || currentMonthData.sessionTypes.C > 0) {
-    const totalSessions = currentMonthData.sessionTypes.A + currentMonthData.sessionTypes.B + currentMonthData.sessionTypes.C;
-    if (totalSessions >= 3) {
-      const avg = totalSessions / 3;
-      const maxType = Math.max(currentMonthData.sessionTypes.A, currentMonthData.sessionTypes.B, currentMonthData.sessionTypes.C);
-      const minType = Math.min(currentMonthData.sessionTypes.A, currentMonthData.sessionTypes.B, currentMonthData.sessionTypes.C);
-      
+  // Détecter un déséquilibre entre les séances du programme (A, B…)
+  const letters = scope === 'all' ? [] : statsLetters(scope);
+  if (letters.length >= 2 && currentMonthData) {
+    const counts = letters.map(k => currentMonthData.sessionTypes[k] || 0);
+    const totalSessions = counts.reduce((a, b) => a + b, 0);
+    if (totalSessions >= letters.length) {
+      const avg = totalSessions / letters.length;
+      const maxType = Math.max(...counts);
       if (maxType > avg * 1.5) {
-        const maxTypeName = currentMonthData.sessionTypes.A === maxType ? 'A' : 
-                           currentMonthData.sessionTypes.B === maxType ? 'B' : 'C';
+        const maxTypeName = letters[counts.indexOf(maxType)];
         advice.push({
           type: 'info',
           text: `Déséquilibre : Tu fais plus de séances ${maxTypeName} (${maxType}) que des autres`
@@ -2439,25 +3020,34 @@ function renderProgressAnalysis() {
   }
   html += `</div>`;
 
-  // 4. Progression par séance (A/B/C), sur tout l'historique
+  // 4. Progression par séance (A, B…) du programme, ou par programme pour « Tous »
   if (stats) {
-    const types = ['A', 'B', 'C'].filter(t => stats.sessionProgress[t].percent !== null && stats.sessionProgress[t].percent !== undefined);
-    if (types.length > 0) {
-      const maxAbs = Math.max(...types.map(t => Math.abs(stats.sessionProgress[t].percent)), 1);
-      html += `<div class="card"><h3 class="analysis-section-title">Progression par séance</h3>`;
-      types.forEach(t => {
-        const percent = stats.sessionProgress[t].percent;
-        const cls = percent >= 0 ? 'positive' : 'negative';
-        const symbol = percent >= 0 ? '\u25b2' : '\u25bc';
-        const width = Math.max(3, Math.round((Math.abs(percent) / maxAbs) * 100));
+    const rows = [];
+    if (stats.programProgress && stats.programProgress.length) {
+      stats.programProgress.filter(x => x.percent !== null).forEach(x => rows.push({ pill: x.libre ? '<span class="type-pill type-pill-libre small">1×</span>' : `<span class="mem-ico small">${SWAP_SVG}</span>`, label: x.name, cls: 'neutral', percent: x.percent }));
+    } else {
+      Object.keys(stats.sessionProgress).filter(t => stats.sessionProgress[t].percent !== null && stats.sessionProgress[t].percent !== undefined)
+        .forEach(t => rows.push({ pill: `<span class="type-pill type-pill-${t} small">${t}</span>`, cls: `type-${t}`, percent: stats.sessionProgress[t].percent }));
+    }
+    if (rows.length > 0) {
+      const byProgram = !!(stats.programProgress && stats.programProgress.length);
+      const maxAbs = Math.max(...rows.map(r => Math.abs(r.percent)), 1);
+      html += `<div class="card"><h3 class="analysis-section-title">${byProgram ? 'Progression par programme' : 'Progression par séance'}</h3>`;
+      rows.forEach(r => {
+        const cls = r.percent >= 0 ? 'positive' : 'negative';
+        const symbol = r.percent >= 0 ? '\u25b2' : '\u25bc';
+        const width = Math.max(3, Math.round((Math.abs(r.percent) / maxAbs) * 100));
         html += `
-          <div class="progress-row">
-            <span class="type-pill type-pill-${t} small">${t}</span>
-            <div class="bar-track"><div class="bar-fill type-${t}" style="width:${width}%"></div></div>
-            <span class="stat-value ${cls}">${symbol} ${Math.abs(percent)} %</span>
+          <div class="progress-row${r.label ? ' named' : ''}">
+            ${r.pill}
+            ${r.label ? `<span class="progress-name">${escapeHtml(r.label)}</span>` : ''}
+            <div class="bar-track"><div class="bar-fill ${r.cls}" style="width:${width}%"></div></div>
+            <span class="stat-value ${cls}">${symbol} ${Math.abs(r.percent)} %</span>
           </div>`;
       });
-      html += `<p class="analysis-note">Tonnage médian des 3 dernières séances vs les 3 premières, sur tout l'historique (sans tenir compte des mois). L'indice global est la moyenne des séances A, B et C.</p></div>`;
+      html += `<p class="analysis-note">${byProgram
+        ? 'Indice de chaque programme ou séance libre sur tout son historique. L\'indice global est la moyenne des programmes.'
+        : 'Tonnage médian des 3 dernières séances vs les 3 premières, sur tout l\'historique (sans tenir compte des mois). L\'indice est la moyenne des séances du programme.'}</p></div>`;
     }
   }
 
@@ -2517,7 +3107,7 @@ function switchTab(tabName) {
 
   const timerBtn = document.getElementById('timer-btn');
   if (timerBtn) {
-    if (tabName === 'seance') {
+    if (tabName === 'seance' && workoutDef) {
       timerBtn.style.display = 'flex';
     } else {
       timerBtn.style.display = 'none';
@@ -2534,8 +3124,8 @@ function switchTab(tabName) {
   if (pageTitle) pageTitle.innerText = PAGE_TITLES[tabName] || '';
 
   if (tabName === 'programme') renderProgramOverview();
-  if (tabName === 'progression') renderCharts();
-  if (tabName === 'progression') renderProgressAnalysis();
+  updateProgramHeader();
+  if (tabName === 'progression') { populateExerciseSelect(); renderCharts(); }
   if (tabName === 'reglages') {
     updateDriveUI(); // le jeton Drive a pu expirer depuis l'ouverture de l'appli
     if (isDriveConnected() && !getDriveAccount()) fetchDriveAccount(); // nouvel essai de lecture de l'adresse
@@ -2864,6 +3454,7 @@ function initDriveTokenClient() {
       if (driveRenewPending) { driveRenewPending.finish(true); return; } // l'appelant envoie lui-même la file d'attente
       // accès obtenu : crée le dossier et envoie la sauvegarde complète si besoin
       syncDriveBackup();
+      resumeProgramRestoreIfPending();
     },
     // Fenêtre Google bloquée ou fermée
     error_callback: (err) => {
@@ -3365,7 +3956,7 @@ async function restoreDriveBackup(file) {
       restoreFromDrive();
       return;
     }
-    if (!dl.ok || !dl.data || !Array.isArray(dl.data.history) || !dl.data.nextType) {
+    if (!dl.ok || !dl.data || !Array.isArray(dl.data.history)) {
       alert('La sauvegarde Drive est illisible ou invalide : rien n\'a été modifié.');
       return;
     }
@@ -3467,8 +4058,13 @@ function importData(event) {
   reader.onload = function(e) {
     try {
       const importedState = JSON.parse(e.target.result);
-      if (importedState.history && importedState.nextType) {
-        state = importedState;
+      if (importedState && Array.isArray(importedState.history)) {
+        // Ancienne sauvegarde (sans programmes) : migration « Hypertrophie » comme au premier lancement
+        const mig = migrateState(importedState);
+        if (mig.error) { alert("Sauvegarde importée impossible à convertir au format des programmes : rien n'a été modifié."); return; }
+        state = mig.state;
+        normalizePrograms();
+        programDraft = null; programView = 'home';
         clearEditState();
         clearDraft();
         discardWeightInput();
@@ -3477,6 +4073,7 @@ function importData(event) {
         initWorkoutForm();
         renderHistory();
         renderCharts();
+        renderProgramOverview();
         alert("Sauvegarde importée avec succès !");
       } else {
         alert("Fichier de sauvegarde invalide (structure incorrecte).");
@@ -3494,7 +4091,9 @@ function resetData() {
   const confirm1 = confirm("⚠️ ATTENTION : Êtes-vous SÛR de vouloir effacer vos saisies récentes ?");
   if (confirm1) {
     fetch('data.json').then(res => res.json()).then(defaultData => {
-      state = defaultData;
+      state = migrateState(defaultData).state;
+      normalizePrograms();
+      programDraft = null; programView = 'home';
       clearEditState();
       clearDraft();
       discardWeightInput();
@@ -3503,6 +4102,7 @@ function resetData() {
       initWorkoutForm();
       renderHistory();
       renderCharts();
+      renderProgramOverview();
       alert("Données réinitialisées avec succès.");
     }).catch(() => {
       alert("Erreur lors de la réinitialisation.");
@@ -3604,6 +4204,7 @@ function initUpdateIndicator() {
 // 17. DÉMARRAGE
 // ============================================================
 async function initApp() {
+  if (!document.body.dataset.tab) document.body.dataset.tab = 'programme';
   initTheme();
   initUpdateIndicator();
   // Google Drive : retour d'une connexion par redirection (application installée), puis statut + sauvegarde à envoyer
@@ -3613,7 +4214,8 @@ async function initApp() {
     initDriveTokenClient(); updateDriveUI();
     syncDriveBackup();
     if (isDriveConnected() && !getDriveAccount()) fetchDriveAccount();
-    if (driveReturn) switchTab('reglages'); // on revient sur Réglages pour voir le résultat de la connexion
+    // on revient sur Réglages pour voir le résultat de la connexion (ou on reprend la restauration de programmes demandée)
+    if (driveReturn && !(driveReturn === 'ok' && resumeProgramRestoreIfPending())) switchTab('reglages');
   }, 800);
   // Jeton écrit par un autre onglet (connexion faite dans Chrome pendant que l'application plein écran attend)
   window.addEventListener('storage', (e) => {
@@ -3644,8 +4246,18 @@ async function initApp() {
     }
   }
 
+  // Programmes sur mesure (1.7.0) : migration unique de l'historique vers le programme « Hypertrophie ».
+  // Copie intégrale des données d'origine conservée sur l'appareil avant toute modification.
+  if (!(state && state.schema >= 2)) {
+    try { localStorage.setItem('h49_state_v1_backup', JSON.stringify(state)); } catch (e) { /* ignoré */ }
+  }
+  const mig = migrateState(state);
+  state = mig.state;
+  if (mig.error) setTimeout(() => alert('La conversion de tes séances au format des programmes a échoué : tes données d\'origine sont conservées telles quelles.\n\nDétail : ' + mig.error.message), 600);
+  normalizePrograms();
   recalculateHistoryTonnages();
-  updateNextTypeFromHistory();
+  getPrograms().forEach(p => { if (!isLibre(p)) p.nextKey = nextKeyFromHistory(p); });
+  syncNextType();
   saveState();
 
   // Affichage de la version de l'application dans le titre

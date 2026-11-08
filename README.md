@@ -2,20 +2,21 @@
 
 **Application PWA de suivi d'entraînement en salle de sport**
 
-[![Version](https://img.shields.io/badge/version-1.6.36-blue)](https://github.com/jeepalexander/suivi-fitness)
+[![Version](https://img.shields.io/badge/version-1.7.0-blue)](https://github.com/jeepalexander/suivi-fitness)
 [![License](https://img.shields.io/badge/license-MIT-green)]
 
 ---
 
 ## ✨ Fonctionnalités
 
-- ✅ **Programmes d'entraînement** A/B/C avec exercices personnalisables et charges par défaut
+- ✅ **Programmes sur mesure** : 2 à 6 séances (A à F) qui tournent en boucle, ou **séances libres** ; un seul élément actif, les autres en mémoire (activation, appui long pour modifier)
+- ✅ **Catalogue de 86 exercices** (`js/catalogue.js`) : séries, répétitions et repos par défaut issus de la littérature, modes de saisie (kg × réps, poids du corps + lest, réps, durée, cardio durée + distance ou étages)
 - ✅ **Suivi des séances** : poids, répétitions, séries, tonnage, durée et historique détaillé
 - ✅ **Brouillon de séance** : la saisie en cours est sauvegardée automatiquement et restaurée après un rechargement ou une fermeture de l’application
 - ✅ **Progression** : volume total, progression par exercice et poids corporel
-- ✅ **Analyse mensuelle** : records, paliers détectés par exercice et progression par séance A/B/C
-- ✅ **Gestion automatique du deload** (semaines 10-12)
-- ✅ **Chronomètre de séance** et **timer de repos** de 2 minutes avec notification sonore
+- ✅ **Analyse mensuelle** : records, paliers détectés par exercice et progression par séance, par programme ou pour tous les programmes
+- ✅ **Gestion automatique du deload** (séances 10 à 12 de chaque cycle), reportable d'une séance
+- ✅ **Chronomètre de séance** et **timer de repos** propre à chaque exercice, avec notification sonore
 - ✅ **Design « Blanc minimaliste »** : fond uni, peu de couleurs, ombres légères, en thème **clair, sombre ou automatique** (mémorisé sur l’appareil)
 - ✅ **Interface mobile optimisée** : en-tête fixe, navigation basse stable et zone de contenu défilante
 - ✅ **Mode hors-ligne complet** (PWA avec Service Worker)
@@ -36,13 +37,16 @@
 
 ### Programme
 
-- Grand bloc « Prochaine séance » (A, B ou C) avec nombre d’exercices et de séries, et bouton de démarrage.
-- Exercices prévus en grille d’icônes, puis aperçu des deux séances suivantes.
-- Pastille de deload (ambre) lorsqu’il est actif.
+- Bouton + : créer un programme (séances A à F en boucle) ou une séance libre (sans récurrence).
+- Grande tuile de l’élément actif (noire pour un programme, sable pour une séance libre) : prochaine séance, nombre d’exercices et de séries, détail, bouton de démarrage.
+- « En mémoire » : programmes en pause ou nouveaux, séances libres ; « Activer » / « Réactiver » met l’actif en pause.
+- Appui long sur une tuile : modifier ou supprimer (l’historique est toujours conservé).
+- Restauration des programmes depuis la dernière sauvegarde Google Drive (nouvel appareil).
 
 ### Séance
 
-- Saisie des poids et répétitions pour chaque série : valeurs suggérées en pâle, série en cours surélevée, série validée en vert.
+- Charge la prochaine séance de l’élément actif (ou « Aucune séance prévue »).
+- Saisie des poids et répétitions pour chaque série (lest pour le poids du corps, durée et distance ou étages pour le cardio) : valeurs suggérées en pâle, série en cours surélevée, série validée en vert.
 - Ajout ou suppression de séries par exercice.
 - Suggestions basées sur les dernières charges réellement effectuées.
 - Chronomètre de séance et timer de repos.
@@ -51,14 +55,16 @@
 
 ### Progression
 
-- Volume total par séance, avec filtre A / B / C.
+- Statistiques du programme actif par défaut, ou d’un autre programme, d’une séance libre, ou de tous.
+- Volume total par séance, avec filtre par lettre de séance.
+- Suivi cardio par appareil : allure /500 m, allure /km, vitesse km/h ou étages/min.
 - Progression par exercice : charge maximale ou volume cumulé.
 - Suivi du poids corporel.
 - Analyse mensuelle : records, paliers et évolution du tonnage.
 
 ### Historique
 
-- Liste des séances groupée par mois.
+- Liste des séances groupée par mois, filtrable par programme ; chaque séance indique son programme d’origine.
 - Consultation et modification des séances passées.
 - Sauvegarde et restauration des données en JSON.
 - Choix du thème : clair, sombre ou automatique.
@@ -77,7 +83,7 @@ suivi-fitness/
 ├── data.json           # Données par défaut
 ├── CHANGELOG.md        # Historique des versions
 ├── tests/              # Tests automatiques (voir tests/README.md)
-├── js/                 # Bibliothèques locales (Chart.js) et security.js
+├── js/                 # catalogue.js (exercices), programmes.js (onglet Programme), Chart.js et security.js
 ├── css/                # Styles complémentaires (polices)
 ├── fonts/              # Polices embarquées
 └── icons/              # Icônes de l’application et des exercices

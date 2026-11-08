@@ -7,6 +7,30 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.0] - 2026-11-08
+### ✨ Programmes sur mesure (co-auteur : Claude)
+Spécification « Programmes sur mesure » et maquette « Programme nouvel usager » (écrans 1 à 30).
+- **Programmes** de 2 à 6 séances (A à F, nouvelles couleurs D vert, E violet, F framboise) qui tournent en boucle, et **séances libres** (sans récurrence, pastille 1× sable). Un seul élément actif ; les autres sont « En mémoire ».
+- **Onglet Programme** : bouton + (créer un programme ou une séance libre), éditeur (nom, séances, exercices réordonnables), feuille « Ajouter un exercice » (recherche, filtres par groupe, sélection multiple), activation sans confirmation (l'ancien actif passe en pause), « Nouveau » pour un élément jamais activé, appui long pour modifier ou supprimer, écran « rien de prévu » au premier lancement, restauration des programmes depuis la dernière sauvegarde Drive (cochés, arrivent en pause, sans doublon).
+- **Catalogue de 86 exercices** (`js/catalogue.js`) : séries, répétitions et repos par défaut sourcés (ACSM 2009, Schoenfeld 2016 et 2021, Singer 2024). Le chrono de pause prend le repos de l'exercice ouvert : 3:00 polyarticulaire lourd, 2:00 polyarticulaire, 1:30 isolation, 1:00 abdos et gainage.
+- **Modes de saisie** : kg × réps, poids du corps + lest (« Lest (kg) », vide = PDC, charge réelle = dernière pesée + lest), réps seules, durée, cardio durée + distance (allure /500 m pour rameur et ski trainer, /km pour le tapis, km/h pour les vélos) ou durée + étages (stair climber).
+- **Onglet Séance** : charge la séance de l'élément actif (« Séance du jour · programme » ou « Séance libre ») ; « Première fois · 3 × 6–10 réps » ; le nombre de séries fait devient la référence ; « Aucune séance prévue » si rien n'est actif.
+- **Déload** global inchangé, **reportable** d'une séance (« Reporter à la prochaine séance », annulable).
+- **Progression** : sélecteur (programme actif par défaut, autre programme, séance libre ou « Tous les programmes »), indice et analyses calculés sur l'élément choisi, lettres de séance du programme, progression par programme pour « Tous », suivi cardio par appareil avec menu.
+- **Historique** : filtres par programme, pastille de la séance ou 1×, programme d'origine sur chaque ligne et dans le détail ; un programme supprimé reste lisible.
+### 🔄 Migration (une seule fois)
+- L'historique existant est rattaché au programme **« Hypertrophie »** (séances A, B, C du programme fixe, même nombre de séries), actif, avec la séance suivante de la rotation.
+- Noms d'exercices alignés sur le catalogue (Leg extension, Leg curl, Oiseau) avec leur identifiant ; contrôle nombre de séances, tonnage et records avant / après, retour à l'original en cas d'écart. Copie intégrale d'origine conservée sur l'appareil (`h49_state_v1_backup`).
+- Le rameur s'affiche désormais en allure **/500 m** (données inchangées).
+- Une ancienne sauvegarde importée ou restaurée est convertie de la même façon.
+### 💾 Sauvegarde
+- Mode inchangé : un fichier complet horodaté, 5 versions conservées. Il contient désormais les programmes et séances libres ; créer, modifier, activer ou supprimer un programme déclenche une sauvegarde.
+### 🧪 Tests
+- Nouveau `tests/test_programmes.py` (79 contrôles) ; `test_chrono`, `test_rameur` et `test_drive_sauvegarde` alignés (repos du catalogue, allure /500 m, programmes dans la sauvegarde). `test_chrono` attend désormais le lancement du repos après le rameur, comportement voulu depuis 1.6.21.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.0.
+
+---
+
 ## [1.6.36] - 2026-11-07
 ### ✏️ Réglages
 - **Apparence** : texte d'explication supprimé (les boutons Clair / Sombre / Auto suffisent).
