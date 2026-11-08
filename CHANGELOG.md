@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.2] - 2026-11-08
+### ✏️ Nom de l'application (co-auteur : Claude)
+- L'application s'appelle **Mon Carnet de Salle**, comme sur la maquette : en-tête de toutes les pages (« MON CARNET DE SALLE »), titre de l'onglet du navigateur, nom à l'installation (`manifest.json` : « Mon Carnet de Salle », raccourci « Mon Carnet » sous l'icône) et titre du partage de la sauvegarde.
+- Inchangés pour ne rien casser : le dossier Google Drive « FITNESS AAP – Séances », les noms des fichiers de sauvegarde, le dépôt et l'adresse de l'application.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.2.
+
+---
+
 ## [1.7.1] - 2026-11-08
 ### 🐛 Corrections (co-auteur : Claude)
 - **Onglet Programme** : la tuile active, « En mémoire » et le texte d'aide sont alignés vers le bas de l'écran, au-dessus de la barre de navigation, comme sur la maquette (ils restaient collés en haut). Le détail déplié fait défiler la page normalement.

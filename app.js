@@ -4031,7 +4031,7 @@ async function exportData() {
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
       await navigator.share({
-        title: 'Sauvegarde Suivi Fitness',
+        title: 'Sauvegarde Mon Carnet de Salle',
         text: 'Sauvegarde du ' + new Date().toLocaleDateString('fr-FR') + '.',
         files: [file],
       });
