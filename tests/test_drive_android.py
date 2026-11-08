@@ -38,7 +38,7 @@ with Srv() as base, sync_playwright() as p:
     br = p.chromium.launch()
     ctx, pg, errs = page(br, base, ua=UA, installed=True)
     pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(300)
-    pg.evaluate("connectGoogleDrive()")
+    pg.evaluate("connectGoogleDrive()"); pg.wait_for_timeout(700)  # lancée ~0,4 s après l'appui (1.7.4), comme la reconnexion automatique
     nav = pg.evaluate("window.__nav")
     u = nav[0] if nav else ''
     check("Android + application installée : la connexion part vers le vrai Chrome (intent://)", len(nav) == 1 and u.startswith('intent://accounts.google.com/o/oauth2/v2/auth?') and 'package=com.android.chrome' in u, u[:120])
@@ -74,7 +74,7 @@ with Srv() as base, sync_playwright() as p:
     # Firefox (cas réel : application installée avec Firefox) : la connexion s'ouvre dans un onglet Firefox, jamais dans Chrome
     ctx, pg, errs = page(br, base, ua=UA_FF, installed=True)
     pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(300)
-    pg.evaluate("connectGoogleDrive()")
+    pg.evaluate("connectGoogleDrive()"); pg.wait_for_timeout(700)  # lancée ~0,4 s après l'appui (1.7.4), comme la reconnexion automatique
     nav, tabs = pg.evaluate("window.__nav"), pg.evaluate("window.__tabs")
     tu = tabs[0][0] if tabs else ''
     q = parse_qs(urlparse(tu).query)

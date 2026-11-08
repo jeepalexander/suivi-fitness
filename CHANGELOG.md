@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.4] - 2026-11-08
+### 🐛 Corrections (co-auteur : Claude)
+- **« Reconnecter maintenant » (application installée avec Firefox)** : le bouton ouvrait la page Google dans un onglet Firefox séparé, qui revenait sur l'application sans lui rendre l'accès. Il suit maintenant exactement le même chemin que la reconnexion automatique après l'enregistrement d'une séance (qui, elle, reste dans l'application et fonctionne) : connexion par redirection lancée environ 0,4 s après l'appui. Même chose pour « Connecter Google Drive » et le lien de la fenêtre « Restaurer une sauvegarde ». Navigateur (non installé) : inchangé.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.4.
+
+---
+
 ## [1.7.3] - 2026-11-08
 ### ✨ Restaurer une sauvegarde (co-auteur : Claude)
 - **Historique › Restaurer** ouvre la fenêtre **« Restaurer une sauvegarde »** (planche de concept, écran 27b) : les 5 dernières sauvegardes Google Drive (date et heure, « La plus récente » / « Version précédente ») et « Choisir un fichier… » pour un fichier créé avec « Sauvegarder ». Un seul choix (la plus récente cochée par défaut) ; bouton « Restaurer cette sauvegarde » ou « Choisir le fichier », puis la confirmation habituelle avant tout remplacement. Sans connexion Drive : le fichier seul et un lien « Se connecter à Google Drive ».

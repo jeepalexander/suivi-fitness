@@ -2,7 +2,7 @@
 
 **Application PWA de suivi d'entraînement en salle de sport** (dépôt `suivi-fitness`)
 
-[![Version](https://img.shields.io/badge/version-1.7.3-blue)](https://github.com/jeepalexander/suivi-fitness)
+[![Version](https://img.shields.io/badge/version-1.7.4-blue)](https://github.com/jeepalexander/suivi-fitness)
 [![License](https://img.shields.io/badge/license-MIT-green)]
 
 ---

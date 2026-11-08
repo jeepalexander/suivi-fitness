@@ -3565,8 +3565,13 @@ function handleDriveRedirectReturn() {
   } catch (e) { return null; }
 }
 
+// Application installée : même enchaînement que la reconnexion automatique après l'enregistrement d'une séance
+// (connexion par redirection lancée ~0,4 s après l'appui), le seul qui reste dans l'application avec Firefox (1.7.4) :
+// lancée directement depuis l'appui, la page Google s'ouvrait dans un onglet Firefox séparé et l'application ne
+// récupérait pas l'accès.
+const DRIVE_CONNECT_DELAY_MS = 400;
 function connectGoogleDrive() {
-  if (isInstalledApp()) { connectDriveByRedirect(); return; }
+  if (isInstalledApp()) { setTimeout(connectDriveByRedirect, DRIVE_CONNECT_DELAY_MS); return; }
   initDriveTokenClient();
   if (!driveTokenClient) {
     alert('Bibliothèque Google non chargée. Vérifie ta connexion et réessaie.');
@@ -4026,7 +4031,7 @@ function autoReconnectDriveIfNeeded() {
     localStorage.setItem(DRIVE_AUTO_RECONNECT_KEY, String(Date.now()));
   } catch (e) { return; }
   // petit délai : la page a fini d'afficher la confirmation de la séance avant de partir chez Google
-  setTimeout(connectDriveByRedirect, 400);
+  setTimeout(connectDriveByRedirect, DRIVE_CONNECT_DELAY_MS);
 }
 
 // Appelée par « Enregistrer la séance » / « Enregistrer les modifications » (geste de l'utilisateur) :
