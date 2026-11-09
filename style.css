@@ -564,9 +564,14 @@ body[data-tab="programme"][data-pview="choose"] header h1 { display: none; }
 .prog-tile { margin-top: 0; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: manipulation; transition: transform 0.45s ease; }
 .prog-tile.pressing, .mem-tile.pressing { transform: scale(0.97); }
 .prog-tile-top { display: flex; align-items: center; gap: 12px; }
+/* 1.7.24 : tuile active compacte (−25 %) — démarrer à droite du nom, compteur et « + de détail » en bas */
+.next-card.prog-tile { gap: 0; }
+.prog-tile-foot { justify-content: space-between; }
+.prog-tile .prog-tile-foot .next-card-count { margin-top: 0; min-width: 0; }
 .prog-tile-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.prog-tile-next { display: flex; align-items: center; gap: 8px; min-width: 0; margin-top: 12px; font-size: 0.9375rem; font-weight: 600; color: var(--pill-ink); }
-.prog-tile-next span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.prog-tile-next { display: flex; align-items: center; gap: 8px; min-width: 0; margin-top: 14px; font-size: 0.9375rem; font-weight: 600; color: var(--pill-ink); }
+.prog-tile-next .prog-tile-session { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.prog-tile .deload-pill.deload-inline { flex: none; margin: 0 0 0 auto; padding: 3px 10px; font-size: 0.8125rem; gap: 6px; }
 .prog-ico { flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--pill-ico); color: var(--pill-ink); display: flex; align-items: center; justify-content: center; }
 .prog-ico svg, .mem-ico svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .prog-ico.dark { width: 44px; height: 44px; background: var(--primary-strong); color: var(--on-strong); }
@@ -574,6 +579,7 @@ body[data-tab="programme"][data-pview="choose"] header h1 { display: none; }
 .prog-tile .next-card-count { margin-top: 6px; }
 .prog-tile .deload-pill { margin-top: 10px; }
 .prog-tile .next-card-row { align-items: center; margin-top: 16px; }
+.prog-tile .deload-pill { margin-top: 12px; }
 .prog-detail-btn { height: 44px; padding: 0 18px; border: none; border-radius: 999px; background: var(--pill-ico); color: var(--pill-ink); font: inherit; font-size: 0.9063rem; font-weight: 600; cursor: pointer; }
 .prog-tile.libre { background: var(--sand); color: var(--sand-ink); }
 .prog-tile.libre .next-card-count { color: var(--sand-muted); }
@@ -852,3 +858,11 @@ body[data-tab="fond"] .page-title-row { margin-top: 10px; }
 .invite-qr { width: 220px; max-width: 70vw; margin: 4px auto 12px; padding: 14px; box-sizing: border-box; border-radius: 20px; background: #FFFFFF; box-shadow: var(--sh-card); }
 .invite-qr svg { display: block; width: 100%; height: auto; }
 .invite-link { margin: 0 0 6px; font-size: 0.8125rem; line-height: 1.4; color: var(--text-muted); text-align: center; overflow-wrap: anywhere; }
+
+/* ============================================
+   Accueil Programmes : message manuscrit (1.7.24)
+   ============================================ */
+.prog-greet { max-width: 94%; margin: 6px 0 0; font-family: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive; font-weight: 600; line-height: 1.05; color: var(--text); transform: rotate(-2deg); transform-origin: left top; }
+.prog-greet-hello, .prog-greet-line { font-family: inherit; } /* « * » impose la police du texte à chaque élément */
+.prog-greet-hello { display: block; font-size: 2.5rem; }
+.prog-greet-line { display: block; margin-top: 2px; font-size: 1.75rem; }

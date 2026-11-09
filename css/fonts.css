@@ -44,3 +44,12 @@
   font-display: swap;
   src: url('../fonts/figtree-latin-600-normal.woff2') format('woff2');
 }
+
+/* Caveat 600 (1.7.24) : message d'accueil manuscrit. Licence SIL Open Font License 1.1, paquet npm @fontsource/caveat. */
+@font-face {
+  font-family: 'Caveat';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../fonts/caveat-latin-600-normal.woff2') format('woff2');
+}

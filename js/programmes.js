@@ -80,7 +80,7 @@ function renderProgramOverview() {
   const active = getActiveProgram();
   const others = programs.filter(p => p !== active);
   // Les tuiles sont alignées vers le bas de l'écran, au-dessus de la barre de navigation (maquette)
-  let html = '<div class="prog-spacer" aria-hidden="true"></div>';
+  let html = programGreetingHtml(active) + '<div class="prog-spacer" aria-hidden="true"></div>';
   if (active) {
     html += `<div class="prog-status"><span class="prog-dot on"></span>${isLibre(active) ? 'Active' : 'Actif'}</div>`; // 1.7.20 : « Actif » / « Active » (séance libre)
     html += activeTileHtml(active);
@@ -100,6 +100,30 @@ function renderProgramOverview() {
   html += `<p class="prog-hint"><span class="prog-hint-ico">${INFO_SVG}</span>Astuce : Reste appuyé sur un programme pour entrer en mode édition</p>`; // 1.7.21 : (i) + « Astuce : »
   container.innerHTML = html;
   bindLongPress(container);
+}
+
+// Message d'accueil manuscrit (1.7.24) : « Bonjour » ou « Bonsoir » selon l'heure, puis une phrase selon le contexte
+// (séance déjà faite aujourd'hui, retour après une pause, déload, pas de programme actif, sinon motivation).
+function programGreeting(active, now = new Date()) {
+  const h = now.getHours();
+  const hello = (h >= 5 && h < 18) ? 'Bonjour' : 'Bonsoir';
+  const hist = (typeof state !== 'undefined' && state && Array.isArray(state.history)) ? state.history : [];
+  const today = now.toISOString().slice(0, 10);
+  const last = hist.length ? hist[hist.length - 1].date : null;
+  const daysSince = last ? Math.floor((new Date(today) - new Date(last)) / 86400000) : null;
+  let line;
+  if (!active) line = 'Choisis ton programme, et c\'est parti !';
+  else if (last === today) line = 'Belle séance aujourd\'hui. Place à la récup !';
+  else if (daysSince !== null && daysSince >= 10) line = 'Content de te revoir ! On s\'y remet ?';
+  else if (!isLibre(active) && typeof checkDeloadStatus === 'function' && checkDeloadStatus()) line = 'Semaine légère : on récupère pour mieux repartir.';
+  else if (!hist.length) line = 'Prêt pour ta première séance ?';
+  else line = 'Prêt à te dépasser aujourd\'hui ?';
+  return { hello, line };
+}
+
+function programGreetingHtml(active) {
+  const g = programGreeting(active);
+  return `<p class="prog-greet"><span class="prog-greet-hello">${g.hello},</span><span class="prog-greet-line">${escapeHtml(g.line)}</span></p>`;
 }
 
 function emptyProgramsHtml() {
@@ -122,19 +146,23 @@ function activeTileHtml(p) {
   const deloadHtml = checkDeloadStatus() ? `<span class="deload-pill">${BOLT_SVG}Déload actif · −20 %</span>` : '';
   // Tuile : pictogramme du type + nom du programme (ou de la séance libre) en grand ; pastille et nom de la
   // prochaine séance en petit (programme seulement) ; exercices et séries ; « + de détail » et démarrer.
+  // 1.7.24 : programme — la pastille déload se place au bout de la ligne de la prochaine séance (pas de ligne en plus)
+  const deloadInline = !libre && deloadHtml ? `<span class="deload-pill deload-inline">${BOLT_SVG}Déload −20 %</span>` : '';
   const nextLine = libre ? '' : `
-      <div class="prog-tile-next">${programPillHtml(p, session.key, 'tiny')}<span>${escapeHtml(sessionLabel(p, session))}</span></div>`;
+      <div class="prog-tile-next">${programPillHtml(p, session.key, 'tiny')}<span class="prog-tile-session">${escapeHtml(sessionLabel(p, session))}</span>${deloadInline}</div>`;
+  // 1.7.24 : tuile compacte (−25 % de hauteur, mêmes informations) — démarrer à droite du nom,
+  // exercices · séries et « + de détail » sur la dernière ligne.
   return `
     <div class="next-card prog-tile${libre ? ' libre' : ''}" data-lp="${escapeHtml(p.id)}">
       <div class="prog-tile-top">
         ${libre ? '<span class="prog-ico libre">1×</span>' : `<span class="prog-ico">${SWAP_SVG}</span>`}
         <span class="session-name prog-tile-name">${escapeHtml(p.name)}</span>
-      </div>${nextLine}
-      <span class="next-card-count">${nEx} exercice${nEx > 1 ? 's' : ''} · ${nSets} série${nSets > 1 ? 's' : ''}</span>
-      ${deloadHtml}
-      <div class="next-card-row">
-        <button type="button" class="prog-detail-btn" aria-expanded="${programDetailOpen}" onclick="toggleProgramDetail()">${programDetailOpen ? '- de détail' : '+ de détail'}</button>
         <button type="button" class="btn-start${libre ? ' libre' : ''}" aria-label="Démarrer la séance" onclick="switchTab('seance')">${ARROW_SVG}</button>
+      </div>${nextLine}
+      ${libre ? deloadHtml : ''}
+      <div class="next-card-row prog-tile-foot">
+        <span class="next-card-count">${nEx} exercice${nEx > 1 ? 's' : ''} · ${nSets} série${nSets > 1 ? 's' : ''}</span>
+        <button type="button" class="prog-detail-btn" aria-expanded="${programDetailOpen}" onclick="toggleProgramDetail()">${programDetailOpen ? '- de détail' : '+ de détail'}</button>
       </div>
     </div>`;
 }

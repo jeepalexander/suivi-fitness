@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.24] - 2026-11-09
+### ✨ Accueil Programmes : message manuscrit et tuile compacte (co-auteur : Claude)
+- **Message d'accueil manuscrit** en haut de l'onglet Programmes (police Caveat, licence OFL, hébergée avec l'app pour fonctionner hors connexion) : « Bonjour, » (5 h – 18 h) ou « Bonsoir, », puis une phrase selon le contexte — séance déjà faite aujourd'hui (« Belle séance aujourd'hui. Place à la récup ! »), retour après 10 jours ou plus (« Content de te revoir ! On s'y remet ? »), semaine de déload, pas encore de séance, pas de programme actif, sinon « Prêt à te dépasser aujourd'hui ? ».
+- **Tuile active −25 % de hauteur** (278 → 206 px avec le déload), sans perte d'information : bouton démarrer à droite du nom, pastille « Déload −20 % » au bout de la ligne de la prochaine séance, « exercices · séries » et « + de détail » sur la dernière ligne.
+- **Fond Poigne** recadré : le logo du short n'est plus dans l'image.
+- Test : `test_accueil.py` (19 contrôles).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.24.
+
+---
+
 ## [1.7.23] - 2026-11-09
 ### 🎨 4 nouveaux fonds d'écran (co-auteur : Claude)
 - **Réglages › Fond d'écran** : Râtelier (kettlebells colorées), Squat, Poigne et Disques s'ajoutent à Course, Barre, Haltères, Kettlebell et Studio — 9 images + « Aucun ». Images en 1000 px + vignettes, mises en cache pour fonctionner hors connexion.
