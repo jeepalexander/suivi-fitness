@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Règles de confidentialité · Mon Carnet de Salle</title>
+  <meta name="description" content="Règles de confidentialité de l'application Mon Carnet de Salle">
+  <link rel="icon" type="image/png" href="icons/app-icon.png">
+  <link href="css/fonts.css" rel="stylesheet">
+  <style>
+  :root { --bg:#FFFFFF; --text:#111114; --muted:#5E5E66; --fill:#F3F3F5; --line:#E4E4E9; --accent:#E5392B; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0E0E11; --text:#F2F2F4; --muted:#A9A9B2; --fill:#1A1A1F; --line:#2C2C33; } }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Figtree', system-ui, sans-serif; font-size: 16px; line-height: 1.6; }
+  main { max-width: 720px; margin: 0 auto; padding: 32px 16px 56px; }
+  .kicker { margin: 0; font-size: 13px; font-weight: 600; letter-spacing: .14em; color: var(--muted); }
+  h1 { margin: 4px 0 6px; font-family: 'Saira Semi Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 38px; line-height: 1.05; }
+  h2 { margin: 32px 0 8px; font-family: 'Saira Semi Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 22px; line-height: 1.15; }
+  p, li { color: var(--text); }
+  .updated { margin: 0 0 20px; color: var(--muted); font-size: 14px; }
+  .summary { margin: 20px 0 0; padding: 16px 18px; border-radius: 20px; background: var(--fill); }
+  .summary p { margin: 0; }
+  ul { padding-left: 1.2em; }
+  li { margin: 4px 0; }
+  a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  code { font-size: .92em; padding: 1px 6px; border-radius: 6px; background: var(--fill); overflow-wrap: anywhere; }
+  .en { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line); }
+  .en h2 { margin-top: 0; }
+  footer { margin-top: 40px; font-size: 14px; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <p class="kicker">MON CARNET DE SALLE</p>
+  <h1>Règles de confidentialité</h1>
+  <p class="updated">Dernière mise à jour : 9 novembre 2026</p>
+
+  <div class="summary"><p><strong>En bref :</strong> tes séances restent sur ton téléphone. Si tu actives la sauvegarde Google Drive, elles sont copiées dans <em>ton</em> Google Drive, dans un dossier créé par l'application. L'application n'a pas de serveur : personne d'autre que toi, pas même son auteur, n'a accès à tes données.</p></div>
+
+  <h2>Qui est responsable de l'application</h2>
+  <p>Mon Carnet de Salle est une application web gratuite de suivi d'entraînement en salle, publiée à l'adresse <code>https://jeepalexander.github.io/suivi-fitness/</code>. Pour toute question : <a href="mailto:jeanphilippealexander@gmail.com">jeanphilippealexander@gmail.com</a>.</p>
+
+  <h2>Les données que tu saisis</h2>
+  <p>Programmes, séances, exercices, charges, répétitions, durées, réglages (thème, fond d'écran…) : tout est enregistré <strong>uniquement dans le stockage local de ton navigateur</strong>, sur ton appareil. Ces données ne sont envoyées nulle part, sauf vers ton propre Google Drive si tu actives la sauvegarde (voir ci-dessous).</p>
+
+  <h2>Sauvegarde Google Drive (facultative)</h2>
+  <p>Si tu touches « Connecter Google Drive », Google te demande l'autorisation pour une seule permission : <code>https://www.googleapis.com/auth/drive.file</code>. Elle permet à l'application de voir et de gérer <strong>uniquement les fichiers qu'elle a elle-même créés</strong> dans ton Drive. Elle n'a accès à aucun autre fichier de ton Drive.</p>
+  <p>Avec cette autorisation, l'application :</p>
+  <ul>
+    <li>crée dans ton Drive un dossier « MON CARNET DE SALLE » ;</li>
+    <li>y enregistre une copie de tes données (fichier JSON) à chaque séance validée, garde les 5 copies les plus récentes et supprime les plus anciennes qu'elle a créées ;</li>
+    <li>relit ces copies quand tu demandes une restauration ;</li>
+    <li>lit le nom et l'adresse e-mail de ton compte Google (via l'API Google Drive) pour t'indiquer, dans Réglages, sur quel compte tes sauvegardes sont faites. Ces informations restent sur ton appareil.</li>
+  </ul>
+  <p>Le jeton d'accès fourni par Google est conservé dans le stockage local de ton navigateur et sert uniquement à ces opérations, directement entre ton appareil et Google. Il expire de lui-même au bout d'une heure.</p>
+  <p>L'utilisation des informations reçues des API Google respecte le <a href="https://developers.google.com/terms/api-services-user-data-policy">règlement de Google sur les données utilisateur des services d'API</a> (Google API Services User Data Policy), y compris les exigences d'utilisation limitée (« Limited Use »). Les données Google ne sont ni vendues, ni partagées, ni utilisées à des fins publicitaires, ni utilisées pour entraîner des modèles d'intelligence artificielle.</p>
+
+  <h2>Ce que l'application ne fait pas</h2>
+  <ul>
+    <li>Pas de compte à créer, pas de serveur de l'application, pas de base de données distante.</li>
+    <li>Pas de publicité, pas de mesure d'audience, pas de traceur ni de cookie publicitaire.</li>
+    <li>Aucune donnée n'est transmise à l'auteur de l'application ni à des tiers.</li>
+  </ul>
+
+  <h2>Hébergement</h2>
+  <p>Les fichiers de l'application sont hébergés par GitHub Pages (GitHub, Inc.). Comme tout hébergeur, GitHub peut enregistrer des données techniques de connexion (adresse IP, navigateur) lors du téléchargement de l'application ; voir la <a href="https://docs.github.com/fr/site-policy/privacy-policies/github-general-privacy-statement">déclaration de confidentialité de GitHub</a>. Une fois installée, l'application fonctionne sans connexion.</p>
+
+  <h2>Supprimer tes données ou retirer l'accès</h2>
+  <ul>
+    <li><strong>Sur ton appareil :</strong> efface les données du site dans les réglages de ton navigateur, ou désinstalle l'application.</li>
+    <li><strong>Dans ton Drive :</strong> supprime le dossier « MON CARNET DE SALLE ».</li>
+    <li><strong>Accès Google :</strong> touche « Déconnecter » dans Réglages, et retire l'application depuis <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</li>
+  </ul>
+
+  <h2>Modifications</h2>
+  <p>Ces règles peuvent évoluer avec l'application. La date de dernière mise à jour figure en haut de la page.</p>
+
+  <section class="en" lang="en">
+    <h2>Summary in English</h2>
+    <p>Mon Carnet de Salle is a free gym-training log web app with no backend. All workout data is stored only in the browser's local storage on the user's device. If the user enables Google Drive backup, the app requests only the <code>drive.file</code> scope: it creates a "MON CARNET DE SALLE" folder in the user's own Drive, writes a JSON backup after each workout (keeping the 5 most recent), reads those backups back on request, and reads the account name and email (Drive API <code>about</code>) to show which account is used. Google user data never leaves the user's device except for these direct calls to Google APIs; it is not sent to the developer or any third party, not sold, not used for advertising or to train AI models. The app's use of information received from Google APIs adheres to the Google API Services User Data Policy, including the Limited Use requirements. Users can revoke access at any time in the app (Disconnect) or at myaccount.google.com/permissions, and delete the Drive folder. Contact: jeanphilippealexander@gmail.com.</p>
+  </section>
+
+  <footer>
+    <p><a href="./">Ouvrir l'application</a> · <a href="confidentialite.html">Règles de confidentialité</a> · <a href="conditions.html">Conditions d'utilisation</a></p>
+    <p>Contact : <a href="mailto:jeanphilippealexander@gmail.com">jeanphilippealexander@gmail.com</a></p>
+  </footer>
+</main>
+</body>
+</html>
