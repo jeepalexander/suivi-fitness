@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.14] - 2026-11-09
+### 🎨 Séance : visuels d'exercice agrandis (co-auteur : Claude)
+- Icône et pastille grise de chaque exercice dans l'onglet Séance : +15 % (48 → 55 px), ouvert ou fermé.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.14.
+
+---
+
 ## [1.7.13] - 2026-11-09
 ### 🎨 Voile des autres onglets renforcé (co-auteur : Claude)
 - Séance, Progression, Historique, Réglages (planche, écran 32) : 100 % (haut) · 95 % à 30 % de la hauteur · 76 % à 72 % · 100 % (bas). Onglet Programmes inchangé. Même chose en noir pour le thème sombre.

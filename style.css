@@ -329,7 +329,7 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 .ex-chevron { display: flex; color: var(--text-muted); }
 .ex-chevron svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .exercise-item.open .ex-chevron { display: none; }
-.exercise-item .ex-icon-badge { width: 48px; height: 48px; flex-shrink: 0; }
+.exercise-item .ex-icon-badge { width: 55px; height: 55px; flex-shrink: 0; } /* +15 % (1.7.14) */
 .ex-body { margin-top: 12px; }
 .ex-body[hidden], .ex-controls[hidden] { display: none; }
 
