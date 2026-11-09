@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.17] - 2026-11-09
+### 🎨 Éditeur : visuels d'exercice agrandis (co-auteur : Claude)
+- Création / modification d'un programme ou d'une séance libre : icône et pastille de chaque exercice +15 % (44 → 51 px) ; fenêtre « Ajouter à la séance » : +15 % (48 → 55 px).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.17.
+
+---
+
 ## [1.7.16] - 2026-11-09
 ### ✨ Éditeur : déplacement des exercices par le menu seulement (co-auteur : Claude)
 - Création / modification d'un programme ou d'une séance libre : la poignée de glisser-déposer (6 points) disparaît des lignes d'exercice.
