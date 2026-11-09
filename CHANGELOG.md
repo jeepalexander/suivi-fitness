@@ -7,6 +7,17 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.18] - 2026-11-09
+### 🎨 Séance, Programmes, pause et fond d'écran (co-auteur : Claude)
+- **Séance** (planche, écran 22a) : l'en-tête fixe (titre, séance du jour, déload, progression) est sur fond uni ; l'image de fond ne se voit que sous les exercices.
+- **Programmes** : « Programme actif » / « Séance libre active » (et « Aucun programme actif ») en noir foncé, pastille verte conservée ; bouton + de l'en-tête en noir.
+- **Gélule de pause** : au repos, « PAUSE » / « ADAPTATIVE » sur 2 lignes, sans la durée tant que le décompte n'est pas lancé, gélule de même taille (144 × 44). Décompte et « GO ! » inchangés ; la durée qui sera lancée reste lue par les lecteurs d'écran.
+- **Réglages › Fond d'écran** : les vignettes défilent sur une seule ligne en bas de l'écran, positionnées sur le fond choisi.
+- Tests : `test_chrono.py` (libellé 2 lignes et taille), `test_programmes.py`, `test_annuler_seance.py` adaptés.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.18.
+
+---
+
 ## [1.7.17] - 2026-11-09
 ### 🎨 Éditeur : visuels d'exercice agrandis (co-auteur : Claude)
 - Création / modification d'un programme ou d'une séance libre : icône et pastille de chaque exercice +15 % (44 → 51 px) ; fenêtre « Ajouter à la séance » : +15 % (48 → 55 px).

@@ -298,6 +298,9 @@ function renderWallpaperGrid() {
       <span class="wallpaper-thumb">${w.id === 'none' ? '' : `<img src="${wallpaperThumb(w.id)}" alt="" loading="lazy" style="object-position:${w.pos}">`}<span class="wallpaper-check">${CHECK_SVG}</span></span>
       <span class="wallpaper-name">${w.name}</span>
     </button></li>`).join('');
+  // Bande sur une ligne (1.7.18) : on la fait défiler jusqu'au fond choisi
+  const sel = grid.querySelector('.wallpaper-opt[aria-checked="true"]');
+  if (sel) { const li = sel.parentElement; grid.scrollLeft = Math.max(0, li.offsetLeft - grid.offsetLeft - parseFloat(getComputedStyle(grid).paddingLeft || 0)); }
 }
 
 // ============================================================
@@ -751,6 +754,8 @@ function updateTimerDisplay(seconds) {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
   display.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+  const btn = document.getElementById('timer-btn');
+  if (btn) btn.removeAttribute('aria-label'); // le décompte affiché suffit
 }
 
 function runRestTimer(endTime) {
@@ -807,9 +812,15 @@ function formatRestDuration(seconds) {
   return `${Math.floor(seconds / 60)}:${s < 10 ? '0' : ''}${s}`;
 }
 
-// Texte du chrono au repos : « PAUSE 1:30 » (la durée qui sera lancée)
+// Texte du chrono au repos (1.7.18) : « PAUSE / ADAPTATIVE » sur 2 lignes, sans la durée tant que le
+// décompte n'est pas lancé ; la durée qui sera lancée (celle de l'exercice ouvert) reste dans l'aria-label.
 function restIdleLabel() {
-  return `PAUSE ${formatRestDuration(currentRestDuration())}`;
+  return 'PAUSE\nADAPTATIVE';
+}
+
+function setRestIdleUi(btn, display) {
+  if (display) display.innerText = restIdleLabel();
+  if (btn) btn.setAttribute('aria-label', `Lancer la pause adaptative (${formatRestDuration(currentRestDuration())})`);
 }
 
 // Met à jour le texte du chrono quand l'exercice ouvert change, seulement s'il est au repos
@@ -819,10 +830,10 @@ function refreshRestTimerIdle() {
   const display = document.getElementById('timer-display');
   if (!btn || !display || restTimerInterval) return;
   if (btn.classList.contains('running') || btn.classList.contains('finished')) return;
-  display.innerText = restIdleLabel();
+  setRestIdleUi(btn, display);
 }
 
-// Retour à l'état initial du timer de repos (affichage « PAUSE m:ss »)
+// Retour à l'état initial du timer de repos (affichage « PAUSE / ADAPTATIVE »)
 function resetRestTimerUi() {
   const btn = document.getElementById('timer-btn');
   const display = document.getElementById('timer-display');
@@ -830,7 +841,7 @@ function resetRestTimerUi() {
     btn.className = 'timer-btn';
     btn.style.setProperty('--progress', '0%');
   }
-  if (display) display.innerText = restIdleLabel();
+  setRestIdleUi(btn, display);
 }
 
 function toggleRestTimer() {

@@ -125,7 +125,7 @@ with Srv() as base, sync_playwright() as p:
     check('Tractions : colonnes Série | Lest (kg) | Réps', heads == 'Série|Lest (kg)|Réps|', heads)
     check('Tractions : historique ancien (charge totale 80 kg) -> lest proposé +2,5 (80 − 78 arrondi)', pg.input_value('#exercises-list .exercise-item[data-ex="Tractions"] .weight-input') == '+2.5', pg.input_value('#exercises-list .exercise-item[data-ex="Tractions"] .weight-input'))
     sub = pg.inner_text('#exercises-list .exercise-item[data-ex="Développé couché"] .ex-sub')
-    check('chrono : repos du Développé couché (3:00) quand il est ouvert', 'PAUSE 3:00' == (pg.evaluate("document.querySelector('#exercises-list .exercise-item[data-ex=\"Développé couché\"] .ex-toggle').click(), document.getElementById('timer-display').innerText")), sub)
+    check('chrono : repos du Développé couché (3:00) quand il est ouvert', '(3:00)' in (pg.evaluate("document.querySelector('#exercises-list .exercise-item[data-ex=\"Développé couché\"] .ex-toggle').click(), document.getElementById('timer-btn').getAttribute('aria-label')")), sub)
     check_set(pg, 'Tractions', 0, '+10', 8)
     check_set(pg, 'Tractions', 1, '', 8)
     check_set(pg, 'Développé couché', 0, 60, 8)

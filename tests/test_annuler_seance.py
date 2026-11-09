@@ -40,7 +40,7 @@ with Srv() as base, sync_playwright() as p:
     check("confirmation demandée ; « Annuler » dans la boîte : rien ne change", len(dialogs) == 1 and pg.evaluate("localStorage.getItem('workout_start_time')!==null"), str(dialogs))
     pg.click('#cancel-session-btn'); pg.wait_for_timeout(500)
     check("confirmé : chrono arrêté et supprimé", pg.evaluate("localStorage.getItem('workout_start_time')") is None and pg.inner_text('#workout-duration-display') == '00:00')
-    check("confirmé : chrono de pause arrêté, remis à « PAUSE m:ss », rien en mémoire",
+    check("confirmé : chrono de pause arrêté, remis à « PAUSE / ADAPTATIVE », rien en mémoire",
           pg.evaluate("localStorage.getItem('rest_end_time')") is None and pg.evaluate("document.getElementById('timer-btn').className")=='timer-btn' and pg.inner_text('#timer-display').startswith('PAUSE'), pg.inner_text('#timer-display'))
     pg.wait_for_timeout(1500)
     check("le décompte ne repart pas", pg.inner_text('#timer-display').startswith('PAUSE'), pg.inner_text('#timer-display'))
