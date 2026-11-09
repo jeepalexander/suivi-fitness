@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.15] - 2026-11-09
+### 🎨 Éditeur de programme : voile des autres onglets (co-auteur : Claude)
+- Création et modification d'un programme ou d'une séance libre : même voile que Séance, Progression, Historique et Réglages (100 / 95 / 76 / 100 % à 0 / 30 / 72 / 100 % de la hauteur), au lieu de celui de l'accueil Programmes. Thème sombre : même chose en noir.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.15.
+
+---
+
 ## [1.7.14] - 2026-11-09
 ### 🎨 Séance : visuels d'exercice agrandis (co-auteur : Claude)
 - Icône et pastille grise de chaque exercice dans l'onglet Séance : +15 % (48 → 55 px), ouvert ou fermé.

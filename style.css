@@ -784,9 +784,9 @@ body[data-pview="choose"] .choose-lead { margin-top: 0; }
 #app-wallpaper { display: none; position: fixed; inset: 0; z-index: -1; pointer-events: none; background-color: var(--bg); background-size: cover; background-position: center; background-repeat: no-repeat; }
 #app-wallpaper::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.82) 22%, rgba(255, 255, 255, 0.15) 42%, rgba(255, 255, 255, 0.6) 72%, rgba(255, 255, 255, 0.88) 100%); }
 /* Voile (1.7.12, valeurs de la planche, écrans 31 et 32) — Programmes : 95/82/15/60/88 % à 0/22/42/72/100 % de la hauteur ;
-   autres onglets (1.7.13) : 100/95/76/100 % à 0/30/72/100 %. Mêmes opacités en noir pour le thème sombre. */
-body:not([data-tab="programme"]) #app-wallpaper::after { background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.95) 30%, rgba(255, 255, 255, 0.76) 72%, rgba(255, 255, 255, 1) 100%); }
-:root[data-theme="dark"] body:not([data-tab="programme"]) #app-wallpaper::after { background: linear-gradient(180deg, rgba(14, 14, 17, 1) 0%, rgba(14, 14, 17, 0.95) 30%, rgba(14, 14, 17, 0.76) 72%, rgba(14, 14, 17, 1) 100%); }
+   autres onglets (1.7.13) et éditeur de programme (1.7.15) : 100/95/76/100 % à 0/30/72/100 %. Mêmes opacités en noir pour le thème sombre. */
+body:not([data-tab="programme"]) #app-wallpaper::after, body[data-pview="editor"] #app-wallpaper::after { background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.95) 30%, rgba(255, 255, 255, 0.76) 72%, rgba(255, 255, 255, 1) 100%); }
+:root[data-theme="dark"] body:not([data-tab="programme"]) #app-wallpaper::after, :root[data-theme="dark"] body[data-pview="editor"] #app-wallpaper::after { background: linear-gradient(180deg, rgba(14, 14, 17, 1) 0%, rgba(14, 14, 17, 0.95) 30%, rgba(14, 14, 17, 0.76) 72%, rgba(14, 14, 17, 1) 100%); }
 :root[data-theme="dark"] #app-wallpaper::after { background: linear-gradient(180deg, rgba(14, 14, 17, 0.95) 0%, rgba(14, 14, 17, 0.82) 22%, rgba(14, 14, 17, 0.15) 42%, rgba(14, 14, 17, 0.6) 72%, rgba(14, 14, 17, 0.88) 100%); }
 :root[data-wallpaper] #app-wallpaper { display: block; }
 :root[data-wallpaper="course"] #app-wallpaper { background-image: url('wallpapers/course.jpg'); background-position: center 30%; }
