@@ -782,11 +782,12 @@ body[data-pview="choose"] .choose-lead { margin-top: 0; }
    qui garde le texte lisible. <html data-wallpaper="…"> est posé avant le premier affichage par index.html.
    ============================================ */
 #app-wallpaper { display: none; position: fixed; inset: 0; z-index: -1; pointer-events: none; background-color: var(--bg); background-size: cover; background-position: center; background-repeat: no-repeat; }
-#app-wallpaper::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255, 255, 255, 0.82) 0%, rgba(255, 255, 255, 0.55) 22%, rgba(255, 255, 255, 0.3) 42%, rgba(255, 255, 255, 0.72) 62%, rgba(255, 255, 255, 0.84) 100%); }
-/* Hors onglet Programmes : voile plus couvrant et plus régulier, l'image reste en retrait derrière la saisie (1.7.10) */
-body:not([data-tab="programme"]) #app-wallpaper::after { background: linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0.78) 30%, rgba(255, 255, 255, 0.72) 50%, rgba(255, 255, 255, 0.82) 72%, rgba(255, 255, 255, 0.88) 100%); }
-:root[data-theme="dark"] body:not([data-tab="programme"]) #app-wallpaper::after { background: linear-gradient(180deg, rgba(14, 14, 17, 0.88) 0%, rgba(14, 14, 17, 0.8) 30%, rgba(14, 14, 17, 0.74) 50%, rgba(14, 14, 17, 0.84) 72%, rgba(14, 14, 17, 0.9) 100%); }
-:root[data-theme="dark"] #app-wallpaper::after { background: linear-gradient(180deg, rgba(14, 14, 17, 0.84) 0%, rgba(14, 14, 17, 0.6) 22%, rgba(14, 14, 17, 0.38) 42%, rgba(14, 14, 17, 0.76) 62%, rgba(14, 14, 17, 0.86) 100%); }
+#app-wallpaper::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.82) 22%, rgba(255, 255, 255, 0.15) 42%, rgba(255, 255, 255, 0.6) 72%, rgba(255, 255, 255, 0.88) 100%); }
+/* Voile (1.7.12, valeurs de la planche, écrans 31 et 32) — Programmes : 95/82/15/60/88 % à 0/22/42/72/100 % de la hauteur ;
+   autres onglets : 100/90/68/96 % à 0/22/72/100 %. Mêmes opacités en noir pour le thème sombre. */
+body:not([data-tab="programme"]) #app-wallpaper::after { background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.9) 22%, rgba(255, 255, 255, 0.68) 72%, rgba(255, 255, 255, 0.96) 100%); }
+:root[data-theme="dark"] body:not([data-tab="programme"]) #app-wallpaper::after { background: linear-gradient(180deg, rgba(14, 14, 17, 1) 0%, rgba(14, 14, 17, 0.9) 22%, rgba(14, 14, 17, 0.68) 72%, rgba(14, 14, 17, 0.96) 100%); }
+:root[data-theme="dark"] #app-wallpaper::after { background: linear-gradient(180deg, rgba(14, 14, 17, 0.95) 0%, rgba(14, 14, 17, 0.82) 22%, rgba(14, 14, 17, 0.15) 42%, rgba(14, 14, 17, 0.6) 72%, rgba(14, 14, 17, 0.88) 100%); }
 :root[data-wallpaper] #app-wallpaper { display: block; }
 :root[data-wallpaper="course"] #app-wallpaper { background-image: url('wallpapers/course.jpg'); background-position: center 30%; }
 :root[data-wallpaper="barre"] #app-wallpaper { background-image: url('wallpapers/barre.jpg'); background-position: center 55%; }

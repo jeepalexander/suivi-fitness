@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.12] - 2026-11-09
+### 🎨 Voile du fond d'écran ajusté (co-auteur : Claude)
+- Valeurs validées sur la planche (écrans 31 et 32), en opacité du voile selon la hauteur de l'écran :
+  - **Programmes** : 95 % (haut) · 82 % à 22 % · 15 % à 42 % · 60 % à 72 % · 88 % (bas) ;
+  - **autres onglets** : 100 % (haut) · 90 % à 22 % · 68 % à 72 % · 96 % (bas).
+- Thème sombre : mêmes opacités avec un voile noir.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.12.
+
+---
+
 ## [1.7.11] - 2026-11-09
 ### 🐛 Valider un programme n'ouvre plus Firefox (co-auteur : Claude)
 - Application installée, accès Google expiré : créer, modifier, activer ou supprimer un programme (ou supprimer une séance de l'historique) lançait la reconnexion automatique à Google, qui ouvrait Firefox en mode normal. Cette reconnexion est désormais réservée à l'enregistrement d'une séance ; pour les programmes, la sauvegarde reste en attente (« modifications en attente d'envoi ») et part avec la prochaine séance enregistrée ou via « Reconnecter maintenant ».
