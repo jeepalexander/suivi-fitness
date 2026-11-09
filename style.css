@@ -245,9 +245,9 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 .type-pill-C { background: var(--accent-c); }
 .type-letter { font-weight: 700; color: var(--pill-ink); }
 
-/* Icônes d'exercice : PNG détourés, posés directement sur le fond avec une ombre dessous */
-.ex-icon-badge { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; overflow: visible; }
-.ex-icon-badge img { width: 100%; height: 100%; object-fit: contain; filter: var(--sh-icon); }
+/* Icônes d'exercice : PNG détourés, posés sur une pastille grise ronde (1.7.8, comme la planche de concept) */
+.ex-icon-badge { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 50%; background: var(--fill); }
+.ex-icon-badge img { width: 88%; height: 88%; object-fit: contain; }
 
 /* Pastille de déload : ambre */
 .deload-pill { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; background: var(--warn-tint); border: 1px solid var(--warn-border); border-radius: 999px; color: var(--warn); font-size: 0.8625rem; font-weight: 600; }
@@ -287,7 +287,7 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 
 .tile-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 6px; }
 .ex-tile { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 0; background: none; border: none; border-radius: 0; text-align: center; font-size: 0.9063rem; font-weight: 600; line-height: 1.2; }
-.ex-tile .ex-icon-badge { width: 76px; height: 76px; }
+.ex-tile .ex-icon-badge { width: 70px; height: 70px; box-shadow: 0 8px 12px -6px rgba(17, 17, 20, 0.35); }
 
 .next-row-wrap { display: flex; flex-direction: column; gap: 14px; }
 .next-row { width: 100%; min-height: 62px; display: flex; align-items: center; gap: 12px; padding: 0; background: none; border: none; border-radius: 0; color: var(--text); text-align: left; cursor: pointer; }
@@ -324,7 +324,6 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 .ex-chevron svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .exercise-item.open .ex-chevron { display: none; }
 .exercise-item .ex-icon-badge { width: 48px; height: 48px; flex-shrink: 0; }
-.exercise-item.open .ex-icon-badge { width: 52px; height: 52px; }
 .ex-body { margin-top: 12px; }
 .ex-body[hidden], .ex-controls[hidden] { display: none; }
 
@@ -360,7 +359,6 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 
 /* Écrans étroits (≤ 380 px) : on libère de la place au nom de l'exercice ouvert */
 @media (max-width: 380px) {
-  .exercise-item.open .ex-icon-badge { width: 44px; height: 44px; }
   .exercise-item.open .ex-toggle { gap: 8px; }
   .exercise-item.open .ex-name { font-size: 1.0625rem; }
   .exercise-item.open .ex-controls { gap: 6px; }
@@ -778,8 +776,8 @@ body[data-pview="choose"] .choose-lead { margin-top: 0; }
    qui garde le texte lisible. <html data-wallpaper="…"> est posé avant le premier affichage par index.html.
    ============================================ */
 #app-wallpaper { display: none; position: fixed; inset: 0; z-index: -1; pointer-events: none; background-color: var(--bg); background-size: cover; background-position: center; background-repeat: no-repeat; }
-#app-wallpaper::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255, 255, 255, 0.86) 0%, rgba(255, 255, 255, 0.78) 45%, rgba(255, 255, 255, 0.86) 100%); }
-:root[data-theme="dark"] #app-wallpaper::after { background: linear-gradient(180deg, rgba(14, 14, 17, 0.88) 0%, rgba(14, 14, 17, 0.8) 45%, rgba(14, 14, 17, 0.88) 100%); }
+#app-wallpaper::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255, 255, 255, 0.82) 0%, rgba(255, 255, 255, 0.55) 22%, rgba(255, 255, 255, 0.3) 42%, rgba(255, 255, 255, 0.72) 62%, rgba(255, 255, 255, 0.84) 100%); }
+:root[data-theme="dark"] #app-wallpaper::after { background: linear-gradient(180deg, rgba(14, 14, 17, 0.84) 0%, rgba(14, 14, 17, 0.6) 22%, rgba(14, 14, 17, 0.38) 42%, rgba(14, 14, 17, 0.76) 62%, rgba(14, 14, 17, 0.86) 100%); }
 :root[data-wallpaper] #app-wallpaper { display: block; }
 :root[data-wallpaper="course"] #app-wallpaper { background-image: url('wallpapers/course.jpg'); background-position: center 30%; }
 :root[data-wallpaper="barre"] #app-wallpaper { background-image: url('wallpapers/barre.jpg'); background-position: center 55%; }
@@ -788,6 +786,9 @@ body[data-pview="choose"] .choose-lead { margin-top: 0; }
 :root[data-wallpaper="studio"] #app-wallpaper { background-image: url('wallpapers/studio.jpg'); background-position: center 40%; }
 :root[data-wallpaper] header, :root[data-wallpaper] .ed-row { background: transparent; }
 :root[data-wallpaper] .ed-row.dragging { background: var(--bg); }
+/* Tuile du programme (ou de la séance libre) active : légèrement transparente, l'image floutée dessous (1.7.8) */
+:root[data-wallpaper] .prog-tile { background: color-mix(in srgb, var(--pill-bg) 84%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+:root[data-wallpaper] .prog-tile.libre { background: color-mix(in srgb, var(--sand) 84%, transparent); }
 
 /* En-tête : bouton retour à gauche du titre, sur la page Fond d'écran seulement */
 .page-title-row { display: flex; align-items: center; gap: 14px; min-width: 0; }

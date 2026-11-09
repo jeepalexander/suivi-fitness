@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.8] - 2026-11-09
+### 🎨 Fond d'écran : alignement sur la planche de concept (co-auteur : Claude)
+- **Voile dégradé selon la hauteur** : plus couvrant en haut (titres) et en bas (navigation), plus léger au milieu où l'image se voit (82 % → 55 % → 30 % → 72 % → 84 %). Équivalent sombre en thème sombre.
+- **Tuile du programme actif légèrement transparente** quand un fond d'écran est choisi (84 %, image floutée dessous) ; idem pour la tuile sable de la séance libre.
+- **Pastilles grises derrière les icônes d'exercice** : détail du programme (70 px, ombre douce), Séance, éditeur, fenêtre d'ajout.
+- **Séance** : l'icône de l'exercice ouvert garde sa taille (48 px) au lieu de rétrécir sur les écrans étroits.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.8.
+
+---
+
 ## [1.7.7] - 2026-11-08
 ### ✨ Fond d'écran et bloc Drive (co-auteur : Claude)
 - **Réglages › Fond d'écran** (sous Apparence) : une ligne avec la vignette et le nom du fond choisi ouvre la page « Fond d'écran » (bouton retour, grille de vignettes). 5 images : Course, Barre, Haltères, Kettlebell, Studio, plus « Aucun » (par défaut, fond blanc comme avant). Le choix s'applique tout de suite sur toutes les pages, sous un voile clair (ou sombre en thème sombre) qui garde le texte lisible.
