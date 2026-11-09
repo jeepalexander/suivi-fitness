@@ -2059,7 +2059,7 @@ function deleteSelectedSession() {
   getPrograms().forEach(p => { if (!isLibre(p)) p.nextKey = nextKeyFromHistory(p); });
   syncNextType();
   saveState();
-  backupToDrive();
+  backupToDrive({ autoReconnect: false });
   closeSessionModal();
   initWorkoutForm();
   renderHistory();
@@ -4146,14 +4146,19 @@ function autoReconnectDriveIfNeeded() {
 // envoie tout de suite la sauvegarde complète. Accès expiré : dans le navigateur il est renouvelé en
 // silence par la fenêtre Google ; dans l'application installée (pas de renouvellement silencieux possible)
 // l'application se reconnecte toute seule par redirection et la sauvegarde part au retour.
-async function backupToDrive() {
+// 1.7.11 : la reconnexion automatique (qui quitte l'application, et ouvre le navigateur avec Firefox) est
+// réservée à l'enregistrement d'une séance. Programmes (création, modification, activation, suppression) :
+// { autoReconnect: false } — la sauvegarde reste en attente et part avec la prochaine séance enregistrée
+// (ou « Reconnecter maintenant » dans Réglages).
+async function backupToDrive(opts) {
+  const autoReconnect = !(opts && opts.autoReconnect === false);
   try {
     if (!isDriveWanted() && !getDriveToken()) return; // Drive n'a jamais été connecté : rien à faire
     let token = getDriveToken();
     if (!token && await renewDriveToken()) token = getDriveToken();
-    if (!token) { updateDriveUI(); autoReconnectDriveIfNeeded(); return; }
+    if (!token) { updateDriveUI(); if (autoReconnect) autoReconnectDriveIfNeeded(); return; }
     const r = await syncDriveBackup();
-    if (r && r.reason === 'token') autoReconnectDriveIfNeeded();
+    if (r && r.reason === 'token' && autoReconnect) autoReconnectDriveIfNeeded();
     updateDriveUI();
   } catch (e) { /* ne jamais gêner l'enregistrement */ }
 }

@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.11] - 2026-11-09
+### 🐛 Valider un programme n'ouvre plus Firefox (co-auteur : Claude)
+- Application installée, accès Google expiré : créer, modifier, activer ou supprimer un programme (ou supprimer une séance de l'historique) lançait la reconnexion automatique à Google, qui ouvrait Firefox en mode normal. Cette reconnexion est désormais réservée à l'enregistrement d'une séance ; pour les programmes, la sauvegarde reste en attente (« modifications en attente d'envoi ») et part avec la prochaine séance enregistrée ou via « Reconnecter maintenant ».
+- Test : `test_drive_android.py` (Firefox installé, accès expiré : programme validé / activé sans onglet ouvert).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.11.
+
+---
+
 ## [1.7.10] - 2026-11-09
 ### 🎨 Pastilles et voile (co-auteur : Claude)
 - Pastille grise réduite (86 % de la case de l'icône) : l'icône garde sa taille et déborde un peu plus du rond.

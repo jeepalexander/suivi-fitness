@@ -211,7 +211,7 @@ function activateProgram(id) {
   if (!isLibre(p)) p.nextKey = nextKeyFromHistory(p);
   syncNextType();
   saveState();
-  backupToDrive();
+  backupToDrive({ autoReconnect: false });
   programDetailOpen = false;
   clearDraft();
   initWorkoutForm();
@@ -430,7 +430,7 @@ function saveProgramDraft() {
   }
   normalizePrograms();
   saveState();
-  backupToDrive(); // la sauvegarde complète Drive contient désormais ce programme
+  backupToDrive({ autoReconnect: false }); // la sauvegarde complète Drive contient désormais ce programme (sans quitter l'application)
   programDraft = null;
   programDetailOpen = false;
   clearDraft();
@@ -636,7 +636,7 @@ function deleteProgram(id) {
   state.programs = getPrograms().filter(p => p.id !== id);
   normalizePrograms();
   saveState();
-  backupToDrive();
+  backupToDrive({ autoReconnect: false });
   closeSheet();
   programDraft = null;
   programDetailOpen = false;
