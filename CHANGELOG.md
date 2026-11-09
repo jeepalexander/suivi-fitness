@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.16] - 2026-11-09
+### ✨ Éditeur : déplacement des exercices par le menu seulement (co-auteur : Claude)
+- Création / modification d'un programme ou d'une séance libre : la poignée de glisser-déposer (6 points) disparaît des lignes d'exercice.
+- Menu ⋮ d'un exercice : il reste ouvert après « Monter » ou « Descendre » et suit l'exercice à sa nouvelle place (plusieurs crans d'affilée possibles) ; « Annuler » devient « Fermer ».
+- Test : `test_editeur_deplacer.py` (26 contrôles, 390 et 360 px).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.16.
+
+---
+
 ## [1.7.15] - 2026-11-09
 ### 🎨 Éditeur de programme : voile des autres onglets (co-auteur : Claude)
 - Création et modification d'un programme ou d'une séance libre : même voile que Séance, Progression, Historique et Réglages (100 / 95 / 76 / 100 % à 0 / 30 / 72 / 100 % de la hauteur), au lieu de celui de l'accueil Programmes. Thème sombre : même chose en noir.

@@ -26,7 +26,6 @@ const BACK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 
 const PEN_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>';
 const ARROW_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 const DOTS_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>';
-const HANDLE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="6" r="1.4"/><circle cx="15" cy="6" r="1.4"/><circle cx="9" cy="12" r="1.4"/><circle cx="15" cy="12" r="1.4"/><circle cx="9" cy="18" r="1.4"/><circle cx="15" cy="18" r="1.4"/></svg>';
 const TRASH_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
 const CLOSE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 const SEARCH_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>';
@@ -333,7 +332,6 @@ function editorHtml() {
     const name = exInfo(e.exId).name;
     return `
       <div class="ed-row" data-i="${i}">
-        <span class="ed-handle" aria-hidden="true">${HANDLE_SVG}</span>
         <span class="ex-icon-badge">${getIcon(name, true)}</span>
         <span class="ed-row-text"><span class="ed-row-name">${escapeHtml(name)}</span><span class="ed-row-sub">${exerciseSubText(e)}</span></span>
         <button type="button" class="ed-more" aria-label="Options de ${escapeHtml(name)}" onclick="openExerciseMenu(${i})">${DOTS_SVG}</button>
@@ -363,7 +361,6 @@ function bindEditor() {
   if (name) name.addEventListener('input', () => { programDraft.name = name.value; });
   const sname = document.getElementById('ed-sname');
   if (sname) sname.addEventListener('input', () => { draftSession().name = sname.value; });
-  bindDragReorder(document.getElementById('ed-list'));
 }
 
 function selectDraftSession(i) {
@@ -440,17 +437,23 @@ function saveProgramDraft() {
 }
 
 // --- Menu d'un exercice (⋮) : monter, descendre, retirer ---
-function openExerciseMenu(i) {
+// 1.7.16 : plus de poignée de glisser-déposer ; le menu reste ouvert après « Monter » / « Descendre »
+// (l'exercice peut être déplacé de plusieurs crans d'affilée), « Fermer » le referme.
+function exerciseMenuHtml(i) {
   const s = draftSession();
   const e = s.exercises[i];
-  if (!e) return;
   const name = exInfo(e.exId).name;
-  openSheet(`
+  return `
     <h3 class="sheet-title small">${escapeHtml(name)}</h3>
-    <button type="button" class="btn btn-secondary" ${i === 0 ? 'disabled' : ''} onclick="moveDraftExercise(${i}, -1)">Monter</button>
-    <button type="button" class="btn btn-secondary" ${i === s.exercises.length - 1 ? 'disabled' : ''} onclick="moveDraftExercise(${i}, 1)">Descendre</button>
+    <button type="button" class="btn btn-secondary" id="ed-move-up" ${i === 0 ? 'disabled' : ''} onclick="moveDraftExercise(${i}, -1)">Monter</button>
+    <button type="button" class="btn btn-secondary" id="ed-move-down" ${i === s.exercises.length - 1 ? 'disabled' : ''} onclick="moveDraftExercise(${i}, 1)">Descendre</button>
     <button type="button" class="btn btn-danger" onclick="removeDraftExercise(${i})">Retirer de la séance</button>
-    <button type="button" class="btn btn-secondary" onclick="closeSheet()">Annuler</button>`);
+    <button type="button" class="btn btn-secondary" onclick="closeSheet()">Fermer</button>`;
+}
+
+function openExerciseMenu(i) {
+  if (!draftSession().exercises[i]) return;
+  openSheet(exerciseMenuHtml(i));
 }
 
 function moveDraftExercise(i, dir) {
@@ -458,54 +461,14 @@ function moveDraftExercise(i, dir) {
   const j = i + dir;
   if (j < 0 || j >= list.length) return;
   [list[i], list[j]] = [list[j], list[i]];
-  closeSheet();
   renderProgramOverview();
+  openSheet(exerciseMenuHtml(j), { update: true }); // le menu reste ouvert, sur l'exercice à sa nouvelle place
 }
 
 function removeDraftExercise(i) {
   draftSession().exercises.splice(i, 1);
   closeSheet();
   renderProgramOverview();
-}
-
-// Glisser-déposer par la poignée (⋮⋮) pour réordonner les exercices
-function bindDragReorder(list) {
-  if (!list) return;
-  list.querySelectorAll('.ed-handle').forEach(handle => {
-    handle.addEventListener('pointerdown', ev => {
-      const row = handle.closest('.ed-row');
-      if (!row) return;
-      ev.preventDefault();
-      handle.setPointerCapture(ev.pointerId);
-      row.classList.add('dragging');
-      const move = e2 => {
-        const rows = Array.from(list.querySelectorAll('.ed-row'));
-        const y = e2.clientY;
-        for (const other of rows) {
-          if (other === row) continue;
-          const r = other.getBoundingClientRect();
-          const mid = r.top + r.height / 2;
-          const idx = rows.indexOf(row), oIdx = rows.indexOf(other);
-          if (oIdx < idx && y < mid) { list.insertBefore(row, other); break; }
-          if (oIdx > idx && y > mid) { list.insertBefore(row, other.nextSibling); break; }
-        }
-      };
-      const up = () => {
-        handle.removeEventListener('pointermove', move);
-        handle.removeEventListener('pointerup', up);
-        handle.removeEventListener('pointercancel', up);
-        row.classList.remove('dragging');
-        const order = Array.from(list.querySelectorAll('.ed-row')).map(r => +r.dataset.i);
-        const s = draftSession();
-        const before = s.exercises.slice();
-        s.exercises = order.map(i => before[i]);
-        renderProgramOverview();
-      };
-      handle.addEventListener('pointermove', move);
-      handle.addEventListener('pointerup', up);
-      handle.addEventListener('pointercancel', up);
-    });
-  });
 }
 
 // ============================================================

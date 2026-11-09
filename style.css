@@ -644,9 +644,6 @@ body[data-tab="programme"][data-pview="choose"] header h1 { display: none; }
 .ed-count { margin-bottom: 8px; font-size: 0.875rem; color: var(--text-muted); }
 .ed-list { display: flex; flex-direction: column; }
 .ed-row { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 4px 0; background: var(--bg); border-radius: 16px; }
-.ed-row.dragging { position: relative; z-index: 2; box-shadow: var(--sh-card); }
-.ed-handle { flex: none; display: flex; width: 22px; color: var(--todo); touch-action: none; cursor: grab; }
-.ed-handle svg { width: 20px; height: 20px; fill: currentColor; stroke: none; }
 .ed-row .ex-icon-badge { width: 44px; height: 44px; flex: none; }
 .ed-row-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .ed-row-name { font-size: 1.0625rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -795,7 +792,6 @@ body:not([data-tab="programme"]) #app-wallpaper::after, body[data-pview="editor"
 :root[data-wallpaper="kettlebell"] #app-wallpaper { background-image: url('wallpapers/kettlebell.jpg'); background-position: center 45%; }
 :root[data-wallpaper="studio"] #app-wallpaper { background-image: url('wallpapers/studio.jpg'); background-position: center 40%; }
 :root[data-wallpaper] header, :root[data-wallpaper] .ed-row { background: transparent; }
-:root[data-wallpaper] .ed-row.dragging { background: var(--bg); }
 /* Tuile du programme (ou de la séance libre) active : légèrement transparente, l'image floutée dessous (1.7.8) */
 :root[data-wallpaper] .prog-tile { background: color-mix(in srgb, var(--pill-bg) 84%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
 :root[data-wallpaper] .prog-tile.libre { background: color-mix(in srgb, var(--sand) 84%, transparent); }
