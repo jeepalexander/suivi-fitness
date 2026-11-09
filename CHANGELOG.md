@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.10] - 2026-11-09
+### 🎨 Pastilles et voile (co-auteur : Claude)
+- Pastille grise réduite (86 % de la case de l'icône) : l'icône garde sa taille et déborde un peu plus du rond.
+- Fond d'écran : hors onglet Programmes, voile plus couvrant et plus régulier (88 → 72 → 88 %) pour garder l'image en retrait derrière la saisie ; l'onglet Programmes garde le dégradé de la planche.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.10.
+
+---
+
 ## [1.7.9] - 2026-11-09
 ### 🎨 Pastilles d'icônes (co-auteur : Claude)
 - Pastille plus grise derrière les icônes d'exercice (`--icon-pastille` : #E4E4E9, #2C2C33 en sombre).

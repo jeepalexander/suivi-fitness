@@ -248,7 +248,10 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 .type-letter { font-weight: 700; color: var(--pill-ink); }
 
 /* Icônes d'exercice : PNG détourés, posés sur une pastille grise ronde (1.7.8, comme la planche de concept) */
-.ex-icon-badge { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; overflow: visible; border-radius: 50%; background: var(--icon-pastille); }
+.ex-icon-badge { position: relative; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; overflow: visible; }
+/* La pastille est plus petite que l'icône (86 % de la case) : l'icône déborde un peu (1.7.10) */
+.ex-icon-badge::before { content: ''; position: absolute; inset: 7%; border-radius: 50%; background: var(--icon-pastille); }
+.ex-icon-badge img, .ex-icon-badge .ex-generic { position: relative; }
 .ex-icon-badge img { width: 96%; height: 96%; object-fit: contain; }
 
 /* Pastille de déload : ambre */
@@ -289,7 +292,8 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 
 .tile-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 6px; }
 .ex-tile { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 0; background: none; border: none; border-radius: 0; text-align: center; font-size: 0.9063rem; font-weight: 600; line-height: 1.2; }
-.ex-tile .ex-icon-badge { width: 70px; height: 70px; box-shadow: 0 8px 12px -6px rgba(17, 17, 20, 0.35); }
+.ex-tile .ex-icon-badge { width: 70px; height: 70px; }
+.ex-tile .ex-icon-badge::before { box-shadow: 0 8px 12px -6px rgba(17, 17, 20, 0.35); }
 
 .next-row-wrap { display: flex; flex-direction: column; gap: 14px; }
 .next-row { width: 100%; min-height: 62px; display: flex; align-items: center; gap: 12px; padding: 0; background: none; border: none; border-radius: 0; color: var(--text); text-align: left; cursor: pointer; }
@@ -779,6 +783,9 @@ body[data-pview="choose"] .choose-lead { margin-top: 0; }
    ============================================ */
 #app-wallpaper { display: none; position: fixed; inset: 0; z-index: -1; pointer-events: none; background-color: var(--bg); background-size: cover; background-position: center; background-repeat: no-repeat; }
 #app-wallpaper::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255, 255, 255, 0.82) 0%, rgba(255, 255, 255, 0.55) 22%, rgba(255, 255, 255, 0.3) 42%, rgba(255, 255, 255, 0.72) 62%, rgba(255, 255, 255, 0.84) 100%); }
+/* Hors onglet Programmes : voile plus couvrant et plus régulier, l'image reste en retrait derrière la saisie (1.7.10) */
+body:not([data-tab="programme"]) #app-wallpaper::after { background: linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0.78) 30%, rgba(255, 255, 255, 0.72) 50%, rgba(255, 255, 255, 0.82) 72%, rgba(255, 255, 255, 0.88) 100%); }
+:root[data-theme="dark"] body:not([data-tab="programme"]) #app-wallpaper::after { background: linear-gradient(180deg, rgba(14, 14, 17, 0.88) 0%, rgba(14, 14, 17, 0.8) 30%, rgba(14, 14, 17, 0.74) 50%, rgba(14, 14, 17, 0.84) 72%, rgba(14, 14, 17, 0.9) 100%); }
 :root[data-theme="dark"] #app-wallpaper::after { background: linear-gradient(180deg, rgba(14, 14, 17, 0.84) 0%, rgba(14, 14, 17, 0.6) 22%, rgba(14, 14, 17, 0.38) 42%, rgba(14, 14, 17, 0.76) 62%, rgba(14, 14, 17, 0.86) 100%); }
 :root[data-wallpaper] #app-wallpaper { display: block; }
 :root[data-wallpaper="course"] #app-wallpaper { background-image: url('wallpapers/course.jpg'); background-position: center 30%; }
