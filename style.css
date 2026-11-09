@@ -799,6 +799,10 @@ body:not([data-tab="programme"]) #app-wallpaper::after, body[data-pview="editor"
 :root[data-wallpaper="halteres"] #app-wallpaper { background-image: url('wallpapers/halteres.jpg'); background-position: center 45%; }
 :root[data-wallpaper="kettlebell"] #app-wallpaper { background-image: url('wallpapers/kettlebell.jpg'); background-position: center 45%; }
 :root[data-wallpaper="studio"] #app-wallpaper { background-image: url('wallpapers/studio.jpg'); background-position: center 40%; }
+:root[data-wallpaper="ratelier"] #app-wallpaper { background-image: url('wallpapers/ratelier.jpg'); background-position: center 60%; }
+:root[data-wallpaper="squat"] #app-wallpaper { background-image: url('wallpapers/squat.jpg'); background-position: center 40%; }
+:root[data-wallpaper="poigne"] #app-wallpaper { background-image: url('wallpapers/poigne.jpg'); background-position: center 40%; }
+:root[data-wallpaper="disques"] #app-wallpaper { background-image: url('wallpapers/disques.jpg'); background-position: center 50%; }
 /* Page Fond d'écran (1.7.19) : voile de l'accueil Programmes, pour voir le fond choisi */
 body[data-tab="fond"] #app-wallpaper::after { background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.82) 22%, rgba(255, 255, 255, 0.15) 42%, rgba(255, 255, 255, 0.6) 72%, rgba(255, 255, 255, 0.88) 100%); }
 :root[data-theme="dark"] body[data-tab="fond"] #app-wallpaper::after { background: linear-gradient(180deg, rgba(14, 14, 17, 0.95) 0%, rgba(14, 14, 17, 0.82) 22%, rgba(14, 14, 17, 0.15) 42%, rgba(14, 14, 17, 0.6) 72%, rgba(14, 14, 17, 0.88) 100%); }

@@ -33,10 +33,10 @@ def main():
               and pg.is_visible('#fond-back') and not pg.is_visible('#settings-back')
               and pg.evaluate("document.getElementById('nav-historique').classList.contains('active')"))
         opts = pg.evaluate("[...document.querySelectorAll('#wallpaper-grid .wallpaper-opt')].map(b=>[b.dataset.wallpaper,b.getAttribute('aria-checked'),b.textContent.trim()])")
-        check("6 choix (5 images + Aucun), « Aucun » coché", len(opts) == 6 and [o[0] for o in opts] == ['course', 'barre', 'halteres', 'kettlebell', 'studio', 'none']
-              and opts[5][1] == 'true' and sum(o[1] == 'true' for o in opts) == 1, opts)
+        check("10 choix (9 images + Aucun), « Aucun » coché", len(opts) == 10 and [o[0] for o in opts] == ['course', 'barre', 'halteres', 'kettlebell', 'studio', 'ratelier', 'squat', 'poigne', 'disques', 'none']
+              and opts[9][1] == 'true' and sum(o[1] == 'true' for o in opts) == 1, opts)
         pg.wait_for_function("[...document.querySelectorAll('#wallpaper-grid img')].every(i=>i.complete&&i.naturalWidth>0)", timeout=5000)
-        check("les 5 vignettes se chargent", True)
+        check("les 9 vignettes se chargent", True)
         if shots: pg.screenshot(path=str(SHOTS / 'fond_grille_aucun.png'))
 
         pg.click('.wallpaper-opt[data-wallpaper="barre"]'); pg.wait_for_timeout(300)
@@ -89,9 +89,9 @@ def main():
         check("le fond d'écran ne fait pas partie des données sauvegardées", 'wallpaper' not in exported)
 
         sw = (REPO / 'sw.js').read_text(encoding='utf-8')
-        check("les 10 images sont mises en cache par le service worker (hors connexion)",
-              all(f"'./wallpapers/{k}{s}.jpg'" in sw for k in ['course', 'barre', 'halteres', 'kettlebell', 'studio'] for s in ['', '-mini'])
-              and all((REPO / 'wallpapers' / f'{k}{s}.jpg').exists() for k in ['course', 'barre', 'halteres', 'kettlebell', 'studio'] for s in ['', '-mini']))
+        check("les 18 images sont mises en cache par le service worker (hors connexion)",
+              all(f"'./wallpapers/{k}{s}.jpg'" in sw for k in ['course', 'barre', 'halteres', 'kettlebell', 'studio', 'ratelier', 'squat', 'poigne', 'disques'] for s in ['', '-mini'])
+              and all((REPO / 'wallpapers' / f'{k}{s}.jpg').exists() for k in ['course', 'barre', 'halteres', 'kettlebell', 'studio', 'ratelier', 'squat', 'poigne', 'disques'] for s in ['', '-mini']))
         check("aucune erreur JavaScript", not errs, errs)
         ctx.close(); br.close()
     print('\nTOUS LES TESTS PASSENT' if OK else '\nÉCHECS')

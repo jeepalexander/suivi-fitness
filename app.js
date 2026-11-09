@@ -250,6 +250,10 @@ const WALLPAPERS = [
   { id: 'halteres', name: 'Haltères', pos: 'center 45%' },
   { id: 'kettlebell', name: 'Kettlebell', pos: 'center 45%' },
   { id: 'studio', name: 'Studio', pos: 'center 40%' },
+  { id: 'ratelier', name: 'Râtelier', pos: 'center 60%' },
+  { id: 'squat', name: 'Squat', pos: 'center 40%' },
+  { id: 'poigne', name: 'Poigne', pos: 'center 40%' },
+  { id: 'disques', name: 'Disques', pos: 'center 50%' },
   { id: 'none', name: 'Aucun' }
 ];
 

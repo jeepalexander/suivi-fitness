@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.23] - 2026-11-09
+### 🎨 4 nouveaux fonds d'écran (co-auteur : Claude)
+- **Réglages › Fond d'écran** : Râtelier (kettlebells colorées), Squat, Poigne et Disques s'ajoutent à Course, Barre, Haltères, Kettlebell et Studio — 9 images + « Aucun ». Images en 1000 px + vignettes, mises en cache pour fonctionner hors connexion.
+- Test : `test_fond_ecran.py` (10 choix, 18 images en cache).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.23.
+
+---
+
 ## [1.7.22] - 2026-11-09
 ### 📄 Pages publiques pour Google (co-auteur : Claude)
 - `confidentialite.html` (règles de confidentialité) et `conditions.html` (conditions d'utilisation), demandées par Google pour publier l'accès Google Drive de l'application (sortie du mode Test). Pages autonomes dans le style de l'app (polices locales, thème clair / sombre), avec un résumé en anglais pour les relecteurs Google : données sur l'appareil, sauvegarde facultative dans le Drive de l'utilisateur via `drive.file` uniquement, pas de serveur ni de traceur, respect de la Google API Services User Data Policy (Limited Use), suppression et retrait de l'accès. Contact : jeanphilippealexander@gmail.com.
