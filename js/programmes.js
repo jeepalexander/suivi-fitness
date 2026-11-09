@@ -420,6 +420,17 @@ function removeDraftSession() {
   renderProgramOverview();
 }
 
+// Bouton « Programmes » de la barre : toujours la page de départ (1.7.27).
+// Depuis l'éditeur, une saisie non enregistrée demande confirmation.
+function goProgramsHome() {
+  if (programView === 'editor' && programDraft && draftSnapshot(programDraft) !== programDraft.start
+      && !confirm('Quitter sans enregistrer ? Ta saisie sera perdue.')) return;
+  if (programView !== 'home') programDraft = null;
+  programView = 'home';
+  programDetailOpen = false;
+  switchTab('programme');
+}
+
 function programEditorBack() {
   if (programDraft && draftSnapshot(programDraft) !== programDraft.start
       && !confirm('Quitter sans enregistrer ? Ta saisie sera perdue.')) return;

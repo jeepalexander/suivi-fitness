@@ -62,7 +62,7 @@
     <div class="session-head">
       <span id="seance-badge" class="type-pill type-pill-A">A</span>
       <div class="session-head-text">
-        <span id="seance-overline" class="overline">Séance du jour</span>
+        <span id="seance-overline" class="overline" hidden></span>
         <span id="seance-type-title" class="session-name">Séance</span>
       </div>
     </div>
@@ -111,7 +111,7 @@
       <button type="button" class="btn btn-secondary" onclick="switchTab('programme'); openProgramChooser()">Créer un programme ou une séance</button>
     </div>
     <form id="workout-form">
-    <p id="warmup-note" class="warmup-note">🚣 Échauffement : 2 séries légères sur le 1er exercice de force, après le rameur.</p>
+    <p id="warmup-note" class="warmup-note"><svg class="warmup-flame" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c.9 3.1 4.6 4.9 4.6 9.7a4.6 4.6 0 0 1-9.2 0c0-2.5 1.3-3.9 2.5-4.9.2 1.7 1 2.7 2.2 3.1.2-3-.9-5.3-.1-7.9z"/></svg><span>2 séries légères sur le 1er exercice de force <svg class="warmup-weight" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7v10M3.5 9.5v5M17.5 7v10M20.5 9.5v5M6.5 12h11"/></svg></span></p>
       <div id="exercises-list"></div>
       <div class="watch-memo">⌚ N'oublie pas d'arrêter le suivi de ta montre !</div>
       <p class="submit-hint">Seules les séries cochées sont enregistrées.</p>
@@ -236,7 +236,7 @@
   </main>
 
   <nav>
-    <button onclick="switchTab('programme')" id="nav-programme" aria-label="Programmes" class="active">
+    <button onclick="goProgramsHome()" id="nav-programme" aria-label="Programmes" class="active">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
       Programmes
     </button>

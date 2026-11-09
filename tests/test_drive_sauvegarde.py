@@ -110,8 +110,9 @@ with Srv() as base, sync_playwright() as p:
     # 5) vrai formulaire : séance enregistrée
     p0, h0 = d.posts, len(local_state(pg)['history'])
     save_form(pg); pg.wait_for_timeout(2500)
-    saved = [m for m in pg.evaluate("window.__toastLog||[]") if 'Séance enregistrée' in m]
-    check("séance enregistrée (vrai formulaire) : sauvegarde mise à jour avec la nouvelle séance, sans mention de Drive", d.posts == p0 + 1 and len((d.content() or {}).get('history', [])) == h0 + 1 and saved and 'Drive' not in saved[-1], f'post={d.posts}')
+    toasts = pg.evaluate("window.__toastLog||[]")
+    check("séance enregistrée (vrai formulaire) : sauvegarde mise à jour avec la nouvelle séance, fenêtre de fin, sans mention de Drive", d.posts == p0 + 1 and len((d.content() or {}).get('history', [])) == h0 + 1 and pg.evaluate("!!document.getElementById('finish-overlay')") and not any('Drive' in m for m in toasts), f'post={d.posts}')
+    pg.evaluate("closeFinishDialog()")
     # 6) séance modifiée : une nouvelle version
     p0 = d.posts
     pg.evaluate("state.history[3].tonnage += 7; saveState(); backupToDrive()"); pg.wait_for_timeout(2500)
@@ -151,8 +152,8 @@ with Srv() as base, sync_playwright() as p:
     ctx, pg, dlg = run(br, base, d)
     pg.wait_for_timeout(1500)
     save_form(pg); pg.wait_for_timeout(1500)
-    saved = [m for m in pg.evaluate("window.__toastLog||[]") if 'Séance enregistrée' in m]
-    check("jamais connecté : aucune requête Drive, aucune mention de Drive", not d.calls and saved and 'Drive' not in saved[-1], d.calls[:2])
+    toasts = pg.evaluate("window.__toastLog||[]")
+    check("jamais connecté : aucune requête Drive, aucune mention de Drive", not d.calls and pg.evaluate("!!document.getElementById('finish-overlay')") and not any('Drive' in m for m in toasts), d.calls[:2])
     ctx.close()
 
     # 12) première connexion par le bouton : dossier + sauvegarde complète créés

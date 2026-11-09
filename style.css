@@ -874,3 +874,30 @@ body[data-tab="fond"] .page-title-row { margin-top: 10px; }
 .prog-greet-hello, .prog-greet-line { font-family: inherit; } /* « * » impose la police du texte à chaque élément */
 .prog-greet-hello { display: block; font-size: 2.5rem; }
 .prog-greet-line { display: block; margin-top: 2px; font-size: 1.75rem; }
+
+/* ============================================
+   1.7.27 — Séance : échauffement, noms d'exercice, fenêtre de fin
+   ============================================ */
+.warmup-note { display: flex; align-items: center; gap: 8px; }
+.warmup-note[hidden] { display: none; }
+.warmup-flame { flex: none; width: 24px; height: 24px; fill: #EA580C; }
+.warmup-weight { display: inline-block; vertical-align: -3px; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.overline[hidden] { display: none; }
+.ex-name, .exercise-item.open .ex-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.finish-overlay { position: fixed; inset: 0; z-index: 1500; display: flex; align-items: center; justify-content: center; padding: 0 22px; background: var(--overlay); }
+.finish-sheet { width: 100%; max-width: 380px; max-height: 92dvh; overflow-y: auto; box-sizing: border-box; padding: 28px 22px 22px; border-radius: 32px; background: var(--card-bg); color: var(--text); box-shadow: var(--shadow-sheet); text-align: center; animation: sheet-in 0.22s ease; }
+.finish-bravo { margin: 0; font-family: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive; font-weight: 600; font-size: 2.625rem; line-height: 1.05; transform: rotate(-2deg); }
+.finish-title { margin: 12px 0 0; display: flex; align-items: center; justify-content: center; gap: 10px; font-family: var(--font-display); font-weight: 700; font-size: 2rem; line-height: 1.1; }
+.finish-title span { font-family: inherit; }
+.finish-title .finish-pill { width: 38px; height: 38px; font-size: 1.3125rem; }
+.finish-tonnage { margin: 14px 0 0; font-size: 1.375rem; font-weight: 600; }
+.finish-tonnage b, .finish-rec b { font-family: var(--font-display); font-weight: 700; }
+.finish-compare { margin: 6px 0 0; font-size: 1.0625rem; font-weight: 600; color: var(--text-muted); }
+.finish-compare.up { color: var(--success); }
+.finish-sep { margin: 16px auto 0; width: 60%; height: 1px; background: var(--icon-pastille); }
+.finish-rec-title { margin: 14px 0 0; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 1.1875rem; font-weight: 700; }
+.finish-rec-title svg { flex: none; width: 24px; height: 24px; fill: none; stroke: #B45309; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.finish-rec { margin: 8px 0 0; font-size: 1.0625rem; font-weight: 600; }
+.finish-rec + .finish-rec { margin-top: 4px; }
+.finish-ok { margin-top: 22px; }

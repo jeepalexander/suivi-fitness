@@ -1527,7 +1527,7 @@ function workoutDefFromHistory(h) {
   };
 }
 
-// En-tête de l'onglet Séance : pastille, « Séance du jour · programme », nom, déload et report
+// En-tête de l'onglet Séance : pastille, nom de la séance, déload et report
 function renderSeanceHead(def, customSession) {
   const badge = document.getElementById('seance-badge');
   if (badge) {
@@ -1537,11 +1537,11 @@ function renderSeanceHead(def, customSession) {
   }
   const titleEl = document.getElementById('seance-type-title');
   if (titleEl) titleEl.innerText = def.sessionName;
+  // Ligne au-dessus du nom : seulement en modification d'une ancienne séance (1.7.27)
   const overlineEl = document.getElementById('seance-overline');
   if (overlineEl) {
-    overlineEl.innerText = customSession
-      ? `Modification · ${formatDate(customSession.date)}`
-      : (def.kind === 'libre' ? 'Séance libre' : `Séance du jour · ${def.programName}`);
+    overlineEl.innerText = customSession ? `Modification · ${formatDate(customSession.date)}` : '';
+    overlineEl.hidden = !customSession;
   }
 
   const deloadSubEl = document.getElementById('deload-subtitle');
@@ -1850,6 +1850,10 @@ function submitWorkout(e) {
   };
   if (original) ['programId', 'programName', 'kind', 'sessionKey', 'sessionName', 'type'].forEach(k => { if (original[k] !== undefined) entry[k] = original[k]; });
 
+  // Avant d'ajouter la séance : précédente du même type et records battus (fenêtre de fin)
+  const previousEntry = isEditing ? null : previousSameSession(entry);
+  const records = isEditing ? [] : sessionRecords(entry);
+
   // En modification, la séance d'origine est encore dans l'historique : on la remplace
   if (isEditing) {
     const originalIdx = state.history.findIndex(h => h.id === editingOriginalId);
@@ -1892,12 +1896,91 @@ function submitWorkout(e) {
 
   const usedBodyweight = exerciseLogs.some(x => x.sets.some(st => st.lest !== undefined));
   const weighNotice = usedBodyweight && !bodyKg ? '\n• Poids du corps non renseigné : seul le lest est compté (ajoute ta pesée dans Progression)' : '';
-  showToast(`${isEditing ? 'Séance modifiée' : 'Séance enregistrée'} !\n• Temps : ${sessionDuration || 'N/A'}\n• Séries enregistrées : ${validatedRows.length}\n• Tonnage réel : ${Math.round(totalTonnage).toLocaleString()} kg${weighNotice}${driveSaveNotice()}`);
+  if (isEditing) {
+    showToast(`Séance modifiée !\n• Temps : ${sessionDuration || 'N/A'}\n• Séries enregistrées : ${validatedRows.length}\n• Tonnage réel : ${Math.round(totalTonnage).toLocaleString()} kg${weighNotice}${driveSaveNotice()}`);
+  } else {
+    // Fin de séance (1.7.27) : fenêtre « Bravo ! » ; les éventuels avertissements suivent en message
+    openFinishDialog(entry, previousEntry, records);
+    const notes = (weighNotice + driveSaveNotice()).replace(/^\n• /, '').replace(/\n• /g, '\n');
+    if (notes) showToast(notes);
+  }
 
   initWorkoutForm();
   renderHistory();
   renderCharts();
   switchTab('seance');
+}
+
+// ============================================================
+// FENÊTRE DE FIN DE SÉANCE (1.7.27)
+// ============================================================
+const TROPHY_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M9 20h6"/></svg>';
+
+// Dernière séance enregistrée du même programme et de la même séance (A, B…, ou la séance libre)
+function previousSameSession(entry) {
+  const same = h => entry.programId
+    ? h.programId === entry.programId && (entry.kind === 'libre' || h.sessionKey === entry.sessionKey)
+    : !h.programId && h.type === entry.type;
+  const list = (state.history || []).filter(h => h.id !== entry.id && same(h));
+  list.sort((a, b) => (new Date(a.date) - new Date(b.date)) || (a.id - b.id));
+  return list.length ? list[list.length - 1] : null;
+}
+
+// Records battus par cette séance : charge maximale (exercices à charge) ou durée maximale (cardio, gainage),
+// comparées à toutes les séances précédentes. Un exercice jamais fait auparavant ne compte pas.
+function sessionRecords(entry) {
+  const others = (state.history || []).filter(h => h.id !== entry.id);
+  const out = [];
+  entry.exercises.forEach(ex => {
+    const mode = exMode(ex.name);
+    const byTime = ex.cardio || mode === 'time';
+    if (!byTime && mode !== 'weight') return;
+    const val = st => byTime ? (Number(st.seconds) || 0) : (Number(st.weight) || 0);
+    const cur = Math.max(0, ...ex.sets.map(val));
+    if (!cur) return;
+    let prev = 0, seen = false;
+    others.forEach(h => (h.exercises || []).forEach(x => {
+      if (x.name !== ex.name && !(ex.exId && x.exId === ex.exId)) return;
+      seen = true;
+      (x.sets || []).forEach(st => { prev = Math.max(prev, val(st)); });
+    }));
+    if (seen && cur > prev) out.push({ name: ex.name, value: byTime ? formatDurationMS(cur) : `${cur.toLocaleString('fr-FR')} kg` });
+  });
+  return out;
+}
+
+function openFinishDialog(entry, previous, records) {
+  closeFinishDialog();
+  const libre = entry.kind === 'libre';
+  const pill = libre ? '' : `<span class="type-pill type-pill-${escapeHtml(entry.sessionKey)} finish-pill" aria-label="${escapeHtml(entry.sessionKey)}">${escapeHtml(entry.sessionKey)}</span>`;
+  const kg = n => `${Math.round(n).toLocaleString('fr-FR')} kg`;
+  let html = `<p class="finish-bravo">Bravo !</p>
+    <h2 class="finish-title" id="finish-title"><span>Séance</span>${pill}<span>terminée</span></h2>`;
+  if (entry.tonnage > 0) {
+    html += `<p class="finish-tonnage">Tonnage : <b>${kg(entry.tonnage)}</b></p>`;
+    if (previous && previous.tonnage > 0) {
+      const d = entry.tonnage - previous.tonnage;
+      html += `<p class="finish-compare${d > 0 ? ' up' : ''}">${d > 0 ? '+' : d < 0 ? '−' : '±'}${kg(Math.abs(d))} / précédente</p>`;
+    }
+  }
+  if (records.length) {
+    html += `<div class="finish-sep" aria-hidden="true"></div>
+      <p class="finish-rec-title"><span>Nouveau record</span>${TROPHY_SVG}</p>
+      ${records.map(r => `<p class="finish-rec">${escapeHtml(r.name)}, <b>${escapeHtml(r.value)}</b></p>`).join('')}`;
+  }
+  html += `<button type="button" class="btn finish-ok" onclick="closeFinishDialog()">OK</button>`;
+  const overlay = document.createElement('div');
+  overlay.id = 'finish-overlay';
+  overlay.className = 'finish-overlay';
+  overlay.innerHTML = `<div class="finish-sheet" role="dialog" aria-modal="true" aria-labelledby="finish-title">${html}</div>`;
+  document.body.appendChild(overlay);
+  const ok = overlay.querySelector('.finish-ok');
+  if (ok) ok.focus();
+}
+
+function closeFinishDialog() {
+  const overlay = document.getElementById('finish-overlay');
+  if (overlay) overlay.remove();
 }
 
 document.addEventListener('submit', function(e) {

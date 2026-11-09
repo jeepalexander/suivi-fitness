@@ -7,6 +7,18 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.27] - 2026-11-09
+### 🎨 Séance : en-tête allégé, échauffement, fenêtre de fin de séance (co-auteur : Claude)
+- **Bouton « Programmes »** de la barre : ramène toujours à la page de départ (choix d'un programme, éditeur ou détail refermés). Depuis l'éditeur avec une saisie non enregistrée, la confirmation « Quitter sans enregistrer ? » est demandée.
+- **En-tête de Séance** : plus de « Séance du jour · programme » ; seuls la pastille et le nom de la séance restent (la ligne « Modification · date » reste affichée quand on corrige une ancienne séance).
+- **Échauffement** : flamme orange, « 2 séries légères sur le 1er exercice de force » suivi du pictogramme poids (l'emoji 🚣 et « après le rameur » disparaissent).
+- **Noms d'exercice** : toujours sur une ligne, terminés par « … » s'ils sont trop longs (exercice ouvert ou fermé). La flèche reste en bout de ligne.
+- **Fenêtre de fin de séance** (après « Valider & Enregistrer ») à la place du message en bas d'écran : « Bravo ! » en manuscrit, « Séance (A) terminée » (« Séance terminée » pour une séance libre), tonnage, écart avec la précédente séance du même type (« +300 kg / précédente » en vert, baisse en gris ; absent sans séance précédente), puis « Nouveau record » avec la coupe et une ligne par record (charge maximale, ou durée pour le cardio et le gainage ; absent sans record), bouton OK. Une modification d'ancienne séance garde le message habituel. Les avertissements (pesée manquante, reconnexion Google Drive) s'affichent toujours en message.
+- Tests : `test_fin_seance.py` (56 contrôles à 390 et 360 px, clair et sombre) ; `test_validation.py`, `test_rameur.py`, `test_programmes.py`, `test_drive_sauvegarde.py`, `test_drive_installee.py` adaptés à la fenêtre de fin.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.27.
+
+---
+
 ## [1.7.26] - 2026-11-09
 ### 🐛 Réactiver un programme n'ouvre plus Firefox (co-auteur : Claude)
 - Accès Google expiré : créer, modifier, activer, réactiver ou supprimer un programme (ou supprimer une séance de l'historique) tentait encore de renouveler l'accès par la fenêtre Google, qui ouvre Firefox (Firefox ne se déclare pas toujours comme application installée, d'où le passage par cette fenêtre). Ces actions ne tentent plus aucun renouvellement : la sauvegarde reste en attente et part avec la prochaine séance enregistrée ou via « Reconnecter maintenant ». L'enregistrement d'une séance garde son comportement.

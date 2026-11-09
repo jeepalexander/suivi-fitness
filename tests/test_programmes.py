@@ -124,7 +124,7 @@ with Srv() as base, sync_playwright() as p:
     pg.evaluate("localStorage.setItem('h49_state', JSON.stringify(Object.assign(JSON.parse(localStorage.getItem('h49_state')), {weights:[{date:'2026-11-01',weight:78}]})))")
     pg.reload(); pg.wait_for_timeout(800)
     pg.evaluate("switchTab('seance')"); pg.wait_for_timeout(300)
-    check('Séance : « Séance du jour · Sèche », séance A « Haut »', pg.inner_text('#seance-overline') == 'Séance du jour · Sèche' and pg.inner_text('#seance-type-title') == 'Haut' and pg.inner_text('#seance-badge') == 'A')
+    check('Séance : plus de « Séance du jour · programme » (1.7.27), séance A « Haut »', not pg.is_visible('#seance-overline') and pg.inner_text('#seance-type-title') == 'Haut' and pg.inner_text('#seance-badge') == 'A')
     heads = pg.evaluate("[...document.querySelectorAll('#exercises-list .exercise-item')[0].querySelectorAll('.sets-head span')].map(s=>s.textContent).join('|')")
     check('Tractions : colonnes Série | Lest (kg) | Réps', heads == 'Série|Lest (kg)|Réps|', heads)
     check('Tractions : historique ancien (charge totale 80 kg) -> lest proposé +2,5 (80 − 78 arrondi)', pg.input_value('#exercises-list .exercise-item[data-ex="Tractions"] .weight-input') == '+2.5', pg.input_value('#exercises-list .exercise-item[data-ex="Tractions"] .weight-input'))
@@ -133,7 +133,7 @@ with Srv() as base, sync_playwright() as p:
     check_set(pg, 'Tractions', 0, '+10', 8)
     check_set(pg, 'Tractions', 1, '', 8)
     check_set(pg, 'Développé couché', 0, 60, 8)
-    pg.evaluate("document.getElementById('workout-form').requestSubmit()"); pg.wait_for_timeout(400)
+    pg.evaluate("document.getElementById('workout-form').requestSubmit()"); pg.wait_for_timeout(400); pg.evaluate("closeFinishDialog()")
     st = state(pg)
     h = st['history'][-1]
     trac = next(e for e in h['exercises'] if e['name'] == 'Tractions')
@@ -152,7 +152,7 @@ with Srv() as base, sync_playwright() as p:
     pl = '#exercises-list .exercise-item[data-ex="Planche"]'
     check('Planche : un seul champ Durée', pg.evaluate(f"document.querySelector('{pl} .sets-head').classList.contains('single')") and pg.input_value(f'{pl} .weight-input') == '0:30', pg.input_value(f'{pl} .weight-input'))
     pg.click(f'{pl} .set-row >> nth=0 >> .btn-check-set')
-    pg.evaluate("document.getElementById('workout-form').requestSubmit()"); pg.wait_for_timeout(400)
+    pg.evaluate("document.getElementById('workout-form').requestSubmit()"); pg.wait_for_timeout(400); pg.evaluate("closeFinishDialog()")
     h = state(pg)['history'][-1]
     check('enregistré : vélo elliptique 5 500 m en 1 200 s, planche 30 s', h['exercises'][0]['sets'] == [{'weight': 0, 'reps': 0, 'seconds': 1200, 'meters': 5500}] and h['exercises'][1]['sets'] == [{'weight': 0, 'reps': 0, 'seconds': 30, 'hold': True}], json.dumps(h['exercises']))
 
@@ -161,9 +161,9 @@ with Srv() as base, sync_playwright() as p:
     pg.click('.mem-tile.libre .mem-btn'); pg.wait_for_timeout(300)
     check('séance libre activée : « Actif », tuile sable « Dorsaux » sans ligne de prochaine séance', pg.inner_text('.prog-status').strip() == 'Actif' and pg.inner_text('.prog-tile-name') == 'Dorsaux' and not pg.locator('.prog-tile .prog-tile-next').count() and pg.locator('.prog-tile.libre').count() == 1)
     pg.evaluate("switchTab('seance')"); pg.wait_for_timeout(300)
-    check('Séance : pastille 1×, « Séance libre », Dorsaux', pg.inner_text('#seance-badge') == '1×' and pg.inner_text('#seance-overline') == 'Séance libre' and pg.inner_text('#seance-type-title') == 'Dorsaux')
+    check('Séance : pastille 1×, Dorsaux, sans ligne au-dessus', pg.inner_text('#seance-badge') == '1×' and not pg.is_visible('#seance-overline') and pg.inner_text('#seance-type-title') == 'Dorsaux')
     check_set(pg, 'Tirage vertical', 0, 50, 10)
-    pg.evaluate("document.getElementById('workout-form').requestSubmit()"); pg.wait_for_timeout(400)
+    pg.evaluate("document.getElementById('workout-form').requestSubmit()"); pg.wait_for_timeout(400); pg.evaluate("closeFinishDialog()")
     st = state(pg)
     check('après la séance : la séance libre reste active', next(x for x in st['programs'] if x['name'] == 'Dorsaux')['status'] == 'active' and st['history'][-1]['kind'] == 'libre')
     pg.evaluate("switchTab('programme')"); pg.wait_for_timeout(200)

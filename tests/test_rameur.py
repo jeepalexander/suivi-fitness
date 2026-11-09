@@ -39,7 +39,9 @@ with Srv() as base, sync_playwright() as p:
 
     n0 = len(hist()); msgs.clear()
     pg.evaluate("document.getElementById('workout-form').requestSubmit()"); pg.wait_for_timeout(300)
-    check("enregistrement : plus d'alert() bloquante (seule la confirmation partielle reste), message affiché en bandeau", not [m for m in msgs if m[0] == 'alert'] and pg.evaluate("document.getElementById('toast').classList.contains('show')") and 'Séance enregistrée' in pg.inner_text('#toast'), str(msgs))
+    check("enregistrement : plus d'alert() bloquante (seule la confirmation partielle reste), fenêtre de fin affichée", not [m for m in msgs if m[0] == 'alert'] and pg.is_visible('#finish-overlay') and 'Bravo' in pg.inner_text('#finish-overlay'), str(msgs))
+    check("rameur seul : pas de ligne de tonnage dans la fenêtre de fin", 'Tonnage' not in pg.inner_text('#finish-overlay'))
+    pg.click('.finish-ok'); pg.wait_for_timeout(100)
     pg.screenshot(path='/tmp/claude-0/toast.png', clip={'x':0,'y':560,'width':390,'height':284})
     h = hist(); last = h[-1]
     ex = last['exercises'][0]
