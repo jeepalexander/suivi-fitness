@@ -109,6 +109,22 @@ with Srv() as base, sync_playwright() as p:
     check("l'enregistrement d'une séance garde la reconnexion automatique (onglet Google)", len(pg.evaluate("window.__tabs")) == 1, pg.evaluate("window.__tabs"))
     check("aucune erreur JavaScript (programme + Firefox)", not errs, errs)
     ctx.close()
+    # 1.7.26 : Firefox (non reconnu comme application installée), accès expiré -> réactiver / valider un programme
+    # n'ouvre aucune fenêtre Google (pas de renouvellement) ; seul l'enregistrement d'une séance le tente
+    ctx, pg, errs = page(br, base, ua=UA_FF, installed=False)
+    pg.evaluate("localStorage.setItem('h49_drive_wanted','1'); localStorage.removeItem('h49_drive_token'); window.__renew=0; const _r=renewDriveToken; window.renewDriveToken=()=>{window.__renew++; return _r()}; 0")
+    pg.evaluate("programDraft={id:null,kind:'program',name:'Test FF2',sessions:[{name:'Haut',exercises:[{exId:exInfo('Dips').id,sets:3}]},{name:'Bas',exercises:[{exId:exInfo('Mollets').id,sets:3}]}],idx:0}; saveProgramDraft(false)")
+    pg.wait_for_timeout(600)
+    pg.evaluate("programDraft={id:null,kind:'program',name:'Test FF3',sessions:[{name:'Haut',exercises:[{exId:exInfo('Dips').id,sets:3}]},{name:'Bas',exercises:[{exId:exInfo('Mollets').id,sets:3}]}],idx:0}; saveProgramDraft(false)"); pg.wait_for_timeout(400)
+    pg.evaluate("activateProgram(state.programs.find(x=>x.name==='Test FF2').id)"); pg.wait_for_timeout(400)
+    pg.evaluate("activateProgram(state.programs.find(x=>x.name==='Test FF3').id)"); pg.wait_for_timeout(400)
+    paused = pg.evaluate("(state.programs.find(x=>x.name==='Test FF2')||{}).status")
+    pg.evaluate("activateProgram(state.programs.find(x=>x.name==='Test FF2').id)"); pg.wait_for_timeout(600)  # « Réactiver »
+    check("Firefox (navigateur), accès expiré : créer, activer, réactiver un programme -> aucune fenêtre Google", paused == 'paused' and pg.evaluate("window.__renew") == 0 and pg.evaluate("window.__tabs") == [] and pg.evaluate("window.__nav") == [], [pg.evaluate("window.__renew"), pg.evaluate("window.__tabs")])
+    pg.evaluate("backupToDrive()"); pg.wait_for_timeout(400)
+    check("… l'enregistrement d'une séance tente toujours le renouvellement", pg.evaluate("window.__renew") == 1)
+    check("aucune erreur JavaScript (Firefox navigateur)", not errs, errs)
+    ctx.close()
     # Samsung Internet : même principe que Firefox (son propre onglet, pas Chrome)
     ctx, pg, errs = page(br, base, ua=UA_SAMSUNG, installed=True)
     pg.evaluate("connectDriveByRedirect()")

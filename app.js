@@ -4208,7 +4208,9 @@ async function backupToDrive(opts) {
   try {
     if (!isDriveWanted() && !getDriveToken()) return; // Drive n'a jamais été connecté : rien à faire
     let token = getDriveToken();
-    if (!token && await renewDriveToken()) token = getDriveToken();
+    // 1.7.26 : pas de fenêtre Google non plus pour les programmes — le renouvellement passe par une fenêtre
+    // qui, avec Firefox (même installé, Firefox ne se déclare pas toujours comme application), ouvre le navigateur.
+    if (!token && autoReconnect && await renewDriveToken()) token = getDriveToken();
     if (!token) { updateDriveUI(); if (autoReconnect) autoReconnectDriveIfNeeded(); return; }
     const r = await syncDriveBackup();
     if (r && r.reason === 'token' && autoReconnect) autoReconnectDriveIfNeeded();

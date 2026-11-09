@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.26] - 2026-11-09
+### 🐛 Réactiver un programme n'ouvre plus Firefox (co-auteur : Claude)
+- Accès Google expiré : créer, modifier, activer, réactiver ou supprimer un programme (ou supprimer une séance de l'historique) tentait encore de renouveler l'accès par la fenêtre Google, qui ouvre Firefox (Firefox ne se déclare pas toujours comme application installée, d'où le passage par cette fenêtre). Ces actions ne tentent plus aucun renouvellement : la sauvegarde reste en attente et part avec la prochaine séance enregistrée ou via « Reconnecter maintenant ». L'enregistrement d'une séance garde son comportement.
+- Test : `test_drive_android.py` (Firefox navigateur, accès expiré : créer / activer / réactiver un programme sans fenêtre Google ; reproduit le problème sans le correctif).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.26.
+
+---
+
 ## [1.7.25] - 2026-11-09
 ### 🎨 Tuile du programme actif selon la planche validée (co-auteur : Claude)
 - **Tuile du programme actif** : pastille de séance (A, B…) à la taille de l'icône du programme et dans la même colonne ; nom de la séance aligné sur le nom du programme, « exercices · séries » dessous ; trait pointillé de sous l'icône jusqu'à « + de détail », en passant derrière la pastille de séance ; « + de détail » en bas à gauche, aligné sur le bas de la flèche rouge en bas à droite ; marges intérieures de 12 px. La pastille « Déload −20 % » se place au bout de la ligne « exercices · séries » et passe à la ligne si la place manque (aucun texte coupé).
