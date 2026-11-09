@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.22] - 2026-11-09
+### 📄 Pages publiques pour Google (co-auteur : Claude)
+- `confidentialite.html` (règles de confidentialité) et `conditions.html` (conditions d'utilisation), demandées par Google pour publier l'accès Google Drive de l'application (sortie du mode Test). Pages autonomes dans le style de l'app (polices locales, thème clair / sombre), avec un résumé en anglais pour les relecteurs Google : données sur l'appareil, sauvegarde facultative dans le Drive de l'utilisateur via `drive.file` uniquement, pas de serveur ni de traceur, respect de la Google API Services User Data Policy (Limited Use), suppression et retrait de l'accès. Contact : jeanphilippealexander@gmail.com.
+- Ces deux pages sont aussi publiées seules sur `main` (sans autre changement de l'app en production) pour être accessibles à https://jeepalexander.github.io/suivi-fitness/confidentialite.html et …/conditions.html.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.22.
+
+---
+
 ## [1.7.21] - 2026-11-09
 ### ✨ Inviter quelqu'un + astuce (co-auteur : Claude)
 - **Réglages › Inviter quelqu'un** (entre Google Drive et Application) : « Afficher le QR code » ouvre une fenêtre avec un QR code vers l'adresse de l'application, le lien en clair et « Partager le lien » (partage du téléphone) ou « Copier le lien ». La personne ouvre l'app sur son téléphone, l'installe et la connecte à son propre Google Drive. QR noir sur fond blanc, lisible aussi en thème sombre ; bibliothèque `js/qrcode.js` (qrcode-generator 2.0.4, Kazuhiko Arase, licence MIT) mise en cache pour fonctionner hors connexion.
