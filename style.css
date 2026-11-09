@@ -187,7 +187,8 @@ header h1 { font-family: var(--font-display); font-size: 2.625rem; font-weight: 
 .timer-btn.running::before { display: block; }
 .timer-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 .timer-btn.running { background: var(--timer-base); border-color: var(--timer-base); color: var(--timer-text); }
-.timer-btn:not(.running):not(.finished) { width: 144px; justify-content: center; } /* 1.7.18 : au repos, même taille qu'avant (« PAUSE 1:30 ») */
+.timer-btn:not(.running):not(.finished) { width: 124px; padding: 0 8px; justify-content: center; } /* 1.7.19 : au repos, gélule plus étroite (144 → 124 px) */
+.timer-btn:not(.running):not(.finished) svg { flex: none; width: 24px; height: 24px; } /* 1.7.19 : logo du chrono agrandi (18 → 24 px) */
 .timer-btn:not(.running):not(.finished) #timer-display { font-size: 0.75rem; line-height: 1.05; letter-spacing: 0.02em; }
 .timer-btn.finished { background: var(--accent-c); border-color: var(--accent-c); color: #fff; box-shadow: none; animation: pulse 0.8s infinite alternate; }
 
@@ -581,7 +582,10 @@ body[data-tab="programme"][data-pview="choose"] header h1 { display: none; }
 .btn-start.libre { background: var(--sand-ink); box-shadow: 0 2px 2px rgba(74, 56, 24, 0.4), 0 8px 12px -4px rgba(74, 56, 24, 0.5); }
 .prog-detail { margin-top: 10px; }
 
-.prog-mem-title { margin: 28px 0 10px; }
+.prog-mem-title { margin: 28px 0 10px; display: flex; align-items: center; gap: 8px; }
+/* 1.7.19 : symbole pause devant « En mémoire » (couleur des mentions « En pause ») */
+.mem-pause-ico { flex: none; display: flex; color: var(--sand-line); }
+.mem-pause-ico svg { width: 20px; height: 20px; fill: currentColor; stroke: none; }
 .mem-list { display: flex; flex-direction: column; gap: 8px; }
 .mem-tile { display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 8px 0 10px; border-radius: 999px; background: var(--pill-bg); color: var(--pill-ink); box-shadow: var(--sh-card); user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: manipulation; transition: transform 0.45s ease; }
 .mem-ico { flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--pill-ico); color: var(--pill-ink); display: flex; align-items: center; justify-content: center; }
@@ -793,6 +797,9 @@ body:not([data-tab="programme"]) #app-wallpaper::after, body[data-pview="editor"
 :root[data-wallpaper="halteres"] #app-wallpaper { background-image: url('wallpapers/halteres.jpg'); background-position: center 45%; }
 :root[data-wallpaper="kettlebell"] #app-wallpaper { background-image: url('wallpapers/kettlebell.jpg'); background-position: center 45%; }
 :root[data-wallpaper="studio"] #app-wallpaper { background-image: url('wallpapers/studio.jpg'); background-position: center 40%; }
+/* Page Fond d'écran (1.7.19) : voile de l'accueil Programmes, pour voir le fond choisi */
+body[data-tab="fond"] #app-wallpaper::after { background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.82) 22%, rgba(255, 255, 255, 0.15) 42%, rgba(255, 255, 255, 0.6) 72%, rgba(255, 255, 255, 0.88) 100%); }
+:root[data-theme="dark"] body[data-tab="fond"] #app-wallpaper::after { background: linear-gradient(180deg, rgba(14, 14, 17, 0.95) 0%, rgba(14, 14, 17, 0.82) 22%, rgba(14, 14, 17, 0.15) 42%, rgba(14, 14, 17, 0.6) 72%, rgba(14, 14, 17, 0.88) 100%); }
 :root[data-wallpaper] header, :root[data-wallpaper] .ed-row { background: transparent; }
 /* Séance (1.7.18, planche 22a) : en-tête fixe sur fond uni, l'image ne se voit que sous les exercices */
 :root[data-wallpaper] body[data-tab="seance"] header { background: var(--bg); }

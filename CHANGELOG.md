@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.19] - 2026-11-09
+### 🎨 Pause, « En mémoire » et page Fond d'écran (co-auteur : Claude)
+- **Gélule de pause au repos** : plus étroite (144 → 124 px), logo du chrono agrandi (18 → 24 px). Décompte et « GO ! » inchangés.
+- **Programmes** : symbole pause (couleur des mentions « En pause ») devant « En mémoire ».
+- **Réglages › Fond d'écran** : voile de l'accueil Programmes, pour bien voir le fond choisi au-dessus des vignettes.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.19.
+
+---
+
 ## [1.7.18] - 2026-11-09
 ### 🎨 Séance, Programmes, pause et fond d'écran (co-auteur : Claude)
 - **Séance** (planche, écran 22a) : l'en-tête fixe (titre, séance du jour, déload, progression) est sur fond uni ; l'image de fond ne se voit que sous les exercices.

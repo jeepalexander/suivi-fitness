@@ -30,6 +30,7 @@ const TRASH_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M
 const CLOSE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 const SEARCH_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>';
 const CLOUD_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a5 5 0 1 1 1-9.9A6 6 0 0 1 19.5 10 4 4 0 0 1 18 18"/><path d="M12 12v8M9 17l3 3 3-3"/></svg>';
+const PAUSE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/></svg>';
 const GRID_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="2"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="2"/></svg>';
 
 function setProgramView(view) {
@@ -87,7 +88,7 @@ function renderProgramOverview() {
     html += `<div class="prog-status"><span class="prog-dot"></span>Aucun programme actif</div>`;
   }
   if (others.length) {
-    html += `<h2 class="section-label prog-mem-title">En mémoire</h2><div class="mem-list">`;
+    html += `<h2 class="section-label prog-mem-title"><span class="mem-pause-ico">${PAUSE_SVG}</span>En mémoire</h2><div class="mem-list">`;
     others.forEach(p => { html += memTileHtml(p); });
     html += `</div>`;
   }

@@ -36,9 +36,9 @@ with Srv() as base, sync_playwright() as p:
     names = pg.evaluate("[...document.querySelectorAll('#exercises-list .exercise-item')].map(i=>i.dataset.ex)")
     print('  exercices de la séance :', names)
 
-    check('au repos : « PAUSE » / « ADAPTATIVE » sur 2 lignes, sans durée, gélule de même taille (144 × 44)',
+    check('au repos : « PAUSE » / « ADAPTATIVE » sur 2 lignes, sans durée, gélule plus étroite (124 × 44), logo agrandi (24 px)',
           pg.inner_text('#timer-display').split('\n') == ['PAUSE', 'ADAPTATIVE']
-          and pg.evaluate("(()=>{const r=document.getElementById('timer-btn').getBoundingClientRect();return Math.round(r.width)===144&&Math.round(r.height)===44})()"),
+          and pg.evaluate("(()=>{const r=document.getElementById('timer-btn').getBoundingClientRect();return Math.round(r.width)===124&&Math.round(r.height)===44&&Math.round(document.querySelector('#timer-btn svg').getBoundingClientRect().width)===24})()"),
           repr(pg.inner_text('#timer-display')))
     check('au chargement : le chrono annonce la durée de l\'exercice ouvert (le rameur ouvre la séance : repos par défaut 1:30)', chrono(pg) == 'PAUSE 1:30', chrono(pg))
 
