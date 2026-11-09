@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.21] - 2026-11-09
+### ✨ Inviter quelqu'un + astuce (co-auteur : Claude)
+- **Réglages › Inviter quelqu'un** (entre Google Drive et Application) : « Afficher le QR code » ouvre une fenêtre avec un QR code vers l'adresse de l'application, le lien en clair et « Partager le lien » (partage du téléphone) ou « Copier le lien ». La personne ouvre l'app sur son téléphone, l'installe et la connecte à son propre Google Drive. QR noir sur fond blanc, lisible aussi en thème sombre ; bibliothèque `js/qrcode.js` (qrcode-generator 2.0.4, Kazuhiko Arase, licence MIT) mise en cache pour fonctionner hors connexion.
+- **Programmes** : symbole (i) et « Astuce : » devant « Reste appuyé sur un programme… » ; « Tes autres programmes apparaîtront ici » centré.
+- Test : `test_invitation.py` (23 contrôles, dont la lecture du QR code).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.21.
+
+---
+
 ## [1.7.20] - 2026-11-09
 ### 🎨 Accueil Programmes : « Actif » et « En mémoire » (co-auteur : Claude)
 - « Programme actif » devient **« Actif »** (« Active » pour une séance libre), à la même taille que « En mémoire » ; pastille verte conservée.

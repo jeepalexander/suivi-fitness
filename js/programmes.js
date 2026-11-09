@@ -31,6 +31,7 @@ const CLOSE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 
 const SEARCH_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>';
 const CLOUD_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a5 5 0 1 1 1-9.9A6 6 0 0 1 19.5 10 4 4 0 0 1 18 18"/><path d="M12 12v8M9 17l3 3 3-3"/></svg>';
 const PAUSE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/></svg>';
+const INFO_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.4"/></svg>';
 const GRID_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="2"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="2"/></svg>';
 
 function setProgramView(view) {
@@ -96,7 +97,7 @@ function renderProgramOverview() {
   } else {
     html += `<p class="mem-empty">Tes autres programmes apparaîtront ici</p>`;
   }
-  html += `<p class="prog-hint">Reste appuyé sur un programme pour entrer en mode édition</p>`;
+  html += `<p class="prog-hint"><span class="prog-hint-ico">${INFO_SVG}</span>Astuce : Reste appuyé sur un programme pour entrer en mode édition</p>`; // 1.7.21 : (i) + « Astuce : »
   container.innerHTML = html;
   bindLongPress(container);
 }

@@ -209,6 +209,11 @@
       <p id="drive-status" class="theme-hint drive-status">Non connecté</p>
       <p class="theme-hint">Chaque séance validée déclenche une sauvegarde dans le dossier « MON CARNET DE SALLE ». 5 sauvegardes y sont conservées. Pour en reprendre une, touche « Restaurer » dans l'Historique.</p>
     </div>
+    <div class="card invite-card">
+      <div class="card-title">Inviter quelqu'un</div>
+      <p class="theme-hint">Fais scanner un QR code à la personne : elle ouvrira l'application sur son téléphone et pourra la connecter à son propre Google Drive. Ses séances restent les siennes.</p>
+      <button type="button" id="invite-btn" class="btn btn-secondary" onclick="openInviteSheet()">Afficher le QR code</button>
+    </div>
     <div class="card update-card" id="update-card">
       <div class="card-title">Application</div>
       <div class="update-row">
@@ -252,6 +257,7 @@
   <script src="js/catalogue.js"></script>
   <script src="app.js"></script>
   <script src="js/programmes.js"></script>
+  <script src="js/qrcode.js"></script>
   <script src="js/security.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

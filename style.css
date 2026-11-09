@@ -584,7 +584,7 @@ body[data-tab="programme"][data-pview="choose"] header h1 { display: none; }
 
 .prog-mem-title { margin: 28px 0 10px; display: flex; align-items: center; gap: 8px; }
 /* 1.7.19 : symbole pause devant « En mémoire » (couleur des mentions « En pause ») */
-.mem-empty { margin: 0; font-size: 0.9375rem; line-height: 1.4; color: var(--text-muted); } /* 1.7.20 */
+.mem-empty { margin: 0; font-size: 0.9375rem; line-height: 1.4; color: var(--text-muted); text-align: center; } /* 1.7.20, centré 1.7.21 */
 .mem-pause-ico { flex: none; display: flex; color: var(--sand-line); }
 .mem-pause-ico svg { width: 20px; height: 20px; fill: currentColor; stroke: none; }
 .mem-list { display: flex; flex-direction: column; gap: 8px; }
@@ -600,6 +600,7 @@ body[data-tab="programme"][data-pview="choose"] header h1 { display: none; }
 .mem-tile.libre .mem-sub { color: var(--sand-muted); }
 .mem-tile.libre .mem-btn { background: var(--sand-ink); color: #fff; }
 .prog-hint { margin: 16px 0 0; font-size: 0.8125rem; line-height: 1.4; color: var(--text-muted); text-align: center; }
+.prog-hint-ico svg { display: inline-block; width: 15px; height: 15px; margin-right: 5px; vertical-align: -3px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 
 /* Écran 1 : rien de prévu */
 .prog-empty { position: relative; min-height: calc(100dvh - 300px); padding-top: 250px; }
@@ -840,3 +841,10 @@ body[data-tab="fond"] .page-title-row { margin-top: 10px; }
 .wallpaper-opt[aria-checked="true"] .wallpaper-check { display: flex; }
 .wallpaper-check svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .wallpaper-name { font-size: 0.8425rem; font-weight: 600; text-align: center; line-height: 1.2; }
+
+/* ============================================
+   Réglages › Inviter quelqu'un (1.7.21) : QR code vers l'application
+   ============================================ */
+.invite-qr { width: 220px; max-width: 70vw; margin: 4px auto 12px; padding: 14px; box-sizing: border-box; border-radius: 20px; background: #FFFFFF; box-shadow: var(--sh-card); }
+.invite-qr svg { display: block; width: 100%; height: auto; }
+.invite-link { margin: 0 0 6px; font-size: 0.8125rem; line-height: 1.4; color: var(--text-muted); text-align: center; overflow-wrap: anywhere; }

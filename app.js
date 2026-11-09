@@ -303,6 +303,44 @@ function renderWallpaperGrid() {
   if (sel) { const li = sel.parentElement; grid.scrollLeft = Math.max(0, li.offsetLeft - grid.offsetLeft - parseFloat(getComputedStyle(grid).paddingLeft || 0)); }
 }
 
+// Inviter quelqu'un (1.7.21) : QR code vers l'adresse de l'application (celle de cette page : dev ou production).
+// La personne installe l'app sur son téléphone et la connecte à son propre Google Drive.
+function appShareUrl() {
+  return new URL('./', location.href).href;
+}
+
+function inviteQrSvg(url) {
+  if (typeof qrcode !== 'function') return '';
+  const qr = qrcode(0, 'M');
+  qr.addData(url);
+  qr.make();
+  return qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true, alt: 'QR code vers ' + url });
+}
+
+function openInviteSheet() {
+  const url = appShareUrl();
+  const canShare = typeof navigator.share === 'function';
+  openSheet(`
+    <h3 class="sheet-title small">Inviter quelqu'un</h3>
+    <p class="sheet-text center">Scanne ce QR code avec l'appareil photo de son téléphone pour ouvrir l'application.</p>
+    <div class="invite-qr">${inviteQrSvg(url)}</div>
+    <p class="invite-link">${escapeHtml(url)}</p>
+    <button type="button" class="btn" onclick="shareAppLink()">${canShare ? 'Partager le lien' : 'Copier le lien'}</button>
+    <button type="button" class="btn btn-secondary" onclick="closeSheet()">Fermer</button>`);
+}
+
+async function shareAppLink() {
+  const url = appShareUrl();
+  try {
+    if (typeof navigator.share === 'function') { await navigator.share({ title: 'Mon Carnet de Salle', url }); return; }
+    await navigator.clipboard.writeText(url);
+    showToast('Lien copié', 2500);
+  } catch (e) {
+    if (e && e.name === 'AbortError') return; // partage annulé
+    showToast('Copie impossible : ' + url, 6000);
+  }
+}
+
 // ============================================================
 // 4. DONNÉES : SAUVEGARDE ET OUTILS COMMUNS
 // ============================================================
