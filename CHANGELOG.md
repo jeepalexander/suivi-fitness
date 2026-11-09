@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.9] - 2026-11-09
+### 🎨 Pastilles d'icônes (co-auteur : Claude)
+- Pastille plus grise derrière les icônes d'exercice (`--icon-pastille` : #E4E4E9, #2C2C33 en sombre).
+- Icônes plus grandes (96 % de la pastille) et non rognées : elles dépassent légèrement du rond, comme sur la planche.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.9.
+
+---
+
 ## [1.7.8] - 2026-11-09
 ### 🎨 Fond d'écran : alignement sur la planche de concept (co-auteur : Claude)
 - **Voile dégradé selon la hauteur** : plus couvrant en haut (titres) et en bas (navigation), plus léger au milieu où l'image se voit (82 % → 55 % → 30 % → 72 % → 84 %). Équivalent sombre en thème sombre.
