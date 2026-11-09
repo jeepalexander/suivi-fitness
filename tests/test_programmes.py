@@ -65,7 +65,11 @@ with Srv() as base, sync_playwright() as p:
 
     # Accueil Programme
     txt = pg.inner_text('#program-overview')
-    check('accueil : « Programme actif » (sans nom), tuile au nom du programme', 'Programme actif' in txt and 'Programme actif ·' not in txt and 'Hypertrophie' in pg.inner_text('.prog-tile-name') and pg.inner_text('.prog-tile-next .type-pill') == attendu and 'Presse' in pg.inner_text('.prog-tile-next') if attendu == 'A' else 'Hypertrophie' in pg.inner_text('.prog-tile-name') and pg.inner_text('.prog-tile-next .type-pill') == attendu, txt[:120])
+    check('accueil : « Actif » (sans nom), tuile au nom du programme', pg.inner_text('.prog-status').strip() == 'Actif' and 'Hypertrophie' in pg.inner_text('.prog-tile-name') and pg.inner_text('.prog-tile-next .type-pill') == attendu and 'Presse' in pg.inner_text('.prog-tile-next') if attendu == 'A' else 'Hypertrophie' in pg.inner_text('.prog-tile-name') and pg.inner_text('.prog-tile-next .type-pill') == attendu, txt[:120])
+    check('« En mémoire » présent ; vide : « Tes autres programmes apparaîtront ici »',
+          pg.locator('.prog-mem-title').count() == 1 and ((pg.locator('.mem-tile').count() == 0) == (pg.locator('.mem-empty').count() == 1))
+          and (pg.locator('.mem-empty').count() == 0 or pg.inner_text('.mem-empty') == 'Tes autres programmes apparaîtront ici'))
+    check('« Actif » à la même taille que « En mémoire »', pg.evaluate("getComputedStyle(document.querySelector('.prog-status')).fontSize===getComputedStyle(document.querySelector('.prog-mem-title')).fontSize"))
     check('onglet et titre « Programmes »', pg.inner_text('#page-title') == 'Programmes' and pg.inner_text('#nav-programme').strip() == 'Programmes')
     check('accueil : bouton + visible dans l\'en-tête', pg.is_visible('#add-program-btn'))
     gap = pg.evaluate("document.querySelector('nav').getBoundingClientRect().top - document.querySelector('.prog-hint').getBoundingClientRect().bottom")
@@ -155,7 +159,7 @@ with Srv() as base, sync_playwright() as p:
     # ---------- 6. Séance libre : activée, reste active après la séance, jamais « En pause » ----------
     pg.evaluate("switchTab('programme')"); pg.wait_for_timeout(200)
     pg.click('.mem-tile.libre .mem-btn'); pg.wait_for_timeout(300)
-    check('séance libre activée : « Séance libre active », tuile sable « Dorsaux » sans ligne de prochaine séance', 'Séance libre active' in pg.inner_text('.prog-status') and pg.inner_text('.prog-tile-name') == 'Dorsaux' and not pg.locator('.prog-tile .prog-tile-next').count() and pg.locator('.prog-tile.libre').count() == 1)
+    check('séance libre activée : « Active », tuile sable « Dorsaux » sans ligne de prochaine séance', pg.inner_text('.prog-status').strip() == 'Active' and pg.inner_text('.prog-tile-name') == 'Dorsaux' and not pg.locator('.prog-tile .prog-tile-next').count() and pg.locator('.prog-tile.libre').count() == 1)
     pg.evaluate("switchTab('seance')"); pg.wait_for_timeout(300)
     check('Séance : pastille 1×, « Séance libre », Dorsaux', pg.inner_text('#seance-badge') == '1×' and pg.inner_text('#seance-overline') == 'Séance libre' and pg.inner_text('#seance-type-title') == 'Dorsaux')
     check_set(pg, 'Tirage vertical', 0, 50, 10)

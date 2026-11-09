@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.20] - 2026-11-09
+### 🎨 Accueil Programmes : « Actif » et « En mémoire » (co-auteur : Claude)
+- « Programme actif » devient **« Actif »** (« Active » pour une séance libre), à la même taille que « En mémoire » ; pastille verte conservée.
+- La catégorie **« En mémoire »** reste affichée même vide, avec « Tes autres programmes apparaîtront ici ».
+- Test : `test_programmes.py` (88 contrôles).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.20.
+
+---
+
 ## [1.7.19] - 2026-11-09
 ### 🎨 Pause, « En mémoire » et page Fond d'écran (co-auteur : Claude)
 - **Gélule de pause au repos** : plus étroite (144 → 124 px), logo du chrono agrandi (18 → 24 px). Décompte et « GO ! » inchangés.

@@ -81,16 +81,20 @@ function renderProgramOverview() {
   // Les tuiles sont alignées vers le bas de l'écran, au-dessus de la barre de navigation (maquette)
   let html = '<div class="prog-spacer" aria-hidden="true"></div>';
   if (active) {
-    html += `<div class="prog-status"><span class="prog-dot on"></span>${isLibre(active) ? 'Séance libre active' : 'Programme actif'}</div>`;
+    html += `<div class="prog-status"><span class="prog-dot on"></span>${isLibre(active) ? 'Active' : 'Actif'}</div>`; // 1.7.20 : « Actif » / « Active » (séance libre)
     html += activeTileHtml(active);
     if (programDetailOpen) html += activeDetailHtml(active);
   } else {
     html += `<div class="prog-status"><span class="prog-dot"></span>Aucun programme actif</div>`;
   }
+  // 1.7.20 : la catégorie « En mémoire » est toujours là ; vide, elle annonce où iront les autres programmes
+  html += `<h2 class="section-label prog-mem-title"><span class="mem-pause-ico">${PAUSE_SVG}</span>En mémoire</h2>`;
   if (others.length) {
-    html += `<h2 class="section-label prog-mem-title"><span class="mem-pause-ico">${PAUSE_SVG}</span>En mémoire</h2><div class="mem-list">`;
+    html += `<div class="mem-list">`;
     others.forEach(p => { html += memTileHtml(p); });
     html += `</div>`;
+  } else {
+    html += `<p class="mem-empty">Tes autres programmes apparaîtront ici</p>`;
   }
   html += `<p class="prog-hint">Reste appuyé sur un programme pour entrer en mode édition</p>`;
   container.innerHTML = html;
