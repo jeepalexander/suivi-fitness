@@ -564,22 +564,30 @@ body[data-tab="programme"][data-pview="choose"] header h1 { display: none; }
 .prog-tile { margin-top: 0; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: manipulation; transition: transform 0.45s ease; }
 .prog-tile.pressing, .mem-tile.pressing { transform: scale(0.97); }
 .prog-tile-top { display: flex; align-items: center; gap: 12px; }
-/* 1.7.24 : tuile active compacte (−25 %) — démarrer à droite du nom, compteur et « + de détail » en bas */
-.next-card.prog-tile { gap: 0; }
-.prog-tile-foot { justify-content: space-between; }
-.prog-tile .prog-tile-foot .next-card-count { margin-top: 0; min-width: 0; }
 .prog-tile-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.prog-tile-next { display: flex; align-items: center; gap: 8px; min-width: 0; margin-top: 14px; font-size: 0.9375rem; font-weight: 600; color: var(--pill-ink); }
-.prog-tile-next .prog-tile-session { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.prog-tile .deload-pill.deload-inline { flex: none; margin: 0 0 0 auto; padding: 3px 10px; font-size: 0.8125rem; gap: 6px; }
+/* 1.7.25 (planche validée) : tuile active — marges de 12 px, pastille de séance de 40 px dans la colonne des icônes,
+   textes alignés sur le nom du programme, trait pointillé de l'icône à « + de détail », boutons en bas */
+.next-card.prog-tile { position: relative; gap: 0; padding: 12px; }
+.prog-tile-line { position: absolute; left: 31px; top: 52px; bottom: 56px; border-left: 2px dotted color-mix(in srgb, var(--pill-ink) 40%, transparent); pointer-events: none; }
+.prog-tile-next { display: flex; align-items: center; gap: 12px; min-width: 0; margin-top: 14px; }
+.prog-tile-next .type-pill { position: relative; }
+.type-pill.mid { width: 40px; height: 40px; font-size: 1.1875rem; }
+.prog-tile-next-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.prog-tile-session { font-size: 1rem; font-weight: 600; line-height: 1.25; color: var(--pill-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.prog-tile-sum { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-width: 0; margin-top: 2px; } /* la pastille déload passe à la ligne plutôt que de couper le texte */
+.prog-tile.libre .prog-tile-sum { margin: 2px 0 0 52px; }
+.prog-tile .next-card-count { flex: none; margin: 0; font-size: 0.9375rem; color: var(--pill-muted); white-space: nowrap; }
+.prog-tile .deload-pill.deload-inline { flex: none; margin: 0; padding: 3px 10px; font-size: 0.8125rem; gap: 6px; }
+.prog-tile .next-card-row.prog-tile-foot { align-items: flex-end; justify-content: space-between; margin-top: 6px; }
+.prog-tile-foot .prog-detail-btn { flex: none; }
+/* « Actif » : point vert sur un cercle vert pâle, dans une case de la largeur du symbole pause (texte aligné sur « En mémoire ») */
+.prog-dot-slot { flex: none; width: 20px; display: flex; align-items: center; justify-content: center; }
+.prog-status .prog-dot.on { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--live) 28%, transparent); }
+.prog-status .prog-dot.on::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--live); box-shadow: 0 0 3px 1px rgba(10, 80, 40, 0.85); }
 .prog-ico { flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--pill-ico); color: var(--pill-ink); display: flex; align-items: center; justify-content: center; }
 .prog-ico svg, .mem-ico svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .prog-ico.dark { width: 44px; height: 44px; background: var(--primary-strong); color: var(--on-strong); }
 .prog-ico.libre, .mem-ico.libre, .mem-tile.libre .mem-ico, .restore-item.libre .mem-ico { background: transparent; border: 2px dashed var(--sand-line); color: var(--sand-ink); font-family: var(--font-display); font-weight: 700; font-size: 0.9375rem; }
-.prog-tile .next-card-count { margin-top: 6px; }
-.prog-tile .deload-pill { margin-top: 10px; }
-.prog-tile .next-card-row { align-items: center; margin-top: 16px; }
-.prog-tile .deload-pill { margin-top: 12px; }
 .prog-detail-btn { height: 44px; padding: 0 18px; border: none; border-radius: 999px; background: var(--pill-ico); color: var(--pill-ink); font: inherit; font-size: 0.9063rem; font-weight: 600; cursor: pointer; }
 .prog-tile.libre { background: var(--sand); color: var(--sand-ink); }
 .prog-tile.libre .next-card-count { color: var(--sand-muted); }
@@ -594,7 +602,7 @@ body[data-tab="programme"][data-pview="choose"] header h1 { display: none; }
 .mem-pause-ico { flex: none; display: flex; color: var(--sand-line); }
 .mem-pause-ico svg { width: 20px; height: 20px; fill: currentColor; stroke: none; }
 .mem-list { display: flex; flex-direction: column; gap: 8px; }
-.mem-tile { display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 8px 0 10px; border-radius: 999px; background: var(--pill-bg); color: var(--pill-ink); box-shadow: var(--sh-card); user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: manipulation; transition: transform 0.45s ease; }
+.mem-tile { display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 12px; border-radius: 999px; background: var(--pill-bg); color: var(--pill-ink); box-shadow: var(--sh-card); user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: manipulation; transition: transform 0.45s ease; }
 .mem-ico { flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--pill-ico); color: var(--pill-ink); display: flex; align-items: center; justify-content: center; }
 .mem-ico.small { width: 32px; height: 32px; }
 .mem-text { flex: 1; min-width: 0; }

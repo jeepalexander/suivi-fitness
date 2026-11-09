@@ -159,7 +159,7 @@ with Srv() as base, sync_playwright() as p:
     # ---------- 6. Séance libre : activée, reste active après la séance, jamais « En pause » ----------
     pg.evaluate("switchTab('programme')"); pg.wait_for_timeout(200)
     pg.click('.mem-tile.libre .mem-btn'); pg.wait_for_timeout(300)
-    check('séance libre activée : « Active », tuile sable « Dorsaux » sans ligne de prochaine séance', pg.inner_text('.prog-status').strip() == 'Active' and pg.inner_text('.prog-tile-name') == 'Dorsaux' and not pg.locator('.prog-tile .prog-tile-next').count() and pg.locator('.prog-tile.libre').count() == 1)
+    check('séance libre activée : « Actif », tuile sable « Dorsaux » sans ligne de prochaine séance', pg.inner_text('.prog-status').strip() == 'Actif' and pg.inner_text('.prog-tile-name') == 'Dorsaux' and not pg.locator('.prog-tile .prog-tile-next').count() and pg.locator('.prog-tile.libre').count() == 1)
     pg.evaluate("switchTab('seance')"); pg.wait_for_timeout(300)
     check('Séance : pastille 1×, « Séance libre », Dorsaux', pg.inner_text('#seance-badge') == '1×' and pg.inner_text('#seance-overline') == 'Séance libre' and pg.inner_text('#seance-type-title') == 'Dorsaux')
     check_set(pg, 'Tirage vertical', 0, 50, 10)

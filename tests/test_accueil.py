@@ -19,12 +19,23 @@ with Srv() as base, sync_playwright() as p:
         check(f"[{w}px] message manuscrit (Caveat) en haut de l'accueil", pg.locator('#tab-programme .prog-greet').count() == 1
               and 'Caveat' in pg.evaluate("getComputedStyle(document.querySelector('.prog-greet-hello')).fontFamily")
               and pg.evaluate("[...document.fonts].some(f=>f.family.includes('Caveat')&&f.status==='loaded')"))
-        tile = pg.evaluate("""(()=>{const t=document.querySelector('.prog-tile');return {h:Math.round(t.getBoundingClientRect().height), txt:t.innerText,
-            start:!!t.querySelector('.prog-tile-top .btn-start'), det:!!t.querySelector('.prog-tile-foot .prog-detail-btn'), next:!!t.querySelector('.prog-tile-next .prog-tile-session'),
-            deload:!!t.querySelector('.deload-inline')}})()""")
-        check(f"[{w}px] tuile active ≤ 75 % de l'ancienne hauteur (278 px), déload compris", tile['h'] <= 209, tile['h'])
-        check(f"[{w}px] mêmes informations : nom, démarrer, prochaine séance, exercices · séries, + de détail, déload",
-              tile['start'] and tile['det'] and tile['next'] and 'exercice' in tile['txt'] and 'série' in tile['txt'] and ('Déload' in tile['txt']) == tile['deload'], tile)
+        tile = pg.evaluate("""(()=>{const t=document.querySelector('.prog-tile');const r=e=>{const b=e.getBoundingClientRect();return [Math.round(b.left),Math.round(b.right),Math.round(b.top),Math.round(b.bottom)]};
+            return {h:Math.round(t.getBoundingClientRect().height), txt:t.innerText, tile:r(t), ico:r(t.querySelector('.prog-ico')), pill:r(t.querySelector('.prog-tile-next .type-pill')),
+            name:r(t.querySelector('.prog-tile-name')), sess:r(t.querySelector('.prog-tile-session')), det:r(t.querySelector('.prog-tile-foot .prog-detail-btn')), start:r(t.querySelector('.prog-tile-foot .btn-start')),
+            line:r(t.querySelector('.prog-tile-line')), deload:!!t.querySelector('.prog-tile-sum .deload-inline')}})()""")
+        check(f"[{w}px] tuile active compacte (≤ 215 px avec la pastille déload, 278 px avant)", tile['h'] <= 215, tile['h'])
+        check(f"[{w}px] mêmes informations : nom, séance, exercices · séries, + de détail, démarrer, déload",
+              'exercice' in tile['txt'] and 'série' in tile['txt'] and ('Déload' in tile['txt']) == tile['deload'], tile['txt'])
+        check(f"[{w}px] pastille de séance de la taille de l'icône du programme, dans la même colonne", tile['pill'][1] - tile['pill'][0] == 40 and tile['pill'][0] == tile['ico'][0])
+        check(f"[{w}px] nom de la séance aligné sur le nom du programme", tile['sess'][0] == tile['name'][0])
+        check(f"[{w}px] « + de détail » en bas à gauche, démarrer en bas à droite, alignés sur le bas", tile['det'][0] == tile['ico'][0] and tile['start'][1] == tile['tile'][1] - 12 and tile['det'][3] == tile['start'][3])
+        check(f"[{w}px] trait pointillé : de sous l'icône jusqu'à « + de détail », sur l'axe de l'icône", tile['line'][2] == tile['ico'][3] and tile['line'][3] == tile['det'][2] and abs((tile['line'][0] + tile['line'][1]) / 2 - (tile['ico'][0] + tile['ico'][1]) / 2) <= 1, tile)
+        st = pg.evaluate("""(()=>{const tx=sel=>{const e=document.querySelector(sel);const n=[...e.childNodes].reverse().find(n=>n.nodeType===3&&n.textContent.trim());const R=document.createRange();R.selectNodeContents(n);return [Math.round(R.getBoundingClientRect().left), n.textContent.trim()]};
+            return {actif:tx('.prog-status'), mem:tx('.prog-mem-title')}})()""")
+        check(f"[{w}px] « Actif » aligné sur « En mémoire »", st['actif'][1] == 'Actif' and st['actif'][0] == st['mem'][0], st)
+        pg.evaluate("programDraft={id:null,kind:'program',name:'Force',sessions:[{name:'Haut',exercises:[{exId:exInfo('Dips').id,sets:3}]},{name:'Bas',exercises:[{exId:exInfo('Mollets').id,sets:3}]}],idx:0}; saveProgramDraft(false)"); pg.wait_for_timeout(400)
+        al = pg.evaluate("(()=>{const r=e=>{const b=e.getBoundingClientRect();return [Math.round(b.left),Math.round(b.right)]};return {ico:r(document.querySelector('.prog-tile .prog-ico')), start:r(document.querySelector('.prog-tile .btn-start')), mi:r(document.querySelector('.mem-tile .mem-ico')), mb:r(document.querySelector('.mem-tile button'))}})()")
+        check(f"[{w}px] tuile active alignée sur les programmes en mémoire (icônes à gauche, boutons à droite)", al['ico'][0] == al['mi'][0] and al['start'][1] == al['mb'][1], al)
         ov = pg.evaluate(OVERFLOW_JS)
         check(f"[{w}px] rien ne déborde", ov['docW'] <= ov['vw'] and not ov['out'], ov)
         check(f"[{w}px] aucune erreur JavaScript", not errs, errs)

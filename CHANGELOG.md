@@ -7,6 +7,17 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.25] - 2026-11-09
+### 🎨 Tuile du programme actif selon la planche validée (co-auteur : Claude)
+- **Tuile du programme actif** : pastille de séance (A, B…) à la taille de l'icône du programme et dans la même colonne ; nom de la séance aligné sur le nom du programme, « exercices · séries » dessous ; trait pointillé de sous l'icône jusqu'à « + de détail », en passant derrière la pastille de séance ; « + de détail » en bas à gauche, aligné sur le bas de la flèche rouge en bas à droite ; marges intérieures de 12 px. La pastille « Déload −20 % » se place au bout de la ligne « exercices · séries » et passe à la ligne si la place manque (aucun texte coupé).
+- **Séance libre active** : « exercices · séries » sous le nom, même ligne du bas, pas de trait pointillé.
+- **Programmes en mémoire** : marges latérales de 12 px — icônes et boutons alignés avec la tuile active.
+- **« Actif »** (aussi pour la séance libre), aligné sur « En mémoire » ; point vert de 7 px à l'ombre centrée sur un cercle vert pâle de 18 px.
+- Tests : `test_accueil.py` (alignements, trait, taille de la pastille, « Actif »), `test_programmes.py`.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.25.
+
+---
+
 ## [1.7.24] - 2026-11-09
 ### ✨ Accueil Programmes : message manuscrit et tuile compacte (co-auteur : Claude)
 - **Message d'accueil manuscrit** en haut de l'onglet Programmes (police Caveat, licence OFL, hébergée avec l'app pour fonctionner hors connexion) : « Bonjour, » (5 h – 18 h) ou « Bonsoir, », puis une phrase selon le contexte — séance déjà faite aujourd'hui (« Belle séance aujourd'hui. Place à la récup ! »), retour après 10 jours ou plus (« Content de te revoir ! On s'y remet ? »), semaine de déload, pas encore de séance, pas de programme actif, sinon « Prêt à te dépasser aujourd'hui ? ».

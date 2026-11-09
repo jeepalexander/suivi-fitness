@@ -82,11 +82,11 @@ function renderProgramOverview() {
   // Les tuiles sont alignées vers le bas de l'écran, au-dessus de la barre de navigation (maquette)
   let html = programGreetingHtml(active) + '<div class="prog-spacer" aria-hidden="true"></div>';
   if (active) {
-    html += `<div class="prog-status"><span class="prog-dot on"></span>${isLibre(active) ? 'Active' : 'Actif'}</div>`; // 1.7.20 : « Actif » / « Active » (séance libre)
+    html += `<div class="prog-status"><span class="prog-dot-slot"><span class="prog-dot on"></span></span>Actif</div>`; // 1.7.25 : « Actif » aussi pour la séance libre
     html += activeTileHtml(active);
     if (programDetailOpen) html += activeDetailHtml(active);
   } else {
-    html += `<div class="prog-status"><span class="prog-dot"></span>Aucun programme actif</div>`;
+    html += `<div class="prog-status"><span class="prog-dot-slot"><span class="prog-dot"></span></span>Aucun programme actif</div>`;
   }
   // 1.7.20 : la catégorie « En mémoire » est toujours là ; vide, elle annonce où iront les autres programmes
   html += `<h2 class="section-label prog-mem-title"><span class="mem-pause-ico">${PAUSE_SVG}</span>En mémoire</h2>`;
@@ -143,26 +143,25 @@ function activeTileHtml(p) {
   const nEx = (session.exercises || []).length;
   const nSets = sessionSetCount(session);
   const BOLT_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>';
-  const deloadHtml = checkDeloadStatus() ? `<span class="deload-pill">${BOLT_SVG}Déload actif · −20 %</span>` : '';
-  // Tuile : pictogramme du type + nom du programme (ou de la séance libre) en grand ; pastille et nom de la
-  // prochaine séance en petit (programme seulement) ; exercices et séries ; « + de détail » et démarrer.
-  // 1.7.24 : programme — la pastille déload se place au bout de la ligne de la prochaine séance (pas de ligne en plus)
-  const deloadInline = !libre && deloadHtml ? `<span class="deload-pill deload-inline">${BOLT_SVG}Déload −20 %</span>` : '';
-  const nextLine = libre ? '' : `
-      <div class="prog-tile-next">${programPillHtml(p, session.key, 'tiny')}<span class="prog-tile-session">${escapeHtml(sessionLabel(p, session))}</span>${deloadInline}</div>`;
-  // 1.7.24 : tuile compacte (−25 % de hauteur, mêmes informations) — démarrer à droite du nom,
-  // exercices · séries et « + de détail » sur la dernière ligne.
+  const deload = checkDeloadStatus() ? `<span class="deload-pill deload-inline">${BOLT_SVG}Déload −20 %</span>` : '';
+  const count = `<span class="next-card-count">${nEx} exercice${nEx > 1 ? 's' : ''} · ${nSets} série${nSets > 1 ? 's' : ''}</span>`;
+  // 1.7.25 (planche validée) : pictogramme + nom du programme ; pastille de séance de même taille, nom de la séance
+  // aligné sur celui du programme, exercices · séries dessous (déload au bout, à la ligne si la place manque) ; trait pointillé de l'icône jusqu'à
+  // « + de détail » (programme seulement) ; « + de détail » en bas à gauche, démarrer en bas à droite.
+  const middle = libre
+    ? `<div class="prog-tile-sum">${count}${deload}</div>`
+    : `<div class="prog-tile-next">${programPillHtml(p, session.key, 'mid')}<div class="prog-tile-next-text"><span class="prog-tile-session">${escapeHtml(sessionLabel(p, session))}</span><div class="prog-tile-sum">${count}${deload}</div></div></div>`;
   return `
     <div class="next-card prog-tile${libre ? ' libre' : ''}" data-lp="${escapeHtml(p.id)}">
+      ${libre ? '' : '<span class="prog-tile-line" aria-hidden="true"></span>'}
       <div class="prog-tile-top">
         ${libre ? '<span class="prog-ico libre">1×</span>' : `<span class="prog-ico">${SWAP_SVG}</span>`}
         <span class="session-name prog-tile-name">${escapeHtml(p.name)}</span>
-        <button type="button" class="btn-start${libre ? ' libre' : ''}" aria-label="Démarrer la séance" onclick="switchTab('seance')">${ARROW_SVG}</button>
-      </div>${nextLine}
-      ${libre ? deloadHtml : ''}
+      </div>
+      ${middle}
       <div class="next-card-row prog-tile-foot">
-        <span class="next-card-count">${nEx} exercice${nEx > 1 ? 's' : ''} · ${nSets} série${nSets > 1 ? 's' : ''}</span>
         <button type="button" class="prog-detail-btn" aria-expanded="${programDetailOpen}" onclick="toggleProgramDetail()">${programDetailOpen ? '- de détail' : '+ de détail'}</button>
+        <button type="button" class="btn-start${libre ? ' libre' : ''}" aria-label="Démarrer la séance" onclick="switchTab('seance')">${ARROW_SVG}</button>
       </div>
     </div>`;
 }
