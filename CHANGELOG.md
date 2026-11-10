@@ -7,6 +7,21 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.31] - 2026-11-10
+### 📐 Rationalisation de la feuille de style (co-auteur : Claude)
+Aucun changement de couleur, de style ou de mise en page ; seules des valeurs nées écran par écran sont ramenées à quelques paliers (planches « Pastilles de séance : 3 tailles » et « Rationalisation, lot B » de la maquette).
+- **Pastilles de séance** : 3 tailles — 56 px (détail d'une séance), 44 px (par défaut, y compris le choix « programme ou séance libre », 42 → 44), 40 px (tuile active, fin de séance 38 → 40, « Presque prêt » 36 → 40). Classe `.type-pill.tiny`, inutilisée, supprimée.
+- **Tailles de texte** : 38 → 15 paliers (12, 13, 14, 15, 16, 17, 18, 20, 22, 24, 28, 30, 32, 42, 73 px). Plus visible : nom du programme dans la tuile active 26,6 → 28 px.
+- **Rayons** : 18 → 5 (pilule, 10, 16, 22, 32 px) ; les éléments dont le rayon valait la moitié de la hauteur deviennent des pilules ; tuiles et détail de séance 34 → 32 px.
+- **Hauteurs** : paliers 40 / 44 / 48 / 52 / 56 px (puces de filtre 38 → 40, puces de l'ajout 42 → 44, bascule du graphique 36 → 40, saisie des séries et coche 50 → 52).
+- **Icônes** : 16 / 20 / 24 px (+ l'icône d'écran vide à 34 px).
+- **Illustrations d'exercice** : éditeur 51 → 55 px (55 partout, 70 dans le détail).
+- **Couleurs et ombres en dur → variables** : `--on-color`, `--hero-ink`, `--hero-chip`, `--hero-axis`, `--warn-icon(-bg)`, `--info(-icon-bg)`, `--record`, `--flame`, `--qr-bg`, `--sand-ico`, `--live-glow`, `--sh-sand`, `--sh-danger`, `--sh-thumb(-lg)`, `--sh-badge`, `--sh-toast`, `--veil-home`, `--veil-page`, `--font-hand` (mêmes valeurs, thème sombre compris).
+- Tests : suite complète au vert ; captures avant / après de 8 écrans comparées.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.31.
+
+---
+
 ## [1.7.30] - 2026-11-10
 ### ⏸️ Mettre le programme actif en pause depuis sa tuile (co-auteur : Claude)
 - **Bouton pause** (rond de 40 px, pictogramme pause) en haut à droite de la tuile du programme actif, aligné sur son icône ; aussi sur la séance libre active (couleur sable).
