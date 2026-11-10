@@ -448,10 +448,10 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 
 /* 4 derniers mois : barres horizontales */
 .bar-list { display: flex; flex-direction: column; gap: 16px; }
-.bar-row-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 8px; font-size: 0.9375rem; }
+.bar-row-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 8px; font-size: 1rem; }   /* textes : taille des dates de l'Historique (1.7.33) */
 .bar-label { font-weight: 600; color: var(--text); }
-.bar-meta { color: var(--text-muted); font-size: 0.875rem; }
-.bar-value { font-family: var(--font-display); font-weight: 700; font-size: 1.0625rem; color: var(--text); white-space: nowrap; }   /* même taille que le tonnage de l'Historique (1.7.33) */
+.bar-meta { color: var(--text-muted); }
+.bar-value { font-family: var(--font-display); font-weight: 700; font-size: 1.0625rem; color: var(--text); white-space: nowrap; }   /* valeurs : taille du tonnage de l'Historique (1.7.33) */
 .bar-track { height: 8px; background: var(--fill); border-radius: 999px; overflow: hidden; }
 .bar-fill { height: 100%; min-width: 4px; border-radius: 999px; background: var(--neutral); }
 .bar-fill.current { background: var(--primary-strong); }
@@ -461,20 +461,20 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 
 /* Records et paliers */
 .records-list, .plateaus-list { display: flex; flex-direction: column; gap: 8px; }
-.record-item, .plateau-item { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 16px 16px; border-radius: var(--radius-field); font-size: 0.9375rem; }
+.record-item, .plateau-item { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 16px 16px; border-radius: var(--radius-field); font-size: 1rem; }   /* textes : taille des dates de l'Historique (1.7.33) */
 .record-item { background: var(--success-tint); }
 .record-exercise { font-weight: 600; color: var(--success); flex: 1; }
-.record-value { font-family: var(--font-display); font-weight: 700; color: var(--text); }
-.record-improvement { color: var(--success); font-weight: 600; font-size: 0.875rem; }
+.record-value { font-family: var(--font-display); font-weight: 700; font-size: 1.0625rem; color: var(--text); white-space: nowrap; }
+.record-improvement { font-family: var(--font-display); color: var(--success); font-weight: 700; font-size: 1.0625rem; white-space: nowrap; }
 .plateau-item { background: var(--warn-tint); flex-wrap: wrap; }
 .plateau-exercise { font-weight: 600; color: var(--warn); }
-.plateau-value { font-family: var(--font-display); font-weight: 700; color: var(--text); white-space: nowrap; }
-.plateau-duration { color: var(--warn); font-size: 0.8125rem; flex-basis: 100%; }
+.plateau-value { font-family: var(--font-display); font-weight: 700; font-size: 1.0625rem; color: var(--text); white-space: nowrap; }
+.plateau-duration { color: var(--warn); flex-basis: 100%; }
 
 /* Progression par séance */
 .progress-row { display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 12px; }
 .progress-row + .progress-row { margin-top: 16px; }
-.stat-value { font-family: var(--font-display); font-weight: 700; color: var(--text); white-space: nowrap; font-size: 1rem; }
+.stat-value { font-family: var(--font-display); font-weight: 700; color: var(--text); white-space: nowrap; font-size: 1.0625rem; }
 .stat-value.positive { color: var(--success); }
 .stat-value.negative { color: var(--danger); }
 
@@ -802,7 +802,7 @@ body[data-seance="empty"] .seance-sticky { display: none; }
 .scope-chevron svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .filter-btn[hidden] { display: none; }
 .progress-row.named { grid-template-columns: 32px minmax(0, 1fr) minmax(60px, 30%) auto; }
-.progress-name { font-size: 0.9375rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.progress-name { font-size: 1rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .progress-row .mem-ico { background: var(--primary-strong); color: var(--on-strong); }
 #cardio-card[hidden] { display: none; }
 #cardio-filter[hidden] { display: none; }
