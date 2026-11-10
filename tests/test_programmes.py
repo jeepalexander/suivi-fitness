@@ -207,7 +207,7 @@ with Srv() as base, sync_playwright() as p:
 
     # ---------- 9. Progression : périmètre par défaut = actif, sélecteur, Tous ----------
     pg.evaluate("switchTab('progression')"); pg.wait_for_timeout(500)
-    check('Progression : statistiques de l\'élément actif (Sèche) par défaut', 'Sèche' in pg.inner_text('#stats-scope-btn') and pg.inner_text('#tab-progression .hero-label') == 'Indice de progression du programme')
+    check('Progression : statistiques de l\'élément actif (Sèche) par défaut', 'Sèche' in pg.inner_text('#stats-scope-btn') and pg.inner_text('#tab-progression .hero-label') == 'Indice de progression')
     check('filtre de séances : lettres du programme (A / B)', pg.inner_text('#btn-vol-type') == 'A / B', pg.inner_text('#btn-vol-type'))
     check('graphique de volume limité à Sèche (2 points)', pg.evaluate("tonnageChart.data.labels.length") == 2)
     check('Suivi cardio : menu limité au cardio de Sèche (Vélo elliptique, km/h)', 'Vélo elliptique' in pg.inner_text('#cardio-unit') and 'km/h' in pg.inner_text('#cardio-unit') and pg.inner_text('#cardio-current') == '16,5', pg.inner_text('#cardio-unit'))
@@ -220,7 +220,7 @@ with Srv() as base, sync_playwright() as p:
     pg.click('#btn-vol-type'); pg.wait_for_timeout(200)
     check('A / B / C : premier appui = séance A', pg.inner_text('#btn-vol-type') == 'Séance A')
     pg.click('#stats-scope-btn'); pg.click('.scope-item >> text=Tous les programmes'); pg.wait_for_timeout(500)
-    check('Tous : indice global, filtre de lettres masqué, progression par programme', pg.inner_text('#tab-progression .hero-label') == 'Indice de progression global' and not pg.is_visible('#btn-vol-type') and 'Progression par programme' in pg.inner_text('#monthly-analysis'))
+    check('Tous : même titre « Indice de progression », filtre de lettres masqué, progression par programme', pg.inner_text('#tab-progression .hero-label') == 'Indice de progression' and not pg.is_visible('#btn-vol-type') and 'Progression par programme' in pg.inner_text('#monthly-analysis'))
 
     # ---------- 10. Déload : reporter puis annuler ----------
     pg.evaluate("activateProgram('hypertrophie'); switchTab('seance')"); pg.wait_for_timeout(300)

@@ -7,6 +7,18 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.29] - 2026-11-10
+### 🎨 Fenêtres de l'app dans un seul style ; tuile de progression en dégradé (co-auteur : Claude)
+- **Plus aucune boîte système** (confirm / alert) : toutes deviennent le volet du bas de l'app, comme « Supprimer le programme » : pastille d'icône (ambre = attention, rouge = suppression, gris = Google Drive, bleu = information), titre, texte court, bouton principal (rouge pour une suppression) et bouton gris pour renoncer ; toucher le fond ou Échap = renoncer. Les messages d'information n'ont qu'un bouton OK.
+  - Éditeur : retour ou bouton Programmes avec une saisie non enregistrée (« Attention · Revenir en arrière annulera la saisie. Continuer ? »), retirer une séance remplie, abandonner une sélection d'exercices (le volet passe au-dessus de la liste).
+  - Séance : aucune série cochée, série à corriger, séries non cochées, annuler la séance en cours.
+  - Historique : supprimer une séance (au-dessus du détail), restaurer une sauvegarde Drive, remplacer / effacer la sauvegarde Drive, réinitialiser les données, import de fichier ; erreurs Google Drive.
+- **Progression** : la tuile principale passe à un dégradé indigo profond avec un reflet magenta en haut à droite ; son titre reste « Indice de progression » quel que soit le programme choisi.
+- Tests : `test_fenetres.py` (53 contrôles sur les vrais volets, 390 px clair / 360 px sombre, aucune boîte système, plus aucun `confirm()` / `alert()` dans le code) ; les tests existants répondent aux volets via un point d'accroche de test ; textes mis à jour.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.29.
+
+---
+
 ## [1.7.28] - 2026-11-10
 ### 🎨 Éditeur de programme : enregistrement plus clair ; liens légaux dans Réglages (co-auteur : Claude)
 - **Éditeur** : la phrase « Ajoute au moins un exercice dans chaque séance pour enregistrer » disparaît. Le bouton « Enregistrer le programme » apparaît et reste actif dès qu'un exercice est choisi.

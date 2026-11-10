@@ -66,7 +66,7 @@ with Srv() as url, sync_playwright() as p:
         pg.evaluate("editProgram(getActiveProgram().id)"); pg.wait_for_timeout(200)
         pg.evaluate("programDraft.name='Changé'")
         resp['confirm'] = False; pg.click('#nav-programme'); pg.wait_for_timeout(200)
-        ok(tag + "éditeur modifié, « Annuler » : on reste dans l'éditeur", pg.evaluate("programView") == 'editor' and msgs and 'Quitter sans enregistrer' in msgs[-1][1])
+        ok(tag + "éditeur modifié, « Annuler » : on reste dans l'éditeur", pg.evaluate("programView") == 'editor' and msgs and 'Revenir en arrière annulera la saisie' in msgs[-1][1])
         resp['confirm'] = True; pg.click('#nav-programme'); pg.wait_for_timeout(200)
         ok(tag + "éditeur modifié, « OK » : page de départ, rien d'enregistré", pg.evaluate("programView") == 'home' and pg.evaluate("getActiveProgram().name") != 'Changé')
         msgs.clear()

@@ -185,12 +185,12 @@ with Srv() as base, sync_playwright() as p:
     ctx, pg, dlg = run(br, base, d, seeds=[VALID, FOLDER])
     pg.wait_for_timeout(2500)
     rows = restore_pick(pg, 0)
-    conf = [m for (t, m) in dlg if t == 'confirm' and 'Restaurer la sauvegarde Drive' in m]
+    conf = [m for (t, m) in dlg if t == 'confirm' and 'Restaurer la sauvegarde du' in m]
     check("« Restaurer » : fenêtre avec la liste des sauvegardes affichée avant toute restauration", rows == 1, rows)
-    check("« Restaurer » : confirmation avec le nombre de séances et l'avertissement de remplacement", conf and f'({N + 1} séances)' in conf[-1] and f'cet appareil ({N} séances)' in conf[-1], conf[-1:] )
+    check("« Restaurer » : confirmation avec le nombre de séances et l'avertissement de remplacement", conf and f'contient {N + 1} séances' in conf[-1] and f'cet appareil ({N} séances)' in conf[-1], conf[-1:] )
     st = local_state(pg)
     check("restauration : les données de l'appareil deviennent celles du Drive (séance en plus incluse), conflit levé", len(st['history']) == N + 1 and any(h['id'] == 999999 for h in st['history']) and ls(pg, 'h49_drive_conflict') is None and ls(pg, 'h49_drive_backup_id') in {f['id'] for f in d.live()})
-    check("restauration : message « Sauvegarde importée avec succès »", any('importée avec succès' in m for (t, m) in dlg))
+    check("restauration : message « Sauvegarde importée »", any(m.startswith('Sauvegarde importée') for (t, m) in dlg))
     check("restauration : la sauvegarde restaurée reste sur le Drive, la plus récente version = données restaurées", any(f['id'] == 'BK1' for f in d.live()) and len((d.content() or {}).get('history', [])) == N + 1)
     check("restauration : la fenêtre des sauvegardes se referme", not pg.evaluate("!!document.querySelector('#sheet-overlay.open')"))
     ctx.close()

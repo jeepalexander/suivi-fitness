@@ -136,7 +136,7 @@ with Srv() as base, sync_playwright() as p:
     dlg.clear()
     pg.evaluate("document.getElementById('backup-restore-go').click()"); pg.wait_for_timeout(2500)
     conf = [mm for (t, mm) in dlg if t == 'confirm']
-    check("restaurer la 3e sauvegarde : confirmation avec SA date et SON nombre de séances", conf and rows[2]['t'] in conf[-1] and '(14 séances)' in conf[-1], conf[-1:])
+    check("restaurer la 3e sauvegarde : confirmation avec SA date et SON nombre de séances", conf and rows[2]['t'] in conf[-1] and 'contient 14 séances' in conf[-1], conf[-1:])
     check("restaurer la 3e sauvegarde : l'appareil contient exactement cette version", len(local_state(pg)['history']) == 14 and ls(pg, 'h49_drive_backup_id') == 'V5', len(local_state(pg)['history']))
     check("après restauration : fenêtre refermée", not pg.evaluate("!!document.querySelector('#sheet-overlay.open')"))
     # restaurer la plus ancienne de la liste (5e)

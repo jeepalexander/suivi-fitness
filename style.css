@@ -34,7 +34,7 @@
   --primary: #111114;
   --primary-strong: #131316;   /* fond des boutons */
   --on-strong: #FFFFFF;        /* texte posé sur --primary-strong */
-  --hero-bg: linear-gradient(135deg, #4A43F0 0%, #3730E3 100%);   /* bloc de progression : identique dans les deux thèmes */
+  --hero-bg: radial-gradient(80% 70% at 100% 0%, rgba(217, 70, 239, 0.55) 0%, rgba(217, 70, 239, 0) 60%), linear-gradient(160deg, #5B3FF0 0%, #3730E3 55%, #1F1A8F 100%);   /* 1.7.29 : indigo profond, reflet magenta */   /* bloc de progression : identique dans les deux thèmes */
 
   /* Rouge d'action */
   --accent: #E5392B;
@@ -917,3 +917,15 @@ body[data-tab="fond"] .page-title-row { margin-top: 10px; }
 .miss-ok { flex: none; width: 20px; height: 20px; fill: none; stroke: var(--success); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 :root[data-theme="dark"] .miss-row.empty .miss-sub, :root[data-theme="dark"] .miss-todo { color: #F5B862; }
 .legal-links a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+
+/* ============================================
+   1.7.29 — Fenêtres de confirmation et messages (remplacent confirm / alert)
+   ============================================ */
+.ask-overlay { z-index: 1600; }
+.ask-sheet { max-width: 600px; }
+.ask-sheet .sheet-text + .sheet-text { margin-top: -6px; }
+.ask-sheet #ask-ok { margin-top: 8px; }
+.sheet-icon.warn { background: #FDF0DC; color: #92400E; }
+.sheet-icon.info { background: #E3EEFB; color: #1B6FD8; }
+:root[data-theme="dark"] .sheet-icon.warn { background: #3A2A12; color: #F5B862; }
+:root[data-theme="dark"] .sheet-icon.info { background: #16263D; color: #7FB0F0; }

@@ -409,11 +409,14 @@ function addDraftSession() {
   renderProgramOverview();
 }
 
-function removeDraftSession() {
+async function removeDraftSession() {
   const d = programDraft;
   if (d.sessions.length <= SESSION_MIN) return;
   const s = draftSession();
-  if (s.exercises.length && !confirm(`Retirer la séance ${s.key} et ses ${s.exercises.length} exercice${s.exercises.length > 1 ? 's' : ''} ?`)) return;
+  const n = s.exercises.length;
+  if (n && !await askSheet({ tone: 'danger', danger: true, title: `Retirer la séance ${s.key} ?`,
+    text: `${n === 1 ? 'Son exercice sera retiré' : `Ses ${n} exercices seront retirés`} du programme.`, ok: 'Retirer la séance', cancel: 'Annuler' })) return;
+  if (programDraft !== d) return;
   d.sessions.splice(d.idx, 1);
   d.sessions.forEach((x, i) => { x.key = SESSION_KEYS[i]; });
   d.idx = Math.min(d.idx, d.sessions.length - 1);
@@ -422,18 +425,18 @@ function removeDraftSession() {
 
 // Bouton « Programmes » de la barre : toujours la page de départ (1.7.27).
 // Depuis l'éditeur, une saisie non enregistrée demande confirmation.
-function goProgramsHome() {
+async function goProgramsHome() {
   if (programView === 'editor' && programDraft && draftSnapshot(programDraft) !== programDraft.start
-      && !confirm('Quitter sans enregistrer ? Ta saisie sera perdue.')) return;
+      && !await askSheet(LEAVE_EDITOR_ASK)) return;
   if (programView !== 'home') programDraft = null;
   programView = 'home';
   programDetailOpen = false;
   switchTab('programme');
 }
 
-function programEditorBack() {
+async function programEditorBack() {
   if (programDraft && draftSnapshot(programDraft) !== programDraft.start
-      && !confirm('Quitter sans enregistrer ? Ta saisie sera perdue.')) return;
+      && !await askSheet(LEAVE_EDITOR_ASK)) return;
   const wasNew = programDraft && !programDraft.id;
   programDraft = null;
   setProgramView(wasNew ? 'choose' : 'home');
@@ -649,8 +652,11 @@ function confirmAddExercise() {
   renderProgramOverview();
 }
 
-function cancelAddExercise() {
-  if (addSheet && addSheet.selected.size && !confirm('Abandonner les exercices sélectionnés ?')) return;
+async function cancelAddExercise() {
+  const n = addSheet ? addSheet.selected.size : 0;
+  if (n && !await askSheet({ tone: 'warn', title: 'Abandonner la sélection ?',
+    text: n === 1 ? "L'exercice coché ne sera pas ajouté à la séance." : `Les ${n} exercices cochés ne seront pas ajoutés à la séance.`,
+    ok: 'Abandonner', cancel: 'Continuer la sélection' })) return;
   closeSheet();
 }
 
@@ -860,6 +866,62 @@ function openSheet(html, opts = {}) {
   overlay.innerHTML = `<div class="sheet${opts.tall ? ' tall' : ''}" role="dialog" aria-modal="true"><span class="sheet-grip" aria-hidden="true"></span>${html}</div>`;
   overlay.classList.add('open');
 }
+
+// ============================================================
+// FENÊTRES DE CONFIRMATION ET MESSAGES (1.7.29)
+// Remplacent confirm() et alert() : même volet du bas que « Supprimer le programme ».
+// Une couche à part (#ask-overlay), au-dessus des autres volets et fenêtres.
+// askSheet(...) renvoie une promesse : true = bouton principal, false = renoncer (bouton gris, fond, Échap).
+// ============================================================
+const WARN_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4l9 16H3z"/><path d="M12 10v4.5M12 17.5v.5"/></svg>';
+let askResolve = null;
+function askSheet({ tone = 'warn', title = '', text = '', ok = 'OK', cancel = null, danger = false } = {}) {
+  // Point d'accroche des tests automatiques (jamais défini dans l'application)
+  if (typeof window.__askHook === 'function') return Promise.resolve(!!window.__askHook({ tone, title, text, ok, cancel, danger }));
+  if (askResolve) finishAsk(false);
+  let overlay = document.getElementById('ask-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'ask-overlay';
+    overlay.className = 'sheet-overlay ask-overlay';
+    overlay.addEventListener('click', ev => {
+      if (ev.target === overlay) return finishAsk(false);
+      const b = ev.target.closest('[data-ask]');
+      if (b) finishAsk(b.dataset.ask === 'ok');
+    });
+    document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && askResolve) finishAsk(false); });
+    document.body.appendChild(overlay);
+  }
+  const icon = { warn: WARN_SVG, danger: TRASH_SVG, cloud: CLOUD_SVG, info: INFO_SVG }[tone] || WARN_SVG;
+  const paras = String(text || '').split(/\n\s*\n/).filter(Boolean).map(t => `<p class="sheet-text center">${escapeHtml(t.trim()).replace(/\n/g, '<br>')}</p>`).join('');
+  overlay.innerHTML = `<div class="sheet ask-sheet" role="alertdialog" aria-modal="true" aria-labelledby="ask-title">
+    <span class="sheet-grip" aria-hidden="true"></span>
+    <div class="sheet-icon ${tone}">${icon}</div>
+    <h3 class="sheet-title center" id="ask-title">${escapeHtml(title)}</h3>
+    ${paras}
+    <button type="button" class="btn${danger ? ' btn-delete' : ''}" id="ask-ok" data-ask="ok">${escapeHtml(ok)}</button>
+    ${cancel ? `<button type="button" class="btn btn-secondary" id="ask-cancel" data-ask="cancel">${escapeHtml(cancel)}</button>` : ''}
+  </div>`;
+  overlay.classList.add('open');
+  const focus = overlay.querySelector(cancel ? '#ask-cancel' : '#ask-ok');
+  if (focus) focus.focus({ preventScroll: true });
+  return new Promise(res => { askResolve = res; });
+}
+
+function finishAsk(value) {
+  const overlay = document.getElementById('ask-overlay');
+  if (overlay) { overlay.classList.remove('open'); overlay.innerHTML = ''; }
+  const res = askResolve;
+  askResolve = null;
+  if (res) res(value);
+}
+
+// Message d'information (un seul bouton OK)
+function appAlert(title, text = '', tone = 'info') {
+  return askSheet({ tone, title, text, ok: 'OK' });
+}
+
+const LEAVE_EDITOR_ASK = { tone: 'warn', title: 'Attention', text: 'Revenir en arrière annulera la saisie. Continuer ?', ok: 'Revenir en arrière', cancel: 'Rester sur le programme' };
 
 function closeSheet() {
   const overlay = document.getElementById('sheet-overlay');

@@ -1700,7 +1700,7 @@ function initWorkoutForm(customSession = null) {
 }
 
 // Enregistrement de la séance (formulaire de l'onglet Séance) : seules les séries cochées sont conservées
-function submitWorkout(e) {
+async function submitWorkout(e) {
   e.preventDefault();
   if (!workoutDef) return;
   let totalTonnage = 0;
@@ -1715,7 +1715,7 @@ function submitWorkout(e) {
   const validatedRows = setRows.filter(row => row.classList.contains('done'));
 
   if (validatedRows.length === 0) {
-    alert("Aucune série n'est cochée. Valide au moins une série avec la coche avant d'enregistrer la séance.");
+    appAlert('Aucune série cochée', "Valide au moins une série avec la coche avant d'enregistrer la séance.");
     return;
   }
 
@@ -1723,8 +1723,7 @@ function submitWorkout(e) {
   const refuse = (row, input, message) => {
     manualOpenExercise = items.indexOf(row.closest('.exercise-item'));
     refreshExerciseStates();
-    alert(message);
-    if (input) input.focus();
+    appAlert('Série à corriger', message, 'warn').then(() => { if (input) input.focus(); });
   };
 
   // Une série cochée doit avoir des valeurs valides (selon le mode de saisie de l'exercice)
@@ -1771,7 +1770,11 @@ function submitWorkout(e) {
     const okS = validatedRows.length > 1 ? 's' : '';
     const noS = uncheckedCount > 1 ? 's' : '';
     const ignored = uncheckedCount > 1 ? 'seront ignorées' : 'sera ignorée';
-    if (!confirm(`Enregistrer ${validatedRows.length} série${okS} cochée${okS} ?\n\n${uncheckedCount} série${noS} non cochée${noS} ${ignored}.`)) return;
+    const willS = validatedRows.length > 1 ? 'seront enregistrées' : 'sera enregistrée';
+    if (!await askSheet({ tone: 'warn', title: 'Séries non cochées',
+      text: `${validatedRows.length} série${okS} cochée${okS} ${willS}. ${uncheckedCount} série${noS} non cochée${noS} ${ignored}.`,
+      ok: 'Enregistrer', cancel: 'Revenir à la séance' })) return;
+    if (!workoutDef) return;
   }
 
   const logFor = (exName, cardio) => {
@@ -2170,13 +2173,15 @@ function injectSessionModalHtml() {
 // Suppression d'une séance de l'historique (essai de validation, saisie par erreur...).
 // Les dernières charges sont recalculées, la prochaine séance repart de l'historique restant, et la
 // sauvegarde Google Drive est mise à jour : la séance supprimée y est retirée (voir DRIVE_DELETED_KEY).
-function deleteSelectedSession() {
+async function deleteSelectedSession() {
   if (selectedSessionIndex === null) return;
   const idx = selectedSessionIndex;
   const session = state.history[idx];
   if (!session) return;
   const driveOn = isDriveWanted() || !!getDriveToken();
-  if (!confirm(`Supprimer définitivement la ${historySessionTitle(session).replace(/^Séance /, 'séance ')} ?` + (driveOn ? '\nElle sera aussi retirée de la sauvegarde Google Drive.' : ''))) return;
+  if (!await askSheet({ tone: 'danger', danger: true, title: `Supprimer la ${historySessionTitle(session).replace(/^Séance /, 'séance ')} ?`,
+    text: 'Suppression définitive.' + (driveOn ? ' Elle sera aussi retirée de la sauvegarde Google Drive.' : ''), ok: 'Supprimer la séance', cancel: 'Annuler' })) return;
+  if (state.history[idx] !== session) return;
 
   state.history.splice(idx, 1);
   if (session.id !== undefined && session.id !== null) rememberDeletedSessionId(session.id);
@@ -2238,8 +2243,9 @@ function closeSessionModal() {
 
 // Annule la séance en cours de saisie : arrête et remet à zéro le chrono, supprime le brouillon,
 // recrée un formulaire vide. Rien n'est enregistré dans l'historique.
-function cancelNewSession() {
-  if (!confirm("Annuler la séance en cours ? Les séries saisies et le chrono seront supprimés (rien n'est enregistré).")) return;
+async function cancelNewSession() {
+  if (!await askSheet({ tone: 'danger', danger: true, title: 'Annuler la séance ?',
+    text: "Les séries saisies et le chrono seront supprimés. Rien n'est enregistré.", ok: 'Annuler la séance', cancel: 'Continuer la séance' })) return;
   resetWorkoutTimer();
   // Chrono de pause : arrêté lui aussi (sinon le décompte et le « GO ! » continuent)
   if (restTimerInterval) { clearInterval(restTimerInterval); restTimerInterval = null; }
@@ -2317,7 +2323,7 @@ function renderStatsScopeButton() {
     <span class="scope-text"><span class="scope-name">${escapeHtml(statsScopeName(scope))}</span><span class="scope-sub">${active ? '<span class="prog-dot on"></span>' : ''}${escapeHtml(statsScopeStatusText(scope))}</span></span>
     <span class="scope-chevron">${CHEVRON_SVG}</span>`;
   const label = document.querySelector('#tab-progression .hero-label');
-  if (label) label.textContent = scope === 'all' ? 'Indice de progression global' : (libre ? 'Indice de progression de la séance libre' : 'Indice de progression du programme');
+  if (label) label.textContent = 'Indice de progression';   // 1.7.29 : même titre quel que soit le programme
   const typeBtn = document.getElementById('btn-vol-type');
   if (typeBtn) typeBtn.hidden = statsLetters(scope).length === 0;
 }
@@ -3657,7 +3663,7 @@ function initDriveTokenClient() {
       if (resp.error) {
         console.warn('Drive auth error', resp);
         if (driveRenewPending) { driveRenewPending.finish(false); updateDriveUI(); return; } // renouvellement silencieux : pas d'alerte
-        alert('Connexion Google Drive annulée ou échouée.');
+        appAlert('Connexion annulée', 'La connexion à Google Drive a été annulée ou a échoué.', 'cloud');
         return;
       }
       setDriveToken(resp);
@@ -3703,7 +3709,7 @@ function connectDriveByRedirect() {
   crypto.getRandomValues(bytes);
   const state = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
   try { localStorage.setItem(DRIVE_OAUTH_STATE_KEY, state); }
-  catch (e) { alert('Stockage indisponible : connexion impossible.'); return; }
+  catch (e) { appAlert('Connexion impossible', "Le stockage de l'appareil est indisponible.", 'warn'); return; }
   const p = new URLSearchParams({
     client_id: GOOGLE_CLIENT_ID,
     redirect_uri: driveRedirectUri(),
@@ -3787,7 +3793,7 @@ function connectGoogleDrive() {
   if (isInstalledApp()) { setTimeout(connectDriveByRedirect, DRIVE_CONNECT_DELAY_MS); return; }
   initDriveTokenClient();
   if (!driveTokenClient) {
-    alert('Bibliothèque Google non chargée. Vérifie ta connexion et réessaie.');
+    appAlert('Google indisponible', 'La bibliothèque Google ne s\'est pas chargée. Vérifie ta connexion et réessaie.', 'cloud');
     return;
   }
   // prompt only if we have no token
@@ -4093,14 +4099,16 @@ async function refreshDriveConflictDate() {
   } catch (e) { /* date facultative */ }
 }
 
-function replaceDriveBackupWithThisDevice() {
+async function replaceDriveBackupWithThisDevice() {
   const c = getDriveConflict();
   if (!c) return;
   const when = formatDriveDate(c.modified) || 'date inconnue';
   const what = '(' + (c.sessions != null ? c.sessions + ' séances, ' : '') + 'modifiée le ' + when + ')';
   const ok = isDeviceEmpty()
-    ? confirm('Effacer DÉFINITIVEMENT la sauvegarde Drive ' + what + ' ?\n\nCet appareil ne contient aucune séance : la sauvegarde sera vidée et ses séances perdues (irréversible depuis l\'application).')
-    : confirm('Remplacer la sauvegarde Drive ' + what + ' par les données de cet appareil ?\n\nLes séances qu\'elle contient et que cet appareil n\'a pas seront perdues.');
+    ? await askSheet({ tone: 'danger', danger: true, title: 'Effacer la sauvegarde Drive ?',
+        text: 'La sauvegarde ' + what + ' sera vidée : cet appareil ne contient aucune séance. Ses séances seront perdues (irréversible depuis l\'application).', ok: 'Effacer', cancel: 'Annuler' })
+    : await askSheet({ tone: 'danger', danger: true, title: 'Remplacer la sauvegarde Drive ?',
+        text: 'La sauvegarde ' + what + ' sera remplacée par les données de cet appareil. Les séances qu\'elle seule contient seront perdues.', ok: 'Remplacer', cancel: 'Annuler' });
   if (!ok) return;
   setDriveBackupId(c.id);
   setDriveConflict(null);
@@ -4220,30 +4228,31 @@ function openBackupRestore() { restoreFromDrive(); }
 async function restoreDriveBackup(file) {
   const token = getDriveToken();
   if (!token) {
-    alert(isInstalledApp() ? 'Accès Google expiré : touche d\'abord « Reconnecter maintenant ».' : 'Connecte-toi d\'abord à Google Drive.');
+    appAlert('Google Drive', isInstalledApp() ? 'Accès Google expiré : touche d\'abord « Reconnecter maintenant ».' : 'Connecte-toi d\'abord à Google Drive.', 'cloud');
     return;
   }
   if (!file || typeof file.id !== 'string') return;
   try {
     const dl = await downloadDriveBackup(token.access_token, file.id);
     if (!dl.ok && dl.status === 404) {
-      alert('Cette sauvegarde n\'existe plus sur le Drive : la liste a été mise à jour, rien n\'a été modifié.');
+      appAlert('Sauvegarde introuvable', 'Cette sauvegarde n\'existe plus sur le Drive : la liste a été mise à jour, rien n\'a été modifié.', 'warn');
       restoreFromDrive();
       return;
     }
     if (!dl.ok || !dl.data || !Array.isArray(dl.data.history)) {
-      alert('La sauvegarde Drive est illisible ou invalide : rien n\'a été modifié.');
+      appAlert('Restauration impossible', 'La sauvegarde Drive est illisible ou invalide : rien n\'a été modifié.', 'warn');
       return;
     }
     const when = formatDriveBackupDate(file.modifiedTime);
     const n = dl.data.history.length;
     if (n === 0) {
-      alert('La sauvegarde Drive du ' + when + ' ne contient aucune séance : rien à restaurer, tes données n\'ont pas été modifiées.\n\nSi tu as un fichier de sauvegarde manuel, utilise « Restaurer » dans l\'Historique.');
+      appAlert('Sauvegarde vide', 'La sauvegarde Drive du ' + when + ' ne contient aucune séance : rien à restaurer, tes données n\'ont pas été modifiées.\n\nSi tu as un fichier de sauvegarde manuel, utilise « Restaurer » dans l\'Historique.', 'cloud');
       return;
     }
     const local = state && Array.isArray(state.history) ? state.history.length : 0;
-    if (!confirm('Restaurer la sauvegarde Drive du ' + when + ' (' + n + ' séance' + (n > 1 ? 's' : '') + ') ?\n\n'
-      + 'Cela remplace les données de cet appareil (' + local + ' séance' + (local > 1 ? 's' : '') + ').')) return;
+    if (!await askSheet({ tone: 'cloud', title: 'Restaurer la sauvegarde du ' + when + ' ?',
+      text: 'Elle contient ' + n + ' séance' + (n > 1 ? 's' : '') + ' et remplace les données de cet appareil (' + local + ' séance' + (local > 1 ? 's' : '') + ').',
+      ok: 'Restaurer', cancel: 'Annuler' })) return;
     setDriveBackupId(file.id);
     setDriveConflict(null);
     const f = new File([dl.text], file.name || DRIVE_BACKUP_NAME, { type: 'application/json' });
@@ -4251,7 +4260,7 @@ async function restoreDriveBackup(file) {
     hideDriveBackupList();
     updateDriveUI();
   } catch (e) {
-    alert('Restauration impossible : ' + (e && e.message ? e.message : 'erreur réseau') + '.');
+    appAlert('Restauration impossible', 'Restauration impossible : ' + (e && e.message ? e.message : 'erreur réseau') + '.', 'warn');
   }
 }
 
@@ -4343,7 +4352,7 @@ function importData(event) {
       if (importedState && Array.isArray(importedState.history)) {
         // Ancienne sauvegarde (sans programmes) : migration « Hypertrophie » comme au premier lancement
         const mig = migrateState(importedState);
-        if (mig.error) { alert("Sauvegarde importée impossible à convertir au format des programmes : rien n'a été modifié."); return; }
+        if (mig.error) { appAlert('Import impossible', "La sauvegarde importée ne peut pas être convertie au format des programmes : rien n'a été modifié.", 'warn'); return; }
         state = mig.state;
         normalizePrograms();
         programDraft = null; programView = 'home';
@@ -4356,12 +4365,12 @@ function importData(event) {
         renderHistory();
         renderCharts();
         renderProgramOverview();
-        alert("Sauvegarde importée avec succès !");
+        appAlert('Sauvegarde importée', 'Tes données ont été restaurées.');
       } else {
-        alert("Fichier de sauvegarde invalide (structure incorrecte).");
+        appAlert('Fichier invalide', 'Ce fichier de sauvegarde a une structure incorrecte.', 'warn');
       }
     } catch (err) {
-      alert("Erreur lors de la lecture du fichier JSON.");
+      appAlert('Fichier illisible', 'Erreur lors de la lecture du fichier de sauvegarde.', 'warn');
     } finally {
       event.target.value = '';
     }
@@ -4369,8 +4378,9 @@ function importData(event) {
   reader.readAsText(file);
 }
 
-function resetData() {
-  const confirm1 = confirm("⚠️ ATTENTION : Êtes-vous SÛR de vouloir effacer vos saisies récentes ?");
+async function resetData() {
+  const confirm1 = await askSheet({ tone: 'danger', danger: true, title: 'Réinitialiser les données ?',
+    text: "Tes séances, pesées et programmes seront remplacés par les données d'origine.", ok: 'Réinitialiser', cancel: 'Annuler' });
   if (confirm1) {
     fetch('data.json').then(res => res.json()).then(defaultData => {
       state = migrateState(defaultData).state;
@@ -4385,9 +4395,9 @@ function resetData() {
       renderHistory();
       renderCharts();
       renderProgramOverview();
-      alert("Données réinitialisées avec succès.");
+      appAlert('Données réinitialisées', "Les données d'origine ont été rechargées.");
     }).catch(() => {
-      alert("Erreur lors de la réinitialisation.");
+      appAlert('Réinitialisation impossible', 'Erreur lors de la réinitialisation.', 'warn');
     });
   }
 }
@@ -4536,7 +4546,7 @@ async function initApp() {
   }
   const mig = migrateState(state);
   state = mig.state;
-  if (mig.error) setTimeout(() => alert('La conversion de tes séances au format des programmes a échoué : tes données d\'origine sont conservées telles quelles.\n\nDétail : ' + mig.error.message), 600);
+  if (mig.error) setTimeout(() => appAlert('Conversion impossible', 'La conversion de tes séances au format des programmes a échoué : tes données d\'origine sont conservées telles quelles.\n\nDétail : ' + mig.error.message, 'warn'), 600);
   normalizePrograms();
   recalculateHistoryTonnages();
   getPrograms().forEach(p => { if (!isLibre(p)) p.nextKey = nextKeyFromHistory(p); });

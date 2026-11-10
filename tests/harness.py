@@ -29,7 +29,7 @@ class Srv:
         self.p.terminate()
 
 
-def newpage(br, w=390, h=844, scheme='light', sw='block', pref=None, seed=True):
+def newpage(br, w=390, h=844, scheme='light', sw='block', pref=None, seed=True, native_dialogs=True):
     """Page neuve avec les données du jeu d'essai (tests/fixture_data.json) dans localStorage ; pref = thème forcé ('light' / 'dark' / 'auto')."""
     ctx = br.new_context(viewport={'width': w, 'height': h}, device_scale_factor=2, service_workers=sw, color_scheme=scheme)
     # Le script Google Identity (sauvegarde Drive) n'est jamais chargé pour de vrai dans les tests.
@@ -43,5 +43,9 @@ def newpage(br, w=390, h=844, scheme='light', sw='block', pref=None, seed=True):
         init += "if(!localStorage.getItem('h49_state'))localStorage.setItem('h49_state', %s);" % json.dumps(json.dumps(DATA))
     if pref:
         init += "if(!sessionStorage.getItem('seeded')){localStorage.setItem('h49_theme','%s');sessionStorage.setItem('seeded','1')}" % pref
+    if native_dialogs:
+        # 1.7.29 : les volets de confirmation de l'app (askSheet) passent par les boîtes natives dans les tests
+        # historiques, pour garder leurs réponses automatiques ; test_fenetres.py vérifie les vrais volets.
+        init += "window.__askHook=function(o){var m=[o.title,o.text].filter(Boolean).join('\\n\\n');if(o.cancel)return confirm(m);alert(m);return true};"
     pg.add_init_script(init)
     return ctx, pg, errs
