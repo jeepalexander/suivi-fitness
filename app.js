@@ -3168,7 +3168,7 @@ function renderProgressAnalysis() {
     container.innerHTML = `
       <div class="card analysis-empty">
         <p>\ud83d\udcca Aucune donnée disponible.</p>
-        <p style="font-size: 0.9125rem; margin-top: 8px;">Enregistre des séances pour voir ta progression !</p>
+        <p class="analysis-empty-hint">Enregistre des séances pour voir ta progression !</p>
       </div>`;
     return;
   }

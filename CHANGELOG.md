@@ -7,6 +7,20 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.32] - 2026-11-10
+### 📐 Rationalisation, suite : espacements, interlignes, mouvement, superpositions, rangement (co-auteur : Claude)
+- **Espacements** (marges et marges intérieures) sur une grille de 4 px : 33 → 15 valeurs (micro-ajustements de 1 et 2 px et décalages négatifs conservés, marge de page 26 px inchangée). Exception : la tuile active garde sa hauteur validée (écart sous la ligne de séance 12 px, pied 4 px).
+- **Écarts entre éléments** : 4 / 8 / 12 / 16 px (2, 3 → 4 ; 6 → 8 ; 10 → 12 ; 14 → 16).
+- **Interlignes** : 11 → 4 (1 ; 1,05 titres ; 1,35 petits textes ; 1,45 paragraphes).
+- **Mouvement** : deux durées nommées, `--t-fast` (0,15 s) et `--t-normal` (0,25 s) ; l'appui long garde 0,45 s.
+- **Superpositions** : échelle nommée `--z-wallpaper` … `--z-toast` (mêmes valeurs).
+- **Rangement de style.css** : un seul bloc de variables par thème ; échauffement, nom d'exercice et sous-titre de séance définis à un seul endroit ; sections nommées par composant.
+- **Restes** : classes inutilisées `.next-card-info` et `.type-letter` supprimées ; texte de Progression vide et écart des boutons Google Drive sortis du code en dur ; fenêtre de fin de séance à 20 px de marge pour que « Séance (A) terminée » tienne à 360 px.
+- Tests : suite complète au vert ; captures avant / après de 8 écrans.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.32.
+
+---
+
 ## [1.7.31] - 2026-11-10
 ### 📐 Rationalisation de la feuille de style (co-auteur : Claude)
 Aucun changement de couleur, de style ou de mise en page ; seules des valeurs nées écran par écran sont ramenées à quelques paliers (planches « Pastilles de séance : 3 tailles » et « Rationalisation, lot B » de la maquette).
