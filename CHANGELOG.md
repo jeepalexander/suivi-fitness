@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.33] - 2026-11-10
+### 📊 Progression : chiffres et textes plus lisibles (co-auteur : Claude)
+- **Valeurs en 17 px** (taille du tonnage de l'Historique) : tonnages des 4 derniers mois, kg et gain des records, kg des paliers, % de la progression par séance / programme.
+- **Textes associés en 16 px** (taille des dates de l'Historique) : mois et nombre de séances, noms d'exercice, phrase des paliers, noms de la progression par programme.
+- **Paliers** : « sans progression depuis X séances » (sans la date), sur une ligne, directement sous le nom de l'exercice ; poids à droite sur la ligne du nom.
+- **Gélules des records et des paliers** : même hauteur (68 px).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.33.
+
+---
+
 ## [1.7.32] - 2026-11-10
 ### 📐 Rationalisation, suite : espacements, interlignes, mouvement, superpositions, rangement (co-auteur : Claude)
 - **Espacements** (marges et marges intérieures) sur une grille de 4 px : 33 → 15 valeurs (micro-ajustements de 1 et 2 px et décalages négatifs conservés, marge de page 26 px inchangée). Exception : la tuile active garde sa hauteur validée (écart sous la ligne de séance 12 px, pied 4 px).
