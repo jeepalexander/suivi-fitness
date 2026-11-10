@@ -901,3 +901,19 @@ body[data-tab="fond"] .page-title-row { margin-top: 10px; }
 .finish-rec { margin: 8px 0 0; font-size: 1.0625rem; font-weight: 600; }
 .finish-rec + .finish-rec { margin-top: 4px; }
 .finish-ok { margin-top: 22px; }
+
+/* ============================================
+   1.7.28 — Éditeur : résumé des séances vides ; Réglages : liens légaux
+   ============================================ */
+.miss-list { list-style: none; margin: 4px 0 18px; padding: 0; }
+.miss-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.miss-row:last-child { border-bottom: 0; }
+.miss-row .type-pill { flex: none; width: 36px; height: 36px; font-size: 1.0625rem; }
+.miss-text { flex: 1; min-width: 0; text-align: left; }
+.miss-name { display: block; font-size: 1rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.miss-sub { display: block; font-size: 0.84375rem; color: var(--text-muted); }
+.miss-row.empty .miss-sub, .miss-todo { color: #92400E; }
+.miss-todo { flex: none; font-size: 0.84375rem; font-weight: 600; }
+.miss-ok { flex: none; width: 20px; height: 20px; fill: none; stroke: var(--success); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+:root[data-theme="dark"] .miss-row.empty .miss-sub, :root[data-theme="dark"] .miss-todo { color: #F5B862; }
+.legal-links a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }

@@ -91,8 +91,17 @@ with Srv() as base, sync_playwright() as p:
     pg.fill('#ed-name', 'Sèche')
     pg.click('.ed-seg-btn >> text=A'); pg.fill('#ed-sname', 'Haut')
     add_exercises(pg, [26, 39])   # Tractions (poids du corps), Développé couché
-    check('éditeur : « Enregistrer » caché tant qu\'une séance est vide', not pg.locator('#ed-save').count())
-    pg.click('.ed-seg-btn >> text=B')
+    check('éditeur (1.7.28) : « Enregistrer » visible dès le 1er exercice, plus de phrase « Ajoute au moins… »', pg.is_visible('#ed-save') and 'Ajoute au moins' not in pg.inner_text('#program-overview'))
+    n_before = len(state(pg).get('programs', []))
+    pg.click('#ed-save'); pg.wait_for_timeout(300)
+    check('séance B vide : résumé « Presque prêt », A complète (coche), B « À compléter », rien d\'enregistré',
+          pg.is_visible('#sheet-overlay') and 'Presque prêt' in pg.inner_text('#sheet-overlay') and "La séance B n'a encore aucun exercice" in pg.inner_text('#sheet-overlay')
+          and pg.locator('.miss-row').count() == 2 and pg.locator('.miss-row:not(.empty) .miss-ok').count() == 1
+          and 'Aucun exercice' in pg.inner_text('.miss-row.empty') and len(state(pg).get('programs', [])) == n_before, pg.inner_text('#sheet-overlay') if pg.is_visible('#sheet-overlay') else '')
+    ov = pg.evaluate(OVERFLOW_JS)
+    check('résumé : rien ne déborde', ov['docW'] <= ov['vw'] and not ov['out'], ov)
+    pg.click('#miss-go'); pg.wait_for_timeout(250)
+    check('« Compléter la séance B » : volet fermé, séance B sélectionnée', not pg.is_visible('#sheet-overlay') and pg.evaluate("programDraft.idx") == 1)
     add_exercises(pg, [86, 76])   # Vélo elliptique (km/h), Planche (durée)
     check('éditeur : liste de la séance B (2 exercices · 4 séries)', '2 exercices · 4 séries' in pg.inner_text('#program-overview'), pg.inner_text('.ed-count'))
     pg.click('#ed-save'); pg.wait_for_timeout(300)

@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.28] - 2026-11-10
+### 🎨 Éditeur de programme : enregistrement plus clair ; liens légaux dans Réglages (co-auteur : Claude)
+- **Éditeur** : la phrase « Ajoute au moins un exercice dans chaque séance pour enregistrer » disparaît. Le bouton « Enregistrer le programme » apparaît et reste actif dès qu'un exercice est choisi.
+- **Séances vides à l'enregistrement** : un volet « Presque prêt » résume la situation (une ligne par séance : pastille, nom, nombre d'exercices et de séries avec une coche, ou « Aucun exercice · À compléter »), avec « Compléter la séance B » (ouvre la première séance vide) et « Fermer ». Rien n'est enregistré tant qu'une séance est vide.
+- **Réglages › Application** : liens « Règles de confidentialité » et « Conditions d'utilisation » (nouvel onglet).
+- Tests : `test_editeur_incomplet.py` (42 contrôles, 390/360 px, clair/sombre) ; `test_programmes.py` adapté.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.28.
+
+---
+
 ## [1.7.27] - 2026-11-09
 ### 🎨 Séance : en-tête allégé, échauffement, fenêtre de fin de séance (co-auteur : Claude)
 - **Bouton « Programmes »** de la barre : ramène toujours à la page de départ (choix d'un programme, éditeur ou détail refermés). Depuis l'éditeur avec une saisie non enregistrée, la confirmation « Quitter sans enregistrer ? » est demandée.

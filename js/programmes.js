@@ -372,18 +372,18 @@ function editorHtml() {
   }).join('') + `</div>`;
   html += `<button type="button" class="ed-add" onclick="openAddExercise()"><span class="ed-add-plus">${PLUS_SVG}</span>Ajouter un exercice</button>`;
 
-  const complete = d.sessions.every(x => x.exercises.length > 0);
+  // 1.7.28 : le bouton apparaît dès qu'un exercice est choisi dans une séance ;
+  // s'il reste des séances vides, l'appui ouvre un résumé (rien n'est enregistré).
+  const anyExercise = d.sessions.some(x => x.exercises.length > 0);
   html += `<div class="ed-footer">`;
   if (!isNew) html += `<button type="button" class="ed-delete" onclick="openDeleteProgram()">${TRASH_SVG}${libre ? 'Supprimer la séance libre' : 'Supprimer le programme'}</button>`;
-  if (complete) {
+  if (anyExercise) {
     let label;
     if (!isNew) label = 'Enregistrer';
     else if (libre) label = getActiveProgram() ? 'Enregistrer la séance libre' : 'Démarrer la séance';
     else label = 'Enregistrer le programme';
     if (isNew && !libre) html += `<p class="ed-note">Tu pourras tout modifier plus tard, dans Programme.</p>`;
     html += `<button type="button" class="btn${libre ? ' btn-sand' : ''}" id="ed-save" onclick="saveProgramDraft()">${label}</button>`;
-  } else if (!libre && nEx > 0) {
-    html += `<p class="ed-note">Ajoute au moins un exercice dans chaque séance pour enregistrer.</p>`;
   }
   html += `</div>`;
   return html;
@@ -439,9 +439,46 @@ function programEditorBack() {
   setProgramView(wasNew ? 'choose' : 'home');
 }
 
+// Résumé quand des séances sont encore vides à l'enregistrement (1.7.28)
+function openMissingSessions() {
+  const d = programDraft;
+  if (!d) return;
+  const empty = d.sessions.filter(x => !x.exercises.length);
+  if (!empty.length) return;
+  const n = empty.length;
+  const text = n === 1
+    ? `La séance ${empty[0].key} n'a encore aucun exercice. Ajoutes-en au moins un pour enregistrer le programme.`
+    : `${n} séances n'ont encore aucun exercice. Ajoutes-en au moins un dans chacune pour enregistrer le programme.`;
+  const rows = d.sessions.map(x => {
+    const ne = x.exercises.length;
+    const ns = x.exercises.reduce((t, e) => t + (Number(e.sets) || exInfo(e.exId).sets || 3), 0);
+    const name = (x.name || '').trim() || `Séance ${x.key}`;
+    return `<li class="miss-row${ne ? '' : ' empty'}">
+      <span class="type-pill type-pill-${x.key}">${x.key}</span>
+      <span class="miss-text"><span class="miss-name">${escapeHtml(name)}</span><span class="miss-sub">${ne ? `${ne} exercice${ne > 1 ? 's' : ''} · ${ns} série${ns > 1 ? 's' : ''}` : 'Aucun exercice'}</span></span>
+      ${ne ? `<svg class="miss-ok" viewBox="0 0 24 24" role="img" aria-label="complète"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>` : `<span class="miss-todo">À compléter</span>`}
+    </li>`;
+  }).join('');
+  openSheet(`
+    <h3 class="sheet-title center">Presque prêt</h3>
+    <p class="sheet-text center">${text}</p>
+    <ul class="miss-list">${rows}</ul>
+    <button type="button" class="btn" id="miss-go" onclick="completeMissingSession()">Compléter la séance ${empty[0].key}</button>
+    <button type="button" class="btn btn-secondary" onclick="closeSheet()">Fermer</button>`);
+}
+
+function completeMissingSession() {
+  const d = programDraft;
+  closeSheet();
+  if (!d) return;
+  const i = d.sessions.findIndex(x => !x.exercises.length);
+  if (i >= 0) selectDraftSession(i);
+}
+
 function saveProgramDraft() {
   const d = programDraft;
-  if (!d || !d.sessions.every(x => x.exercises.length > 0)) return;
+  if (!d || !d.sessions.some(x => x.exercises.length > 0)) return;
+  if (!d.sessions.every(x => x.exercises.length > 0)) { openMissingSessions(); return; }
   const libre = d.kind === 'libre';
   const name = (d.name || '').replace(/[<>]/g, '').trim() || (libre ? 'Séance libre' : 'Mon programme');
   const now = new Date().toISOString();
