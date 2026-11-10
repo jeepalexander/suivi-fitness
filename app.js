@@ -3213,9 +3213,11 @@ function renderProgressAnalysis() {
     analysis.plateaus.forEach(plateau => {
       html += `
         <div class="plateau-item">
-          <span class="plateau-exercise">${plateau.exercise}</span>
+          <span class="plateau-text">
+            <span class="plateau-exercise">${plateau.exercise}</span>
+            <span class="plateau-duration">sans progression depuis ${plateau.sessionsCount} séance${plateau.sessionsCount > 1 ? 's' : ''}</span>
+          </span>
           <span class="plateau-value">${plateau.currentMax} kg</span>
-          <span class="plateau-duration">sans progression depuis ${plateau.sessionsCount} séance${plateau.sessionsCount > 1 ? 's' : ''}</span>
         </div>`;
     });
     html += `</div>`;
