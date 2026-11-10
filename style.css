@@ -451,7 +451,7 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 .bar-row-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 8px; font-size: 0.9375rem; }
 .bar-label { font-weight: 600; color: var(--text); }
 .bar-meta { color: var(--text-muted); font-size: 0.875rem; }
-.bar-value { font-family: var(--font-display); font-weight: 700; color: var(--text); white-space: nowrap; }
+.bar-value { font-family: var(--font-display); font-weight: 700; font-size: 1.0625rem; color: var(--text); white-space: nowrap; }   /* même taille que le tonnage de l'Historique (1.7.33) */
 .bar-track { height: 8px; background: var(--fill); border-radius: 999px; overflow: hidden; }
 .bar-fill { height: 100%; min-width: 4px; border-radius: 999px; background: var(--neutral); }
 .bar-fill.current { background: var(--primary-strong); }
