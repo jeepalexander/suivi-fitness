@@ -3215,7 +3215,7 @@ function renderProgressAnalysis() {
         <div class="plateau-item">
           <span class="plateau-exercise">${plateau.exercise}</span>
           <span class="plateau-value">${plateau.currentMax} kg</span>
-          <span class="plateau-duration">sans progression depuis le ${plateau.sinceDate.substring(8, 10)}/${plateau.sinceDate.substring(5, 7)} (${plateau.sessionsCount} séances)</span>
+          <span class="plateau-duration">sans progression depuis ${plateau.sessionsCount} séance${plateau.sessionsCount > 1 ? 's' : ''}</span>
         </div>`;
     });
     html += `</div>`;
