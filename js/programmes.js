@@ -157,6 +157,7 @@ function activeTileHtml(p) {
       <div class="prog-tile-top">
         ${libre ? '<span class="prog-ico libre">1×</span>' : `<span class="prog-ico">${SWAP_SVG}</span>`}
         <span class="session-name prog-tile-name">${escapeHtml(p.name)}</span>
+        <button type="button" class="prog-pause-btn" aria-label="Mettre « ${escapeHtml(p.name)} » en pause (en mémoire)" title="Mettre en pause" onclick="pauseActiveProgram()">${PAUSE_SVG}</button>
       </div>
       ${middle}
       <div class="next-card-row prog-tile-foot">
@@ -245,6 +246,33 @@ function activateProgram(id) {
   saveState();
   backupToDrive({ autoReconnect: false });
   programDetailOpen = false;
+  clearDraft();
+  initWorkoutForm();
+  renderProgramOverview();
+}
+
+// Pause (1.7.30) : bouton en haut à droite de la tuile active ; le programme passe « En mémoire »
+// (« En pause depuis le … »), aucun programme n'est alors actif. Une séance en cours demande confirmation.
+async function pauseActiveProgram() {
+  const p = getActiveProgram();
+  if (!p) return;
+  let started = false;
+  try { started = localStorage.getItem('workout_start_time') !== null; } catch (e) { /* ignoré */ }
+  if (started && !await askSheet({ tone: 'warn', title: `Mettre en pause « ${p.name} » ?`,
+    text: 'Une séance est en cours : les séries saisies et le chrono seront supprimés.', ok: 'Mettre en pause', cancel: 'Continuer la séance' })) return;
+  if (getActiveProgram() !== p) return;
+  p.status = 'paused';
+  p.pausedAt = new Date().toISOString();
+  syncNextType();
+  saveState();
+  backupToDrive({ autoReconnect: false });
+  programDetailOpen = false;
+  if (started) {
+    resetWorkoutTimer();
+    if (restTimerInterval) { clearInterval(restTimerInterval); restTimerInterval = null; }
+    try { localStorage.removeItem('rest_end_time'); } catch (e) { /* ignoré */ }
+    resetRestTimerUi();
+  }
   clearDraft();
   initWorkoutForm();
   renderProgramOverview();

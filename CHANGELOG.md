@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.30] - 2026-11-10
+### ⏸️ Mettre le programme actif en pause depuis sa tuile (co-auteur : Claude)
+- **Bouton pause** (rond de 40 px, pictogramme pause) en haut à droite de la tuile du programme actif, aligné sur son icône ; aussi sur la séance libre active (couleur sable).
+- Un appui passe le programme **En mémoire** (« En pause depuis le … ») ; plus aucun programme n'est actif (« Aucun programme actif »). « Réactiver » le remet en service.
+- Si une séance est en cours, un volet demande confirmation (« Mettre en pause « … » ? » / « Continuer la séance ») ; confirmer remet le chrono à zéro et supprime le brouillon.
+- Tests : `test_pause_actif.py` (18 contrôles, 390 px clair / 360 px sombre).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.30.
+
+---
+
 ## [1.7.29] - 2026-11-10
 ### 🎨 Fenêtres de l'app dans un seul style ; tuile de progression en dégradé (co-auteur : Claude)
 - **Plus aucune boîte système** (confirm / alert) : toutes deviennent le volet du bas de l'app, comme « Supprimer le programme » : pastille d'icône (ambre = attention, rouge = suppression, gris = Google Drive, bleu = information), titre, texte court, bouton principal (rouge pour une suppression) et bouton gris pour renoncer ; toucher le fond ou Échap = renoncer. Les messages d'information n'ont qu'un bouton OK.

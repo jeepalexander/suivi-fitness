@@ -929,3 +929,8 @@ body[data-tab="fond"] .page-title-row { margin-top: 10px; }
 .sheet-icon.info { background: #E3EEFB; color: #1B6FD8; }
 :root[data-theme="dark"] .sheet-icon.warn { background: #3A2A12; color: #F5B862; }
 :root[data-theme="dark"] .sheet-icon.info { background: #16263D; color: #7FB0F0; }
+
+/* 1.7.30 — bouton pause en haut à droite de la tuile active (passe le programme en mémoire) */
+.prog-pause-btn { flex: none; width: 40px; height: 40px; margin-left: auto; padding: 0; border: none; border-radius: 50%; background: var(--pill-ico); color: var(--pill-ink); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.prog-pause-btn svg { width: 18px; height: 18px; fill: currentColor; stroke: none; }
+.prog-tile.libre .prog-pause-btn { background: rgba(74, 56, 24, 0.1); color: var(--sand-ink); }
