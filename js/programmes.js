@@ -623,7 +623,7 @@ function addListHtml() {
   const s = draftSession();
   const inSession = new Set(s.exercises.map(e => e.exId));
   const q = normalizeSearch(addSheet.query);
-  const items = CATALOGUE.filter(e => (addSheet.filter === 'Tous' || e.group === addSheet.filter) && (!q || normalizeSearch(e.name).includes(q)));
+  const items = CATALOGUE.filter(e => (addSheet.filter === 'Tous' || (addSheet.filter === 'Polyarticulaires' ? !!e.poly : e.group === addSheet.filter)) && (!q || normalizeSearch(e.name).includes(q)));
   if (!items.length) return `<p class="add-empty">Aucun exercice trouvé.</p>`;
   return items.map(e => {
     const already = inSession.has(e.id);

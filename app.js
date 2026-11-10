@@ -64,7 +64,7 @@ const SESSION_TYPE_COLORS = { A: '#1B6FD8', B: '#C2570C', C: '#C62B35', D: '#2E8
 const REST_DURATION = 90; // repos par défaut (s), pour un exercice hors catalogue
 
 // Groupes proposés en filtre dans « Ajouter un exercice »
-const EXERCISE_FILTERS = ['Tous', 'Cardio', 'Pectoraux', 'Dos', 'Épaules', 'Jambes', 'Bras', 'Abdos'];
+const EXERCISE_FILTERS = ['Tous', 'Polyarticulaires', 'Cardio', 'Pectoraux', 'Dos', 'Épaules', 'Jambes', 'Bras', 'Abdos'];
 
 // Couleurs des graphiques : valeurs de repli (thème clair). Elles sont relues depuis
 // les variables --chart-* de style.css à chaque changement de thème (voir readChartColors).
@@ -2619,6 +2619,22 @@ function renderTonnageChart() {
   if (dayMode && wrap) wrap.scrollLeft = wrap.scrollWidth;
 }
 
+// 1RM estimé d'une séance (formule d'Epley) : meilleure série faite en 10 répétitions ou moins ; null si aucune
+function estimateOneRepMax(sets) {
+  let best = null;
+  (sets || []).forEach(s => {
+    const w = parseFloat(s.weight) || 0, r = Math.round(parseFloat(s.reps) || 0);
+    if (w <= 0 || r < 1 || r > 10) return;
+    const rm = r === 1 ? w : w * (1 + r / 30);
+    if (best === null || rm > best) best = rm;
+  });
+  return best === null ? null : Math.round(best * 2) / 2;
+}
+
+function formatKgHalf(v) {
+  return (Math.round((Number(v) || 0) * 2) / 2).toLocaleString('fr-FR') + ' kg';
+}
+
 function renderExerciseChart() {
   const canvas = document.getElementById('exerciseChart');
   if(!canvas) return;
@@ -2631,6 +2647,10 @@ function renderExerciseChart() {
   let labels = [];
   let chartData = [];
   let dates = [];
+  // 1.7.34 : 1RM estimé (Epley : charge × (1 + reps / 30)), meilleure série de 10 répétitions ou moins de la séance ;
+  // seulement en « Charge max » et pour les exercices saisis en kg × répétitions
+  const showRm = currentExMetricMode !== 'volume' && exInfo(selectedEx).mode === 'weight';
+  const rmData = [];
 
   state.history.forEach(h => {
     if (h.exercises) {
@@ -2651,6 +2671,7 @@ function renderExerciseChart() {
           chartData.push(performedSets
             ? Math.max(...performedSets.map(s => parseFloat(s.weight) || 0))
             : (exData.maxWeight || 0));
+          if (showRm) rmData.push(estimateOneRepMax(performedSets));
         }
       }
     }
@@ -2679,6 +2700,19 @@ function renderExerciseChart() {
     }
   };
 
+  const hasRm = showRm && rmData.some(v => v !== null);
+  const legend = document.getElementById('exercise-legend');
+  const rmNote = document.getElementById('exercise-rm-note');
+  if (legend) {
+    legend.hidden = !hasRm;
+    if (hasRm) {
+      const lastRm = [...rmData].reverse().find(v => v !== null);
+      document.getElementById('exercise-legend-max').textContent = formatKgHalf(chartData[chartData.length - 1]);
+      document.getElementById('exercise-legend-rm').textContent = formatKgHalf(lastRm);
+    }
+  }
+  if (rmNote) rmNote.hidden = !hasRm;
+
   const labelTitle = currentExMetricMode === 'volume' ? 'Volume Cumulé (kg)' : 'Charge Max (kg)';
   const color = currentExMetricMode === 'volume' ? CHART_COLORS.volume : CHART_COLORS.primary;
 
@@ -2695,7 +2729,18 @@ function renderExerciseChart() {
         fill: true,
         tension: 0.2,
         pointRadius: 3
-      }]
+      }].concat(hasRm ? [{
+        label: '1RM estimé (kg)',
+        data: rmData,
+        borderColor: color,
+        borderDash: [5, 5],
+        borderWidth: 2,
+        fill: false,
+        tension: 0.2,
+        pointRadius: 0,
+        pointHitRadius: 8,
+        spanGaps: true
+      }] : [])
     },
     options: {
       responsive: true,

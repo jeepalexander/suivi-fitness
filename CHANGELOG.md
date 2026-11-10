@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.34] - 2026-11-10
+### 🏋️ Filtre « Polyarticulaires » et 1RM estimé (co-auteur : Claude)
+- **Ajouter un exercice : puce « Polyarticulaires »** juste après « Tous ». Elle liste les 34 exercices qui font bouger au moins deux articulations (définition de l'ACSM 2009, revues de Gentil 2017 et Paoli 2017) : squats, presse, fentes, montées sur banc, soulevé de terre, tirages, tractions, rowings, tirage facial, développés, dips, pompes, tirage menton, dips triceps. Le soulevé de terre roumain, le soulevé de terre jambes tendues et les hip thrusts restent monoarticulaires (mouvement de hanche seule). Cardio et abdos ne sont pas concernés. Catalogue v1.2 : champ `poly`.
+- **Progression par exercice : 1RM estimé en pointillé** sur le graphique « Charge max », formule d'Epley (charge × (1 + reps / 30)) appliquée à la meilleure série de 10 répétitions ou moins de chaque séance. Seulement pour les exercices saisis en kg × répétitions (pas pour les exercices au poids du corps, le gainage ni le cardio), pas en « Volume cumulé ».
+- **Légende sous le graphique** : « Charge max 82 kg · 1RM estimé 98,5 kg » (dernières valeurs), et une phrase qui explique le pointillé.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.34.
+
+---
+
 ## [1.7.33] - 2026-11-10
 ### 📊 Progression : chiffres et textes plus lisibles (co-auteur : Claude)
 - **Valeurs en 17 px** (taille du tonnage de l'Historique) : tonnages des 4 derniers mois, kg et gain des records, kg des paliers, % de la progression par séance / programme.

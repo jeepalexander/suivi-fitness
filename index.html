@@ -147,6 +147,11 @@
         <button class="filter-btn" id="btn-mode-vol" onclick="setExMetricMode('volume', this)">Volume cumulé</button>
       </div>
       <canvas id="exerciseChart" height="180"></canvas>
+      <div id="exercise-legend" class="ex-legend" hidden>
+        <span><svg viewBox="0 0 24 4" aria-hidden="true"><line x1="0" y1="2" x2="24" y2="2"></line></svg>Charge max <b id="exercise-legend-max"></b></span>
+        <span><svg viewBox="0 0 24 4" aria-hidden="true"><line class="dash" x1="0" y1="2" x2="24" y2="2"></line></svg>1RM estimé <b id="exercise-legend-rm"></b></span>
+      </div>
+      <p id="exercise-rm-note" class="analysis-note" hidden>Le pointillé estime la charge que tu pourrais soulever une seule fois (formule d’Epley, à partir de ta meilleure série de 10 répétitions ou moins). C’est une indication, pas un objectif à tester.</p>
       <p id="exercise-plateau-note" class="analysis-note" hidden>La bande ambre marque les séances sans progression (palier).</p>
     </div>
     <div class="card" id="cardio-card">

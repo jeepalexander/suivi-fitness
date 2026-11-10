@@ -320,6 +320,13 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 .warmup-note[hidden] { display: none; }
 .submit-hint { text-align: center; color: var(--text-muted); font-size: 0.875rem; margin: 16px 0 -2px; }
 .analysis-note { margin-top: 12px; font-size: 0.8125rem; line-height: 1.35; color: var(--text-muted); }
+.ex-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 12px; font-size: 0.8125rem; color: var(--text-muted); }   /* 1.7.34 : légende charge max / 1RM estimé */
+.ex-legend[hidden] { display: none; }
+.ex-legend span { display: flex; align-items: center; gap: 8px; }
+.ex-legend b { color: var(--text); font-weight: 600; }
+.ex-legend svg { flex: none; width: 24px; height: 4px; }
+.ex-legend line { stroke: var(--chart-primary); stroke-width: 2.5; }
+.ex-legend line.dash { stroke-width: 2; stroke-dasharray: 5 5; }
 .analysis-empty-hint { margin-top: 8px; font-size: 0.9375rem; }
 .analysis-none { font-size: 0.9375rem; color: var(--text-muted); }
 .analysis-empty { text-align: center; color: var(--text-muted); }
