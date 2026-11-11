@@ -1,4 +1,4 @@
-"""1.7.40-1.7.41 : titre de la page Séance = nom du programme ou de la séance libre ; allure cardio remontée sous l'ombre de la saisie."""
+"""1.7.40-1.7.48 : titre de la page Séance = nom du programme ou de la séance libre ; allure cardio remontée sous l'ombre de la saisie."""
 import sys
 from harness import *
 
@@ -25,7 +25,10 @@ with Srv() as base, sync_playwright() as p:
               and pg.evaluate("document.querySelector('#seance-prog-ico').getBoundingClientRect().right") < pg.evaluate("document.querySelector('#page-title').getBoundingClientRect().left"))
         t, b = pg.evaluate(f"({RECT})('#page-title')"), pg.evaluate(f"({RECT})('#timer-btn')")
         t_prog, ico_prog = t, pg.evaluate(f"({RECT})('#seance-prog-ico')")
-        check(tag + 'titre sans chevauchement avec le bouton PAUSE', t['r'] <= b['l'] - 8 or t['t'] >= b['b'] - 4, f'{t} {b}')
+        check(tag + 'titre sans chevauchement avec le bouton PAUSE', t['r'] <= b['l'] - 8 or t['t'] >= b['b'] - 4 or t['b'] <= b['t'], f'{t} {b}')
+        c = pg.evaluate("(()=>{const r=s=>{const x=s.getBoundingClientRect();return [x.top,x.bottom]};const k=document.querySelector('.workout-counts');return {row:document.getElementById('timer-btn').parentElement.className,a:r(k.children[0]),d:r(k.children[1]),b:r(document.getElementById('timer-btn'))}})()")
+        check(tag + "1.7.48 : bouton de pause à droite du compteur ; séries et durée empilées dans sa hauteur, titre en haut (pas de décalage)",
+              c['row'] == 'workout-progress-row' and c['a'][0] >= c['b'][0] - 0.5 and c['d'][1] <= c['b'][1] + 0.5 and c['a'][1] <= c['d'][0] and t['t'] < 50, c)
 
         # allure : remontée sous la ligne en cours, qui passe au-dessus (ombre)
         row = pg.evaluate(f"({RECT})('#exercises-list .exercise-item .set-row')")
@@ -41,8 +44,8 @@ with Srv() as base, sync_playwright() as p:
         # nom long : le titre descend sous le bouton
         pg.evaluate("switchTab('seance'); getProgram('hypertrophie').name='Force printemps haut du corps'; initWorkoutForm()"); pg.wait_for_timeout(300)
         t, b = pg.evaluate(f"({RECT})('#page-title')"), pg.evaluate(f"({RECT})('#timer-btn')")
-        check(tag + 'nom long : titre affiché, sous le bouton PAUSE, sans débordement',
-              pg.inner_text('#page-title') == 'Force printemps haut du corps' and t['t'] >= b['b'] - 4 and not pg.evaluate(OVERFLOW_JS)['out'], f'{t} {b}')
+        check(tag + 'nom long : titre affiché sur deux lignes, à sa hauteur normale, sans débordement',
+              pg.inner_text('#page-title') == 'Force printemps haut du corps' and t['t'] == t_prog['t'] and not pg.evaluate(OVERFLOW_JS)['out'], f'{t} {t_prog}')
         # séance libre : icône 1× + nom, rien d'autre
         pg.evaluate("""(()=>{const p=JSON.parse(JSON.stringify(state.programs[0]));p.id='lib1';p.kind='libre';p.name='Dorsaux';p.sessions=[Object.assign(p.sessions[0],{key:'',name:'Dorsaux'})];state.programs.push(p);activateProgram('lib1');})()"""); pg.wait_for_timeout(300)
         pg.evaluate("switchTab('seance')"); pg.wait_for_timeout(300)
@@ -52,6 +55,12 @@ with Srv() as base, sync_playwright() as p:
         check(tag + "séance libre (1.7.43) : « 1× » brun en clair, doré en sombre", col == ('rgb(168, 118, 31)' if scheme == 'dark' else 'rgb(74, 56, 24)'), col)
         check(tag + 'séance libre : icône 1× + nom en titre, plus de ligne pastille / nom (1.7.41)', pg.inner_text('#page-title') == 'Dorsaux'
               and pg.inner_text('#seance-prog-ico') == '1×' and not pg.is_visible('#seance-head') and not pg.evaluate(OVERFLOW_JS)['out'])
+        pg.evaluate("switchTab('programme')"); pg.wait_for_timeout(200)
+        hauteurs = {}
+        for tab in ('programme', 'progression', 'historique', 'reglages', 'seance'):
+            pg.evaluate(f"switchTab('{tab}')"); pg.wait_for_timeout(150)
+            hauteurs[tab] = pg.evaluate(f"({RECT})('#page-title')")['t']
+        check(tag + "1.7.48 : titre de Séance à la même hauteur que celui des autres onglets", len(set(hauteurs.values())) == 1, hauteurs)
         pg.evaluate("switchTab('programme')"); pg.wait_for_timeout(200)
         check(tag + 'retour sur Programmes : titre « Programmes », en-tête à sa place',
               pg.inner_text('#page-title') == 'Programmes' and not pg.is_visible('#seance-prog-ico') and pg.evaluate("document.querySelector('.page-title-row').getBoundingClientRect().top") < 50)

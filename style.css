@@ -237,7 +237,7 @@ header h1 { font-family: var(--font-display); font-size: 2.625rem; font-weight: 
 .hdr-btn.has-update::after { content: ''; position: absolute; top: 8px; right: 8px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--surface); }
 
 /* Chrono de repos : prêt (blanc) · en cours (vert) · terminé (rouge) */
-.timer-btn { position: absolute; top: 18px; right: calc(var(--gutter) - 6px); z-index: var(--z-header-btn); display: none; align-items: center; gap: 8px; height: 44px; padding: 0 16px 0 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--card-bg); color: var(--indigo); box-shadow: var(--sh-card); font-family: var(--font-display); font-size: 1rem; font-weight: 700; cursor: pointer; overflow: hidden; isolation: isolate; transition: background var(--t-normal) ease, color var(--t-normal) ease; --progress: 0%; font-variant-numeric: tabular-nums; }
+.timer-btn { position: relative; flex: none; z-index: var(--z-raised); /* 1.7.48 : dans la ligne séries / durée, plus en haut à droite */ display: none; align-items: center; gap: 8px; height: 44px; padding: 0 16px 0 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--card-bg); color: var(--indigo); box-shadow: var(--sh-card); font-family: var(--font-display); font-size: 1rem; font-weight: 700; cursor: pointer; overflow: hidden; isolation: isolate; transition: background var(--t-normal) ease, color var(--t-normal) ease; --progress: 0%; font-variant-numeric: tabular-nums; }
 /* Remplissage de la gélule : bande claire à bord DROIT, rognée par la gélule, qui avance de gauche à droite pendant le décompte */
 .timer-btn::before { content: ''; display: none; position: absolute; inset: 0 auto 0 0; width: calc(100% - var(--progress)); z-index: var(--z-wallpaper); background: var(--timer-fill); pointer-events: none; }
 .timer-btn.running::before { display: block; }
@@ -377,7 +377,10 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
    7. SÉANCE
    ============================================ */
 .workout-progress { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-.workout-progress-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.9375rem; color: var(--text-muted); }
+.workout-progress-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 0.9375rem; color: var(--text-muted); }
+.workout-counts { display: flex; flex-direction: column; justify-content: center; gap: 2px; min-height: 44px; min-width: 0; } /* 1.7.48 : séries puis durée, dans la hauteur du bouton de pause (44 px) */
+.workout-counts > span { line-height: 1; }
+.workout-counts > .workout-duration { font-size: 0.875rem; line-height: 1.1; }
 .workout-progress-row strong { color: var(--text); font-weight: 600; }
 #sets-progress-text { font-family: var(--font-display); font-size: 1.375rem; font-weight: 700; }
 #workout-duration-display { cursor: pointer; }
@@ -892,7 +895,6 @@ body[data-tab="fond"] .page-title-row { margin-top: 12px; }
 body[data-tab="seance"] #seance-prog-ico.on { display: flex; }
 body[data-tab="seance"] #seance-prog-ico.libre { width: 44px; height: 44px; } /* 1.7.42 : même taille que l'icône de cycle */
 :root[data-theme="dark"] body[data-tab="seance"] #seance-prog-ico.libre { color: var(--sand-line); } /* 1.7.43 : « 1× » doré, lisible sur fond sombre */
-body[data-tab="seance"] .page-title-row.title-clear { margin-top: 12px; } /* 1.7.40 : nom de programme long, sous le bouton PAUSE */
 body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 
 /* Réglages › ligne « Fond d'écran » */

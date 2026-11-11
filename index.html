@@ -73,8 +73,14 @@
 
     <div class="workout-progress">
       <div class="workout-progress-row">
-        <span><strong id="sets-progress-text">0 / 0</strong> séries</span>
-        <span><span id="workout-duration-label">Durée :</span> <strong id="workout-duration-display" onclick="toggleWorkoutTimer()">00:00</strong></span>
+        <div class="workout-counts"><!-- 1.7.48 : séries et durée empilées, à la hauteur du bouton de pause -->
+          <span><strong id="sets-progress-text">0 / 0</strong> séries</span>
+          <span class="workout-duration"><span id="workout-duration-label">Durée :</span> <strong id="workout-duration-display" onclick="toggleWorkoutTimer()">00:00</strong></span>
+        </div>
+        <button id="timer-btn" class="timer-btn" onclick="toggleRestTimer()">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5M9 3h6"/></svg>
+          <span id="timer-display">PAUSE<br>ADAPTATIVE</span>
+        </button>
       </div>
       <div class="progress-track"><div id="sets-progress-bar" class="progress-fill"></div></div>
     </div>
@@ -91,10 +97,6 @@
       <span>Retour</span>
     </button>
 
-    <button id="timer-btn" class="timer-btn" onclick="toggleRestTimer()">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5M9 3h6"/></svg>
-      <span id="timer-display">PAUSE<br>ADAPTATIVE</span>
-    </button>
   </header>
 
   <main id="app-scroll">

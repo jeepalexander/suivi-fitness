@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.48] - 2026-11-11
+### ✨ Séance : bouton PAUSE ADAPTATIVE à côté du compteur de séries (co-auteur : Claude)
+- Le bouton PAUSE ADAPTATIVE (et le chrono vert une fois lancé) quitte le haut à droite pour se placer à droite de « 0 / 22 séries », juste au-dessus de la barre de progression : plus près de la saisie et du pouce.
+- « Durée : 00:00 » passe sous le compteur de séries, en 14 px ; les deux lignes tiennent dans la hauteur du bouton (44 px) et se centrent sur lui. Un toucher sur la durée met toujours le chrono de séance en pause.
+- Le titre de la page Séance n'a plus besoin de descendre sous le bouton : il reste à sa hauteur normale, quel que soit le nom ; l'en-tête gagne environ 16 px.
+- Tests : `test_titre_seance.py` (place du bouton, séries et durée dans sa hauteur, titre non décalé).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.48.
+
+---
+
 ## [1.7.47] - 2026-11-11
 ### 🌐 Page de présentation publique pour Google (co-auteur : Claude)
 - Nouvelle page `presentation.html` (planche 34 de la maquette), hors de l'application : nom exact « Mon Carnet de Salle », à quoi sert l'app, bouton « Ouvrir l'application », ce que fait l'app, usage de Google Drive (un seul dossier, portée `drive.file`), liens visibles vers les règles de confidentialité et les conditions d'utilisation, contact et résumé en anglais. Même style que les pages légales, clair ou sombre selon le téléphone.

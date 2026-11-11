@@ -1529,9 +1529,7 @@ function updateSeancePageTitle() {
     ico.className = 'prog-ico' + (libre ? ' libre' : ' dark') + (workoutDef ? ' on' : '');
     ico.innerHTML = workoutDef ? (libre ? '1×' : SWAP_SVG) : '';
   }
-  // 1.7.42 : dès qu'un programme ou une séance libre est affiché, le titre descend sous le bouton
-  // PAUSE ADAPTATIVE, à la même hauteur quel que soit le nom (court ou long)
-  pageTitle.parentElement.classList.toggle('title-clear', !!workoutDef);
+  // 1.7.48 : le bouton de pause est descendu près du compteur de séries : le titre reste à sa hauteur normale
   updateStickyOffsets();
 }
 
@@ -3468,7 +3466,6 @@ function switchTab(tabName) {
   const pageTitle = document.getElementById('page-title');
   if (pageTitle) pageTitle.innerText = PAGE_TITLES[tabName] || '';
   if (tabName === 'seance') updateSeancePageTitle();
-  else if (pageTitle && pageTitle.parentElement) pageTitle.parentElement.classList.remove('title-clear'); // 1.7.41 : marge réservée à la page Séance
 
   if (tabName === 'programme') renderProgramOverview();
   updateProgramHeader();

@@ -42,7 +42,7 @@ Un test seul : `python3 tests/test_validation.py` ou `python3 tests/run_tests.py
 | `test_supprimer_seance.py` | 13 | Suppression d'une séance : l'historique, les dernières charges et la sauvegarde Google Drive suivent |
 | `test_annuler_seance.py` | 14 | Annulation d'une séance en cours : chrono remis à zéro, brouillon supprimé, rien d'enregistré |
 | `test_fin_seance.py` | 56 | Séance (1.7.27) : bouton Programmes → page de départ, en-tête allégé, échauffement, noms sur une ligne, fenêtre de fin (« Bravo ! », tonnage, écart, records) ; 390 / 360 px, clair et sombre |
-| `test_titre_seance.py` | 32 | Séance (1.7.40-41) : titre = nom du programme précédé de l'icône du type, séance libre = icône 1× + nom seuls, « Séance » si rien n'est prévu, nom long sous le bouton PAUSE ; allure cardio sous l'ombre de la ligne en cours ; 390 / 360 px, clair et sombre |
+| `test_titre_seance.py` | 36 | Séance (1.7.40-48) : titre = nom du programme précédé de l'icône du type, à la hauteur des autres onglets, séance libre = icône 1× + nom seuls, « Séance » si rien n'est prévu ; bouton de pause à droite des séries et de la durée ; allure cardio sous l'ombre de la ligne en cours ; 390 / 360 px, clair et sombre |
 | `test_pastille_1x.py` | 14 | Pastille « 1× » de séance libre lisible partout (Programmes, Progression, choix du périmètre, restauration, création, Séance) en clair et en sombre (1.7.44) |
 | `test_contraste.py` | 74 | Lisibilité de 18 écrans en clair et en sombre : textes ≥ 4,5:1 (≥ 3:1 en grand), icônes ≥ 3:1 ; exception : « 1× » doré en sombre (choix du 11/11/2026) (1.7.46) |
 | `test_editeur_incomplet.py` | 42 | Éditeur (1.7.28) : « Enregistrer » dès le 1er exercice, volet « Presque prêt » si des séances sont vides ; liens légaux des Réglages |
