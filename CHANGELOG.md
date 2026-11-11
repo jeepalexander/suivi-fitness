@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.39] - 2026-11-11
+### 🔄 « Reconnecter maintenant » : plus d'onglet Firefox ni de page blanche (co-auteur : Claude)
+- Accès Google expiré : le bouton suit désormais le même mécanisme que l'enregistrement d'une séance, qui se reconnectait déjà sans intervention : renouvellement silencieux avec le compte déjà connu. Avant, il forçait l'écran d'autorisation Google (« consent »), qui s'ouvrait dans un onglet Firefox, redemandait les autorisations et finissait sur une page blanche (Firefox ne se déclare pas toujours comme application installée).
+- Si Google exige quand même une confirmation : message « touche à nouveau », et l'appui suivant ouvre la connexion complète. Première connexion et application reconnue comme installée : inchangées.
+- Test : `test_drive_reconnexion.py` (reproduit le problème sans le correctif).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.39.
+
+---
+
 ## [1.7.38] - 2026-11-11
 ### 📝 Documentation remise en cohérence (co-auteur : Claude)
 - **README.md rétabli** : il avait été vidé par erreur en 1.7.13. Il reprend la présentation complète, mise à jour pour la 1.7.38 (fin de séance, bouton pause, polyarticulaires, 1RM estimé, poids du corps en répétitions, fonds d'écran, inviter quelqu'un, liens légaux, résumé des versions depuis la 1.7.0).
@@ -14,6 +23,7 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Aucun changement de l'application elle-même. `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.38.
 
 ---
+
 
 ## [1.7.37] - 2026-11-11
 ### 🔗 Inviter quelqu'un : QR code seul (co-auteur : Claude)

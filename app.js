@@ -3768,6 +3768,7 @@ function initDriveTokenClient() {
         return;
       }
       setDriveToken(resp);
+      driveFullConnectNext = false;
       localStorage.setItem(DRIVE_WANTED_KEY, '1');
       updateDriveUI();
       if (!getDriveAccount()) fetchDriveAccount();
@@ -3890,6 +3891,7 @@ function handleDriveRedirectReturn() {
 // lancée directement depuis l'appui, la page Google s'ouvrait dans un onglet Firefox séparé et l'application ne
 // récupérait pas l'accès.
 const DRIVE_CONNECT_DELAY_MS = 400;
+let driveFullConnectNext = false; // 1.7.39 : renouvellement silencieux déjà tenté sans succès
 function connectGoogleDrive() {
   if (isInstalledApp()) { setTimeout(connectDriveByRedirect, DRIVE_CONNECT_DELAY_MS); return; }
   initDriveTokenClient();
@@ -3897,8 +3899,27 @@ function connectGoogleDrive() {
     appAlert('Google indisponible', 'La bibliothèque Google ne s\'est pas chargée. Vérifie ta connexion et réessaie.', 'cloud');
     return;
   }
-  // prompt only if we have no token
+  // 1.7.39 (co-auteur : Claude) : RECONNEXION (Drive déjà autorisé, accès expiré) = même mécanisme que
+  // « Enregistrer la séance » : renouvellement silencieux (prompt '' + adresse connue). Avant, le bouton forçait
+  // « prompt: 'consent' » : Google redemandait les autorisations dans un onglet Firefox qui finissait sur une
+  // page blanche (Firefox ne se déclare pas toujours comme application installée). Si le renouvellement
+  // silencieux échoue, l'appui suivant ouvre la connexion complète.
   const t = getDriveToken();
+  if (!t && isDriveWanted() && !driveFullConnectNext) {
+    renewDriveToken().then((ok) => {
+      if (ok) {
+        syncDriveBackup().then(updateDriveUI, updateDriveUI);
+        resumeProgramRestoreIfPending();
+        return;
+      }
+      driveFullConnectNext = true;
+      updateDriveUI();
+      showToast('Reconnexion automatique impossible : touche à nouveau « Reconnecter maintenant ».', 6000);
+    });
+    return;
+  }
+  driveFullConnectNext = false;
+  // première connexion (ou échec du renouvellement silencieux) : écran d'autorisation Google
   driveTokenClient.requestAccessToken({ prompt: t ? '' : 'consent' });
 }
 
