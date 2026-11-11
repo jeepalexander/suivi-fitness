@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.38] - 2026-11-11
+### 📝 Documentation remise en cohérence (co-auteur : Claude)
+- **README.md rétabli** : il avait été vidé par erreur en 1.7.13. Il reprend la présentation complète, mise à jour pour la 1.7.38 (fin de séance, bouton pause, polyarticulaires, 1RM estimé, poids du corps en répétitions, fonds d'écran, inviter quelqu'un, liens légaux, résumé des versions depuis la 1.7.0).
+- **tests/README.md** : les 28 fichiers lancés par `run_tests.py` sont décrits, avec leur nombre de contrôles (11 manquaient) ; descriptions d'invitation et de fond d'écran mises à jour.
+- Aucun changement de l'application elle-même. `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.38.
+
+---
+
 ## [1.7.37] - 2026-11-11
 ### 🔗 Inviter quelqu'un : QR code seul (co-auteur : Claude)
 - Le bouton « Partager le lien » est retiré de la fenêtre « Inviter quelqu'un » : il reste le QR code, l'adresse de l'application écrite dessous et « Fermer ». Sous Firefox pour Android, un partage abandonné restait en attente et s'affichait ensuite à la place des menus de choix (exercice du graphique) et du choix de fichier.
