@@ -37,6 +37,7 @@ Un test seul : `python3 tests/test_validation.py`.
 | `test_supprimer_seance.py` | 13 | Suppression d'une séance : l'historique, les dernières charges et la sauvegarde Google Drive suivent |
 | `test_annuler_seance.py` | 14 | Annulation d'une séance en cours : chrono remis à zéro, brouillon supprimé, rien d'enregistré |
 | `test_fin_seance.py` | 56 | Séance (1.7.27) : bouton Programmes → page de départ, en-tête allégé, échauffement, noms sur une ligne, fenêtre de fin (« Bravo ! », tonnage, écart, records) ; 390 / 360 px, clair et sombre |
+| `test_titre_seance.py` | 18 | Séance (1.7.40) : titre = nom du programme, « Séance » si rien n'est prévu, nom long sous le bouton PAUSE ; allure cardio sous l'ombre de la ligne en cours ; 390 / 360 px, clair et sombre |
 | `test_editeur_incomplet.py` | 42 | Éditeur (1.7.28) : « Enregistrer » dès le 1er exercice, volet « Presque prêt » si des séances sont vides ; liens légaux des Réglages |
 | `test_fenetres.py` | 53 | Fenêtres (1.7.29) : tous les volets de l'app au lieu des boîtes système, plus aucun `confirm()` / `alert()` dans le code |
 | `test_pause_actif.py` | 18 | Bouton pause de la tuile active (1.7.30) : passage « En mémoire », confirmation si une séance est en cours |

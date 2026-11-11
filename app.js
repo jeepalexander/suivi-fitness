@@ -1515,6 +1515,22 @@ function workoutDefFromHistory(h) {
   };
 }
 
+// 1.7.40 (co-auteur : Claude) : titre de la page Séance = nom du programme ou de la séance libre
+// (« Séance » quand rien n'est prévu)
+function updateSeancePageTitle() {
+  if (document.body.dataset.tab !== 'seance') return;
+  const pageTitle = document.getElementById('page-title');
+  if (!pageTitle) return;
+  pageTitle.innerText = (workoutDef && workoutDef.programName) || PAGE_TITLES.seance;
+  // Nom long : le titre descend un peu pour ne pas passer sous le bouton PAUSE ADAPTATIVE
+  const row = pageTitle.parentElement;
+  row.classList.remove('title-clear');
+  const timerBtn = document.getElementById('timer-btn');
+  if (timerBtn && timerBtn.offsetParent !== null
+      && pageTitle.getBoundingClientRect().right > timerBtn.getBoundingClientRect().left - 8) row.classList.add('title-clear');
+  updateStickyOffsets();
+}
+
 // En-tête de l'onglet Séance : pastille, nom de la séance, déload et report
 function renderSeanceHead(def, customSession) {
   const badge = document.getElementById('seance-badge');
@@ -1525,6 +1541,7 @@ function renderSeanceHead(def, customSession) {
   }
   const titleEl = document.getElementById('seance-type-title');
   if (titleEl) titleEl.innerText = def.sessionName;
+  updateSeancePageTitle();
   // Ligne au-dessus du nom : seulement en modification d'une ancienne séance (1.7.27)
   const overlineEl = document.getElementById('seance-overline');
   if (overlineEl) {
@@ -1574,6 +1591,7 @@ function initWorkoutForm(customSession = null) {
   const container = document.getElementById('exercises-list');
   if (empty) {
     if (container) container.innerHTML = '';
+    updateSeancePageTitle();
     updateSetsProgress();
     updateStickyOffsets();
     return;
@@ -3427,6 +3445,7 @@ function switchTab(tabName) {
   updateStickyOffsets();
   const pageTitle = document.getElementById('page-title');
   if (pageTitle) pageTitle.innerText = PAGE_TITLES[tabName] || '';
+  if (tabName === 'seance') updateSeancePageTitle();
 
   if (tabName === 'programme') renderProgramOverview();
   updateProgramHeader();

@@ -1,0 +1,55 @@
+"""1.7.40 : titre de la page Séance = nom du programme ou de la séance libre ; allure cardio remontée sous l'ombre de la saisie."""
+import sys
+from harness import *
+
+res = []
+
+
+def check(name, ok, extra=''):
+    ok = bool(ok); res.append(ok)
+    print(('OK   ' if ok else 'ÉCHEC'), name, extra)
+
+
+RECT = "s=>{const r=document.querySelector(s).getBoundingClientRect();return {l:r.left,t:r.top,r:r.right,b:r.bottom}}"
+
+with Srv() as base, sync_playwright() as p:
+    br = p.chromium.launch()
+    for w, scheme in ((390, 'light'), (360, 'dark')):
+        tag = f'[{w} px {scheme}] '
+        ctx, pg, errs = newpage(br, w, 844, pref=scheme)
+        pg.goto(base + 'index.html'); pg.wait_for_timeout(800)
+        pg.evaluate("switchTab('seance')"); pg.wait_for_timeout(400)
+        check(tag + 'titre = nom du programme actif', pg.inner_text('#page-title') == 'Hypertrophie', pg.inner_text('#page-title'))
+        check(tag + 'nom de la séance toujours sous le titre', pg.inner_text('#seance-type-title') == 'Presse / Développé')
+        t, b = pg.evaluate(f"({RECT})('#page-title')"), pg.evaluate(f"({RECT})('#timer-btn')")
+        check(tag + 'titre sans chevauchement avec le bouton PAUSE', t['r'] <= b['l'] - 8 or t['t'] >= b['b'] - 4, f'{t} {b}')
+
+        # allure : remontée sous la ligne en cours, qui passe au-dessus (ombre)
+        row = pg.evaluate(f"({RECT})('#exercises-list .exercise-item .set-row')")
+        pace = pg.evaluate(f"({RECT})('#exercises-list .exercise-item .cardio-pace')")
+        z = pg.evaluate("[...document.querySelectorAll('#exercises-list .exercise-item:first-child .set-row, #exercises-list .exercise-item:first-child .cardio-pace')].map(e=>getComputedStyle(e).zIndex).join(',')")
+        check(tag + "allure glissée sous la ligne de saisie (chevauchement) et dessous à l'empilement", pace['t'] < row['b'] - 10 and z == '1,0', f'{row} {pace} {z}')
+        check(tag + "texte de l'allure sous la ligne, lisible", pg.evaluate("(()=>{const b=document.querySelector('#exercises-list .exercise-item .cardio-pace span').getBoundingClientRect();return b.top})()") >= row['b'], '')
+        pg.evaluate("document.querySelector('#exercises-list .exercise-item .set-row').classList.remove('current')"); pg.wait_for_timeout(100)
+        pace2 = pg.evaluate(f"({RECT})('#exercises-list .exercise-item .cardio-pace')")
+        row2 = pg.evaluate(f"({RECT})('#exercises-list .exercise-item .set-row')")
+        check(tag + "ligne qui n'est plus en cours : allure de nouveau détachée", pace2['t'] >= row2['b'], f'{row2} {pace2}')
+
+        # nom long : le titre descend sous le bouton
+        pg.evaluate("switchTab('seance'); getProgram('hypertrophie').name='Force printemps haut du corps'; initWorkoutForm()"); pg.wait_for_timeout(300)
+        t, b = pg.evaluate(f"({RECT})('#page-title')"), pg.evaluate(f"({RECT})('#timer-btn')")
+        check(tag + 'nom long : titre affiché, sous le bouton PAUSE, sans débordement',
+              pg.inner_text('#page-title') == 'Force printemps haut du corps' and t['t'] >= b['b'] - 4 and not pg.evaluate(OVERFLOW_JS)['out'], f'{t} {b}')
+        pg.evaluate("switchTab('programme')"); pg.wait_for_timeout(200)
+        check(tag + 'retour sur Programmes : titre « Programmes », en-tête à sa place',
+              pg.inner_text('#page-title') == 'Programmes' and pg.evaluate("document.querySelector('.page-title-row').getBoundingClientRect().top") < 50)
+
+        # rien de prévu : « Séance »
+        pg.evaluate("workoutDef=null; buildWorkoutDef=()=>null; switchTab('seance'); initWorkoutForm()"); pg.wait_for_timeout(300)
+        check(tag + 'aucune séance prévue : titre « Séance »', pg.inner_text('#page-title') == 'Séance', pg.inner_text('#page-title'))
+        check(tag + 'aucune erreur JavaScript', not errs, str(errs))
+        ctx.close()
+    br.close()
+
+print(f"\n{sum(res)}/{len(res)} contrôles OK")
+sys.exit(0 if all(res) else 1)

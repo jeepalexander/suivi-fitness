@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.40] - 2026-11-11
+### ✨ Onglet Séance : titre dynamique, échauffement reformulé, allure cardio sous la saisie (co-auteur : Claude)
+- Titre de la page Séance : nom du programme actif ou de la séance libre (au lieu de « Séance », qui reste quand rien n'est prévu). Un nom long passe sous le bouton PAUSE ADAPTATIVE et peut tenir sur deux lignes.
+- Phrase d'échauffement : « (i) Ajoute 2 séries légères à la première séance de force (poids) pour t'échauffer (flamme) ».
+- Cardio : le cadre Allure / Vitesse remonte juste sous la ligne de saisie en cours et passe sous son ombre ; il reprend sa place quand la ligne n'est plus en cours.
+- Tests : `test_titre_seance.py` (nouveau), `test_fin_seance.py` et `test_programmes.py` mis à jour.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.40.
+
+---
+
 ## [1.7.39] - 2026-11-11
 ### 🔄 « Reconnecter maintenant » : plus d'onglet Firefox ni de page blanche (co-auteur : Claude)
 - Accès Google expiré : le bouton suit désormais le même mécanisme que l'enregistrement d'une séance, qui se reconnectait déjà sans intervention : renouvellement silencieux avec le compte déjà connu. Avant, il forçait l'écran d'autorisation Google (« consent »), qui s'ouvrait dans un onglet Firefox, redemandait les autorisations et finissait sur une page blanche (Firefox ne se déclare pas toujours comme application installée).
