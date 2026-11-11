@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.49] - 2026-11-11
+### 🧪 Version de test : mise à jour sans changement visible (co-auteur : Claude)
+- Seul le numéro de version change. Sert à vérifier si la mise à jour de l'application (rechargement) fait perdre le plein écran dans Firefox pour Android.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.49.
+
+---
+
 ## [1.7.48] - 2026-11-11
 ### ✨ Séance : bouton PAUSE ADAPTATIVE à côté du compteur de séries (co-auteur : Claude)
 - Le bouton PAUSE ADAPTATIVE (et le chrono vert une fois lancé) quitte le haut à droite pour se placer à droite de « 0 / 22 séries », juste au-dessus de la barre de progression : plus près de la saisie et du pouce.
