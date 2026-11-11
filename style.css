@@ -782,6 +782,7 @@ body[data-tab="programme"][data-pview="choose"] header h1 { display: none; }
 .restore-item:disabled { opacity: 0.5; cursor: default; }
 .restore-item .mem-ico { background: var(--primary-strong); color: var(--on-strong); }
 .restore-item .mem-ico.grid { background: var(--card-bg); color: var(--text); }
+:root[data-theme="dark"] .restore-item.libre .mem-ico { color: var(--sand-line); } /* 1.7.44 : « 1× » doré sur fond sombre (choix du périmètre, restauration) */
 .restore-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .restore-name { font-size: 1rem; color: var(--text-muted); }
 .restore-name b { color: var(--text); font-weight: 600; }
@@ -809,7 +810,7 @@ body[data-seance="empty"] .seance-sticky { display: none; }
 /* --- Progression : sélecteur des statistiques --- */
 .stats-scope { width: 100%; display: flex; align-items: center; gap: 12px; height: 60px; margin: 0 0 16px; padding: 0 20px 0 8px; border: none; border-radius: 999px; background: var(--fill); color: var(--text); font: inherit; text-align: left; cursor: pointer; }
 .stats-scope .mem-ico { background: var(--primary-strong); color: var(--on-strong); }
-.stats-scope .mem-ico.libre { background: var(--sand); }
+.stats-scope .mem-ico.libre { background: var(--sand); color: var(--sand-ink); } /* 1.7.44 : « 1× » brun sur sable (il était blanc en clair) */
 .stats-scope .mem-ico.grid { background: var(--card-bg); color: var(--text); }
 .scope-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .scope-name { font-size: 1.0625rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

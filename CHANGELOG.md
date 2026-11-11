@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.44] - 2026-11-11
+### 🎨 Pastille « 1× » lisible partout (co-auteur : Claude)
+- Progression, bouton du haut (mode clair) : le « 1× » sur la pastille sable passe en brun (il était blanc, illisible).
+- Mode sombre, fenêtres « Voir les statistiques de » et « Restaurer un programme » : le « 1× » passe en doré, comme sur la page Séance depuis la 1.7.43.
+- Tests : `test_pastille_1x.py` (nouveau) mesure le contraste de chaque « 1× » visible sur 6 écrans, en clair et en sombre.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.44.
+
+---
+
 ## [1.7.43] - 2026-11-11
 ### 🎨 Séance libre : « 1× » lisible en mode sombre (co-auteur : Claude)
 - Page Séance, mode sombre : le « 1× » de la pastille séance libre prend la couleur dorée de ses pointillés (il était brun foncé sur fond sombre). Rien ne change en mode clair ni dans l'onglet Programmes.
