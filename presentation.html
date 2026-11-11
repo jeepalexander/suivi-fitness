@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mon Carnet de Salle</title>
+  <meta name="description" content="Mon Carnet de Salle : le carnet d'entraînement de salle sur ton téléphone. Programmes sur mesure, séances, progression. Sauvegarde facultative dans ton propre Google Drive.">
+  <link rel="icon" type="image/png" href="icons/app-icon.png">
+  <link href="css/fonts.css" rel="stylesheet">
+  <style>
+:root { --bg:#FFFFFF; --text:#111114; --muted:#5E5E66; --fill:#F3F3F5; --line:#E4E4E9; --strong:#131316; --on-strong:#FFFFFF; }
+@media (prefers-color-scheme: dark) { :root { --bg:#0E0E11; --text:#F2F2F4; --muted:#A9A9B2; --fill:#1A1A1F; --line:#2C2C33; --strong:#F2F2F4; --on-strong:#111114; } }
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Figtree', system-ui, sans-serif; font-size: 16px; line-height: 1.6; }
+main { max-width: 720px; margin: 0 auto; padding: 32px 16px 56px; }
+.kicker { margin: 0; font-size: 13px; font-weight: 600; letter-spacing: .14em; color: var(--muted); }
+.hero { display: flex; align-items: center; gap: 16px; margin-top: 16px; }
+.app-icon { width: 72px; height: 72px; border-radius: 16px; flex: none; }
+h1 { margin: 0; font-family: 'Saira Semi Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 38px; line-height: 1.05; }
+h2 { margin: 32px 0 8px; font-family: 'Saira Semi Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 22px; line-height: 1.15; }
+.lead { margin: 16px 0 0; font-size: 17px; }
+.btn { display: flex; align-items: center; justify-content: center; height: 56px; margin-top: 20px; border-radius: 999px; background: var(--strong); color: var(--on-strong); font-weight: 600; font-size: 17px; text-decoration: none; box-shadow: 0 12px 22px -8px rgba(19,19,22,.5), 0 3px 6px rgba(19,19,22,.2); }
+.note { margin: 12px 0 0; color: var(--muted); font-size: 14px; text-align: center; }
+ul { padding-left: 1.2em; }
+li { margin: 4px 0; }
+.summary { margin: 8px 0 0; padding: 16px 18px; border-radius: 20px; background: var(--fill); }
+.summary p { margin: 0; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+code { font-size: .92em; padding: 1px 6px; border-radius: 6px; background: var(--fill); overflow-wrap: anywhere; }
+footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+footer p { margin: 0 0 8px; }
+.en { margin-top: 16px; }
+  </style>
+</head>
+<body>
+<main>
+  <p class="kicker">MON CARNET DE SALLE</p>
+  <div class="hero">
+    <img class="app-icon" src="icons/app-icon.png" alt="" width="72" height="72">
+    <h1>Mon Carnet de Salle</h1>
+  </div>
+  <p class="lead">Le carnet d'entraînement de salle sur ton téléphone : tes programmes, tes séances et ta progression, au même endroit.</p>
+  <a class="btn" href="./">Ouvrir l'application</a>
+  <p class="note">Gratuite, sans compte, sans publicité. Fonctionne aussi sans connexion.</p>
+
+  <h2>Ce que fait l'application</h2>
+  <ul>
+    <li><strong>Programmes sur mesure</strong> : de 2 à 6 séances (A à F) qui s'enchaînent, ou des séances libres.</li>
+    <li><strong>86 exercices</strong> avec séries, répétitions et temps de repos réglés d'après la littérature scientifique.</li>
+    <li><strong>Saisie en salle</strong> : charges, répétitions, lest, durées et cardio, avec un chrono de repos.</li>
+    <li><strong>Progression</strong> : indice de progression, records, paliers, 1RM estimé et poids corporel.</li>
+    <li><strong>Historique</strong> de toutes tes séances, modifiable.</li>
+  </ul>
+
+  <h2>Tes données et Google Drive</h2>
+  <div class="summary"><p>Tes séances restent sur ton téléphone. Si tu le choisis, l'application les sauvegarde dans <em>ton</em> Google Drive, dans un seul dossier qu'elle crée (« MON CARNET DE SALLE »). Elle ne voit aucun autre fichier de ton Drive et n'a pas de serveur : personne d'autre que toi n'a accès à tes données.</p></div>
+
+  <footer>
+    <p><a href="confidentialite.html">Règles de confidentialité</a> · <a href="conditions.html">Conditions d'utilisation</a></p>
+    <p>Contact : <a href="mailto:jeanphilippealexander@gmail.com">jeanphilippealexander@gmail.com</a></p>
+    <p lang="en" class="en">Mon Carnet de Salle is a free gym-training log web app. Workout data stays on the user's device; optional backups go to the user's own Google Drive, in a single folder created by the app (<code>drive.file</code> scope only).</p>
+  </footer>
+</main>
+
+</body>
+</html>
