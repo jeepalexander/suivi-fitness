@@ -2631,6 +2631,21 @@ function estimateOneRepMax(sets) {
   return best === null ? null : Math.round(best * 2) / 2;
 }
 
+// Exercice au poids du corps : meilleure série d'une séance = plus fort lest, puis le plus de répétitions à ce lest.
+// Une ancienne série sans « lest » (charge totale saisie) compte comme poids du corps seul (lest 0).
+function bestBodyweightSet(sets) {
+  let best = null;
+  (sets || []).forEach(s => {
+    const reps = Math.round(parseFloat(s.reps) || 0);
+    if (reps <= 0) return;
+    const lest = s.lest !== undefined ? (parseFloat(s.lest) || 0) : 0;
+    if (!best || lest > best.lest || (lest === best.lest && reps > best.reps)) best = { lest, reps };
+  });
+  return best;
+}
+
+function repsText(n) { return `${n} rép.`; }
+
 function formatKgHalf(v) {
   return (Math.round((Number(v) || 0) * 2) / 2).toLocaleString('fr-FR') + ' kg';
 }
@@ -2651,6 +2666,12 @@ function renderExerciseChart() {
   // seulement en « Charge max » et pour les exercices saisis en kg × répétitions
   const showRm = currentExMetricMode !== 'volume' && exInfo(selectedEx).mode === 'weight';
   const rmData = [];
+  // 1.7.35 : exercice au poids du corps → « Répétitions » (meilleure série de la séance) au lieu d'une charge plate
+  const isBw = exInfo(selectedEx).mode === 'bw';
+  const repsMode = isBw && currentExMetricMode !== 'volume';
+  const lestData = [];
+  const maxBtn = document.getElementById('btn-mode-max');
+  if (maxBtn) maxBtn.textContent = isBw ? 'Répétitions' : 'Charge max';
 
   state.history.forEach(h => {
     if (h.exercises) {
@@ -2666,6 +2687,10 @@ function renderExerciseChart() {
         dates.push(h.date);
         if (currentExMetricMode === 'volume') {
           chartData.push(exData.totalVolume || 0);
+        } else if (repsMode) {
+          const best = bestBodyweightSet(performedSets || []);
+          chartData.push(best ? best.reps : 0);
+          lestData.push(best ? best.lest : 0);
         } else {
           // Charge max calculée sur les séries réellement faites uniquement
           chartData.push(performedSets
@@ -2701,19 +2726,30 @@ function renderExerciseChart() {
   };
 
   const hasRm = showRm && rmData.some(v => v !== null);
+  const hasReps = repsMode && chartData.length > 0;
   const legend = document.getElementById('exercise-legend');
   const rmNote = document.getElementById('exercise-rm-note');
+  const bwNote = document.getElementById('exercise-bw-note');
   if (legend) {
-    legend.hidden = !hasRm;
+    legend.hidden = !(hasRm || hasReps);
+    legend.classList.toggle('reps', hasReps);
     if (hasRm) {
       const lastRm = [...rmData].reverse().find(v => v !== null);
+      document.getElementById('exercise-legend-max-label').textContent = 'Charge max';
+      document.getElementById('exercise-legend-rm-label').textContent = '1RM estimé';
       document.getElementById('exercise-legend-max').textContent = formatKgHalf(chartData[chartData.length - 1]);
       document.getElementById('exercise-legend-rm').textContent = formatKgHalf(lastRm);
+    } else if (hasReps) {
+      document.getElementById('exercise-legend-max-label').textContent = 'Meilleure série';
+      document.getElementById('exercise-legend-rm-label').textContent = 'Record';
+      document.getElementById('exercise-legend-max').textContent = repsText(chartData[chartData.length - 1]);
+      document.getElementById('exercise-legend-rm').textContent = repsText(Math.max(...chartData));
     }
   }
   if (rmNote) rmNote.hidden = !hasRm;
+  if (bwNote) bwNote.hidden = !hasReps;
 
-  const labelTitle = currentExMetricMode === 'volume' ? 'Volume Cumulé (kg)' : 'Charge Max (kg)';
+  const labelTitle = currentExMetricMode === 'volume' ? 'Volume Cumulé (kg)' : (repsMode ? 'Répétitions' : 'Charge Max (kg)');
   const color = currentExMetricMode === 'volume' ? CHART_COLORS.volume : CHART_COLORS.primary;
 
   exerciseChart = new Chart(ctx, {
@@ -2744,10 +2780,14 @@ function renderExerciseChart() {
     },
     options: {
       responsive: true,
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: { display: false },
+        // Poids du corps : « 12 rép. », et le lest quand il y en a un (« 12 rép. · PDC +5 kg »)
+        tooltip: repsMode ? { callbacks: { label: c => repsText(c.parsed.y) + (lestData[c.dataIndex] ? ' · ' + lestText(lestData[c.dataIndex]) : '') } } : {}
+      },
       scales: {
         x: { ticks: { color: CHART_COLORS.tick, font: { size: 10 }, maxTicksLimit: 6, maxRotation: 0, minRotation: 0, autoSkip: true }, grid: { display: false } },
-        y: { ticks: { color: CHART_COLORS.tick, maxTicksLimit: 5 }, grid: { color: CHART_COLORS.grid }, border: { display: false } }
+        y: { beginAtZero: repsMode, ticks: { color: CHART_COLORS.tick, maxTicksLimit: 5, precision: repsMode ? 0 : undefined }, grid: { color: CHART_COLORS.grid }, border: { display: false } }
       }
     },
     plugins: [bandPlugin]
@@ -2936,7 +2976,12 @@ function analyzeMonthlyProgress(hist = statsHistory(), scope = currentStatsScope
         if (exName) {
           allExercises.add(exName);
           if (!monthlyData[monthKey].exercises[exName]) {
-            monthlyData[monthKey].exercises[exName] = { maxWeights: [], volumes: [] };
+            monthlyData[monthKey].exercises[exName] = { maxWeights: [], volumes: [], bwBest: [] };
+          }
+          // 1.7.35 : poids du corps → meilleure série (lest puis répétitions) pour les records
+          if (exInfo(exName).mode === 'bw' && Array.isArray(ex.sets)) {
+            const b = bestBodyweightSet(ex.sets.filter(isPerformedSet));
+            if (b) monthlyData[monthKey].exercises[exName].bwBest.push(b);
           }
           if (ex.maxWeight) {
             monthlyData[monthKey].exercises[exName].maxWeights.push(parseFloat(ex.maxWeight) || 0);
@@ -2988,8 +3033,29 @@ function analyzeMonthlyProgress(hist = statsHistory(), scope = currentStatsScope
 
   if (thisMonthData) {
     const earlierMonths = sortedMonths.filter(key => key < realMonthKey);
+    const betterBw = (x, y) => !y || x.lest > y.lest || (x.lest === y.lest && x.reps > y.reps);
     allExercises.forEach(exName => {
       const thisEx = thisMonthData.exercises[exName];
+      // Poids du corps : record si la meilleure série du mois bat celle d'avant (plus de lest, ou plus de répétitions au même lest)
+      if (thisEx && exInfo(exName).mode === 'bw' && thisEx.bwBest && thisEx.bwBest.length) {
+        const cur = thisEx.bwBest.reduce((m, b) => (betterBw(b, m) ? b : m), null);
+        let prev = null;
+        earlierMonths.forEach(key => {
+          const p = monthlyData[key].exercises[exName];
+          if (p && p.bwBest) p.bwBest.forEach(b => { if (betterBw(b, prev)) prev = b; });
+        });
+        if (prev && betterBw(cur, prev)) {
+          const byLest = cur.lest > prev.lest;
+          currentMonthRecords.push({
+            exercise: exName,
+            newMax: byLest ? cur.lest : cur.reps,
+            improvement: byLest ? cur.lest - prev.lest : cur.reps - prev.reps,
+            valueText: byLest ? lestText(cur.lest) : repsText(cur.reps),
+            improvementText: byLest ? `+${String(cur.lest - prev.lest).replace('.', ',')} kg` : `+${cur.reps - prev.reps} rép.`
+          });
+        }
+        return;
+      }
       if (!thisEx || thisEx.maxWeights.length === 0) return;
       const currentMax = Math.max(...thisEx.maxWeights);
 
@@ -3244,8 +3310,8 @@ function renderProgressAnalysis() {
       html += `
         <div class="record-item">
           <span class="record-exercise">${record.exercise}</span>
-          <span class="record-value">${record.newMax} kg</span>
-          <span class="record-improvement">+${record.improvement} kg</span>
+          <span class="record-value">${record.valueText || record.newMax + ' kg'}</span>
+          <span class="record-improvement">${record.improvementText || '+' + record.improvement + ' kg'}</span>
         </div>`;
     });
     html += `</div></div>`;

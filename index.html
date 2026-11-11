@@ -148,10 +148,11 @@
       </div>
       <canvas id="exerciseChart" height="180"></canvas>
       <div id="exercise-legend" class="ex-legend" hidden>
-        <span><svg viewBox="0 0 24 4" aria-hidden="true"><line x1="0" y1="2" x2="24" y2="2"></line></svg>Charge max <b id="exercise-legend-max"></b></span>
-        <span><svg viewBox="0 0 24 4" aria-hidden="true"><line class="dash" x1="0" y1="2" x2="24" y2="2"></line></svg>1RM estimé <b id="exercise-legend-rm"></b></span>
+        <span><svg viewBox="0 0 24 4" aria-hidden="true"><line x1="0" y1="2" x2="24" y2="2"></line></svg><span id="exercise-legend-max-label">Charge max</span> <b id="exercise-legend-max"></b></span>
+        <span><svg class="rm-line" viewBox="0 0 24 4" aria-hidden="true"><line class="dash" x1="0" y1="2" x2="24" y2="2"></line></svg><span id="exercise-legend-rm-label">1RM estimé</span> <b id="exercise-legend-rm"></b></span>
       </div>
       <p id="exercise-rm-note" class="analysis-note" hidden>Le pointillé estime la charge que tu pourrais soulever une seule fois (formule d’Epley, à partir de ta meilleure série de 10 répétitions ou moins). C’est une indication, pas un objectif à tester.</p>
+      <p id="exercise-bw-note" class="analysis-note" hidden>Au poids du corps, ta progression se lit en répétitions : la courbe suit ta meilleure série de chaque séance. Le volume cumulé compte ta pesée du jour, plus le lest s’il y en a un.</p>
       <p id="exercise-plateau-note" class="analysis-note" hidden>La bande ambre marque les séances sans progression (palier).</p>
     </div>
     <div class="card" id="cardio-card">

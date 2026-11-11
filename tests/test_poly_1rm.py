@@ -72,7 +72,7 @@ with Srv() as url, sync_playwright() as p:
         pg.click('#btn-mode-max'); pg.wait_for_timeout(200)
         pg.select_option('#exercise-filter', 'Tractions'); pg.wait_for_timeout(300)
         ok(tag + "exercice au poids du corps (tractions) : pas de 1RM estimé",
-           pg.evaluate("exerciseChart.data.datasets.length") == 1 and not pg.is_visible('#exercise-legend'))
+           pg.evaluate("exerciseChart.data.datasets.length") == 1 and '1RM' not in pg.inner_text('#exercise-legend'))  # 1.7.35 : légende en répétitions
         ok(tag + "aucune erreur JavaScript", not errs, errs)
         ctx.close()
     br.close()

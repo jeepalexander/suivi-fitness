@@ -7,6 +7,18 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.35] - 2026-11-11
+### 🤸 Exercices au poids du corps : progression en répétitions (co-auteur : Claude)
+- **Progression par exercice** : pour un exercice au poids du corps (tractions, dips, dips triceps, pompes lestées, relevés de jambes suspendu), le bouton « Charge max » devient **« Répétitions »** et la courbe suit la **meilleure série** de chaque séance (plus fort lest, puis le plus de répétitions), au lieu d'une charge qui ne bougeait pas. Graduations en nombres entiers, à partir de 0.
+- **Info-bulle** : « 12 rép. », avec le lest quand il y en a un (« 12 rép. · PDC +5 kg »).
+- **Légende** : « Meilleure série 15 rép. · Record 22 rép. » (sans 1RM estimé), et une phrase qui explique la lecture en répétitions.
+- **Records du mois** : un exercice au poids du corps bat son record avec plus de lest (« Tractions · PDC +5 kg · +5 kg ») ou plus de répétitions au même lest (« Dips · 22 rép. · +8 rép. »). Les anciennes séances sans lest comptent comme poids du corps seul.
+- « Volume cumulé » inchangé : pesée du jour + lest.
+- Test test_poids_du_corps.py (390/360 px, clair/sombre) ; test_poly_1rm.py ajusté à la nouvelle légende.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.35.
+
+---
+
 ## [1.7.34] - 2026-11-10
 ### 🏋️ Filtre « Polyarticulaires » et 1RM estimé (co-auteur : Claude)
 - **Ajouter un exercice : puce « Polyarticulaires »** juste après « Tous ». Elle liste les 34 exercices qui font bouger au moins deux articulations (définition de l'ACSM 2009, revues de Gentil 2017 et Paoli 2017) : squats, presse, fentes, montées sur banc, soulevé de terre, tirages, tractions, rowings, tirage facial, développés, dips, pompes, tirage menton, dips triceps. Le soulevé de terre roumain, le soulevé de terre jambes tendues et les hip thrusts restent monoarticulaires (mouvement de hanche seule). Cardio et abdos ne sont pas concernés. Catalogue v1.2 : champ `poly`.
