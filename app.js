@@ -1529,12 +1529,9 @@ function updateSeancePageTitle() {
     ico.className = 'prog-ico' + (libre ? ' libre' : ' dark') + (workoutDef ? ' on' : '');
     ico.innerHTML = workoutDef ? (libre ? '1×' : SWAP_SVG) : '';
   }
-  // Nom long : le titre descend un peu pour ne pas passer sous le bouton PAUSE ADAPTATIVE
-  const row = pageTitle.parentElement;
-  row.classList.remove('title-clear');
-  const timerBtn = document.getElementById('timer-btn');
-  if (timerBtn && timerBtn.offsetParent !== null
-      && pageTitle.getBoundingClientRect().right > timerBtn.getBoundingClientRect().left - 8) row.classList.add('title-clear');
+  // 1.7.42 : dès qu'un programme ou une séance libre est affiché, le titre descend sous le bouton
+  // PAUSE ADAPTATIVE, à la même hauteur quel que soit le nom (court ou long)
+  pageTitle.parentElement.classList.toggle('title-clear', !!workoutDef);
   updateStickyOffsets();
 }
 
@@ -1604,6 +1601,8 @@ function initWorkoutForm(customSession = null) {
   if (form) form.hidden = empty;
   const container = document.getElementById('exercises-list');
   if (empty) {
+    const warmNote = document.getElementById('warmup-note'); // 1.7.42 : la sortir de la liste avant de la vider
+    if (warmNote && container && container.contains(warmNote)) { container.parentElement.insertBefore(warmNote, container); warmNote.hidden = true; }
     if (container) container.innerHTML = '';
     updateSeancePageTitle();
     updateSetsProgress();
@@ -1612,8 +1611,9 @@ function initWorkoutForm(customSession = null) {
   }
 
   renderSeanceHead(def, customSession);
+  // 1.7.42 : la phrase d'échauffement est replacée à chaque affichage, juste avant le 1er exercice de force
   const warm = document.getElementById('warmup-note');
-  if (warm) warm.hidden = !(def.exercises[0] && def.exercises[0].name === ROWER_NAME);
+  if (warm && container && warm.parentElement !== container.parentElement) container.parentElement.insertBefore(warm, container);
 
   // Bouton Annuler + libellé du bouton de validation selon le mode (création / modification)
   const isEditing = editingOriginalId !== null;
@@ -1711,6 +1711,14 @@ function initWorkoutForm(customSession = null) {
     `;
     container.appendChild(div);
   });
+
+  // 1.7.42 (co-auteur : Claude) : phrase d'échauffement juste avant le premier exercice de force
+  // (cardio éventuel au-dessus), cachée si la séance n'a que du cardio
+  if (warm) {
+    const firstStrength = [...container.querySelectorAll('.exercise-item')].find(el => !exInfo(el.dataset.ex).cardio);
+    if (firstStrength) container.insertBefore(warm, firstStrength);
+    warm.hidden = !firstStrength;
+  }
 
   // Saisie en cours retrouvée après un rechargement (jamais en modification d'une ancienne séance)
   if (!customSession && editingOriginalId === null) restoreDraft(def.draftKey);

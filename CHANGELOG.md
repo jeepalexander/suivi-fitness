@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.42] - 2026-11-11
+### ✨ Séance : phrase d'échauffement juste avant le premier exercice de force, titre à hauteur constante (co-auteur : Claude)
+- La phrase « Ajoute 2 séries légères au premier exercice de force pour t'échauffer » se place à chaque affichage juste au-dessus du premier exercice de force, après le cardio éventuel (rameur, tapis…).
+- Elle s'affiche désormais aussi quand la séance ne commence pas par le rameur (avant : seulement si le rameur était en tête) ; cachée si la séance n'a que du cardio.
+- Titre de la page Séance à la même hauteur pour un programme et une séance libre, quel que soit le nom : il passe toujours sous le bouton PAUSE ADAPTATIVE, et la pastille 1× prend la taille de l'icône de cycle (44 px).
+- Tests mis à jour (`test_fin_seance.py`, `test_titre_seance.py`, `test_brouillon.py`) ; `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.42.
+
+---
+
 ## [1.7.41] - 2026-11-11
 ### ✨ Onglet Séance : icône du type de programme devant le titre (co-auteur : Claude)
 - Devant le nom du programme : l'icône de cycle (pastille sombre) ; devant le nom d'une séance libre : la pastille 1× en pointillés.

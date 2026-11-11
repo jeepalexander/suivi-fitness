@@ -888,6 +888,7 @@ body[data-tab="fond"] .page-title-row { margin-top: 12px; }
 /* 1.7.41 : icône du type de programme devant le titre de la page Séance */
 #seance-prog-ico { display: none; }
 body[data-tab="seance"] #seance-prog-ico.on { display: flex; }
+body[data-tab="seance"] #seance-prog-ico.libre { width: 44px; height: 44px; } /* 1.7.42 : même taille que l'icône de cycle */
 body[data-tab="seance"] .page-title-row.title-clear { margin-top: 12px; } /* 1.7.40 : nom de programme long, sous le bouton PAUSE */
 body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 

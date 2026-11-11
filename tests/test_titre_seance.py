@@ -24,12 +24,13 @@ with Srv() as base, sync_playwright() as p:
         check(tag + "icône du type (cycle, pastille sombre) devant le titre (1.7.41)", pg.is_visible('#seance-prog-ico svg') and 'dark' in pg.get_attribute('#seance-prog-ico', 'class')
               and pg.evaluate("document.querySelector('#seance-prog-ico').getBoundingClientRect().right") < pg.evaluate("document.querySelector('#page-title').getBoundingClientRect().left"))
         t, b = pg.evaluate(f"({RECT})('#page-title')"), pg.evaluate(f"({RECT})('#timer-btn')")
+        t_prog, ico_prog = t, pg.evaluate(f"({RECT})('#seance-prog-ico')")
         check(tag + 'titre sans chevauchement avec le bouton PAUSE', t['r'] <= b['l'] - 8 or t['t'] >= b['b'] - 4, f'{t} {b}')
 
         # allure : remontée sous la ligne en cours, qui passe au-dessus (ombre)
         row = pg.evaluate(f"({RECT})('#exercises-list .exercise-item .set-row')")
         pace = pg.evaluate(f"({RECT})('#exercises-list .exercise-item .cardio-pace')")
-        z = pg.evaluate("[...document.querySelectorAll('#exercises-list .exercise-item:first-child .set-row, #exercises-list .exercise-item:first-child .cardio-pace')].map(e=>getComputedStyle(e).zIndex).join(',')")
+        z = pg.evaluate("[...document.querySelectorAll('#exercises-list .exercise-item:first-of-type .set-row, #exercises-list .exercise-item:first-of-type .cardio-pace')].map(e=>getComputedStyle(e).zIndex).join(',')")
         check(tag + "allure glissée sous la ligne de saisie (chevauchement) et dessous à l'empilement", pace['t'] < row['b'] - 10 and z == '1,0', f'{row} {pace} {z}')
         check(tag + "texte de l'allure sous la ligne, lisible", pg.evaluate("(()=>{const b=document.querySelector('#exercises-list .exercise-item .cardio-pace span').getBoundingClientRect();return b.top})()") >= row['b'], '')
         pg.evaluate("document.querySelector('#exercises-list .exercise-item .set-row').classList.remove('current')"); pg.wait_for_timeout(100)
@@ -45,6 +46,8 @@ with Srv() as base, sync_playwright() as p:
         # séance libre : icône 1× + nom, rien d'autre
         pg.evaluate("""(()=>{const p=JSON.parse(JSON.stringify(state.programs[0]));p.id='lib1';p.kind='libre';p.name='Dorsaux';p.sessions=[Object.assign(p.sessions[0],{key:'',name:'Dorsaux'})];state.programs.push(p);activateProgram('lib1');})()"""); pg.wait_for_timeout(300)
         pg.evaluate("switchTab('seance')"); pg.wait_for_timeout(300)
+        check(tag + 'séance libre (1.7.42) : échauffement avant son 1er exercice de force', pg.evaluate("document.getElementById('warmup-note').nextElementSibling.dataset.ex") == pg.evaluate("[...document.querySelectorAll('#exercises-list .exercise-item')].map(e=>e.dataset.ex).find(n=>!exInfo(n).cardio)") and pg.is_visible('#warmup-note'))
+        check(tag + 'séance libre (1.7.42) : titre et icône à la même hauteur que pour un programme', pg.evaluate(f"({RECT})('#page-title')")['t'] == t_prog['t'] and pg.evaluate(f"({RECT})('#seance-prog-ico')")['t'] == ico_prog['t'] and pg.evaluate(f"({RECT})('#seance-prog-ico')")['b'] == ico_prog['b'], f"{t_prog} {ico_prog}")
         check(tag + 'séance libre : icône 1× + nom en titre, plus de ligne pastille / nom (1.7.41)', pg.inner_text('#page-title') == 'Dorsaux'
               and pg.inner_text('#seance-prog-ico') == '1×' and not pg.is_visible('#seance-head') and not pg.evaluate(OVERFLOW_JS)['out'])
         pg.evaluate("switchTab('programme')"); pg.wait_for_timeout(200)
@@ -53,6 +56,7 @@ with Srv() as base, sync_playwright() as p:
 
         # rien de prévu : « Séance »
         pg.evaluate("workoutDef=null; buildWorkoutDef=()=>null; switchTab('seance'); initWorkoutForm()"); pg.wait_for_timeout(300)
+        check(tag + "aucune séance prévue : échauffement caché et remis hors de la liste (1.7.42)", not pg.is_visible('#warmup-note') and pg.evaluate("document.getElementById('warmup-note').parentElement.id") == 'workout-form')
         check(tag + 'aucune séance prévue : titre « Séance », sans icône', pg.inner_text('#page-title') == 'Séance' and not pg.is_visible('#seance-prog-ico'), pg.inner_text('#page-title'))
         check(tag + 'aucune erreur JavaScript', not errs, str(errs))
         ctx.close()

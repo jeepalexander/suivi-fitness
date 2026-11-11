@@ -26,7 +26,9 @@ with Srv() as url, sync_playwright() as p:
            and 'Séance du jour' not in pg.inner_text('#seance-sticky'), pg.inner_text('#seance-sticky'))
         first = pg.evaluate("workoutDef.exercises[0].name")
         warm_vis = pg.is_visible('#warmup-note')
-        ok(tag + "échauffement : visible seulement si la séance commence par le rameur", warm_vis == (first == 'Rameur'), first)
+        place = pg.evaluate("""(()=>{const n=document.getElementById('warmup-note');const nx=n.nextElementSibling;return [n.parentElement.id, nx&&nx.dataset.ex]})()""")
+        first_force = pg.evaluate("[...document.querySelectorAll('#exercises-list .exercise-item')].map(e=>e.dataset.ex).find(n=>!exInfo(n).cardio)")
+        ok(tag + "échauffement (1.7.42) : visible, juste avant le premier exercice de force", warm_vis and place == ['exercises-list', first_force], f'{place} {first_force}')
         pg.evaluate("document.getElementById('warmup-note').hidden=false")
         ok(tag + "échauffement (1.7.41) : (i), texte, picto poids après « force », flamme orange après « t'échauffer », plus d'emoji",
            pg.inner_text('#warmup-note').strip() == "Ajoute 2 séries légères au premier exercice de force  pour t'échauffer"
