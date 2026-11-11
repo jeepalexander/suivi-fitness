@@ -322,27 +322,15 @@ function inviteQrSvg(url) {
 }
 
 function openInviteSheet() {
+  // 1.7.37 : QR code et adresse seulement. Le bouton « Partager le lien » est retiré : sous Firefox pour Android,
+  // un partage abandonné restait en attente et bloquait ensuite les menus de choix et le choix de fichier.
   const url = appShareUrl();
-  const canShare = typeof navigator.share === 'function';
   openSheet(`
     <h3 class="sheet-title small">Inviter quelqu'un</h3>
     <p class="sheet-text center">Scanne ce QR code avec l'appareil photo de son téléphone pour ouvrir l'application.</p>
     <div class="invite-qr">${inviteQrSvg(url)}</div>
     <p class="invite-link">${escapeHtml(url)}</p>
-    <button type="button" class="btn" onclick="shareAppLink()">${canShare ? 'Partager le lien' : 'Copier le lien'}</button>
     <button type="button" class="btn btn-secondary" onclick="closeSheet()">Fermer</button>`);
-}
-
-async function shareAppLink() {
-  const url = appShareUrl();
-  try {
-    if (typeof navigator.share === 'function') { await navigator.share({ title: 'Mon Carnet de Salle', url }); return; }
-    await navigator.clipboard.writeText(url);
-    showToast('Lien copié', 2500);
-  } catch (e) {
-    if (e && e.name === 'AbortError') return; // partage annulé
-    showToast('Copie impossible : ' + url, 6000);
-  }
 }
 
 // ============================================================

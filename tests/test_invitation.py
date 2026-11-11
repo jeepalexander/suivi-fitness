@@ -34,9 +34,9 @@ with Srv() as base, sync_playwright() as p:
         check(f"[{th}] carte « Inviter quelqu'un » entre Google Drive et Application", titles.index("Inviter quelqu'un") == titles.index('Sauvegarde Google Drive') + 1 and titles.index('Application') == titles.index("Inviter quelqu'un") + 1, titles)
         pg.click('#invite-btn'); pg.wait_for_timeout(400)
         url = pg.evaluate("appShareUrl()")
-        check(f"[{th}] la fenêtre s'ouvre : QR code, lien de l'application, Partager/Copier, Fermer",
+        check(f"[{th}] la fenêtre s'ouvre : QR code, adresse visible, un seul bouton « Fermer » (1.7.37 : plus de partage)",
               pg.locator('.sheet .invite-qr svg').count() == 1 and pg.inner_text('.sheet .invite-link') == url
-              and [b.strip() for b in pg.evaluate("[...document.querySelectorAll('.sheet .btn')].map(b=>b.textContent)")][-1] == 'Fermer', url)
+              and [b.strip() for b in pg.evaluate("[...document.querySelectorAll('.sheet .btn')].map(b=>b.textContent)")] == ['Fermer'], url)
         check(f"[{th}] lien = dossier de l'application (sans index.html ni paramètres)", url == base and '?' not in url and '#' not in url, url)
         check(f"[{th}] QR noir sur fond blanc (lisible en thème sombre)", pg.evaluate("getComputedStyle(document.querySelector('.invite-qr')).backgroundColor") == 'rgb(255, 255, 255)')
         png = os.path.join(tempfile.gettempdir(), f'qr_{th}.png')
@@ -46,10 +46,7 @@ with Srv() as base, sync_playwright() as p:
             check(f"[{th}] le QR code se lit et donne l'adresse de l'application", dec == url, dec)
         ov = pg.evaluate(OVERFLOW_JS)
         check(f"[{th}] rien ne déborde", ov['docW'] <= ov['vw'] and not ov['out'], ov)
-        # Copie (pas de partage natif dans Chromium de test)
-        pg.evaluate("navigator.share=undefined; navigator.clipboard.writeText=t=>{window.__copied=t;return Promise.resolve()}")
-        pg.evaluate("shareAppLink()"); pg.wait_for_timeout(300)
-        check(f"[{th}] sans partage natif : « Copier le lien » copie l'adresse", pg.evaluate("window.__copied") == url)
+        check(f"[{th}] aucun appel au partage natif", pg.evaluate("typeof shareAppLink") == 'undefined')
         pg.click('.sheet .btn:has-text("Fermer")'); pg.wait_for_timeout(300)
         check(f"[{th}] « Fermer » referme la fenêtre", not pg.evaluate("!!document.querySelector('#sheet-overlay.open')"))
         check(f"[{th}] aucune erreur JavaScript", not errs, errs)

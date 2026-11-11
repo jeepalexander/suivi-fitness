@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.37] - 2026-11-11
+### 🔗 Inviter quelqu'un : QR code seul (co-auteur : Claude)
+- Le bouton « Partager le lien » est retiré de la fenêtre « Inviter quelqu'un » : il reste le QR code, l'adresse de l'application écrite dessous et « Fermer ». Sous Firefox pour Android, un partage abandonné restait en attente et s'affichait ensuite à la place des menus de choix (exercice du graphique) et du choix de fichier.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.37.
+
+---
+
 ## [1.7.36] - 2026-11-11
 ### 🔧 Restauration locale : plus de demande d'accès à la caméra et au micro (co-auteur : Claude)
 - Le champ de choix de fichier de « Restaurer › Choisir un fichier… » n'accepte plus que les sauvegardes `.json`. Sans type précisé, Firefox pour Android proposait aussi photo, vidéo et son, et demandait donc l'accès à la caméra et au micro ; un refus empêchait le sélecteur de s'ouvrir.
