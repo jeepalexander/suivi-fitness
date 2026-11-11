@@ -56,6 +56,8 @@ with Srv() as url, sync_playwright() as p:
         pg.select_option('#exercise-filter', 'Développé couché'); pg.wait_for_timeout(300)
         leg = pg.inner_text('#exercise-legend').replace('\n', ' ')
         ok(tag + "exercice en kg : « Charge max » revient, avec le 1RM estimé", pg.inner_text('#btn-mode-max') == 'Charge max' and 'Charge max' in leg and '1RM estimé' in leg and pg.is_visible('#exercise-legend .rm-line'), leg)
+        ok(tag + "1.7.36 : restauration locale limitée aux sauvegardes .json (pas de caméra ni de micro sous Firefox Android)",
+           pg.get_attribute('#import-file', 'accept') == '.json,application/json')
         ok(tag + "aucune erreur JavaScript", not errs, errs)
         ctx.close()
     br.close()

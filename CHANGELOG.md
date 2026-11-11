@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.36] - 2026-11-11
+### 🔧 Restauration locale : plus de demande d'accès à la caméra et au micro (co-auteur : Claude)
+- Le champ de choix de fichier de « Restaurer › Choisir un fichier… » n'accepte plus que les sauvegardes `.json`. Sans type précisé, Firefox pour Android proposait aussi photo, vidéo et son, et demandait donc l'accès à la caméra et au micro ; un refus empêchait le sélecteur de s'ouvrir.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.36.
+
+---
+
 ## [1.7.35] - 2026-11-11
 ### 🤸 Exercices au poids du corps : progression en répétitions (co-auteur : Claude)
 - **Progression par exercice** : pour un exercice au poids du corps (tractions, dips, dips triceps, pompes lestées, relevés de jambes suspendu), le bouton « Charge max » devient **« Répétitions »** et la courbe suit la **meilleure série** de chaque séance (plus fort lest, puis le plus de répétitions), au lieu d'une charge qui ne bougeait pas. Graduations en nombres entiers, à partir de 0.
