@@ -58,6 +58,7 @@
   --warn-border: #F6D58B;
   --neutral: #8B8B93;
   --danger: #C62B35;
+  --danger-strong: #C62B35;    /* 1.7.45 : fond du bouton rouge de suppression, le même dans les deux thèmes (texte blanc lisible) */
 
   /* Séances */
   --accent-a: #1B6FD8;
@@ -735,7 +736,7 @@ body[data-tab="programme"][data-pview="choose"] header h1 { display: none; }
 .ed-delete svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .btn.btn-sand { background: var(--sand-ink); color: var(--on-color); box-shadow: var(--sh-sand); }
 .btn:disabled { opacity: 0.4; cursor: default; }
-.btn.btn-delete { background: var(--danger); color: var(--on-color); box-shadow: var(--sh-danger); }
+.btn.btn-delete { background: var(--danger-strong); color: var(--on-color); box-shadow: var(--sh-danger); }
 
 /* --- Feuilles du bas --- */
 .sheet-overlay { position: fixed; inset: 0; z-index: var(--z-sheet); display: none; align-items: flex-end; justify-content: center; background: var(--overlay); }

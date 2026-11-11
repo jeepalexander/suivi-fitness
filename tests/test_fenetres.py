@@ -57,6 +57,8 @@ with Srv() as url, sync_playwright() as p:
         a = ask(pg)
         ok(tag + f"retirer la séance {k} remplie : volet rouge « Retirer la séance {k} ? », 2 exercices",
            a and a['tone'] == 'danger' and a['danger'] and a['title'] == f'Retirer la séance {k} ?' and 'Ses 2 exercices seront retirés du programme.' in a['text'] and a['cancel'] == 'Annuler', a)
+        cr = pg.evaluate("""(()=>{const b=document.getElementById('ask-ok');const p=s=>s.match(/[\\d.]+/g).slice(0,3).map(Number);const L=c=>{const[r,g,x]=c.map(v=>{v/=255;return v<=0.03928?v/12.92:((v+0.055)/1.055)**2.4});return 0.2126*r+0.7152*g+0.0722*x};const cs=getComputedStyle(b);const a=L(p(cs.color)),c=L(p(cs.backgroundColor));return (Math.max(a,c)+0.05)/(Math.min(a,c)+0.05)})()""")
+        ok(tag + f"bouton rouge de suppression lisible (1.7.45) : contraste {cr:.1f} ≥ 4,5", cr >= 4.5, cr)
         pg.click('#ask-cancel'); pg.wait_for_timeout(150)
         ok(tag + "« Annuler » : séance gardée", pg.evaluate("programDraft.sessions.length") == n0)
         pg.click('.ed-seg-op:not(.plus)'); pg.wait_for_timeout(150); pg.click('#ask-ok'); pg.wait_for_timeout(150)

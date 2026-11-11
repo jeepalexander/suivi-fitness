@@ -6,9 +6,14 @@ Ils ouvrent l'application dans un vrai navigateur (Chromium piloté par Playwrig
 ```bash
 pip install playwright --break-system-packages   # une seule fois (ou dans un environnement virtuel)
 playwright install chromium                      # une seule fois
-python3 tests/run_tests.py                       # code de sortie 0 = tout est bon
+python3 tests/run_tests.py                       # tous les tests ; code de sortie 0 = tout est bon
+python3 tests/run_tests.py seance                # seulement les tests d'un groupe (plusieurs possibles)
+python3 tests/run_tests.py -j 3 seance style     # 3 tests en parallèle (par défaut : 2)
+python3 tests/run_tests.py --liste               # les groupes et leurs tests
 ```
-Un test seul : `python3 tests/test_validation.py`.
+Un test seul : `python3 tests/test_validation.py` ou `python3 tests/run_tests.py rameur`.
+
+**Groupes (1.7.45)** : `seance`, `programmes`, `progression`, `historique`, `reglages`, `drive`, `style`. Avant un déploiement, on lance les groupes touchés par la modification ; la suite complète reste disponible. En parallèle (2 à la fois), un groupe va environ deux fois plus vite (groupe `programmes` : 45 s au lieu de 80 s).
 
 ## Ce qui est couvert
 | Fichier | Contrôles | Vérifie |
@@ -53,4 +58,4 @@ Automatiquement : GitHub les exécute à chaque envoi de code et à chaque deman
 ## Limites
 - Chromium uniquement : pas de test sur Safari ni sur un vrai Android (Chrome ou Firefox), où certains comportements du système (fenêtre de partage, choix de fichier, permissions) diffèrent.
 - Rien sur le rendu visuel fin (couleurs, ombres) : à regarder à l'œil.
-- Ajouter un test : copier la structure d'un fichier existant (`Srv`, `newpage` dans `harness.py`) et l'ajouter à la liste de `run_tests.py`.
+- Ajouter un test : copier la structure d'un fichier existant (`Srv`, `newpage` dans `harness.py`) et l'ajouter à la liste `TESTS` de `run_tests.py`, ainsi qu'au(x) groupe(s) de `GROUPES` qui le concernent.

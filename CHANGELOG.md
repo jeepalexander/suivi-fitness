@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.45] - 2026-11-11
+### 🎨 Bouton de suppression lisible en sombre, tests par groupes (co-auteur : Claude)
+- Mode sombre : le bouton rouge des volets de suppression (« Supprimer la séance », « Retirer la séance »…) prend le même rouge qu'en mode clair ; le texte blanc devient lisible (contraste 2,5 → 5,5). Nouveau jeton `--danger-strong` ; le rose `--danger` reste pour l'icône poubelle et les valeurs négatives.
+- Tests : `run_tests.py` accepte des groupes par onglet (`seance`, `programmes`, `progression`, `historique`, `reglages`, `drive`, `style`), des fichiers précis et `-j N` pour lancer N tests en parallèle (2 par défaut) ; `--liste` affiche les groupes. `test_fenetres.py` vérifie la lisibilité du bouton de suppression.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.45.
+
+---
+
 ## [1.7.44] - 2026-11-11
 ### 🎨 Pastille « 1× » lisible partout (co-auteur : Claude)
 - Progression, bouton du haut (mode clair) : le « 1× » sur la pastille sable passe en brun (il était blanc, illisible).
