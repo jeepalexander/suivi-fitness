@@ -10,6 +10,12 @@ def snap(pg):
 res=[]
 def check(name,ok,extra=''):
     res.append(ok); print(('OK   ' if ok else 'ÉCHEC'),name,extra)
+
+def accept_once(d):
+    # 1.7.42 : la boîte peut déjà avoir été acceptée par l'autre gestionnaire (once + on sur la même boîte)
+    try: d.accept()
+    except Exception: pass
+
 with Srv() as base, sync_playwright() as p:
     br=p.chromium.launch()
     ctx,pg,errs=newpage(br,390,844,pref='light')
@@ -41,7 +47,7 @@ with Srv() as base, sync_playwright() as p:
     # modification d'une ancienne séance puis annulation : le brouillon revient
     pg.evaluate("switchTab('historique')"); pg.wait_for_timeout(300)
     pg.evaluate("document.querySelector('.history-item').click()"); pg.wait_for_timeout(300)
-    pg.once('dialog',lambda d:d.accept()); pg.click('#modal-edit-btn'); pg.wait_for_timeout(400)
+    pg.once('dialog',accept_once); pg.click('#modal-edit-btn'); pg.wait_for_timeout(400)
     e=snap(pg); check('en modification : formulaire de l\'ancienne séance (pas le brouillon)',e['rows']!=a['rows'])
     pg.evaluate("document.querySelector('.exercise-item .ex-toggle').getAttribute('aria-expanded')==='false'&&document.querySelector('.exercise-item .ex-toggle').click()"); pg.wait_for_timeout(150)
     pg.fill('#exercises-list .exercise-item .weight-input','99'); pg.wait_for_timeout(200)
@@ -49,7 +55,7 @@ with Srv() as base, sync_playwright() as p:
     pg.evaluate("cancelEditSession()"); pg.wait_for_timeout(500); pg.evaluate("switchTab('seance')")
     f=snap(pg); check('après annulation : saisie en cours retrouvée',[(r['n'],r['sets']) for r in f['rows']]==[(r['n'],r['sets']) for r in a['rows']])
     # enregistrement : brouillon effacé, formulaire neuf
-    pg.on('dialog',lambda d:d.accept()); pg.click('#submit-workout-btn'); pg.wait_for_timeout(700)
+    pg.on('dialog',accept_once); pg.click('#submit-workout-btn'); pg.wait_for_timeout(700)
     g=snap(pg); check('séance enregistrée : brouillon effacé',not g['draft'])
     pg.reload(); pg.wait_for_timeout(900); pg.evaluate("switchTab('seance')"); h=snap(pg)
     check('rechargement après enregistrement : formulaire neuf (pas de fantôme)',not any(s[2] or s[3] for r in h['rows'] for s in r['sets']))

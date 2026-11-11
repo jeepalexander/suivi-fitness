@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.43] - 2026-11-11
+### 🎨 Séance libre : « 1× » lisible en mode sombre (co-auteur : Claude)
+- Page Séance, mode sombre : le « 1× » de la pastille séance libre prend la couleur dorée de ses pointillés (il était brun foncé sur fond sombre). Rien ne change en mode clair ni dans l'onglet Programmes.
+- Tests : `test_titre_seance.py` (couleur du 1× en clair et en sombre) ; `test_brouillon.py` ne lève plus d'erreur quand la même boîte de dialogue est acceptée deux fois.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.43.
+
+---
+
 ## [1.7.42] - 2026-11-11
 ### ✨ Séance : phrase d'échauffement juste avant le premier exercice de force, titre à hauteur constante (co-auteur : Claude)
 - La phrase « Ajoute 2 séries légères au premier exercice de force pour t'échauffer » se place à chaque affichage juste au-dessus du premier exercice de force, après le cardio éventuel (rameur, tapis…).
