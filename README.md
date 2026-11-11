@@ -2,7 +2,7 @@
 
 **Application PWA de suivi d'entraînement en salle de sport** (dépôt `suivi-fitness`)
 
-[![Version](https://img.shields.io/badge/version-1.7.46-blue)](https://github.com/jeepalexander/suivi-fitness)
+[![Version](https://img.shields.io/badge/version-1.7.47-blue)](https://github.com/jeepalexander/suivi-fitness)
 [![License](https://img.shields.io/badge/license-MIT-green)]
 
 ---
@@ -107,7 +107,7 @@ suivi-fitness/
 ├── sw.js               # Service Worker (PWA)
 ├── manifest.json       # Configuration PWA
 ├── data.json           # Données par défaut
-├── confidentialite.html, conditions.html   # Pages publiques (Google)
+├── presentation.html, confidentialite.html, conditions.html   # Pages publiques (Google : page d'accueil, confidentialité, conditions)
 ├── wallpapers/         # Fonds d’écran (images + vignettes)
 ├── CHANGELOG.md        # Historique des versions
 ├── tests/              # Tests automatiques (voir tests/README.md)
