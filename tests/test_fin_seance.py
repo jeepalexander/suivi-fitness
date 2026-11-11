@@ -28,8 +28,8 @@ with Srv() as url, sync_playwright() as p:
         warm_vis = pg.is_visible('#warmup-note')
         ok(tag + "échauffement : visible seulement si la séance commence par le rameur", warm_vis == (first == 'Rameur'), first)
         pg.evaluate("document.getElementById('warmup-note').hidden=false")
-        ok(tag + "échauffement (1.7.40) : (i), texte, picto poids après « force », flamme orange après « t'échauffer », plus d'emoji",
-           pg.inner_text('#warmup-note').strip() == "Ajoute 2 séries légères à la première séance de force  pour t'échauffer"
+        ok(tag + "échauffement (1.7.41) : (i), texte, picto poids après « force », flamme orange après « t'échauffer », plus d'emoji",
+           pg.inner_text('#warmup-note').strip() == "Ajoute 2 séries légères au premier exercice de force  pour t'échauffer"
            and pg.evaluate("[...document.querySelectorAll('#warmup-note svg')].map(e=>e.getAttribute('class')).join(',')") == 'warmup-info,warmup-weight,warmup-flame'
            and pg.evaluate("getComputedStyle(document.querySelector('.warmup-flame')).fill") == 'rgb(234, 88, 12)'
            and pg.is_visible('.warmup-weight') and pg.is_visible('.warmup-info') and '🚣' not in pg.inner_html('#warmup-note'), repr(pg.inner_text('#warmup-note')))

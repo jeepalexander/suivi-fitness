@@ -1,4 +1,4 @@
-"""1.7.40 : titre de la page Séance = nom du programme ou de la séance libre ; allure cardio remontée sous l'ombre de la saisie."""
+"""1.7.40-1.7.41 : titre de la page Séance = nom du programme ou de la séance libre ; allure cardio remontée sous l'ombre de la saisie."""
 import sys
 from harness import *
 
@@ -21,6 +21,8 @@ with Srv() as base, sync_playwright() as p:
         pg.evaluate("switchTab('seance')"); pg.wait_for_timeout(400)
         check(tag + 'titre = nom du programme actif', pg.inner_text('#page-title') == 'Hypertrophie', pg.inner_text('#page-title'))
         check(tag + 'nom de la séance toujours sous le titre', pg.inner_text('#seance-type-title') == 'Presse / Développé')
+        check(tag + "icône du type (cycle, pastille sombre) devant le titre (1.7.41)", pg.is_visible('#seance-prog-ico svg') and 'dark' in pg.get_attribute('#seance-prog-ico', 'class')
+              and pg.evaluate("document.querySelector('#seance-prog-ico').getBoundingClientRect().right") < pg.evaluate("document.querySelector('#page-title').getBoundingClientRect().left"))
         t, b = pg.evaluate(f"({RECT})('#page-title')"), pg.evaluate(f"({RECT})('#timer-btn')")
         check(tag + 'titre sans chevauchement avec le bouton PAUSE', t['r'] <= b['l'] - 8 or t['t'] >= b['b'] - 4, f'{t} {b}')
 
@@ -40,13 +42,18 @@ with Srv() as base, sync_playwright() as p:
         t, b = pg.evaluate(f"({RECT})('#page-title')"), pg.evaluate(f"({RECT})('#timer-btn')")
         check(tag + 'nom long : titre affiché, sous le bouton PAUSE, sans débordement',
               pg.inner_text('#page-title') == 'Force printemps haut du corps' and t['t'] >= b['b'] - 4 and not pg.evaluate(OVERFLOW_JS)['out'], f'{t} {b}')
+        # séance libre : icône 1× + nom, rien d'autre
+        pg.evaluate("""(()=>{const p=JSON.parse(JSON.stringify(state.programs[0]));p.id='lib1';p.kind='libre';p.name='Dorsaux';p.sessions=[Object.assign(p.sessions[0],{key:'',name:'Dorsaux'})];state.programs.push(p);activateProgram('lib1');})()"""); pg.wait_for_timeout(300)
+        pg.evaluate("switchTab('seance')"); pg.wait_for_timeout(300)
+        check(tag + 'séance libre : icône 1× + nom en titre, plus de ligne pastille / nom (1.7.41)', pg.inner_text('#page-title') == 'Dorsaux'
+              and pg.inner_text('#seance-prog-ico') == '1×' and not pg.is_visible('#seance-head') and not pg.evaluate(OVERFLOW_JS)['out'])
         pg.evaluate("switchTab('programme')"); pg.wait_for_timeout(200)
         check(tag + 'retour sur Programmes : titre « Programmes », en-tête à sa place',
-              pg.inner_text('#page-title') == 'Programmes' and pg.evaluate("document.querySelector('.page-title-row').getBoundingClientRect().top") < 50)
+              pg.inner_text('#page-title') == 'Programmes' and not pg.is_visible('#seance-prog-ico') and pg.evaluate("document.querySelector('.page-title-row').getBoundingClientRect().top") < 50)
 
         # rien de prévu : « Séance »
         pg.evaluate("workoutDef=null; buildWorkoutDef=()=>null; switchTab('seance'); initWorkoutForm()"); pg.wait_for_timeout(300)
-        check(tag + 'aucune séance prévue : titre « Séance »', pg.inner_text('#page-title') == 'Séance', pg.inner_text('#page-title'))
+        check(tag + 'aucune séance prévue : titre « Séance », sans icône', pg.inner_text('#page-title') == 'Séance' and not pg.is_visible('#seance-prog-ico'), pg.inner_text('#page-title'))
         check(tag + 'aucune erreur JavaScript', not errs, str(errs))
         ctx.close()
     br.close()

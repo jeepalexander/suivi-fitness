@@ -54,12 +54,13 @@
         <button id="fond-back" class="ed-back" type="button" onclick="switchTab('reglages')" aria-label="Retour aux réglages">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
         </button>
+        <span id="seance-prog-ico" class="prog-ico" aria-hidden="true"></span>
         <h1 id="page-title">Programmes</h1>
       </div>
     </div>
 
     <div id="seance-sticky" class="seance-sticky">
-    <div class="session-head">
+    <div id="seance-head" class="session-head">
       <span id="seance-badge" class="type-pill type-pill-A">A</span>
       <div class="session-head-text">
         <span id="seance-overline" class="overline" hidden></span>
@@ -111,7 +112,7 @@
       <button type="button" class="btn btn-secondary" onclick="switchTab('programme'); openProgramChooser()">Créer un programme ou une séance</button>
     </div>
     <form id="workout-form">
-    <p id="warmup-note" class="warmup-note"><svg class="warmup-info" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.4"/></svg><span>Ajoute 2 séries légères à la première séance de force <svg class="warmup-weight" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7v10M3.5 9.5v5M17.5 7v10M20.5 9.5v5M6.5 12h11"/></svg> pour t'échauffer <svg class="warmup-flame" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c.9 3.1 4.6 4.9 4.6 9.7a4.6 4.6 0 0 1-9.2 0c0-2.5 1.3-3.9 2.5-4.9.2 1.7 1 2.7 2.2 3.1.2-3-.9-5.3-.1-7.9z"/></svg></span></p>
+    <p id="warmup-note" class="warmup-note"><svg class="warmup-info" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.4"/></svg><span>Ajoute 2 séries légères au premier exercice de force <svg class="warmup-weight" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7v10M3.5 9.5v5M17.5 7v10M20.5 9.5v5M6.5 12h11"/></svg> pour t'échauffer <svg class="warmup-flame" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c.9 3.1 4.6 4.9 4.6 9.7a4.6 4.6 0 0 1-9.2 0c0-2.5 1.3-3.9 2.5-4.9.2 1.7 1 2.7 2.2 3.1.2-3-.9-5.3-.1-7.9z"/></svg></span></p>
       <div id="exercises-list"></div>
       <div class="watch-memo">⌚ N'oublie pas d'arrêter le suivi de ta montre !</div>
       <p class="submit-hint">Seules les séries cochées sont enregistrées.</p>

@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.41] - 2026-11-11
+### ✨ Onglet Séance : icône du type de programme devant le titre (co-auteur : Claude)
+- Devant le nom du programme : l'icône de cycle (pastille sombre) ; devant le nom d'une séance libre : la pastille 1× en pointillés.
+- Séance libre : plus de ligne pastille 1× + nom sous le titre, seulement l'icône et le nom (la ligne « Modification · date » reste en modification d'une ancienne séance).
+- Phrase d'échauffement : « au premier exercice de force » (au lieu de « à la première séance de force »).
+- Tests mis à jour (`test_titre_seance.py`, `test_programmes.py`, `test_fin_seance.py`) ; `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.41.
+
+---
+
 ## [1.7.40] - 2026-11-11
 ### ✨ Onglet Séance : titre dynamique, échauffement reformulé, allure cardio sous la saisie (co-auteur : Claude)
 - Titre de la page Séance : nom du programme actif ou de la séance libre (au lieu de « Séance », qui reste quand rien n'est prévu). Un nom long passe sous le bouton PAUSE ADAPTATIVE et peut tenir sur deux lignes.

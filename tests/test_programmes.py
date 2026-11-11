@@ -171,7 +171,7 @@ with Srv() as base, sync_playwright() as p:
     pg.click('.mem-tile.libre .mem-btn'); pg.wait_for_timeout(300)
     check('séance libre activée : « Actif », tuile sable « Dorsaux » sans ligne de prochaine séance', pg.inner_text('.prog-status').strip() == 'Actif' and pg.inner_text('.prog-tile-name') == 'Dorsaux' and not pg.locator('.prog-tile .prog-tile-next').count() and pg.locator('.prog-tile.libre').count() == 1)
     pg.evaluate("switchTab('seance')"); pg.wait_for_timeout(300)
-    check('Séance : pastille 1×, Dorsaux, sans ligne au-dessus', pg.inner_text('#seance-badge') == '1×' and not pg.is_visible('#seance-overline') and pg.inner_text('#seance-type-title') == 'Dorsaux')
+    check('Séance libre (1.7.41) : plus de ligne pastille + nom sous le titre, icône 1× devant le titre', not pg.is_visible('#seance-head') and pg.inner_text('#seance-prog-ico') == '1×' and 'libre' in pg.get_attribute('#seance-prog-ico', 'class'))
     check('Séance libre : titre de la page = son nom (1.7.40)', pg.inner_text('#page-title') == 'Dorsaux', pg.inner_text('#page-title'))
     check_set(pg, 'Tirage vertical', 0, 50, 10)
     pg.evaluate("document.getElementById('workout-form').requestSubmit()"); pg.wait_for_timeout(400); pg.evaluate("closeFinishDialog()")

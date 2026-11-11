@@ -1522,6 +1522,13 @@ function updateSeancePageTitle() {
   const pageTitle = document.getElementById('page-title');
   if (!pageTitle) return;
   pageTitle.innerText = (workoutDef && workoutDef.programName) || PAGE_TITLES.seance;
+  // 1.7.41 : icône du type de programme devant le nom (cycle pour un programme, 1× pour une séance libre)
+  const ico = document.getElementById('seance-prog-ico');
+  if (ico) {
+    const libre = !!workoutDef && workoutDef.kind === 'libre';
+    ico.className = 'prog-ico' + (libre ? ' libre' : ' dark') + (workoutDef ? ' on' : '');
+    ico.innerHTML = workoutDef ? (libre ? '1×' : SWAP_SVG) : '';
+  }
   // Nom long : le titre descend un peu pour ne pas passer sous le bouton PAUSE ADAPTATIVE
   const row = pageTitle.parentElement;
   row.classList.remove('title-clear');
@@ -1541,6 +1548,13 @@ function renderSeanceHead(def, customSession) {
   }
   const titleEl = document.getElementById('seance-type-title');
   if (titleEl) titleEl.innerText = def.sessionName;
+  // 1.7.41 : séance libre = seulement l'icône 1× et le nom dans le titre de la page ;
+  // en modification d'une ancienne séance libre, seule la ligne « Modification · date » reste
+  const libreHead = def.kind === 'libre';
+  if (badge) badge.hidden = libreHead;
+  if (titleEl) titleEl.hidden = libreHead;
+  const headEl = document.getElementById('seance-head');
+  if (headEl) headEl.hidden = libreHead && !customSession;
   updateSeancePageTitle();
   // Ligne au-dessus du nom : seulement en modification d'une ancienne séance (1.7.27)
   const overlineEl = document.getElementById('seance-overline');
@@ -3446,6 +3460,7 @@ function switchTab(tabName) {
   const pageTitle = document.getElementById('page-title');
   if (pageTitle) pageTitle.innerText = PAGE_TITLES[tabName] || '';
   if (tabName === 'seance') updateSeancePageTitle();
+  else if (pageTitle && pageTitle.parentElement) pageTitle.parentElement.classList.remove('title-clear'); // 1.7.41 : marge réservée à la page Séance
 
   if (tabName === 'programme') renderProgramOverview();
   updateProgramHeader();
