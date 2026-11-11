@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.46] - 2026-11-11
+### 🧪 Test de contraste automatique (co-auteur : Claude)
+- Nouveau `tests/test_contraste.py` (groupe `style`) : sur 18 écrans, en clair et en sombre, chaque texte visible doit avoir un contraste d'au moins 4,5:1 (3:1 en grand) et chaque icône d'au moins 3:1. Exception validée : le « 1× » doré des pastilles non remplies en sombre. Non mesurés : la tuile de progression (dégradé) et les valeurs suggérées pâles.
+- Aucun changement visible dans l'app.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.46.
+
+---
+
 ## [1.7.45] - 2026-11-11
 ### 🎨 Bouton de suppression lisible en sombre, tests par groupes (co-auteur : Claude)
 - Mode sombre : le bouton rouge des volets de suppression (« Supprimer la séance », « Retirer la séance »…) prend le même rouge qu'en mode clair ; le texte blanc devient lisible (contraste 2,5 → 5,5). Nouveau jeton `--danger-strong` ; le rose `--danger` reste pour l'icône poubelle et les valeurs négatives.

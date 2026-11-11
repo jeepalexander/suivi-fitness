@@ -44,6 +44,7 @@ Un test seul : `python3 tests/test_validation.py` ou `python3 tests/run_tests.py
 | `test_fin_seance.py` | 56 | Séance (1.7.27) : bouton Programmes → page de départ, en-tête allégé, échauffement, noms sur une ligne, fenêtre de fin (« Bravo ! », tonnage, écart, records) ; 390 / 360 px, clair et sombre |
 | `test_titre_seance.py` | 32 | Séance (1.7.40-41) : titre = nom du programme précédé de l'icône du type, séance libre = icône 1× + nom seuls, « Séance » si rien n'est prévu, nom long sous le bouton PAUSE ; allure cardio sous l'ombre de la ligne en cours ; 390 / 360 px, clair et sombre |
 | `test_pastille_1x.py` | 14 | Pastille « 1× » de séance libre lisible partout (Programmes, Progression, choix du périmètre, restauration, création, Séance) en clair et en sombre (1.7.44) |
+| `test_contraste.py` | 74 | Lisibilité de 18 écrans en clair et en sombre : textes ≥ 4,5:1 (≥ 3:1 en grand), icônes ≥ 3:1 ; exception : « 1× » doré en sombre (choix du 11/11/2026) (1.7.46) |
 | `test_editeur_incomplet.py` | 42 | Éditeur (1.7.28) : « Enregistrer » dès le 1er exercice, volet « Presque prêt » si des séances sont vides ; liens légaux des Réglages |
 | `test_fenetres.py` | 53 | Fenêtres (1.7.29) : tous les volets de l'app au lieu des boîtes système, plus aucun `confirm()` / `alert()` dans le code |
 | `test_pause_actif.py` | 18 | Bouton pause de la tuile active (1.7.30) : passage « En mémoire », confirmation si une séance est en cours |
