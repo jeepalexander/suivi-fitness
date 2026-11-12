@@ -7,6 +7,18 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.50] - 2026-11-12
+### ✨ Bilan du mois (co-auteur : Claude)
+- **Post-it sur l'écran Programmes** : du 1er au 10 du mois, s'il y a eu au moins une séance le mois précédent, un post-it jaune carré (100 px, incliné, écriture manuscrite) se colle à droite entre le message d'accueil et « Actif » : « Ton bilan du mois de septembre ». Pas de notification du téléphone.
+- **Pop-up centré** (style de la fenêtre d'une séance de l'Historique), comparé au mois précédent : séances, tonnage (+ %), régularité (séances par semaine), temps d'entraînement, cardio (distance et temps, s'il y en a), nombre de records battus. Un seul bouton « OK » : il ferme le bilan, l'archive et retire le post-it (aussi après un rechargement). Échap ou un toucher à côté font de même.
+- **Archives dans Progression** : dans « 4 derniers mois », chaque mois terminé avec des séances porte un chevron et ouvre son bilan. Sous les barres, le lien « Tous les bilans » ouvre la liste de tous les mois terminés (« 13 séances · 9 records », « aucun record »).
+- Le bilan couvre toutes les séances du mois, tous programmes confondus. Les records suivent la règle de la fenêtre de fin de séance (charge, ou durée pour le cardio et les exercices au temps), comparés à tout l'historique antérieur.
+- Nouvelles couleurs `--postit` (#FFE58A) et `--postit-ink` (#3A2E0A), identiques en clair et en sombre. Nouveau fichier `js/bilan.js` (mis en cache par le service worker).
+- Maquette : planches 35 (Bilan du mois) et 25 (Progression). Tests : `test_bilan.py` (post-it, pop-up, archivage, fin au 10 du mois, Progression, clair et sombre).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.50.
+
+---
+
 ## [1.7.49] - 2026-11-11
 ### 🧪 Version de test : mise à jour sans changement visible (co-auteur : Claude)
 - Seul le numéro de version change. Sert à vérifier si la mise à jour de l'application (rechargement) fait perdre le plein écran dans Firefox pour Android.

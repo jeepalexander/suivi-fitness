@@ -114,6 +114,8 @@
   --sand-ink: #4A3818;
   --sand-muted: #6B5A3A;
   --sand-line: #A8761F;        /* pointillés de la pastille 1×, « Nouveau » et « En pause » */
+  --postit: #FFE58A;           /* 1.7.50 : post-it du bilan du mois (même jaune en sombre : c'est un objet collé) */
+  --postit-ink: #3A2E0A;
   --pill-ico: rgba(255, 255, 255, 0.14);
   --live: #34C26E;             /* point « actif » */
   --danger-tint: #FBE4E5;
@@ -992,3 +994,26 @@ body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 .prog-pause-btn { flex: none; width: 40px; height: 40px; margin-left: auto; padding: 0; border: none; border-radius: 50%; background: var(--pill-ico); color: var(--pill-ink); display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .prog-pause-btn svg { width: 20px; height: 20px; fill: currentColor; stroke: none; }
 .prog-tile.libre .prog-pause-btn { background: var(--sand-ico); color: var(--sand-ink); }
+
+/* ============================================
+   BILAN DU MOIS (1.7.50) — maquette, planches 35 et 25
+   ============================================ */
+.bilan-postit-row { display: flex; justify-content: flex-end; margin: -8px 8px 16px 0; }
+.bilan-postit { position: relative; width: 100px; height: 100px; padding: 8px; display: flex; flex-direction: column; justify-content: center; border: 0; border-radius: 2px 2px 14px 2px; background: var(--postit); color: var(--postit-ink); font-family: var(--font-hand); font-weight: 600; text-align: left; transform: rotate(3deg); box-shadow: 0 1px 2px rgba(17, 17, 20, 0.2), 0 10px 14px -6px rgba(17, 17, 20, 0.35); cursor: pointer; }
+.bilan-postit-tape { position: absolute; top: -8px; left: 50%; width: 36px; height: 11px; margin-left: -18px; background: rgba(255, 255, 255, 0.55); box-shadow: 0 1px 2px rgba(17, 17, 20, 0.12); transform: rotate(-4deg); }
+.bilan-postit-text { display: block; font-family: inherit; font-size: 1.125rem; line-height: 1.05; } /* « * » impose la police du texte à chaque élément */
+.bilan-overlay { display: flex; }
+.bilan-sheet { text-align: left; }
+.bilan-title { margin: 0 0 4px; }
+.bilan-sub { margin: 0 0 8px; }
+.bilan-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.bilan-label { font-size: 1rem; font-weight: 600; }
+.bilan-val { white-space: nowrap; }
+.bilan-val b { font-family: var(--font-display); font-size: 1.0625rem; font-weight: 700; }
+.bilan-delta { margin-left: 8px; font-size: 0.875rem; font-weight: 600; color: var(--success); }
+.bilan-ok { margin-top: 20px; }
+.bar-row-link { cursor: pointer; }
+.bar-row-link .bar-value { display: inline-flex; align-items: center; gap: 4px; }
+.bar-chevron, .bilan-chevron { flex: none; display: flex; color: var(--text-muted); }
+.bar-chevron svg, .bilan-chevron svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.bilan-all { margin-top: 16px; text-align: center; }

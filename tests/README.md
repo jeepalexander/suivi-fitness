@@ -51,6 +51,7 @@ Un test seul : `python3 tests/test_validation.py` ou `python3 tests/run_tests.py
 | `test_poly_1rm.py` | 48 | Filtre « Polyarticulaires » (34 exercices) et 1RM estimé en pointillé, légende et phrase (1.7.34) |
 | `test_poids_du_corps.py` | 39 | Poids du corps (1.7.35) : graphique en répétitions, légende, info-bulle avec le lest, records en répétitions ou en lest ; restauration limitée aux `.json` (1.7.36) |
 | `test_presentation.py` | 32 | Page de présentation publique (1.7.47) : nom exact, description, usage de Drive, liens visibles vers la confidentialité et les conditions, thème clair et sombre, 390 / 360 px et ordinateur |
+| `test_bilan.py` | 2 × 20 | Bilan du mois (1.7.50) : post-it carré entre l'accueil et « Actif » du 1er au 10, pop-up centré (lignes, un seul bouton OK), archivage qui retire le post-it même après rechargement, mois cliquables et « Tous les bilans » dans Progression, Échap ; clair et sombre |
 
 ## Quand les lancer
 Automatiquement : GitHub les exécute à chaque envoi de code et à chaque demande de fusion (`.github/workflows/tests.yml`, onglet **Actions** du dépôt) ; un échec apparaît en rouge sur le commit.

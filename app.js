@@ -3318,16 +3318,21 @@ function renderProgressAnalysis() {
     const isCurrentMonth = month.year + '-' + month.month === analysis.currentMonthKey;
     const monthLabel = isCurrentMonth ? 'Ce mois-ci' : `${month.monthName} ${month.year}`;
     const width = Math.round((month.totalTonnage / maxTonnage) * 100);
+    // 1.7.50 : un mois terminé avec des séances ouvre son bilan
+    const monthKey = month.year + '-' + String(month.month).padStart(2, '0');
+    const link = !isCurrentMonth && month.sessionCount > 0;
     html += `
-      <div>
+      <div${link ? ` class="bar-row-link" role="button" tabindex="0" onclick="openBilan('${monthKey}', false)" onkeydown="if(event.key==='Enter')openBilan('${monthKey}', false)" aria-label="Bilan ${bilanDeMois(monthKey)} ${month.year}"` : ''}>
         <div class="bar-row-head">
           <span><span class="bar-label">${monthLabel}</span> <span class="bar-meta">· ${month.sessionCount} séance${month.sessionCount > 1 ? 's' : ''}</span></span>
-          <span class="bar-value">${tonnageInTonnes} T</span>
+          <span class="bar-value">${tonnageInTonnes} T${link ? `<span class="bar-chevron">${BILAN_CHEVRON}</span>` : ''}</span>
         </div>
         <div class="bar-track"><div class="bar-fill${isCurrentMonth ? ' current' : ''}" style="width:${width}%"></div></div>
       </div>`;
   });
-  html += `</div></div>`;
+  html += `</div>`;
+  if (bilanDoneKeys().length) html += `<div class="bilan-all"><button type="button" class="link-btn" onclick="openAllBilans()">Tous les bilans</button></div>`; // 1.7.50
+  html += `</div>`;
 
   // 2. Records battus ce mois-ci
   if (analysis.currentMonthRecords.length > 0) {
