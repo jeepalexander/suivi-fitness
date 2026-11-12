@@ -3331,7 +3331,7 @@ function renderProgressAnalysis() {
       </div>`;
   });
   html += `</div>`;
-  if (bilanDoneKeys().length) html += `<div class="bilan-all"><button type="button" class="link-btn" onclick="openAllBilans()">Tous les bilans</button></div>`; // 1.7.50
+  if (bilanDoneKeys(true).length) html += `<div class="bilan-all"><button type="button" class="link-btn" onclick="openAllBilans()">Tous les bilans</button></div>`; // 1.7.50
   html += `</div>`;
 
   // 2. Records battus ce mois-ci

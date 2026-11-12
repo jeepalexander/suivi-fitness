@@ -61,6 +61,17 @@ def run(br, base, scheme):
     assert pg.locator('#bilan-modal').count() == 1 and pg.locator('.sheet-overlay.open').count() == 0
     pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
     assert pg.locator('#bilan-modal').count() == 0
+    # 1.7.51 : depuis Progression, le bilan suit le périmètre choisi ; depuis le post-it, toutes les séances
+    scope = pg.evaluate("currentStatsScope()")
+    exp = pg.evaluate("statsHistory().filter(h => h.date.startsWith('2026-09')).length")
+    pg.evaluate("openBilan('2026-09', false)"); pg.wait_for_timeout(200)
+    assert pg.locator('#bilan-modal .bilan-val b').first.inner_text() == str(exp)
+    assert pg.evaluate("statsScopeName()") in pg.locator('#bilan-modal .bilan-sub').inner_text()
+    pg.keyboard.press('Escape')
+    pg.evaluate("openBilan('2026-09', true)"); pg.wait_for_timeout(200)
+    assert pg.locator('#bilan-modal .bilan-val b').first.inner_text() == str(n_sept)
+    assert pg.locator('#bilan-modal .bilan-sub').inner_text().startswith('Comparé')
+    pg.evaluate("closeBilan()")
     over = pg.evaluate(OVERFLOW_JS)
     assert not over['out'], over
     assert not errs, errs

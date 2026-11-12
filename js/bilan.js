@@ -18,22 +18,28 @@ function bilanPrevKey(key) { const [y, m] = key.split('-').map(Number); return b
 function bilanMonthName(key) { return BILAN_MOIS[Number(key.slice(5)) - 1]; }
 function bilanDeMois(key) { const n = bilanMonthName(key); return (/^[aeiouéo]/.test(n) ? "d'" : 'de ') + n; }
 function bilanMonthLabel(key) { const n = bilanMonthName(key); return n.charAt(0).toUpperCase() + n.slice(1) + ' ' + key.slice(0, 4); }
-function bilanSessions(key) { return ((state && state.history) || []).filter(h => (h.date || '').startsWith(key)); }
+function bilanSessions(key, scoped) { return bilanHist(scoped).filter(h => (h.date || '').startsWith(key)); }
+
+// Séances prises en compte : toutes (post-it), ou le périmètre choisi dans Progression (1.7.51)
+function bilanHist(scoped) {
+  if (scoped && typeof statsHistory === 'function') return statsHistory();
+  return (state && state.history) || [];
+}
 
 // Mois terminés ayant au moins une séance, du plus récent au plus ancien
-function bilanDoneKeys() {
+function bilanDoneKeys(scoped) {
   const cur = bilanKeyOf(bilanNow());
-  return [...new Set(((state && state.history) || []).map(h => (h.date || '').slice(0, 7)))]
+  return [...new Set(bilanHist(scoped).map(h => (h.date || '').slice(0, 7)))]
     .filter(k => /^\d{4}-\d{2}$/.test(k) && k < cur).sort().reverse();
 }
 
 // Records du mois : exercices dont la meilleure valeur du mois bat tout l'historique antérieur
 // (même règle que la fenêtre de fin de séance : charge, ou durée pour le cardio et les exercices au temps)
-function bilanRecordCount(key) {
-  const H = (state && state.history) || [];
+function bilanRecordCount(key, scoped) {
+  const H = bilanHist(scoped);
   const before = H.filter(h => (h.date || '') < key + '-01');
   const best = {};
-  bilanSessions(key).forEach(h => (h.exercises || []).forEach(ex => {
+  bilanSessions(key, scoped).forEach(h => (h.exercises || []).forEach(ex => {
     const mode = exMode(ex.name);
     const byTime = ex.cardio || mode === 'time';
     if (!byTime && mode !== 'weight') return;
@@ -56,8 +62,8 @@ function bilanRecordCount(key) {
   return n;
 }
 
-function bilanData(key) {
-  const cur = bilanSessions(key), prev = bilanSessions(bilanPrevKey(key));
+function bilanData(key, scoped) {
+  const cur = bilanSessions(key, scoped), prev = bilanSessions(bilanPrevKey(key), scoped);
   const sum = (a, f) => a.reduce((s, x) => s + (f(x) || 0), 0);
   const minutes = h => { const m = /(\d+)\s*min/.exec(h.duration || ''); return m ? Number(m[1]) : 0; };
   const [y, m] = key.split('-').map(Number);
@@ -72,14 +78,14 @@ function bilanData(key) {
     ton: sum(cur, h => Number(h.tonnage)), tonPrev: sum(prev, h => Number(h.tonnage)),
     minutes: sum(cur, minutes), perWeek: cur.length / (days / 7),
     cardio: cs || cm ? { s: cs, m: cm } : null,
-    records: bilanRecordCount(key)
+    records: bilanRecordCount(key, scoped)
   };
 }
 
 function bilanHM(min) { const h = Math.floor(min / 60), m = min % 60; return h ? `${h} h ${String(m).padStart(2, '0')}` : `${m} min`; }
 
-function bilanBodyHtml(key) {
-  const b = bilanData(key);
+function bilanBodyHtml(key, scoped) {
+  const b = bilanData(key, scoped);
   const fr = n => Math.round(n).toLocaleString('fr-FR');
   const up = (a, p, pct) => {
     if (!p || a <= p) return '';
@@ -87,7 +93,7 @@ function bilanBodyHtml(key) {
   };
   const row = (label, value, extra = '') => `<div class="bilan-row"><span class="bilan-label">${label}</span><span class="bilan-val"><b>${value}</b>${extra}</span></div>`;
   let html = `<h2 class="modal-title bilan-title" id="bilan-title">Bilan ${bilanDeMois(key)}</h2>
-    <p class="modal-meta bilan-sub">Comparé à ${bilanMonthName(bilanPrevKey(key))}.</p><div class="bilan-rows">`;
+    <p class="modal-meta bilan-sub">${scoped && typeof statsScopeName === 'function' ? escapeHtml(statsScopeName()) + ' · comparé' : 'Comparé'} à ${bilanMonthName(bilanPrevKey(key))}.</p><div class="bilan-rows">`;
   html += row('Séances', b.n, up(b.n, b.nPrev));
   html += row('Tonnage', fr(b.ton) + ' kg', up(b.ton, b.tonPrev, true));
   html += row('Régularité', b.perWeek.toFixed(1).replace('.', ',') + ' / semaine');
@@ -101,12 +107,13 @@ function bilanBodyHtml(key) {
 }
 
 // ---------- Pop-up centré (style de la fenêtre d'une séance de l'Historique) ----------
+// Depuis le post-it : toutes les séances ; depuis Progression : le périmètre choisi (programme ou tous)
 function openBilan(key, fromPostit) {
   closeBilan();
   const ov = document.createElement('div');
   ov.id = 'bilan-modal';
   ov.className = 'modal-overlay bilan-overlay';
-  ov.innerHTML = `<div class="modal-sheet bilan-sheet" role="dialog" aria-modal="true" aria-labelledby="bilan-title">${bilanBodyHtml(key)}
+  ov.innerHTML = `<div class="modal-sheet bilan-sheet" role="dialog" aria-modal="true" aria-labelledby="bilan-title">${bilanBodyHtml(key, !fromPostit)}
     <button type="button" class="btn bilan-ok">OK</button></div>`;
   const done = () => { closeBilan(); if (fromPostit) archiveBilan(key); };
   ov.addEventListener('click', ev => { if (ev.target === ov) done(); });
@@ -143,11 +150,12 @@ function bilanPostitHtml() {
 
 // ---------- Progression : « Tous les bilans » ----------
 function openAllBilans() {
-  const rows = bilanDoneKeys().map(k => {
-    const n = bilanSessions(k).length, r = bilanRecordCount(k);
+  const keys = bilanDoneKeys(true);
+  const rows = keys.map(k => {
+    const n = bilanSessions(k, true).length, r = bilanRecordCount(k, true);
     return `<button type="button" class="restore-item bilan-item" onclick="closeSheet();openBilan('${k}', false)">
       <span class="restore-text"><span class="restore-name"><b>${bilanMonthLabel(k)}</b></span><span class="restore-when">${n} séance${n > 1 ? 's' : ''} · ${r ? r + ' record' + (r > 1 ? 's' : '') : 'aucun record'}</span></span>
       <span class="bilan-chevron">${BILAN_CHEVRON}</span></button>`;
   }).join('');
-  openSheet(`<h3 class="sheet-title">Tous les bilans</h3><div class="restore-list">${rows}</div>`, { tall: bilanDoneKeys().length > 5 });
+  openSheet(`<h3 class="sheet-title">Tous les bilans</h3><p class="sheet-text bilan-scope">${escapeHtml(statsScopeName())}</p><div class="restore-list">${rows}</div>`, { tall: keys.length > 5 });
 }

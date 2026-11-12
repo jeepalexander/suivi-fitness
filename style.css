@@ -1017,3 +1017,4 @@ body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 .bar-chevron, .bilan-chevron { flex: none; display: flex; color: var(--text-muted); }
 .bar-chevron svg, .bilan-chevron svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .bilan-all { margin-top: 16px; text-align: center; }
+.bilan-scope { margin: -4px 0 12px; }

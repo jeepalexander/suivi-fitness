@@ -7,6 +7,17 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.51] - 2026-11-12
+### ✨ Bilan du mois : même périmètre que Progression (co-auteur : Claude)
+- Ouvert depuis Progression (mois de « 4 derniers mois » ou « Tous les bilans »), le bilan ne compte que les séances du programme choisi en haut de l'écran (ou de tous) : les chiffres concordent avec les barres. Le sous-titre le dit : « Hypertrophie · comparé à septembre. »
+- « Tous les bilans » rappelle le programme sous son titre et ne liste que ses mois.
+- Le post-it de l'écran Programmes garde le bilan de toutes les séances du mois.
+- Design system en ligne : jetons `postit` et `postit-ink`, fiche « Bilan du mois ».
+- Tests : `test_bilan.py` (périmètre depuis Progression et depuis le post-it).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.51.
+
+---
+
 ## [1.7.50] - 2026-11-12
 ### ✨ Bilan du mois (co-auteur : Claude)
 - **Post-it sur l'écran Programmes** : du 1er au 10 du mois, s'il y a eu au moins une séance le mois précédent, un post-it jaune carré (100 px, incliné, écriture manuscrite) se colle à droite entre le message d'accueil et « Actif » : « Ton bilan du mois de septembre ». Pas de notification du téléphone.
