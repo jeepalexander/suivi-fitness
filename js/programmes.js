@@ -212,7 +212,7 @@ function formatShortDate(iso) {
 function memSubHtml(p) {
   const n = programExerciseCount(p);
   const count = `${n} exercice${n > 1 ? 's' : ''}`;
-  if (p.status === 'new') return `<span class="mem-flag">Nouveau</span> · ${count}`;
+  if (p.status === 'new') return `<span class="mem-flag">${p.receivedAt ? 'Reçu' : 'Nouveau'}</span> · ${count}`; // 1.7.52 : programme reçu
   if (!isLibre(p) && p.pausedAt) return `<span class="mem-flag">En pause depuis le ${formatShortDate(p.pausedAt)}</span>`;
   return count;
 }
@@ -308,7 +308,8 @@ function chooserHtml() {
         <span class="type-pill type-pill-libre">1×</span>
         <span class="btn-start libre" aria-hidden="true">${ARROW_SVG}</span>
       </span>
-    </button>`;
+    </button>
+    ${receiveProgramButtonHtml()}`;
 }
 
 // ============================================================
@@ -405,6 +406,7 @@ function editorHtml() {
   // s'il reste des séances vides, l'appui ouvre un résumé (rien n'est enregistré).
   const anyExercise = d.sessions.some(x => x.exercises.length > 0);
   html += `<div class="ed-footer">`;
+  if (!isNew) html += shareProgramButtonHtml(); // 1.7.52 : partager par lien ou QR code
   if (!isNew) html += `<button type="button" class="ed-delete" onclick="openDeleteProgram()">${TRASH_SVG}${libre ? 'Supprimer la séance libre' : 'Supprimer le programme'}</button>`;
   if (anyExercise) {
     let label;

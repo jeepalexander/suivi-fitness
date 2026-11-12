@@ -1018,3 +1018,16 @@ body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 .bar-chevron svg, .bilan-chevron svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .bilan-all { margin-top: 16px; text-align: center; }
 .bilan-scope { margin: -4px 0 12px; }
+
+/* ============================================
+   PARTAGER ET RECEVOIR UN PROGRAMME (1.7.52)
+   ============================================ */
+.ed-share { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 0; border: none; background: none; color: var(--text); font: inherit; font-size: 1.0625rem; font-weight: 600; cursor: pointer; }
+.ed-share svg, .share-ico svg, .share-chev svg, .choose-recv svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.share-ico { flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--primary-strong); color: var(--on-strong); display: flex; align-items: center; justify-content: center; }
+.share-chev { flex: none; display: flex; color: var(--text-muted); }
+.choose-recv { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 44px; margin-top: 8px; border: 0; background: none; color: var(--text); font: inherit; font-size: 1.0625rem; font-weight: 600; cursor: pointer; }
+.recv-field { width: 100%; height: 52px; padding: 0 20px; margin: 0 0 12px; border: 0; border-radius: var(--radius-field, 25px); background: var(--fill); color: var(--text); font: inherit; font-size: 1rem; }
+.qr-cam { position: relative; width: 100%; max-width: 280px; aspect-ratio: 1; margin: 4px auto 12px; border-radius: 22px; overflow: hidden; background: #111114; }
+.qr-cam video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.qr-frame { position: absolute; inset: 18%; border: 3px solid rgba(255, 255, 255, 0.9); border-radius: 16px; box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.25); }

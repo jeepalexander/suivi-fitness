@@ -4734,6 +4734,7 @@ async function initApp() {
 
   // Ajout de la vérification du déload au chargement
   displayDeloadNotificationIfNeeded();
+  receiveProgramFromLocation(); // 1.7.52 : app ouverte par le lien d'un programme partagé
 }
 
 document.addEventListener('DOMContentLoaded', initApp);

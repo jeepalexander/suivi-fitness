@@ -7,6 +7,18 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.52] - 2026-11-12
+### ✨ Partager et recevoir un programme (co-auteur : Claude)
+- **Partager** : en bas de l'éditeur d'un programme ou d'une séance libre déjà enregistré, « Partager le programme » (au-dessus de « Supprimer »). Le volet propose « Envoyer le lien » (menu de partage du téléphone : WhatsApp, SMS, mail…) ou « Afficher le QR code » (à scanner face à face).
+- **Ce qui part** : le nom, le type, les séances, les exercices et leur nombre de séries, rien d'autre (ni historique, ni charges, ni Google Drive). Tout tient dans le lien (environ 250 caractères, compressé), sans serveur.
+- **Recevoir** : le lien ou le QR ouvre l'app sur la fenêtre « Programme reçu » (séances avec leurs pastilles, exercices et séries), avec « Ajouter à mes programmes » ou « Annuler ». Le programme rejoint « En mémoire » avec la mention « Reçu » jusqu'à sa première activation, sans changer le programme actif (il devient actif s'il n'y en a pas). Un nom déjà pris devient « Hypertrophie (2) ».
+- **Menu + → « Recevoir un programme »** : coller le lien reçu (il peut être au milieu d'un message), ou « Scanner un QR code » avec la caméra arrière dans l'app (lecteur intégré à Chrome ; bouton caché si le navigateur n'en a pas). La caméra s'arrête dès la lecture ou à l'annulation.
+- **Sécurité** : le contenu reçu est vérifié (exercices du catalogue seulement, 1 à 10 séries, noms nettoyés, taille limitée) ; sinon « Lien illisible : ce lien ne contient pas de programme valide ».
+- Nouveau fichier `js/partage.js` (mis en cache par le service worker). Tests : `test_partage.py` (56 contrôles, clair et sombre ; caméra et lecteur simulés).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.52.
+
+---
+
 ## [1.7.51] - 2026-11-12
 ### ✨ Bilan du mois : même périmètre que Progression (co-auteur : Claude)
 - Ouvert depuis Progression (mois de « 4 derniers mois » ou « Tous les bilans »), le bilan ne compte que les séances du programme choisi en haut de l'écran (ou de tous) : les chiffres concordent avec les barres. Le sous-titre le dit : « Hypertrophie · comparé à septembre. »

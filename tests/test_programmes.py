@@ -78,8 +78,9 @@ with Srv() as base, sync_playwright() as p:
     # ---------- 2. Création d'un programme (2 séances), enregistrement seulement si chaque séance a un exercice ----------
     pg.click('#add-program-btn'); pg.wait_for_timeout(200)
     check('écran 4 : deux choix (programme / séance libre)', pg.locator('.choose-card').count() == 2)
-    gap = pg.evaluate("document.querySelector('nav').getBoundingClientRect().top - document.querySelector('.choose-card.libre').getBoundingClientRect().bottom")
-    check('écran 4 : cartes alignées vers le bas, juste au-dessus de la navigation', 0 <= gap <= 60, f'{gap:.0f} px')
+    # 1.7.52 : « Recevoir un programme » sous les deux cartes ; l'ensemble reste calé au-dessus de la navigation
+    gap = pg.evaluate("document.querySelector('nav').getBoundingClientRect().top - document.querySelector('.choose-recv').getBoundingClientRect().bottom")
+    check('écran 4 : cartes et « Recevoir » alignés vers le bas, juste au-dessus de la navigation', 0 <= gap <= 60, f'{gap:.0f} px')
     pg.click('.choose-card:not(.libre)'); pg.wait_for_timeout(200)
     check('éditeur : 3 séances A, B, C par défaut', pg.evaluate("[...document.querySelectorAll('.ed-seg-btn:not(.ed-seg-op)')].map(b=>b.textContent).join('')") == 'ABC')
     pg.click('.ed-seg-op:not(.plus)'); pg.wait_for_timeout(100)
