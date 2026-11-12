@@ -2,7 +2,7 @@
 // APP_VERSION doit être incrémenté à chaque release (en même temps que
 // manifest.json) : le navigateur ne réinstalle le service worker que si
 // le contenu de ce fichier change.
-const APP_VERSION = '1.7.52';
+const APP_VERSION = '1.7.53';
 const CACHE_NAME = 'suivi-fitness-' + APP_VERSION;
 const ASSETS = [
   './',
@@ -43,7 +43,9 @@ const ASSETS = [
   './wallpapers/poigne-mini.jpg',
   './wallpapers/disques.jpg',
   './wallpapers/disques-mini.jpg',
-  './icons/app-icon.png',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/apple-touch-icon.png',
   './icons/bench_press.png',
   './icons/biceps_curl.png',
   './icons/calf_raise.png',

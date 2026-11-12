@@ -21,7 +21,7 @@ with Srv() as url, sync_playwright() as p:
         hrefs = [h for _, h in links]
         ok(tag + "liens visibles : Ouvrir l'application, confidentialité, conditions", ["Ouvrir l'application", './'] in links
            and 'confidentialite.html' in hrefs and 'conditions.html' in hrefs and pg.is_visible('footer a[href="confidentialite.html"]'))
-        ok(tag + "pages liées et icône servies", all(pg.request.get(url + h).ok for h in ('confidentialite.html', 'conditions.html', 'icons/app-icon.png'))
+        ok(tag + "pages liées et icône servies", all(pg.request.get(url + h).ok for h in ('confidentialite.html', 'conditions.html', 'icons/icon-192.png'))
            and pg.evaluate("document.querySelector('.app-icon').naturalWidth > 0"))
         bg = pg.evaluate("getComputedStyle(document.body).backgroundColor")
         ok(tag + "thème suivi (fond clair ou sombre)", bg == ('rgb(255, 255, 255)' if scheme == 'light' else 'rgb(14, 14, 17)'), bg)

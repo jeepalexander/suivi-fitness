@@ -7,6 +7,18 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.53] - 2026-11-12
+### 🖼️ Nouvelle icône de l'application (co-auteur : Claude)
+- Nouvelle icône « disque de 10 kg » pour l'écran d'accueil, l'onglet du navigateur et la page de présentation.
+- Manifest : deux tailles, `icons/icon-192.png` et `icons/icon-512.png` (fond transparent ; Chrome Android la pose sur un disque blanc).
+- iPhone : `icons/apple-touch-icon.png` (180 px) posée sur fond blanc, car iOS remplirait la transparence en noir.
+- Image source en 1600 × 1600 conservée dans `icons/source/icon-source-1600.png` (non mise en cache).
+- L'ancienne `icons/app-icon.png` est retirée ; favicon ajouté à `index.html` ; les trois icônes sont mises en cache par le service worker.
+- Tests : `test_presentation.py` suit le nouveau fichier.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.53.
+
+---
+
 ## [1.7.52] - 2026-11-12
 ### ✨ Partager et recevoir un programme (co-auteur : Claude)
 - **Partager** : en bas de l'éditeur d'un programme ou d'une séance libre déjà enregistré, « Partager le programme » (au-dessus de « Supprimer »). Le volet propose « Envoyer le lien » (menu de partage du téléphone : WhatsApp, SMS, mail…) ou « Afficher le QR code » (à scanner face à face).
