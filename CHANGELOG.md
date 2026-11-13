@@ -13,7 +13,7 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - **Sur Google Drive** : une nouvelle version est envoyée tout de suite, même sans changement depuis le dernier envoi (`syncDriveBackup({ force: true })`), avec un message qui donne son nom. Accès Google expiré (renouvellement silencieux impossible), conflit avec une sauvegarde plus complète ou envoi impossible : rien n'est envoyé et le message le dit. Les 5 versions les plus récentes restent gardées.
 - **Sur ce téléphone** : même nom que sur le Drive, `fitness-backup-AAAA-MM-JJ-HH-MM-SS.json` (au lieu de `mon-carnet-de-salle-AAAA-MM-JJ.json`). Message de confirmation et repli sur le téléchargement inchangés (1.7.60).
 - Guillemets insécables dans les messages de sauvegarde.
-- Maquette : planche 27b. Tests : `test_sauvegarde_fichier.py` (44 contrôles : sans Drive, Drive connecté, accès expiré ; clair et sombre).
+- Maquette : nouvelle planche 27c. Tests : `test_sauvegarde_fichier.py` (44 contrôles : sans Drive, Drive connecté, accès expiré ; clair et sombre).
 - `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.61.
 
 ---
