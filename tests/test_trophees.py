@@ -62,6 +62,22 @@ with Srv() as url, sync_playwright() as p:
     ok('données construites : identique aux bilans', ns == pg.evaluate("analyzeMonthlyProgress().trophyMonths.map(m=>bilanRecordCount(m.key,true))"))
     ok('aucune erreur JavaScript (données construites)', not errs, errs)
     ctx.close()
+    # 1.7.69 : la liste « Records battus ce mois-ci » suit la règle des bilans (cardio compris, pas de 1er passage)
+    ctx, pg, errs = newpage(br, seed=False)
+    pg.add_init_script("""(()=>{const d=new Date();const iso=(m,day)=>{const x=new Date(d.getFullYear(),d.getMonth()-m,day);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
+      const s=(m,day,w,sec,extra)=>({id:Date.now()-m*1e7-day,date:iso(m,day),type:'A',isDeload:false,tonnage:0,exercises:[{name:'Squat',sets:[{weight:w,reps:8}],maxWeight:w,totalVolume:w*8},{name:'Rameur',cardio:true,sets:[{seconds:sec}]}].concat(extra||[])});
+      if(!localStorage.getItem('h49_state'))localStorage.setItem('h49_state',JSON.stringify({history:[s(1,5,80,600),s(0,1,85,720,[{name:'Développé couché',sets:[{weight:60,reps:8}],maxWeight:60,totalVolume:480}])],weights:[]}));})()""")
+    pg.goto(url + 'index.html'); pg.wait_for_timeout(500)
+    pg.evaluate("switchTab('progression')"); pg.wait_for_timeout(600)
+    r = pg.evaluate("""(()=>{const items=[...document.querySelectorAll('.records-list .record-item')].map(e=>[e.querySelector('.record-exercise').textContent,e.querySelector('.record-value').textContent,e.querySelector('.record-improvement').textContent]);
+      const n=[...document.querySelectorAll('.trophy-col .trophy-n')].map(e=>+e.textContent);return {items,last:n[n.length-1]}})()""")
+    names = sorted(i[0] for i in r['items'])
+    ok('liste du mois = trophées du mois (2)', len(r['items']) == r['last'] == 2, r)
+    ok('liste : Squat et Rameur, pas le 1er passage au développé couché', names == ['Rameur', 'Squat'], names)
+    ok('liste : record de cardio affiché en temps (12:00, +2:00)', ['Rameur', '12:00', '+2:00'] in r['items'], r['items'])
+    ok('liste : record de charge inchangé (85 kg, +5 kg)', ['Squat', '85 kg', '+5 kg'] in r['items'], r['items'])
+    ok('aucune erreur JavaScript (liste alignée)', not errs, errs)
+    ctx.close()
     # Historique long (14 mois) : la rangée défile et s'ouvre sur le mois en cours, sans déborder de la carte
     ctx, pg, errs = newpage(br, w=360, seed=False)
     pg.add_init_script("""(()=>{const d=new Date();const iso=m=>{const x=new Date(d.getFullYear(),d.getMonth()-m,3);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-03'};

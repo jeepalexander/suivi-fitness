@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.69] - 2026-11-13
+### 🏆 Une seule règle de record : bilans, trophées et « Records battus ce mois-ci » (co-auteur : Claude)
+- La liste « Records battus ce mois-ci » suit maintenant la même règle que les bilans et le graphique Trophées, donc le chiffre du mois en cours est identique partout : un exercice **déjà fait avant** dont la meilleure charge, le meilleur **temps** (cardio, exercices au temps) ou la meilleure série au **poids du corps** (plus de lest, ou plus de répétitions au même lest) bat tout l'historique précédent.
+- Nouveautés qui en découlent : les records de **cardio** apparaissent dans la liste (« 12:00 », « +2:00 ») ; les records au **poids du corps** comptent aussi dans les **bilans** et les **trophées** (les bilans passés peuvent donc augmenter si tu fais des tractions, dips…) ; un tout premier passage n'est plus listé comme record.
+- Règle partagée : `bilanRecordsIn` (`js/bilan.js`), utilisée par `bilanRecordCount`, le graphique et la liste. Aucun changement de style.
+- `test_trophees.py` : liste alignée, cardio en temps (46 contrôles) ; `test_poids_du_corps.py` inchangé et vert.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.69.
+
+---
+
 ## [1.7.68] - 2026-11-13
 ### 🏆 Trophées : mêmes chiffres que les bilans, depuis le début (co-auteur : Claude)
 - Chaque mois du graphique compte désormais les records **exactement comme le bilan du mois** (« x records » dans Historique › Bilans) : meilleure charge — ou meilleur temps pour le cardio et les exercices au temps — qui bat tout l'historique précédent, et seulement pour un exercice **déjà fait avant** (un premier passage n'est plus un trophée). Règle partagée : `bilanRecordCountIn` (`js/bilan.js`), sur le périmètre choisi en haut de Progression.

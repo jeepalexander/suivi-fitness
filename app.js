@@ -3186,7 +3186,15 @@ function analyzeMonthlyProgress(hist = statsHistory(), scope = currentStatsScope
     });
     return out;
   };
-  const currentMonthRecords = thisMonthData ? recordsForMonth(realMonthKey) : [];
+  // 1.7.69 : même règle que les bilans et les trophées (cardio et temps compris, pas de premier passage)
+  const currentMonthRecords = !thisMonthData ? [] : typeof bilanRecordsIn !== 'function' ? recordsForMonth(realMonthKey)
+    : bilanRecordsIn(hist, realMonthKey).map(r => r.bw
+      ? (r.cur.lest > r.prevBw.lest
+        ? { exercise: r.name, newMax: r.cur.lest, improvement: r.cur.lest - r.prevBw.lest, valueText: lestText(r.cur.lest), improvementText: `+${String(r.cur.lest - r.prevBw.lest).replace('.', ',')} kg` }
+        : { exercise: r.name, newMax: r.cur.reps, improvement: r.cur.reps - r.prevBw.reps, valueText: repsText(r.cur.reps), improvementText: `+${r.cur.reps - r.prevBw.reps} rép.` })
+      : r.byTime
+      ? { exercise: r.name, newMax: r.value, improvement: r.value - r.prev, valueText: formatDurationMS(r.value), improvementText: '+' + formatDurationMS(r.value - r.prev) }
+      : { exercise: r.name, newMax: r.value, improvement: r.value - r.prev });
   // 1.7.67–1.7.68 : trophées = records battus chaque mois, comptés comme les bilans du mois (bilanRecordCountIn,
   // même périmètre que la page), depuis le premier mois du périmètre jusqu'au mois en cours
   const SHORT_MONTHS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
