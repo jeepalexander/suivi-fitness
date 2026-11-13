@@ -14,19 +14,6 @@
   <meta name="theme-color" content="#FFFFFF">
   <meta name="apple-mobile-web-app-title" content="Mon Carnet">
 
-  <!-- 1.7.57 : hauteur réellement visible. En plein écran, Chrome Android peut compter dans 100dvh la bande
-       des gestes d'Android ; la page débordait alors sous le menu du bas (fixé sur la partie visible).
-       --app-h suit window.innerHeight, la même hauteur que celle du menu. -->
-  <script>
-    (function () {
-      function setH() { document.documentElement.style.setProperty('--app-h', window.innerHeight + 'px'); }
-      setH();
-      window.addEventListener('resize', setH);
-      window.addEventListener('orientationchange', function () { setTimeout(setH, 150); });
-      window.addEventListener('pageshow', setH);
-    })();
-  </script>
-
   <!-- Thème : résolu avant le premier affichage pour éviter tout flash (clair par défaut) -->
   <script>
     (function () {

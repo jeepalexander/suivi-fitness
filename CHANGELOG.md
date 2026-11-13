@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.58] - 2026-11-13
+### 📐 Écran du bouton + : moins d'espace en haut (co-auteur : Claude)
+- **Cause trouvée** : l'écran « Choisis comment t'entraîner » était plus haut que l'écran du téléphone (environ 794 px pour 785 disponibles à 390 × 844). La page débordait, l'espace élastique qui cale les tuiles en bas était à son minimum, et « Recevoir un programme » finissait contre le menu tant qu'on ne faisait pas défiler.
+- **Correction** : 28 px de moins en haut. « Choisis comment t'entraîner » remonte juste sous la flèche retour (4 px au lieu de 20) et l'espace élastique n'a plus de minimum sur cet écran. Tout tient sans défiler dès 360 × 820 ; « Recevoir un programme » retrouve son écart d'origine, 32 px au-dessus du menu.
+- **Retiré** : la marge de 24 px ajoutée sous « Recevoir un programme » et la hauteur « visible » (`--app-h`) de la 1.7.57, qui n'étaient pas la cause. Le corps de page reprend `100dvh`.
+- Tests : `test_choix_espace.py` remplace `test_hauteur_visible.py` (groupe `style`).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.58.
+
+---
+
 ## [1.7.57] - 2026-11-13
 ### 📐 Hauteur visible en plein écran ; « Recevoir un programme » plus haut (co-auteur : Claude)
 - **Hauteur de la page** : elle suit maintenant la hauteur réellement visible (`--app-h`, mesurée par `window.innerHeight` au lancement, à chaque changement de taille et à la rotation), au lieu de `100dvh`. En plein écran, Chrome Android peut compter dans `100dvh` la bande des gestes d'Android : le bas de la page passait alors sous l'écran et les blocs calés en bas se rapprochaient du menu. `100dvh` reste la valeur de secours.
