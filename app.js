@@ -1970,8 +1970,11 @@ async function submitWorkout(e) {
 
   saveState();
 
-  // Sauvegarde automatique Google Drive (si connecté) : fichier de sauvegarde complète mis à jour
-  backupToDrive();
+  // Sauvegarde automatique Google Drive (si connecté) : fichier de sauvegarde complète mis à jour.
+  // 1.7.63 : après une nouvelle séance, l'envoi (et une éventuelle reconnexion à Google, qui quitte l'application)
+  // attend le « OK » de la fenêtre de fin de séance, pour ne pas la faire disparaître avant qu'on l'ait lue.
+  if (isEditing) backupToDrive();
+  else finishPendingBackup = true;
 
   // Actualise la bannière de déload en temps réel
   displayDeloadNotificationIfNeeded();
@@ -1983,7 +1986,7 @@ async function submitWorkout(e) {
   } else {
     // Fin de séance (1.7.27) : fenêtre « Bravo ! » ; les éventuels avertissements suivent en message
     openFinishDialog(entry, previousEntry, records);
-    const notes = (weighNotice + driveSaveNotice()).replace(/^\n• /, '').replace(/\n• /g, '\n');
+    const notes = (weighNotice + driveSaveNotice(true)).replace(/^\n• /, '').replace(/\n• /g, '\n');
     if (notes) showToast(notes);
   }
 
@@ -2050,7 +2053,7 @@ function openFinishDialog(entry, previous, records) {
       <p class="finish-rec-title"><span>Nouveau record</span>${TROPHY_SVG}</p>
       ${records.map(r => `<p class="finish-rec">${escapeHtml(r.name)}, <b>${escapeHtml(r.value)}</b></p>`).join('')}`;
   }
-  html += `<button type="button" class="btn finish-ok" onclick="closeFinishDialog()">OK</button>`;
+  html += `<button type="button" class="btn finish-ok" onclick="finishDialogOk()">OK</button>`;
   const overlay = document.createElement('div');
   overlay.id = 'finish-overlay';
   overlay.className = 'finish-overlay';
@@ -2063,6 +2066,15 @@ function openFinishDialog(entry, previous, records) {
 function closeFinishDialog() {
   const overlay = document.getElementById('finish-overlay');
   if (overlay) overlay.remove();
+}
+
+// 1.7.63 : « OK » de la fenêtre de fin de séance → la sauvegarde Drive de la séance part maintenant
+// (reconnexion à Google comprise si l'accès a expiré). Sans « OK » (application fermée), elle part au
+// prochain lancement ou avec la prochaine séance, comme une sauvegarde en attente.
+let finishPendingBackup = false;
+function finishDialogOk() {
+  closeFinishDialog();
+  if (finishPendingBackup) { finishPendingBackup = false; backupToDrive(); }
 }
 
 document.addEventListener('submit', function(e) {
@@ -4487,9 +4499,10 @@ async function restoreDriveBackup(file) {
 
 // Ligne ajoutée au message « Séance enregistrée » quand l'accès Google a expiré dans l'application
 // installée : la reconnexion se lance toute seule juste après (voir backupToDrive).
-function driveSaveNotice() {
+function driveSaveNotice(afterOk) {
   if (isDriveWanted() && !getDriveToken() && isInstalledApp()) {
-    return '\n• Google Drive : accès expiré, reconnexion automatique…';
+    return afterOk ? '\n• Google Drive : accès expiré, reconnexion automatique après « OK »'
+      : '\n• Google Drive : accès expiré, reconnexion automatique…';
   }
   return '';
 }

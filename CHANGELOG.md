@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.63] - 2026-11-13
+### 🐛 La reconnexion à Google ne fait plus disparaître la fenêtre de fin de séance (co-auteur : Claude)
+- Après une nouvelle séance, la sauvegarde sur le Drive — et, si l'accès a expiré, la reconnexion à Google (fenêtre Google dans le navigateur, redirection dans l'application installée) — attend maintenant le « OK » de la fenêtre « Bravo ! » (`finishDialogOk`). Avant, elle partait à l'enregistrement et la fenêtre de fin disparaissait avant d'avoir été lue.
+- Message à l'enregistrement : « Google Drive : accès expiré, reconnexion automatique après « OK » ».
+- Accès valide : rien ne change (l'envoi part en fond, sans quitter l'application). Modification d'une ancienne séance : envoi immédiat comme avant (pas de fenêtre de fin). Application fermée sans « OK » : la séance est enregistrée sur le téléphone et la sauvegarde part plus tard, comme toute sauvegarde en attente.
+- Tests : `test_drive_installee.py` et `test_drive_sauvegarde.py` vérifient qu'aucune reconnexion n'a lieu avant « OK ».
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.63.
+
+---
+
 ## [1.7.62] - 2026-11-13
 ### 💾 Sauvegarder sur le Drive : reconnexion forcée si l'accès a expiré (co-auteur : Claude)
 - Dans l'application installée, quand l'accès Google a expiré, « Sauvegarder › Sur Google Drive » lance tout de suite la reconnexion, comme l'enregistrement d'une séance (message « Connexion Google expirée : reconnexion en cours… »). La demande est gardée 10 minutes (`h49_drive_force_pending`) : au retour de Google, une nouvelle version part sur le Drive, même sans changement, l'Historique s'affiche avec le message « Sauvegarde envoyée sur Google Drive : … ». Elle n'est envoyée qu'une fois.
