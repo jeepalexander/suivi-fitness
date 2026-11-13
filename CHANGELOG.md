@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.54] - 2026-11-13
+### 🖼️ Icône de l'application agrandie (co-auteur : Claude)
+- Le disque de 10 kg occupe 8 % de place en plus dans l'icône : la marge transparente autour est réduite, rien n'est coupé (ressort compris).
+- Concerne `icons/icon-192.png`, `icons/icon-512.png` (écran d'accueil Android, écran de lancement, onglet, page de présentation) et `icons/apple-touch-icon.png` (iPhone, toujours sur fond blanc). Recadrées depuis `icons/source/icon-source-1600.png`.
+- Maquette : planche 36.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.54.
+
+---
+
 ## [1.7.53] - 2026-11-12
 ### 🖼️ Nouvelle icône de l'application (co-auteur : Claude)
 - Nouvelle icône « disque de 10 kg » pour l'écran d'accueil, l'onglet du navigateur et la page de présentation.
