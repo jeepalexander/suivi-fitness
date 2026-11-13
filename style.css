@@ -212,7 +212,7 @@
    et la navigation du bas ne bouge plus (Android Chrome faisait « sauter » les éléments fixes en la repliant).
    overscroll-behavior-y empêche aussi le « tirer pour rafraîchir » (il rechargeait l'application en pleine saisie). */
 html, body { height: 100%; overflow: hidden; overscroll-behavior-y: none; }
-body { background-color: var(--bg); color: var(--text); font-size: 17px; height: 100vh; height: 100dvh; display: flex; flex-direction: column; }
+body { background-color: var(--bg); color: var(--text); font-size: 17px; height: 100vh; height: 100dvh; height: var(--app-h, 100dvh); display: flex; flex-direction: column; }
 #app-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; padding-bottom: 112px; }
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -678,7 +678,7 @@ body[data-tab="programme"][data-pview="choose"] header h1 { display: none; }
 .prog-hint-ico svg { display: inline-block; width: 16px; height: 16px; margin-right: 4px; vertical-align: -3px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 
 /* Écran 1 : rien de prévu */
-.prog-empty { position: relative; min-height: calc(100dvh - 300px); padding-top: 250px; }
+.prog-empty { position: relative; min-height: calc(var(--app-h, 100dvh) - 300px); padding-top: 250px; }
 .prog-empty-arrow { position: absolute; top: -6px; right: -6px; width: 170px; height: 196px; fill: none; stroke: var(--text); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 .prog-empty-title { font-family: var(--font-display); font-weight: 700; font-size: 1.75rem; line-height: 1.05; }
 .prog-empty-sub { margin-top: 12px; font-size: 1.0625rem; line-height: 1.45; color: var(--text-muted); }
@@ -1034,7 +1034,7 @@ body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 .ed-share svg, .share-ico svg, .share-chev svg, .choose-recv svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .share-ico { flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--primary-strong); color: var(--on-strong); display: flex; align-items: center; justify-content: center; }
 .share-chev { flex: none; display: flex; color: var(--text-muted); }
-.choose-recv { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 44px; margin-top: 8px; border: 0; background: none; color: var(--text); font: inherit; font-size: 1.0625rem; font-weight: 600; cursor: pointer; }
+.choose-recv { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 44px; margin-top: 8px; margin-bottom: 24px; border: 0; background: none; color: var(--text); font: inherit; font-size: 1.0625rem; font-weight: 600; cursor: pointer; }
 .recv-field { width: 100%; height: 52px; padding: 0 20px; margin: 0 0 12px; border: 0; border-radius: var(--radius-field, 25px); background: var(--fill); color: var(--text); font: inherit; font-size: 1rem; }
 .qr-cam { position: relative; width: 100%; max-width: 280px; aspect-ratio: 1; margin: 4px auto 12px; border-radius: 22px; overflow: hidden; background: #111114; }
 .qr-cam video { width: 100%; height: 100%; object-fit: cover; display: block; }

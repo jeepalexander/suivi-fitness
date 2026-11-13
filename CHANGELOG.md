@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.57] - 2026-11-13
+### 📐 Hauteur visible en plein écran ; « Recevoir un programme » plus haut (co-auteur : Claude)
+- **Hauteur de la page** : elle suit maintenant la hauteur réellement visible (`--app-h`, mesurée par `window.innerHeight` au lancement, à chaque changement de taille et à la rotation), au lieu de `100dvh`. En plein écran, Chrome Android peut compter dans `100dvh` la bande des gestes d'Android : le bas de la page passait alors sous l'écran et les blocs calés en bas se rapprochaient du menu. `100dvh` reste la valeur de secours.
+- **Écran du bouton +** : « Recevoir un programme » remonte de 24 px ; il est à 56 px au-dessus du menu du bas (32 px avant), sur tous les écrans.
+- Maquette : planche 4. Nouveau test `test_hauteur_visible.py` (groupe `style` : hauteur suivie à 390, 360 et 412 px, clair et sombre, après redimensionnement ; écart de 56 px).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.57.
+
+---
+
 ## [1.7.56] - 2026-11-13
 ### 🖼️ Fonds d'écran : Studio et Poulie retirés, Traction déplacé (co-auteur : Claude)
 - Les fonds Studio et Poulie sont retirés (images supprimées du dépôt et du cache). Il reste 17 images, plus « Aucun ».
