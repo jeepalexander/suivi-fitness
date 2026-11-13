@@ -35,31 +35,57 @@ function bilanDoneKeys(scoped) {
 
 // Records du mois : exercices dont la meilleure valeur du mois bat tout l'historique antérieur
 // (même règle que la fenêtre de fin de séance : charge, ou durée pour le cardio et les exercices au temps)
-function bilanRecordCount(key, scoped) {
-  const H = bilanHist(scoped);
+function bilanRecordCount(key, scoped) { return bilanRecordCountIn(bilanHist(scoped), key); }
+
+// 1.7.68 : même règle, sur un historique donné (graphique Trophées de Progression)
+function bilanRecordCountIn(H, key) { return bilanRecordsIn(H, key).length; }
+
+// 1.7.69 : le détail des records d'un mois, règle commune aux bilans, aux trophées et à la liste « Records battus
+// ce mois-ci » : pour un exercice déjà fait avant, meilleure charge, meilleur temps (cardio, exercices au temps) ou,
+// au poids du corps, meilleure série (plus de lest, ou plus de répétitions au même lest) qui bat tout l'historique précédent
+function bilanRecordsIn(H, key) {
   const before = H.filter(h => (h.date || '') < key + '-01');
+  const betterBw = (x, y) => !y || x.lest > y.lest || (x.lest === y.lest && x.reps > y.reps);
+  const bwOf = sets => (typeof bestBodyweightSet === 'function'
+    ? bestBodyweightSet((sets || []).filter(st => typeof isPerformedSet !== 'function' || isPerformedSet(st))) : null);
   const best = {};
-  bilanSessions(key, scoped).forEach(h => (h.exercises || []).forEach(ex => {
+  H.filter(h => (h.date || '').startsWith(key)).forEach(h => (h.exercises || []).forEach(ex => {
     const mode = exMode(ex.name);
+    if (mode === 'bw' && !ex.cardio) {
+      const c = bwOf(ex.sets);
+      if (c && (!best[ex.name] || betterBw(c, best[ex.name].bw))) best[ex.name] = { bw: c, exId: ex.exId };
+      return;
+    }
     const byTime = ex.cardio || mode === 'time';
     if (!byTime && mode !== 'weight') return;
     const val = st => byTime ? (Number(st.seconds) || 0) : (Number(st.weight) || 0);
     const v = Math.max(0, ...(ex.sets || []).map(val));
     if (v > (best[ex.name] ? best[ex.name].v : 0)) best[ex.name] = { v, byTime, exId: ex.exId };
   }));
-  let n = 0;
+  const out = [];
   Object.keys(best).forEach(name => {
     const b = best[name];
+    const same = x => x.name === name || (b.exId && x.exId === b.exId);
+    if (b.bw) {
+      let prev = null;
+      before.forEach(h => (h.exercises || []).forEach(x => {
+        if (!same(x)) return;
+        const p = bwOf(x.sets);
+        if (p && betterBw(p, prev)) prev = p;
+      }));
+      if (prev && betterBw(b.bw, prev)) out.push({ name, bw: true, cur: b.bw, prevBw: prev });
+      return;
+    }
     const val = st => b.byTime ? (Number(st.seconds) || 0) : (Number(st.weight) || 0);
     let prev = 0, seen = false;
     before.forEach(h => (h.exercises || []).forEach(x => {
-      if (x.name !== name && !(b.exId && x.exId === b.exId)) return;
+      if (!same(x)) return;
       seen = true;
       (x.sets || []).forEach(st => { prev = Math.max(prev, val(st)); });
     }));
-    if (seen && b.v > prev) n++;
+    if (seen && b.v > prev) out.push({ name, value: b.v, prev, byTime: b.byTime });
   });
-  return n;
+  return out;
 }
 
 function bilanData(key, scoped) {

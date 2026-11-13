@@ -320,6 +320,15 @@ function renderWallpaperGrid() {
 // 1.7.64 : depuis la version de test (…/suivi-fitness/dev/), les invitations et les programmes partagés
 // mènent toujours à la production (…/suivi-fitness/).
 function isTestVersion() { return /\/dev\/(index\.html)?$/.test(location.pathname); }
+// 1.7.66 : pastille « TEST » à côté de « MON CARNET DE SALLE », dans la version de test seulement
+function markTestVersion() {
+  const t = document.getElementById('app-title');
+  if (!t || !isTestVersion() || t.querySelector('.test-pill')) return;
+  const pill = document.createElement('span');
+  pill.className = 'test-pill';
+  pill.textContent = 'TEST';
+  t.appendChild(pill);
+}
 function appShareUrl() {
   const u = new URL('./', location.href);
   if (/\/dev\/$/.test(u.pathname)) u.pathname = u.pathname.replace(/dev\/$/, '');
@@ -3126,13 +3135,15 @@ function analyzeMonthlyProgress(hist = statsHistory(), scope = currentStatsScope
   // Dernier mois ayant des séances (sert aux conseils ci-dessous)
   const currentMonthData = monthlyData[lastDataMonthKey];
   const thisMonthData = monthlyData[realMonthKey];
-  const currentMonthRecords = [];
-
-  if (thisMonthData) {
-    const earlierMonths = sortedMonths.filter(key => key < realMonthKey);
+  // 1.7.67 : calcul des records d'un mois quelconque (liste « Records battus ce mois-ci »)
+  const recordsForMonth = (monthKey) => {
+    const out = [];
+    const monthData = monthlyData[monthKey];
+    if (!monthData) return out;
+    const earlierMonths = sortedMonths.filter(key => key < monthKey);
     const betterBw = (x, y) => !y || x.lest > y.lest || (x.lest === y.lest && x.reps > y.reps);
     allExercises.forEach(exName => {
-      const thisEx = thisMonthData.exercises[exName];
+      const thisEx = monthData.exercises[exName];
       // Poids du corps : record si la meilleure série du mois bat celle d'avant (plus de lest, ou plus de répétitions au même lest)
       if (thisEx && exInfo(exName).mode === 'bw' && thisEx.bwBest && thisEx.bwBest.length) {
         const cur = thisEx.bwBest.reduce((m, b) => (betterBw(b, m) ? b : m), null);
@@ -3143,7 +3154,7 @@ function analyzeMonthlyProgress(hist = statsHistory(), scope = currentStatsScope
         });
         if (prev && betterBw(cur, prev)) {
           const byLest = cur.lest > prev.lest;
-          currentMonthRecords.push({
+          out.push({
             exercise: exName,
             newMax: byLest ? cur.lest : cur.reps,
             improvement: byLest ? cur.lest - prev.lest : cur.reps - prev.reps,
@@ -3166,13 +3177,36 @@ function analyzeMonthlyProgress(hist = statsHistory(), scope = currentStatsScope
       });
 
       if (currentMax > previousMax) {
-        currentMonthRecords.push({
+        out.push({
           exercise: exName,
           newMax: currentMax,
           improvement: currentMax - previousMax
         });
       }
     });
+    return out;
+  };
+  // 1.7.69 : même règle que les bilans et les trophées (cardio et temps compris, pas de premier passage)
+  const currentMonthRecords = !thisMonthData ? [] : typeof bilanRecordsIn !== 'function' ? recordsForMonth(realMonthKey)
+    : bilanRecordsIn(hist, realMonthKey).map(r => r.bw
+      ? (r.cur.lest > r.prevBw.lest
+        ? { exercise: r.name, newMax: r.cur.lest, improvement: r.cur.lest - r.prevBw.lest, valueText: lestText(r.cur.lest), improvementText: `+${String(r.cur.lest - r.prevBw.lest).replace('.', ',')} kg` }
+        : { exercise: r.name, newMax: r.cur.reps, improvement: r.cur.reps - r.prevBw.reps, valueText: repsText(r.cur.reps), improvementText: `+${r.cur.reps - r.prevBw.reps} rép.` })
+      : r.byTime
+      ? { exercise: r.name, newMax: r.value, improvement: r.value - r.prev, valueText: formatDurationMS(r.value), improvementText: '+' + formatDurationMS(r.value - r.prev) }
+      : { exercise: r.name, newMax: r.value, improvement: r.value - r.prev });
+  // 1.7.67–1.7.68 : trophées = records battus chaque mois, comptés comme les bilans du mois (bilanRecordCountIn,
+  // même périmètre que la page), depuis le premier mois du périmètre jusqu'au mois en cours
+  const SHORT_MONTHS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+  const trophyMonths = [];
+  const firstKey = hist.map(h => (h.date || '').slice(0, 7)).filter(k => /^\d{4}-\d{2}$/.test(k)).sort()[0];
+  if (firstKey) {
+    for (let off = 0; off < 600; off++) {
+      const key = monthKeyFromOffset(off);
+      if (key < firstKey) break;
+      const count = typeof bilanRecordCountIn === 'function' ? bilanRecordCountIn(hist, key) : recordsForMonth(key).length;
+      trophyMonths.unshift({ key, label: SHORT_MONTHS[Number(key.slice(5, 7)) - 1], count });
+    }
   }
 
   // 4. Détecter les paliers : pour chaque exercice, sur ses 4 dernières séances réalisées
@@ -3337,6 +3371,7 @@ function analyzeMonthlyProgress(hist = statsHistory(), scope = currentStatsScope
     monthlyData: last4MonthlyData,
     currentMonthKey: realMonthKey,
     currentMonthRecords: currentMonthRecords,
+    trophyMonths: trophyMonths,
     plateaus: plateaus,
     overallStats: overallStats,
     advice: advice
@@ -3344,6 +3379,12 @@ function analyzeMonthlyProgress(hist = statsHistory(), scope = currentStatsScope
 }
 
 // Bloc héros : indice de progression global + pastille « X % vs mois précédent »
+// « juillet 2026 » (1.7.68 : « depuis juillet 2026 » sous le total de trophées)
+function monthLabelLower(key) {
+  const M = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  return M[Number(key.slice(5, 7)) - 1] + ' ' + key.slice(0, 4);
+}
+
 function renderHero(stats) {
   const idx = document.getElementById('hero-index');
   const pill = document.getElementById('hero-pill');
@@ -3404,6 +3445,26 @@ function renderProgressAnalysis() {
   html += `</div>`;
   if (bilanDoneKeys(true).length) html += `<div class="bilan-all"><button type="button" class="link-btn" onclick="openAllBilans()">Tous les bilans</button></div>`; // 1.7.50
   html += `</div>`;
+
+  // 1.7.67–1.7.68 : Trophées — records battus chaque mois depuis le début du périmètre (planche 25d) : total en grand, barres fines
+  // dorées terminées par un trophée et le nombre au-dessus ; un mois sans record = petit rond gris et « 0 »
+  if (analysis.trophyMonths && analysis.trophyMonths.length) {
+    const tm = analysis.trophyMonths;
+    const total = tm.reduce((n, m) => n + m.count, 0);
+    const max = Math.max(1, ...tm.map(m => m.count));
+    const aria = 'Trophées par mois : ' + tm.map(m => `${m.label} ${m.count}`).join(', ');
+    html += `<div class="card trophy-card"><h3 class="analysis-section-title">Trophées</h3>
+      <div class="weight-current"><span class="weight-value" id="trophy-total">${total}</span><span class="weight-unit" id="trophy-since">${currentStatsScope() === 'all' ? 'tous programmes confondus' : 'depuis ' + monthLabelLower(tm[0].key)}</span></div>
+      <div class="trophy-chart" role="img" aria-label="${escapeHtml(aria)}"><div class="trophy-grid" aria-hidden="true"><span></span><span></span><span></span></div><div class="trophy-scroll" id="trophy-scroll"><div class="trophy-cols">`;
+    tm.forEach(m => {
+      const h = m.count ? Math.round(84 * m.count / max) : 0;
+      html += `<div class="trophy-col${m.count ? '' : ' zero'}" data-month="${m.key}"><div class="trophy-bar">
+        <span class="trophy-n">${m.count}</span>
+        ${m.count ? `<span class="trophy-ico">${TROPHY_SVG}</span>` : '<span class="trophy-dot"></span>'}
+        <span class="trophy-stem" style="height:${h}px"></span></div><span class="trophy-month">${m.label}</span></div>`;
+    });
+    html += `</div></div></div></div>`;
+  }
 
   // 2. Records battus ce mois-ci
   if (analysis.currentMonthRecords.length > 0) {
@@ -3487,6 +3548,9 @@ function renderProgressAnalysis() {
   }
 
   container.innerHTML = html;
+  // 1.7.68 : si les mois débordent, on arrive sur le mois en cours (à droite)
+  const ts = document.getElementById('trophy-scroll');
+  if (ts) ts.scrollLeft = ts.scrollWidth;
 }
 
 // ============================================================
@@ -4860,6 +4924,7 @@ async function initApp() {
   if (!document.body.dataset.tab) document.body.dataset.tab = 'programme';
   initTheme();
   applyWallpaper();
+  markTestVersion();
   initUpdateIndicator();
   // Google Drive : retour d'une connexion par redirection (application installée), puis statut + sauvegarde à envoyer
   cleanupLegacyDriveKeys();

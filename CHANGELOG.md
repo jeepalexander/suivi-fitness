@@ -7,6 +7,44 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.69] - 2026-11-13
+### 🏆 Une seule règle de record : bilans, trophées et « Records battus ce mois-ci » (co-auteur : Claude)
+- La liste « Records battus ce mois-ci » suit maintenant la même règle que les bilans et le graphique Trophées, donc le chiffre du mois en cours est identique partout : un exercice **déjà fait avant** dont la meilleure charge, le meilleur **temps** (cardio, exercices au temps) ou la meilleure série au **poids du corps** (plus de lest, ou plus de répétitions au même lest) bat tout l'historique précédent.
+- Nouveautés qui en découlent : les records de **cardio** apparaissent dans la liste (« 12:00 », « +2:00 ») ; les records au **poids du corps** comptent aussi dans les **bilans** et les **trophées** (les bilans passés peuvent donc augmenter si tu fais des tractions, dips…) ; un tout premier passage n'est plus listé comme record.
+- Règle partagée : `bilanRecordsIn` (`js/bilan.js`), utilisée par `bilanRecordCount`, le graphique et la liste. Aucun changement de style.
+- `test_trophees.py` : liste alignée, cardio en temps (46 contrôles) ; `test_poids_du_corps.py` inchangé et vert.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.69.
+
+---
+
+## [1.7.68] - 2026-11-13
+### 🏆 Trophées : mêmes chiffres que les bilans, depuis le début (co-auteur : Claude)
+- Chaque mois du graphique compte désormais les records **exactement comme le bilan du mois** (« x records » dans Historique › Bilans) : meilleure charge — ou meilleur temps pour le cardio et les exercices au temps — qui bat tout l'historique précédent, et seulement pour un exercice **déjà fait avant** (un premier passage n'est plus un trophée). Règle partagée : `bilanRecordCountIn` (`js/bilan.js`), sur le périmètre choisi en haut de Progression.
+- Le graphique part du **premier mois du périmètre** au lieu des 6 derniers mois ; sous le total : « depuis juillet 2026 » pour un programme, « tous programmes confondus » pour « Tous les programmes ».
+- Au-delà de la largeur de l'écran, la rangée de mois **défile** horizontalement et s'ouvre sur le mois en cours (aucun changement de style).
+- `test_trophees.py` : chaque mois comparé au bilan, libellé, historique de 14 mois (41 contrôles).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.68.
+
+---
+
+## [1.7.67] - 2026-11-13
+### 🏆 Carte « Trophées » dans Progression (co-auteur : Claude)
+- Nouvelle carte avant « Records battus ce mois-ci » : le **total de trophées** des 6 derniers mois en grand, « en 6 mois » en petit gris (même présentation que « Suivi cardio » et « Poids corporel »), puis un graphique en **barres fines dorées** terminées par un **trophée**, le **nombre au-dessus** et les **mois en abscisse**. Un mois sans record : petit rond gris et « 0 ». Aucun détail, rien à toucher.
+- Un trophée = un record battu, compté comme « Records battus ce mois-ci » (`recordsForMonth`, extrait de `analyzeMonthlyProgress`) ; même périmètre que le reste de la page (programme choisi en haut ou « Tous les programmes »).
+- Nouvelles couleurs : `--trophy` #E0A800 (sombre #F2C14E) et `--trophy-stem` (même or à 35 %).
+- Maquette : planche 25d. Nouveau test `test_trophees.py` (groupe `progression`, 390 et 360 px, clair et sombre, données construites).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.67.
+
+---
+
+## [1.7.66] - 2026-11-13
+### 🧪 Pastille « TEST » dans la version de test (co-auteur : Claude)
+- Dans la version de test (`…/suivi-fitness/dev/`), une pastille « TEST » s'affiche à côté de « MON CARNET DE SALLE », sur tous les écrans (`markTestVersion`, `.test-pill`, couleurs de la pastille Déload : `warn`, `warn-tint`, `warn-border`). Jamais en production.
+- Maquette : planche 37. Tests : `test_prod_test.py` (pastille présente en test, absente en production).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.66.
+
+---
+
 ## [1.7.65] - 2026-11-13
 ### 🔒 Script de connexion Google chargé seulement quand le Drive sert (co-auteur : Claude)
 - Google Safe Browsing signale `jeepalexander.github.io/suivi-fitness/` comme « pages trompeuses », sans URL précise : probable faux positif d'une petite app en `github.io` qui charge la connexion Google sur chaque page. Le script Google Identity Services n'est plus dans `index.html` : `loadGoogleIdentity()` le charge à la demande — au lancement si le Drive est déjà connecté (navigateur), à l'ouverture de Réglages, de « Sauvegarder », de « Restaurer » et de la restauration de programmes, et à l'appui sur « Se connecter » / au renouvellement silencieux. Un visiteur qui n'utilise pas le Drive (ou un robot d'exploration) ne charge rien de Google.
