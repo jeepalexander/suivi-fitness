@@ -2,7 +2,7 @@
 
 **Application PWA de suivi d'entraînement en salle de sport** (dépôt `suivi-fitness`)
 
-[![Version](https://img.shields.io/badge/version-1.7.60-blue)](https://github.com/jeepalexander/suivi-fitness)
+[![Version](https://img.shields.io/badge/version-1.7.61-blue)](https://github.com/jeepalexander/suivi-fitness)
 [![License](https://img.shields.io/badge/license-MIT-green)]
 
 ---
@@ -33,7 +33,7 @@
 - **1.7.27 à 1.7.30** : fenêtre de fin de séance, enregistrement d’un programme dès le premier exercice (résumé « Presque prêt » si des séances sont vides), fenêtres de l’app dans un seul style, tuile de progression en dégradé, bouton pause sur la tuile active.
 - **1.7.31 à 1.7.33** : rationalisation de la feuille de style (tailles, rayons, espacements, variables) ; listes de Progression plus lisibles.
 - **1.7.34 à 1.7.37** : filtre « Polyarticulaires », 1RM estimé, progression en répétitions pour le poids du corps, restauration locale limitée aux fichiers `.json`, « Inviter quelqu’un » sans partage (QR code et adresse seulement).
-- **1.7.38 à 1.7.60** : « Reconnecter maintenant » silencieux ; onglet Séance titré au nom du programme avec l’icône de son type, phrase d’échauffement reformulée et placée avant le premier exercice de force, allure cardio sous la saisie, bouton de pause à côté du compteur de séries ; bilan du mois (post-it le 1er du mois, pop-up, archives dans Progression) ; partage d’un programme par lien ou QR code ; nouvelle icône (disque de 10 kg), agrandie en 1.7.54 ; nouveaux fonds d’écran (17 au total) ; écran du bouton + resserré en haut ; le même exercice peut revenir plusieurs fois dans une séance.
+- **1.7.38 à 1.7.61** : « Reconnecter maintenant » silencieux ; onglet Séance titré au nom du programme avec l’icône de son type, phrase d’échauffement reformulée et placée avant le premier exercice de force, allure cardio sous la saisie, bouton de pause à côté du compteur de séries ; bilan du mois (post-it le 1er du mois, pop-up, archives dans Progression) ; partage d’un programme par lien ou QR code ; nouvelle icône (disque de 10 kg), agrandie en 1.7.54 ; nouveaux fonds d’écran (17 au total) ; écran du bouton + resserré en haut ; le même exercice peut revenir plusieurs fois dans une séance.
 
 Le détail est dans [CHANGELOG.md](CHANGELOG.md).
 
@@ -84,7 +84,7 @@ Le détail est dans [CHANGELOG.md](CHANGELOG.md).
 - Liste des séances groupée par mois, filtrable par programme ; chaque séance indique son programme d’origine.
 - Consultation et modification des séances passées.
 - Détail d'une séance (programme d'origine), modification ou suppression.
-- « Sauvegarder » (fichier JSON) et « Restaurer » : fenêtre de choix entre les 5 dernières sauvegardes Google Drive et un fichier de l’appareil.
+- « Sauvegarder » : volet « Sur Google Drive » (nouvelle version tout de suite) ou « Sur ce téléphone » (fichier `fitness-backup-AAAA-MM-JJ-HH-MM-SS.json`, même nom que sur le Drive). « Restaurer » : fenêtre de choix entre les 5 dernières sauvegardes Google Drive et un fichier de l’appareil.
 
 ### Réglages
 

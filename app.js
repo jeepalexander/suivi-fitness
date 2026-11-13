@@ -4200,6 +4200,7 @@ function driveRemoteIsContainedInLocal(remote) {
 }
 
 // Écrit la sauvegarde dans un NOUVEAU fichier horodaté (jamais d'écrasement) ; renvoie la réponse de Google.
+let driveLastWrittenName = ''; // nom du dernier fichier écrit sur le Drive (message de « Sauvegarder »)
 async function writeDriveBackup(accessToken, folderId, payload) {
   const metadata = { name: driveBackupFileName(), parents: [folderId], mimeType: 'application/json' };
   const form = new FormData();
@@ -4211,7 +4212,7 @@ async function writeDriveBackup(accessToken, folderId, payload) {
     body: form
   });
   if (res.ok) {
-    try { const f = await res.clone().json(); if (f && typeof f.id === 'string') setDriveBackupId(f.id); } catch (e) { /* ignoré */ }
+    try { const f = await res.clone().json(); if (f && typeof f.id === 'string') setDriveBackupId(f.id); if (f && typeof f.name === 'string') driveLastWrittenName = f.name; } catch (e) { /* ignoré */ }
   }
   return res;
 }
@@ -4228,10 +4229,11 @@ let driveSyncAgain = false;
 
 // Envoie la sauvegarde complète si elle est à envoyer. Renvoie { ok } ou { reason } :
 // 'no-token' (accès expiré), 'token' (refusé par Google), 'conflict', 'error', 'busy'.
-async function syncDriveBackup() {
+async function syncDriveBackup(opts) {
+  const force = !!(opts && opts.force); // 1.7.61 : « Sauvegarder › Sur Google Drive » envoie une nouvelle version même sans changement
   if (!state || !getDriveToken()) return { reason: 'no-token' };
   if (getDriveConflict()) return { reason: 'conflict' };
-  if (!driveNeedsBackup()) return { ok: true, unchanged: true };
+  if (!force && !driveNeedsBackup()) return { ok: true, unchanged: true };
   if (driveSyncing) { driveSyncAgain = true; return { reason: 'busy' }; }
   driveSyncing = true;
   updateDriveUI();
@@ -4536,7 +4538,69 @@ async function backupToDrive(opts) {
 // 1.7.60 (co-auteur : Claude) : sur Chrome Android, le partage de fichiers n'accepte pas les .json
 // (canShare répond non) : la sauvegarde part en téléchargement, sans aucun signe à l'écran. On le dit
 // maintenant par un message ; un partage refusé ou impossible retombe aussi sur le téléchargement.
-function backupFileName() { return `mon-carnet-de-salle-${new Date().toISOString().slice(0, 10)}.json`; }
+// 1.7.61 : même nom que les sauvegardes du Drive (fitness-backup-AAAA-MM-JJ-HH-MM-SS.json)
+function backupFileName() { return driveBackupFileName(); }
+
+// 1.7.61 (co-auteur : Claude) : « Sauvegarder » demande où enregistrer. Sur Google Drive : une nouvelle version
+// tout de suite, même sans changement ; sur ce téléphone : le fichier, au même nom que sur le Drive.
+let backupSave = null; // { sel: 'drive' | 'file' }
+function backupSaveRow(key, title, sub, drive) {
+  const on = backupSave.sel === key;
+  const ico = drive ? CLOUD_SVG : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>';
+  return `
+    <button type="button" role="radio" aria-checked="${on}" class="restore-item backup-item${on ? ' on' : ''}${drive ? ' drive' : ' file'}" data-k="${key}" onclick="pickBackupSave('${key}')">
+      <span class="mem-ico${drive ? '' : ' grid'}">${ico}</span>
+      <span class="restore-text"><span class="restore-name"><b>${escapeHtml(title)}</b></span><span class="restore-when">${escapeHtml(sub)}</span></span>
+      <span class="restore-box round">${on ? CHECK_SVG : ''}</span>
+    </button>`;
+}
+function renderBackupSaveSheet() {
+  if (!backupSave) return;
+  const wanted = isDriveWanted(), token = !!getDriveToken();
+  const rows = [];
+  if (token || wanted) rows.push(backupSaveRow('drive', 'Sur Google Drive', `Nouvelle version maintenant, dans « ${DRIVE_FOLDER_NAME} »`, true));
+  rows.push(backupSaveRow('file', 'Sur ce téléphone', 'Fichier dans le dossier Téléchargements', false));
+  const connect = (token || wanted) ? '' : `<p class="sheet-text small">Pour sauvegarder aussi sur ton Drive : <button type="button" class="link-btn" onclick="closeSheet(); backupSave = null; connectGoogleDrive()">Se connecter à Google Drive</button></p>`;
+  const go = backupSave.sel === 'drive' ? 'Sauvegarder sur le Drive' : 'Télécharger le fichier';
+  openSheet(`
+    <h3 class="sheet-title">Sauvegarder</h3>
+    <p class="sheet-text">Choisis où enregistrer toutes tes données : séances, programmes et pesées.</p>
+    <div class="backup-scroll"><div class="restore-list" role="radiogroup" aria-label="Où sauvegarder">${rows.join('')}</div>${connect}</div>
+    <div class="sheet-actions"><button type="button" class="btn" id="backup-save-go" onclick="confirmBackupSave()">${go}</button><button type="button" class="btn btn-secondary" onclick="closeSheet()">Annuler</button></div>`,
+    { update: true, onClose: () => { backupSave = null; } });
+}
+function openBackupSave() {
+  backupSave = { sel: (getDriveToken() || isDriveWanted()) ? 'drive' : 'file' };
+  renderBackupSaveSheet();
+}
+function pickBackupSave(k) { if (!backupSave) return; backupSave.sel = k; renderBackupSaveSheet(); }
+function confirmBackupSave() {
+  if (!backupSave) return;
+  const sel = backupSave.sel;
+  backupSave = null;
+  closeSheet();
+  if (sel === 'drive') saveBackupToDriveNow(); else exportData();
+}
+async function saveBackupToDriveNow() {
+  if (!getDriveToken()) {
+    // Accès expiré : renouvellement silencieux quand Google le permet (navigateur), sinon on le dit
+    let renewed = false;
+    try { renewed = await renewDriveToken(); } catch (e) { renewed = false; }
+    if (!renewed || !getDriveToken()) {
+      showToast('Connexion Google expirée : rien n’a été envoyé. Touche «\u00a0Reconnecter maintenant\u00a0» dans Réglages, puis recommence.', 8000);
+      updateDriveUI();
+      return;
+    }
+  }
+  showToast('Envoi de la sauvegarde sur Google Drive…', 4000);
+  const r = await syncDriveBackup({ force: true });
+  updateDriveUI();
+  if (r && r.ok) showToast(`Sauvegarde envoyée sur Google Drive : «\u00a0${driveLastWrittenName || driveBackupFileName()}\u00a0», dans le dossier «\u00a0${DRIVE_FOLDER_NAME}\u00a0».`, 8000);
+  else if (r && r.reason === 'conflict') showToast('Rien n’a été envoyé : la sauvegarde du Drive contient des séances absentes de ce téléphone. Voir Réglages › Google Drive.', 9000);
+  else if (r && r.reason === 'busy') showToast('Une sauvegarde est déjà en cours d’envoi : elle part dans un instant.', 6000);
+  else if (r && (r.reason === 'token' || r.reason === 'no-token')) showToast('Connexion Google expirée : rien n’a été envoyé. Touche «\u00a0Reconnecter maintenant\u00a0» dans Réglages, puis recommence.', 8000);
+  else showToast('Envoi sur Google Drive impossible pour le moment. Vérifie la connexion et recommence.', 8000);
+}
 
 function downloadBackupFile(blob, name) {
   const url = URL.createObjectURL(blob);
@@ -4547,7 +4611,7 @@ function downloadBackupFile(blob, name) {
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 30000);
-  showToast(`Sauvegarde téléchargée : « ${name} », dans le dossier Téléchargements du téléphone.\nPour la remettre : Historique › Restaurer › Choisir un fichier…`, 8000);
+  showToast(`Sauvegarde téléchargée : «\u00a0${name}\u00a0», dans le dossier Téléchargements du téléphone.\nPour la remettre : Historique › Restaurer › Choisir un fichier…`, 8000);
 }
 
 async function exportData() {
