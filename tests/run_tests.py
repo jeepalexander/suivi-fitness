@@ -15,7 +15,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-TESTS = ['test_validation.py', 'test_rameur.py', 'test_drive_reset.py', 'test_progression_jours.py', 'test_supprimer_seance.py', 'test_annuler_seance.py', 'test_brouillon.py', 'test_poids_brouillon.py', 'test_chrono.py', 'test_mise_a_jour.py', 'test_reglages.py', 'test_drive_compte.py', 'test_drive_sauvegarde.py', 'test_drive_versions.py', 'test_drive_installee.py', 'test_drive_android.py', 'test_drive_reconnexion.py', 'test_programmes.py', 'test_editeur_deplacer.py', 'test_fond_ecran.py', 'test_invitation.py', 'test_accueil.py', 'test_fin_seance.py', 'test_editeur_incomplet.py', 'test_fenetres.py', 'test_pause_actif.py', 'test_mise_en_page.py', 'test_poly_1rm.py', 'test_poids_du_corps.py', 'test_titre_seance.py', 'test_pastille_1x.py', 'test_contraste.py', 'test_presentation.py', 'test_bilan.py', 'test_partage.py', 'test_choix_espace.py', 'test_doublons.py']
+TESTS = ['test_validation.py', 'test_rameur.py', 'test_drive_reset.py', 'test_progression_jours.py', 'test_supprimer_seance.py', 'test_annuler_seance.py', 'test_brouillon.py', 'test_poids_brouillon.py', 'test_chrono.py', 'test_mise_a_jour.py', 'test_reglages.py', 'test_drive_compte.py', 'test_drive_sauvegarde.py', 'test_drive_versions.py', 'test_drive_installee.py', 'test_drive_android.py', 'test_drive_reconnexion.py', 'test_programmes.py', 'test_editeur_deplacer.py', 'test_fond_ecran.py', 'test_invitation.py', 'test_accueil.py', 'test_fin_seance.py', 'test_editeur_incomplet.py', 'test_fenetres.py', 'test_pause_actif.py', 'test_mise_en_page.py', 'test_poly_1rm.py', 'test_poids_du_corps.py', 'test_titre_seance.py', 'test_pastille_1x.py', 'test_contraste.py', 'test_presentation.py', 'test_bilan.py', 'test_partage.py', 'test_choix_espace.py', 'test_doublons.py', 'test_sauvegarde_fichier.py']
 
 # Un test peut appartenir à plusieurs groupes.
 GROUPES = {
@@ -24,7 +24,7 @@ GROUPES = {
     'programmes': ['test_partage.py', 'test_bilan.py', 'test_programmes.py', 'test_editeur_deplacer.py', 'test_editeur_incomplet.py', 'test_pause_actif.py',
                    'test_accueil.py', 'test_pastille_1x.py', 'test_doublons.py'],
     'progression': ['test_progression_jours.py', 'test_poly_1rm.py', 'test_poids_du_corps.py', 'test_pastille_1x.py', 'test_bilan.py'],
-    'historique': ['test_supprimer_seance.py', 'test_progression_jours.py'],
+    'historique': ['test_supprimer_seance.py', 'test_progression_jours.py', 'test_sauvegarde_fichier.py'],
     'reglages': ['test_reglages.py', 'test_fond_ecran.py', 'test_invitation.py', 'test_mise_a_jour.py', 'test_presentation.py'],
     'drive': ['test_drive_reset.py', 'test_drive_compte.py', 'test_drive_sauvegarde.py', 'test_drive_versions.py',
               'test_drive_installee.py', 'test_drive_android.py', 'test_drive_reconnexion.py'],

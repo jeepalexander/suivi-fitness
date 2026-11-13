@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.60] - 2026-11-13
+### 🐛 « Sauvegarder » ne montrait rien (co-auteur : Claude)
+- **Cause** : l'app passe d'abord par le menu de partage du téléphone, mais Chrome sur Android refuse de partager un fichier `.json`. Elle repassait alors en téléchargement, sans aucun signe à l'écran.
+- **Correctif** : après le téléchargement, un message le confirme : « Sauvegarde téléchargée : « mon-carnet-de-salle-AAAA-MM-JJ.json », dans le dossier Téléchargements du téléphone. Pour la remettre : Historique › Restaurer › Choisir un fichier… ». Un partage refusé ou impossible télécharge aussi le fichier ; un partage fermé par l'usager ne fait rien de plus.
+- Nom du fichier : `mon-carnet-de-salle-AAAA-MM-JJ.json` (avant : la date seule), plus facile à retrouver.
+- Nouveau test `test_sauvegarde_fichier.py` (groupe `historique`, clair et sombre).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.60.
+
+---
+
 ## [1.7.59] - 2026-11-13
 ### ✨ Le même exercice plusieurs fois dans une séance (co-auteur : Claude)
 - **Éditeur** : dans « Ajouter un exercice », un exercice déjà présent n'est plus grisé. Sa mention verte devient « Déjà dans la séance · ajouter encore » et il se coche comme les autres ; il est ajouté en fin de séance, puis se déplace avec Monter / Descendre. Valable aussi pour le cardio (rameur au début et à la fin, par exemple). Pas de numéro sur les passages.

@@ -4533,10 +4533,28 @@ async function backupToDrive(opts) {
 // ============================================================
 // 15. SAUVEGARDE, IMPORT ET RÉINITIALISATION
 // ============================================================
+// 1.7.60 (co-auteur : Claude) : sur Chrome Android, le partage de fichiers n'accepte pas les .json
+// (canShare répond non) : la sauvegarde part en téléchargement, sans aucun signe à l'écran. On le dit
+// maintenant par un message ; un partage refusé ou impossible retombe aussi sur le téléchargement.
+function backupFileName() { return `mon-carnet-de-salle-${new Date().toISOString().slice(0, 10)}.json`; }
+
+function downloadBackupFile(blob, name) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+  showToast(`Sauvegarde téléchargée : « ${name} », dans le dossier Téléchargements du téléphone.\nPour la remettre : Historique › Restaurer › Choisir un fichier…`, 8000);
+}
+
 async function exportData() {
   const dataStr = JSON.stringify(state, null, 2);
   const blob = new Blob([dataStr], { type: 'application/json' });
-  const file = new File([blob], `${new Date().toISOString().slice(0, 10)}.json`, { type: 'application/json' });
+  const name = backupFileName();
+  const file = new File([blob], name, { type: 'application/json' });
 
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
@@ -4545,19 +4563,13 @@ async function exportData() {
         text: 'Sauvegarde du ' + new Date().toLocaleDateString('fr-FR') + '.',
         files: [file],
       });
+      return;
     } catch (error) {
-      if (error.name !== 'AbortError') {
-        console.log("Partage annulé ou non disponible", error);
-      }
+      if (error && error.name === 'AbortError') return; // partage fermé par l'usager
+      console.log('Partage impossible, téléchargement à la place', error);
     }
-  } else {
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", URL.createObjectURL(blob));
-    downloadAnchor.setAttribute("download", `${new Date().toISOString().slice(0, 10)}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
   }
+  downloadBackupFile(blob, name);
 }
 
 function importData(event) {
