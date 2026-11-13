@@ -3513,6 +3513,7 @@ if (typeof ResizeObserver !== 'undefined') {
 }
 
 function switchTab(tabName) {
+  if (tabName === 'reglages') loadGoogleIdentity(); // 1.7.65 : préchargé avant un appui sur « Se connecter »
   document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
 
@@ -3848,6 +3849,7 @@ function renewDriveToken() {
   // l'application. Pas de renouvellement silencieux possible : la séance reste en file d'attente et
   // Réglages propose « Reconnecter maintenant » (connexion par redirection, voir connectDriveByRedirect).
   if (isInstalledApp()) return Promise.resolve(false);
+  if (!gisReady()) return loadGoogleIdentity().then((ok) => (ok ? renewDriveToken() : false)); // 1.7.65
   initDriveTokenClient();
   if (!driveTokenClient) return Promise.resolve(false);
   let resolveFn;
@@ -3869,8 +3871,28 @@ function renewDriveToken() {
   return promise;
 }
 
+// 1.7.65 (co-auteur : Claude) : le script de connexion Google (Google Identity Services) n'est plus chargé à
+// l'ouverture de chaque page, seulement quand le Google Drive sert : au lancement si l'usager l'a déjà connecté
+// (navigateur), à l'ouverture de Réglages, de Sauvegarder / Restaurer, et à l'appui sur « Se connecter ».
+// Un visiteur qui n'utilise pas le Drive (ou un robot d'exploration) ne charge rien de Google.
+const GIS_SRC = 'https://accounts.google.com/gsi/client';
+let gisPromise = null;
+function gisReady() { return typeof google !== 'undefined' && !!(google.accounts && google.accounts.oauth2); }
+function loadGoogleIdentity() {
+  if (gisReady()) { initDriveTokenClient(); return Promise.resolve(true); }
+  if (gisPromise) return gisPromise;
+  gisPromise = new Promise((resolve) => {
+    const s = document.createElement('script');
+    s.src = GIS_SRC; s.async = true;
+    s.onload = () => { initDriveTokenClient(); resolve(gisReady()); };
+    s.onerror = () => { gisPromise = null; resolve(false); };
+    document.head.appendChild(s);
+  });
+  return gisPromise;
+}
+
 function initDriveTokenClient() {
-  if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) return;
+  if (!gisReady()) return;
   if (driveTokenClient) return;
   driveTokenClient = google.accounts.oauth2.initTokenClient({
     client_id: GOOGLE_CLIENT_ID,
@@ -4009,6 +4031,8 @@ const DRIVE_CONNECT_DELAY_MS = 400;
 let driveFullConnectNext = false; // 1.7.39 : renouvellement silencieux déjà tenté sans succès
 function connectGoogleDrive() {
   if (isInstalledApp()) { setTimeout(connectDriveByRedirect, DRIVE_CONNECT_DELAY_MS); return; }
+  // 1.7.65 : script Google chargé à la demande (en général déjà préchargé à l'ouverture de Réglages)
+  if (!gisReady()) { loadGoogleIdentity().then((ok) => { if (ok) connectGoogleDrive(); else appAlert('Google indisponible', 'La bibliothèque Google ne s\'est pas chargée. Vérifie ta connexion et réessaie.', 'cloud'); }); return; }
   initDriveTokenClient();
   if (!driveTokenClient) {
     appAlert('Google indisponible', 'La bibliothèque Google ne s\'est pas chargée. Vérifie ta connexion et réessaie.', 'cloud');
@@ -4040,8 +4064,9 @@ function connectGoogleDrive() {
 
 function disconnectGoogleDrive() {
   const t = getDriveToken();
-  if (t && t.access_token && typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
-    try { google.accounts.oauth2.revoke(t.access_token, () => {}); } catch (e) {}
+  if (t && t.access_token) {
+    // 1.7.65 : le script Google peut ne pas être chargé ; on le charge pour révoquer l'accès
+    loadGoogleIdentity().then((ok) => { if (ok) { try { google.accounts.oauth2.revoke(t.access_token, () => {}); } catch (e) { /* ignoré */ } } });
   }
   clearDriveToken();
   updateDriveUI();
@@ -4460,7 +4485,7 @@ async function restoreFromDrive() {
   }
   renderBackupRestoreSheet();
 }
-function openBackupRestore() { restoreFromDrive(); }
+function openBackupRestore() { loadGoogleIdentity(); restoreFromDrive(); }
 
 // Restaure les données depuis une sauvegarde du Drive (n'importe laquelle de la liste), par le même chemin que
 // le bouton « Restaurer » de l'Historique (importData, avec l'assainissement de security.js).
@@ -4589,6 +4614,7 @@ function renderBackupSaveSheet() {
     { update: true, onClose: () => { backupSave = null; } });
 }
 function openBackupSave() {
+  loadGoogleIdentity(); // 1.7.65 : préchargé pour une éventuelle reconnexion
   backupSave = { sel: (getDriveToken() || isDriveWanted()) ? 'drive' : 'file' };
   renderBackupSaveSheet();
 }
@@ -4839,6 +4865,7 @@ async function initApp() {
   cleanupLegacyDriveKeys();
   const driveReturn = handleDriveRedirectReturn();
   setTimeout(() => {
+    if (isDriveWanted() && !isInstalledApp()) loadGoogleIdentity(); // 1.7.65 : seulement si le Drive sert
     initDriveTokenClient(); updateDriveUI();
     const forcedSave = driveSyncOnReturn(); // 1.7.62 : sauvegarde demandée par « Sauvegarder » avant la reconnexion
     if (isDriveConnected() && !getDriveAccount()) fetchDriveAccount();

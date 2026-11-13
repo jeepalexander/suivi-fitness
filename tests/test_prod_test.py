@@ -43,6 +43,23 @@ try:
         ok('aucune erreur JavaScript (liens)', not errs, errs)
         ctx.close()
 
+        # --- 1.7.65 : script de connexion Google chargé seulement quand le Drive sert
+        for wanted in (False, True):
+            ctx, pg, errs = newpage(br)
+            reqs = []
+            pg.on('request', lambda r: reqs.append(r.url) if 'accounts.google.com/gsi' in r.url else None)
+            if wanted:
+                pg.add_init_script("localStorage.setItem('h49_drive_wanted','1')")
+            pg.goto(base + 'index.html'); pg.wait_for_timeout(1200)
+            at_start = len(reqs)
+            if wanted:
+                ok('Drive déjà connecté (navigateur) : script Google chargé au lancement', at_start == 1, at_start)
+            else:
+                ok('jamais connecté : aucun script Google au lancement', at_start == 0, reqs)
+                pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(600)
+                ok('jamais connecté : script Google préchargé à l\'ouverture de Réglages, une seule fois', len(reqs) == 1, reqs)
+            ctx.close()
+
         # --- Service workers : un par dossier, caches séparés, anciens caches sans dossier supprimés
         ctx, pg, errs = newpage(br, sw='allow')
         pg.goto(base + 'index.html'); pg.wait_for_timeout(300)
