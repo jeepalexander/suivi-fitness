@@ -1,6 +1,9 @@
 """Même exercice plusieurs fois dans une séance (1.7.59) : éditeur, saisie par passage, brouillon,
 historique (rang « occ »), charges reprises du même passage, Progression et records additionnés."""
-import json, sys
+import json, os, sys, tempfile
+# Captures d'écran facultatives (dossier SHOTS_DIR, sinon le dossier temporaire)
+SHOTS = os.environ.get('SHOTS_DIR') or tempfile.gettempdir()
+os.makedirs(SHOTS, exist_ok=True)
 from harness import Srv, newpage, sync_playwright
 
 res = []
@@ -38,7 +41,7 @@ with Srv() as url, sync_playwright() as p:
         ids = pg.evaluate("draftSession().exercises.map(e=>e.exId)")
         ok(f'[{scheme}] éditeur : ajouté une seconde fois en fin de séance', len(ids) == n0 + 1 and ids[-1] == first and ids.count(first) == 2, ids)
         if scheme == 'light':
-            pg.screenshot(path='/home/claude/shots/doublon-editeur.png')
+            pg.screenshot(path=os.path.join(SHOTS, 'doublon-editeur.png'))
         # Rameur (cardio) en double aussi
         rower = pg.evaluate("exInfo('Rameur').id")
         pg.evaluate("openAddExercise()"); pg.wait_for_timeout(300)
@@ -100,7 +103,7 @@ with Srv() as url, sync_playwright() as p:
         ok(f'[{scheme}] séance suivante : rameur 1 200 m puis 700 m', rv == ['1200', '700'], rv)
         if scheme == 'light':
             pg.evaluate("n=>{const its=[...document.querySelectorAll('.exercise-item')].filter(e=>e.dataset.ex===n);its[1].querySelector('.ex-toggle').click();its[1].scrollIntoView({block:'center'})}", name)
-            pg.wait_for_timeout(300); pg.screenshot(path='/home/claude/shots/doublon-seance.png')
+            pg.wait_for_timeout(300); pg.screenshot(path=os.path.join(SHOTS, 'doublon-seance.png'))
         sub = pg.evaluate("n=>{const it=[...document.querySelectorAll('.exercise-item')].filter(e=>e.dataset.ex===n)[1];if(!it.classList.contains('open'))it.querySelector('.ex-toggle').click();return it.querySelector('.ex-sub').textContent}", name)
         ok(f'[{scheme}] passage 2 ouvert : « Dernière fois · 30 kg max »', sub == 'Dernière fois · 30 kg max', sub)
 
