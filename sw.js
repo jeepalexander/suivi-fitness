@@ -2,8 +2,14 @@
 // APP_VERSION doit être incrémenté à chaque release (en même temps que
 // manifest.json) : le navigateur ne réinstalle le service worker que si
 // le contenu de ce fichier change.
-const APP_VERSION = '1.7.63';
-const CACHE_NAME = 'suivi-fitness-' + APP_VERSION;
+const APP_VERSION = '1.7.64';
+// 1.7.64 (co-auteur : Claude) : production (…/suivi-fitness/) et test (…/suivi-fitness/dev/) sont sur le même
+// domaine et partagent le stockage des caches : chaque version nomme ses caches d'après son dossier et ne
+// supprime que les siens (plus les anciens caches sans dossier, d'avant la 1.7.64).
+const SCOPE_PATH = new URL(self.registration ? self.registration.scope : self.location.href).pathname;
+const CACHE_PREFIX = 'suivi-fitness:' + SCOPE_PATH + ':';
+const CACHE_NAME = CACHE_PREFIX + APP_VERSION;
+const isLegacyCache = (k) => /^suivi-fitness-\d/.test(k);
 const ASSETS = [
   './',
   './index.html',
@@ -94,7 +100,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME && (k.startsWith(CACHE_PREFIX) || isLegacyCache(k))).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
       .then(() => self.clients.matchAll({ type: 'window' }))
       .then((clients) => clients.forEach((c) => c.postMessage({ type: 'SW_ACTIVATED', version: APP_VERSION })))
@@ -104,7 +110,10 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   try {
-    if (new URL(event.request.url).origin !== self.location.origin) return;
+    const u = new URL(event.request.url);
+    if (u.origin !== self.location.origin) return;
+    // la version de test (dossier dev/) a son propre service worker : la production ne s'en mêle pas
+    if (u.pathname.startsWith(SCOPE_PATH + 'dev/')) return;
   } catch (e) { return; }
   event.respondWith(
     caches.open(CACHE_NAME).then((cache) =>

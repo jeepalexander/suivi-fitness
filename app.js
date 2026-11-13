@@ -315,10 +315,16 @@ function renderWallpaperGrid() {
   if (sel) { const li = sel.parentElement; grid.scrollLeft = Math.max(0, li.offsetLeft - grid.offsetLeft - parseFloat(getComputedStyle(grid).paddingLeft || 0)); }
 }
 
-// Inviter quelqu'un (1.7.21) : QR code vers l'adresse de l'application (celle de cette page : dev ou production).
+// Inviter quelqu'un (1.7.21) : QR code vers l'adresse de l'application.
 // La personne installe l'app sur son téléphone et la connecte à son propre Google Drive.
+// 1.7.64 : depuis la version de test (…/suivi-fitness/dev/), les invitations et les programmes partagés
+// mènent toujours à la production (…/suivi-fitness/).
+function isTestVersion() { return /\/dev\/(index\.html)?$/.test(location.pathname); }
 function appShareUrl() {
-  return new URL('./', location.href).href;
+  const u = new URL('./', location.href);
+  if (/\/dev\/$/.test(u.pathname)) u.pathname = u.pathname.replace(/dev\/$/, '');
+  u.hash = ''; u.search = '';
+  return u.href;
 }
 
 function inviteQrSvg(url) {

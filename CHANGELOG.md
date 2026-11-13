@@ -7,6 +7,19 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.64] - 2026-11-13
+### 🧪 Production et version de test publiées séparément (co-auteur : Claude)
+- **Publication** (`.github/workflows/pages.yml`, `tools/assembler_site.py`) : `main` à l'adresse actuelle `…/suivi-fitness/` (production, personnes invitées) et `dev` dans `…/suivi-fitness/dev/` (version de test), publiées ensemble par GitHub Actions. Un envoi sur `dev` relance la publication (`dev-pages.yml`). Les tests et outils ne sont pas publiés. Réglage nécessaire : Settings › Pages › Source = « GitHub Actions ».
+- **Icône de test** : dans `dev/`, le manifeste devient « Mon Carnet de Salle (TEST) » / « Carnet TEST » pour distinguer les deux icônes sur l'écran d'accueil.
+- **Liens** : depuis la version de test, « Inviter quelqu'un » et « Partager le programme » mènent toujours à la production (`appShareUrl`, `isTestVersion`).
+- **Service workers** : les deux versions sont sur le même domaine. Chaque version nomme ses caches d'après son dossier (`suivi-fitness:/suivi-fitness/:1.7.64`, `…/dev/:…`) et ne supprime que les siens ; la production ignore les fichiers de `dev/`. Les anciens caches (`suivi-fitness-1.7.x`) sont supprimés.
+- Les deux versions partagent les données du téléphone (même domaine).
+- Branche `backup` : copie figée de `main` (1.7.62) au 13/11/2026.
+- Nouveau test `test_prod_test.py` (groupe `reglages`, 14 contrôles : site assemblé, liens, manifestes, caches séparés).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.64.
+
+---
+
 ## [1.7.63] - 2026-11-13
 ### 🐛 La reconnexion à Google ne fait plus disparaître la fenêtre de fin de séance (co-auteur : Claude)
 - Après une nouvelle séance, la sauvegarde sur le Drive — et, si l'accès a expiré, la reconnexion à Google (fenêtre Google dans le navigateur, redirection dans l'application installée) — attend maintenant le « OK » de la fenêtre « Bravo ! » (`finishDialogOk`). Avant, elle partait à l'enregistrement et la fenêtre de fin disparaissait avant d'avoir été lue.

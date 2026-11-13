@@ -1,0 +1,18 @@
+# Envoi sur dev : relance la publication (production + test) depuis main (1.7.64, co-auteur : Claude).
+name: Publier la version de test
+
+on:
+  push:
+    branches: [dev]
+
+permissions:
+  actions: write
+
+jobs:
+  relancer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Relancer « Publier le site »
+        run: gh workflow run pages.yml --ref main --repo "$GITHUB_REPOSITORY"
+        env:
+          GH_TOKEN: ${{ github.token }}
