@@ -779,8 +779,7 @@ body[data-tab="programme"][data-pview="choose"] header h1 { display: none; }
 .add-check { flex: none; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--fill); color: var(--text); }
 .add-check svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .add-item.on .add-check { background: var(--success); color: var(--on-success); box-shadow: var(--sh-chip); }
-.add-item.already { cursor: default; }
-.add-item.already .add-check { background: var(--success-tint); color: var(--success); }
+/* 1.7.59 : un exercice déjà présent reste choisissable ; seule sa mention passe en vert */
 
 .restore-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; overflow-y: auto; min-height: 0; }
 .restore-item { width: 100%; display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 12px 16px; border: 2px solid transparent; border-radius: 22px; background: var(--fill); color: var(--text); font: inherit; text-align: left; cursor: pointer; }

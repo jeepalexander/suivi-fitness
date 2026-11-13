@@ -1001,12 +1001,13 @@ function saveDraft() {
   if (!items.length) return;
 
   let dirty = false;
-  const exercises = items.map(item => {
+  const exercises = items.map((item, idx) => {
     const rows = Array.from(item.querySelectorAll('.set-row'));
-    const defEx = workoutDef.exercises.find(e => e.name === item.dataset.ex);
+    const defEx = workoutDef.exercises[idx]; // même ordre que l'écran (un exercice peut revenir plusieurs fois)
     if (defEx && rows.length !== defEx.seriesCount) dirty = true;
     return {
       name: item.dataset.ex,
+      occ: exOccOf(item.dataset),
       sets: rows.map(row => {
         const w = row.querySelector('.weight-input'), r = row.querySelector('.reps-input');
         const done = row.classList.contains('done');
@@ -1039,7 +1040,7 @@ function restoreDraft(type) {
   draftRestoring = true;
   try {
     document.querySelectorAll('#exercises-list .exercise-item').forEach(item => {
-      const saved = d.exercises.find(e => e.name === item.dataset.ex);
+      const saved = d.exercises.find(e => e.name === item.dataset.ex && exOccOf(e) === exOccOf(item.dataset));
       if (!saved || !Array.isArray(saved.sets) || !saved.sets.length) return;
       const grid = item.querySelector('.sets-grid');
       const mode = exMode(item.dataset.ex);
@@ -1113,7 +1114,36 @@ function restoreWeightDraft() {
 //   time : durée (min:ss)        dist : durée · distance (m ou km)        floors : durée · étages
 function sameExercise(a, b) { return canonicalExerciseName(a) === canonicalExerciseName(b); }
 
-function getSuggestedSetValues(exName, setIndex, fallbackWeight, fallbackReps) {
+// 1.7.59 (co-auteur : Claude) : un même exercice peut revenir plusieurs fois dans une séance.
+// Chaque passage a son rang « occ » (0 = premier, absent dans les anciennes données) : il est enregistré
+// dans l'historique pour que chaque passage reprenne ses propres charges la fois suivante.
+function exOccOf(e) { return Number(e && e.occ) || 0; }
+function findExerciseOcc(list, name, occ) {
+  return (list || []).find(e => e && sameExercise(e.name, name) && exOccOf(e) === (occ || 0)) || null;
+}
+// Pour les calculs (Progression, records, paliers) : les passages d'un même exercice sont additionnés
+// (séries mises bout à bout, tonnage additionné, charge max = la meilleure).
+function mergeExercises(list) {
+  const out = [], byName = new Map();
+  (list || []).forEach(ex => {
+    if (!ex) return;
+    const key = ex.name ? canonicalExerciseName(ex.name) : '';
+    const prev = key ? byName.get(key) : null;
+    if (!prev) {
+      const copy = Object.assign({}, ex, { sets: Array.isArray(ex.sets) ? ex.sets.slice() : ex.sets });
+      delete copy.occ;
+      out.push(copy);
+      if (key) byName.set(key, copy);
+      return;
+    }
+    if (Array.isArray(ex.sets)) prev.sets = (Array.isArray(prev.sets) ? prev.sets : []).concat(ex.sets);
+    prev.totalVolume = (Number(prev.totalVolume) || 0) + (Number(ex.totalVolume) || 0);
+    prev.maxWeight = Math.max(Number(prev.maxWeight) || 0, Number(ex.maxWeight) || 0);
+  });
+  return out;
+}
+
+function getSuggestedSetValues(exName, setIndex, fallbackWeight, fallbackReps, occ = 0) {
   const mode = exMode(exName);
   let foundSet = null;
 
@@ -1122,7 +1152,7 @@ function getSuggestedSetValues(exName, setIndex, fallbackWeight, fallbackReps) {
   for (let i = state.history.length - 1; i >= 0; i--) {
     const h = state.history[i];
     if (h.isDeload || !h.exercises) continue;
-    const foundEx = h.exercises.find(e => sameExercise(e.name, exName));
+    const foundEx = findExerciseOcc(h.exercises, exName, occ);
     // On ne reprend qu'une série réellement faite : les séries non faites sont ignorées
     // et on remonte à la dernière séance où cette série a vraiment été réalisée.
     if (foundEx && foundEx.sets && isPerformedSet(foundEx.sets[setIndex])) {
@@ -1130,6 +1160,8 @@ function getSuggestedSetValues(exName, setIndex, fallbackWeight, fallbackReps) {
       break;
     }
   }
+  // Passage suivant jamais fait : on reprend les charges du premier passage
+  if (!foundSet && occ > 0) return getSuggestedSetValues(exName, setIndex, fallbackWeight, fallbackReps, 0);
 
   if (mode === 'bw') {
     let lest = 0;
@@ -1165,12 +1197,13 @@ function getSuggestedSetValues(exName, setIndex, fallbackWeight, fallbackReps) {
 
 // Valeurs proposées pour un cardio : la dernière séance où il a été fait, sinon les valeurs par défaut
 // (rameur : 4:30 et 1 000 m ; autres appareils : champs vides la première fois)
-function getSuggestedCardioValues(exName, defSeconds, defMeters) {
+function getSuggestedCardioValues(exName, defSeconds, defMeters, occ = 0) {
   for (let i = state.history.length - 1; i >= 0; i--) {
-    const ex = (state.history[i].exercises || []).find(e => sameExercise(e.name, exName));
+    const ex = findExerciseOcc(state.history[i].exercises, exName, occ);
     const set = ex && Array.isArray(ex.sets) ? ex.sets.find(isPerformedCardioSet) : null;
     if (set) return { seconds: set.seconds, meters: set.meters, floors: set.floors };
   }
+  if (occ > 0) return getSuggestedCardioValues(exName, defSeconds, defMeters, 0);
   return { seconds: defSeconds, meters: defMeters };
 }
 
@@ -1318,6 +1351,7 @@ function addSet(btn) {
   const rows = grid.querySelectorAll('.set-row');
   const last = rows[rows.length - 1];
   const exName = btn.closest('.exercise-item').dataset.ex;
+  const occ = exOccOf(btn.closest('.exercise-item').dataset);
 
   // La nouvelle série reprend les valeurs de la dernière ;
   // à défaut (aucune série), on utilise la suggestion du programme.
@@ -1326,7 +1360,7 @@ function addSet(btn) {
     weightVal = last.querySelector('.weight-input').value;
     repsVal = last.querySelector('.reps-input').value;
   } else {
-    const suggested = getSuggestedSetValues(exName, 0, '', defaultRepsFor(exName));
+    const suggested = getSuggestedSetValues(exName, 0, '', defaultRepsFor(exName), occ);
     weightVal = suggested.weight;
     repsVal = suggested.reps;
   }
@@ -1394,13 +1428,14 @@ function exerciseSummaryText(item) {
 
 // Ligne de l'exercice ouvert : « Dernière fois · 86 kg max », « Dernière fois · PDC +10 kg »,
 // ou la première fois « Première fois · 3 × 6–10 réps »
-function exerciseLastTimeText(exName) {
+function exerciseLastTimeText(exName, occ = 0) {
   const info = exInfo(exName);
   const history = (state && state.history) ? state.history : [];
+  if (occ && !history.some(h => findExerciseOcc(h.exercises, exName, occ))) occ = 0; // passage jamais fait : le premier
   for (let i = history.length - 1; i >= 0; i--) {
     const h = history[i];
     if (editingOriginalId !== null && h.id === editingOriginalId) continue; // pas la séance en cours de modification
-    const ex = (h.exercises || []).find(e => sameExercise(e.name, exName));
+    const ex = findExerciseOcc(h.exercises, exName, occ);
     if (!ex || !Array.isArray(ex.sets)) continue;
     if (info.cardio) {
       const cs = ex.sets.find(isPerformedCardioSet);
@@ -1455,7 +1490,7 @@ function refreshExerciseStates() {
       const current = rows.find(r => !r.classList.contains('done'));
       if (current) current.classList.add('current');
     }
-    item.querySelector('.ex-sub').textContent = open ? exerciseLastTimeText(item.dataset.ex) : exerciseSummaryText(item);
+    item.querySelector('.ex-sub').textContent = open ? exerciseLastTimeText(item.dataset.ex, exOccOf(item.dataset)) : exerciseSummaryText(item);
   });
 
   // Le chrono de repos suit l'exercice ouvert
@@ -1510,7 +1545,8 @@ function workoutDefFromHistory(h) {
   (h.exercises || []).forEach(ex => {
     const name = canonicalExerciseName(ex.name);
     const n = Array.isArray(ex.sets) ? ex.sets.length : 0;
-    const found = list.find(e => e.name === name);
+    // 1.7.59 : le passage de même rang (un exercice peut revenir plusieurs fois dans la séance)
+    const found = list.filter(e => e.name === name)[exOccOf(ex)];
     if (found) { if (!exInfo(name).cardio) found.seriesCount = Math.max(found.seriesCount, n); }
     else list.push({ name, exId: exInfo(name).id, seriesCount: exInfo(name).cardio ? 1 : Math.max(1, n) });
   });
@@ -1650,14 +1686,17 @@ function initWorkoutForm(customSession = null) {
   if(!container) return;
   container.innerHTML = '';
 
+  const occSeen = {};
   def.exercises.forEach((ex) => {
     const info = exInfo(ex.name);
     const div = document.createElement('div');
     div.className = 'exercise-item';
+    // 1.7.59 : rang du passage quand l'exercice revient plusieurs fois dans la séance
+    const occ = occSeen[ex.name] = occSeen[ex.name] === undefined ? 0 : occSeen[ex.name] + 1;
 
     let existingEx = null;
     if (customSession && customSession.exercises) {
-      existingEx = customSession.exercises.find(e => sameExercise(e.name, ex.name));
+      existingEx = findExerciseOcc(customSession.exercises, ex.name, occ);
     }
 
     let rowsHtml = '';
@@ -1668,7 +1707,7 @@ function initWorkoutForm(customSession = null) {
         secVal = saved.seconds; amtVal = formatCardioAmountInput(ex.name, saved); preChecked = true;
       } else {
         const isRower = ex.name === ROWER_NAME;
-        const sg = getSuggestedCardioValues(ex.name, isRower ? ROWER_DEFAULTS.seconds : '', isRower ? ROWER_DEFAULTS.meters : undefined);
+        const sg = getSuggestedCardioValues(ex.name, isRower ? ROWER_DEFAULTS.seconds : '', isRower ? ROWER_DEFAULTS.meters : undefined, occ);
         secVal = sg.seconds; amtVal = formatCardioAmountInput(ex.name, sg);
       }
       if (info.mode === 'time') rowsHtml = setRowHtml(ex.name, 1, secVal, '', preChecked);
@@ -1686,7 +1725,7 @@ function initWorkoutForm(customSession = null) {
           else weightVal = saved.weight;
           repsVal = info.mode === 'time' ? '' : saved.reps;
         } else {
-          const lastSet = getSuggestedSetValues(ex.name, s - 1, '', defaultRepsFor(ex.name));
+          const lastSet = getSuggestedSetValues(ex.name, s - 1, '', defaultRepsFor(ex.name), occ);
           weightVal = lastSet.weight;
           repsVal = lastSet.reps;
         }
@@ -1695,6 +1734,7 @@ function initWorkoutForm(customSession = null) {
     }
 
     div.dataset.ex = ex.name;
+    div.dataset.occ = occ;
     div.innerHTML = `
       <div class="ex-header">
         <button type="button" class="ex-toggle" aria-expanded="false" onclick="toggleExercise(this)">
@@ -1811,13 +1851,15 @@ async function submitWorkout(e) {
     if (!workoutDef) return;
   }
 
-  const logFor = (exName, cardio) => {
-    let exLog = exerciseLogs.find(x => x.name === exName);
+  // 1.7.59 : un journal par passage (un exercice peut revenir plusieurs fois dans la séance)
+  const logFor = (exName, cardio, occ = 0) => {
+    let exLog = exerciseLogs.find(x => x.name === exName && exOccOf(x) === occ);
     if (!exLog) {
       exLog = { name: exName, sets: [], maxWeight: 0, totalVolume: 0 };
       const id = exInfo(exName).id;
       if (id) exLog.exId = id;
       if (cardio) exLog.cardio = true;
+      if (occ) exLog.occ = occ;
       exerciseLogs.push(exLog);
     }
     return exLog;
@@ -1827,17 +1869,18 @@ async function submitWorkout(e) {
     const wInput = row.querySelector('.weight-input');
     const rInput = row.querySelector('.reps-input');
     const exName = wInput.dataset.ex;
+    const occ = exOccOf(row.closest('.exercise-item').dataset);
     const mode = exMode(exName);
     if (mode === 'dist' || mode === 'floors' || (mode === 'time' && isCardioName(exName))) {
       const set = { weight: 0, reps: 0, seconds: parseDurationInput(wInput.value) };
       if (mode === 'dist') set.meters = parseCardioAmount(exName, rInput.value);
       if (mode === 'floors') set.floors = parseCardioAmount(exName, rInput.value);
-      logFor(exName, true).sets.push(set);
+      logFor(exName, true, occ).sets.push(set);
       return;
     }
-    if (mode === 'time') { logFor(exName).sets.push({ weight: 0, reps: 0, seconds: parseDurationInput(wInput.value), hold: true }); return; }
+    if (mode === 'time') { logFor(exName, false, occ).sets.push({ weight: 0, reps: 0, seconds: parseDurationInput(wInput.value), hold: true }); return; }
     const r = Number(rInput.value);
-    if (mode === 'reps') { logFor(exName).sets.push({ weight: 0, reps: r, free: true }); return; }
+    if (mode === 'reps') { logFor(exName, false, occ).sets.push({ weight: 0, reps: r, free: true }); return; }
 
     let w, set;
     if (mode === 'bw') {
@@ -1851,7 +1894,7 @@ async function submitWorkout(e) {
     }
     const setVolume = w * r;
     totalTonnage += setVolume;
-    const exLog = logFor(exName);
+    const exLog = logFor(exName, false, occ);
     exLog.sets.push(set);
     exLog.totalVolume += setVolume;
     if (w > exLog.maxWeight) exLog.maxWeight = w;
@@ -1906,10 +1949,12 @@ async function submitWorkout(e) {
   if (p && !isEditing) {
     const session = isLibre(p) ? p.sessions[0] : p.sessions.find(s => s.key === def.key);
     if (session) {
-      items.forEach(item => {
+      items.forEach((item, idx) => {
         const info = exInfo(item.dataset.ex);
         if (info.cardio) return;
-        const pe = session.exercises.find(x => x.exId === info.id);
+        // 1.7.59 : par position (un exercice peut revenir plusieurs fois), le premier du même nom à défaut
+        const atIdx = session.exercises[idx];
+        const pe = atIdx && atIdx.exId === info.id ? atIdx : session.exercises.find(x => x.exId === info.id);
         if (pe) pe.sets = item.querySelectorAll('.set-row').length;
       });
     }
@@ -1968,7 +2013,7 @@ function previousSameSession(entry) {
 function sessionRecords(entry) {
   const others = (state.history || []).filter(h => h.id !== entry.id);
   const out = [];
-  entry.exercises.forEach(ex => {
+  mergeExercises(entry.exercises).forEach(ex => {
     const mode = exMode(ex.name);
     const byTime = ex.cardio || mode === 'time';
     if (!byTime && mode !== 'weight') return;
@@ -2709,7 +2754,7 @@ function renderExerciseChart() {
 
   state.history.forEach(h => {
     if (h.exercises) {
-      const exData = h.exercises.find(e => isSelected(e.name));
+      const exData = mergeExercises(h.exercises).find(e => isSelected(e.name));
 
       // On ignore les séances où l'exercice n'a pas été réellement fait (séries à 0 kg / 0 rép.)
       // pour ne pas tracer de faux creux à 0 dans la progression.
@@ -3005,7 +3050,7 @@ function analyzeMonthlyProgress(hist = statsHistory(), scope = currentStatsScope
     }
 
     if (session.exercises) {
-      session.exercises.forEach(ex => {
+      mergeExercises(session.exercises).forEach(ex => {
         const exName = ex.name ? canonicalExerciseName(ex.name) : '';
         if (exName) {
           allExercises.add(exName);

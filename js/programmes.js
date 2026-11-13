@@ -629,13 +629,13 @@ function addListHtml() {
   const items = CATALOGUE.filter(e => (addSheet.filter === 'Tous' || (addSheet.filter === 'Polyarticulaires' ? !!e.poly : e.group === addSheet.filter)) && (!q || normalizeSearch(e.name).includes(q)));
   if (!items.length) return `<p class="add-empty">Aucun exercice trouvé.</p>`;
   return items.map(e => {
-    const already = inSession.has(e.id);
+    const already = inSession.has(e.id); // 1.7.59 : reste choisissable (un exercice peut revenir plusieurs fois)
     const on = addSheet.selected.has(e.id);
     return `
-      <button type="button" class="add-item${already ? ' already' : ''}${on ? ' on' : ''}" ${already ? 'disabled' : ''} data-id="${e.id}" aria-pressed="${on}">
+      <button type="button" class="add-item${already ? ' already' : ''}${on ? ' on' : ''}" data-id="${e.id}" aria-pressed="${on}">
         <span class="ex-icon-badge">${getIcon(e.name, true)}</span>
-        <span class="add-text"><span class="add-name">${escapeHtml(e.name)}</span><span class="add-meta">${already ? 'Déjà dans la séance' : addMetaText(e)}</span></span>
-        <span class="add-check">${already || on ? CHECK_SVG : PLUS_SVG}</span>
+        <span class="add-text"><span class="add-name">${escapeHtml(e.name)}</span><span class="add-meta">${already ? 'Déjà dans la séance · ajouter encore' : addMetaText(e)}</span></span>
+        <span class="add-check">${on ? CHECK_SVG : PLUS_SVG}</span>
       </button>`;
   }).join('');
 }

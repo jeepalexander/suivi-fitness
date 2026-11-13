@@ -7,6 +7,19 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.59] - 2026-11-13
+### ✨ Le même exercice plusieurs fois dans une séance (co-auteur : Claude)
+- **Éditeur** : dans « Ajouter un exercice », un exercice déjà présent n'est plus grisé. Sa mention verte devient « Déjà dans la séance · ajouter encore » et il se coche comme les autres ; il est ajouté en fin de séance, puis se déplace avec Monter / Descendre. Valable aussi pour le cardio (rameur au début et à la fin, par exemple). Pas de numéro sur les passages.
+- **Séance** : chaque passage est une ligne à part, avec ses séries, ses coches, ses charges et le chrono, à sa place dans l'ordre. Le brouillon (rechargement) garde chaque passage séparément.
+- **Charges proposées** : chaque passage reprend les charges du même passage la dernière fois (le 2ᵉ passage celles du 2ᵉ). Un passage jamais fait reprend celles du premier. « Dernière fois · … » suit la même règle.
+- **Historique** : la séance garde les passages séparés, dans l'ordre ; le rang du passage est enregistré (`occ`, absent pour le premier, donc les anciennes séances et sauvegardes restent lisibles). Modifier une ancienne séance rouvre chaque passage avec ses séries.
+- **Progression, records, paliers, bilan du mois** : les passages d'un même exercice sont additionnés (séries mises bout à bout, tonnage additionné, charge max = la meilleure) ; un seul record par exercice en fin de séance.
+- **Programme** : le nombre de séries fait est reporté sur le bon passage. Le partage par lien ou QR code transporte les doublons.
+- Maquette : planches 6 et 7. Nouveau test `test_doublons.py` (groupes `seance` et `programmes`, clair et sombre). Suite complète : 37 tests OK.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.59.
+
+---
+
 ## [1.7.58] - 2026-11-13
 ### 📐 Écran du bouton + : moins d'espace en haut (co-auteur : Claude)
 - **Cause trouvée** : l'écran « Choisis comment t'entraîner » était plus haut que l'écran du téléphone (environ 794 px pour 785 disponibles à 390 × 844). La page débordait, l'espace élastique qui cale les tuiles en bas était à son minimum, et « Recevoir un programme » finissait contre le menu tant qu'on ne faisait pas défiler.
