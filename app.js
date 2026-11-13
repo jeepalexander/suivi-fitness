@@ -3135,7 +3135,7 @@ function analyzeMonthlyProgress(hist = statsHistory(), scope = currentStatsScope
   // Dernier mois ayant des séances (sert aux conseils ci-dessous)
   const currentMonthData = monthlyData[lastDataMonthKey];
   const thisMonthData = monthlyData[realMonthKey];
-  // 1.7.67 : calcul des records d'un mois quelconque (le mois en cours pour la liste, les 6 derniers pour les trophées)
+  // 1.7.67 : calcul des records d'un mois quelconque (liste « Records battus ce mois-ci »)
   const recordsForMonth = (monthKey) => {
     const out = [];
     const monthData = monthlyData[monthKey];
@@ -3187,12 +3187,18 @@ function analyzeMonthlyProgress(hist = statsHistory(), scope = currentStatsScope
     return out;
   };
   const currentMonthRecords = thisMonthData ? recordsForMonth(realMonthKey) : [];
-  // 1.7.67 : trophées = nombre de records battus chaque mois, sur les 6 derniers mois (mois en cours compris)
+  // 1.7.67–1.7.68 : trophées = records battus chaque mois, comptés comme les bilans du mois (bilanRecordCountIn,
+  // même périmètre que la page), depuis le premier mois du périmètre jusqu'au mois en cours
   const SHORT_MONTHS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
   const trophyMonths = [];
-  for (let off = 5; off >= 0; off--) {
-    const key = monthKeyFromOffset(off);
-    trophyMonths.push({ key, label: SHORT_MONTHS[Number(key.slice(5, 7)) - 1], count: recordsForMonth(key).length });
+  const firstKey = hist.map(h => (h.date || '').slice(0, 7)).filter(k => /^\d{4}-\d{2}$/.test(k)).sort()[0];
+  if (firstKey) {
+    for (let off = 0; off < 600; off++) {
+      const key = monthKeyFromOffset(off);
+      if (key < firstKey) break;
+      const count = typeof bilanRecordCountIn === 'function' ? bilanRecordCountIn(hist, key) : recordsForMonth(key).length;
+      trophyMonths.unshift({ key, label: SHORT_MONTHS[Number(key.slice(5, 7)) - 1], count });
+    }
   }
 
   // 4. Détecter les paliers : pour chaque exercice, sur ses 4 dernières séances réalisées
@@ -3365,6 +3371,12 @@ function analyzeMonthlyProgress(hist = statsHistory(), scope = currentStatsScope
 }
 
 // Bloc héros : indice de progression global + pastille « X % vs mois précédent »
+// « juillet 2026 » (1.7.68 : « depuis juillet 2026 » sous le total de trophées)
+function monthLabelLower(key) {
+  const M = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  return M[Number(key.slice(5, 7)) - 1] + ' ' + key.slice(0, 4);
+}
+
 function renderHero(stats) {
   const idx = document.getElementById('hero-index');
   const pill = document.getElementById('hero-pill');
@@ -3426,7 +3438,7 @@ function renderProgressAnalysis() {
   if (bilanDoneKeys(true).length) html += `<div class="bilan-all"><button type="button" class="link-btn" onclick="openAllBilans()">Tous les bilans</button></div>`; // 1.7.50
   html += `</div>`;
 
-  // 1.7.67 : Trophées — records battus chaque mois sur 6 mois (planche 25d) : total en grand, barres fines
+  // 1.7.67–1.7.68 : Trophées — records battus chaque mois depuis le début du périmètre (planche 25d) : total en grand, barres fines
   // dorées terminées par un trophée et le nombre au-dessus ; un mois sans record = petit rond gris et « 0 »
   if (analysis.trophyMonths && analysis.trophyMonths.length) {
     const tm = analysis.trophyMonths;
@@ -3434,8 +3446,8 @@ function renderProgressAnalysis() {
     const max = Math.max(1, ...tm.map(m => m.count));
     const aria = 'Trophées par mois : ' + tm.map(m => `${m.label} ${m.count}`).join(', ');
     html += `<div class="card trophy-card"><h3 class="analysis-section-title">Trophées</h3>
-      <div class="weight-current"><span class="weight-value" id="trophy-total">${total}</span><span class="weight-unit">en ${tm.length} mois</span></div>
-      <div class="trophy-chart" role="img" aria-label="${escapeHtml(aria)}"><div class="trophy-grid" aria-hidden="true"><span></span><span></span><span></span></div><div class="trophy-cols">`;
+      <div class="weight-current"><span class="weight-value" id="trophy-total">${total}</span><span class="weight-unit" id="trophy-since">${currentStatsScope() === 'all' ? 'tous programmes confondus' : 'depuis ' + monthLabelLower(tm[0].key)}</span></div>
+      <div class="trophy-chart" role="img" aria-label="${escapeHtml(aria)}"><div class="trophy-grid" aria-hidden="true"><span></span><span></span><span></span></div><div class="trophy-scroll" id="trophy-scroll"><div class="trophy-cols">`;
     tm.forEach(m => {
       const h = m.count ? Math.round(84 * m.count / max) : 0;
       html += `<div class="trophy-col${m.count ? '' : ' zero'}" data-month="${m.key}"><div class="trophy-bar">
@@ -3443,7 +3455,7 @@ function renderProgressAnalysis() {
         ${m.count ? `<span class="trophy-ico">${TROPHY_SVG}</span>` : '<span class="trophy-dot"></span>'}
         <span class="trophy-stem" style="height:${h}px"></span></div><span class="trophy-month">${m.label}</span></div>`;
     });
-    html += `</div></div></div>`;
+    html += `</div></div></div></div>`;
   }
 
   // 2. Records battus ce mois-ci
@@ -3528,6 +3540,9 @@ function renderProgressAnalysis() {
   }
 
   container.innerHTML = html;
+  // 1.7.68 : si les mois débordent, on arrive sur le mois en cours (à droite)
+  const ts = document.getElementById('trophy-scroll');
+  if (ts) ts.scrollLeft = ts.scrollWidth;
 }
 
 // ============================================================

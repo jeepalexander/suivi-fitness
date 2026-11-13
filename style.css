@@ -485,8 +485,11 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 .trophy-chart { position: relative; height: 168px; margin-top: 4px; }
 .trophy-grid { position: absolute; left: 0; right: 0; top: 24px; height: 110px; display: flex; flex-direction: column; justify-content: space-between; }
 .trophy-grid span { display: block; border-top: 1px solid var(--chart-grid); }
-.trophy-cols { position: absolute; inset: 0; display: flex; }
-.trophy-col { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; }
+/* 1.7.68 : autant de mois que depuis le début ; au-delà de la largeur, la rangée défile (arrivée sur le mois en cours) */
+.trophy-scroll { position: absolute; inset: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+.trophy-scroll::-webkit-scrollbar { display: none; }
+.trophy-cols { display: flex; height: 100%; min-width: 100%; }
+.trophy-col { flex: 1 0 48px; min-width: 48px; display: flex; flex-direction: column; align-items: center; }
 .trophy-bar { height: 134px; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
 .trophy-n { font-family: var(--font-display); font-weight: 700; font-size: 0.9375rem; line-height: 1; color: var(--text); margin-bottom: 4px; }
 .trophy-ico svg { display: block; width: 22px; height: 22px; fill: none; stroke: var(--trophy); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }

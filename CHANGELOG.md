@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.68] - 2026-11-13
+### 🏆 Trophées : mêmes chiffres que les bilans, depuis le début (co-auteur : Claude)
+- Chaque mois du graphique compte désormais les records **exactement comme le bilan du mois** (« x records » dans Historique › Bilans) : meilleure charge — ou meilleur temps pour le cardio et les exercices au temps — qui bat tout l'historique précédent, et seulement pour un exercice **déjà fait avant** (un premier passage n'est plus un trophée). Règle partagée : `bilanRecordCountIn` (`js/bilan.js`), sur le périmètre choisi en haut de Progression.
+- Le graphique part du **premier mois du périmètre** au lieu des 6 derniers mois ; sous le total : « depuis juillet 2026 » pour un programme, « tous programmes confondus » pour « Tous les programmes ».
+- Au-delà de la largeur de l'écran, la rangée de mois **défile** horizontalement et s'ouvre sur le mois en cours (aucun changement de style).
+- `test_trophees.py` : chaque mois comparé au bilan, libellé, historique de 14 mois (41 contrôles).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.68.
+
+---
+
 ## [1.7.67] - 2026-11-13
 ### 🏆 Carte « Trophées » dans Progression (co-auteur : Claude)
 - Nouvelle carte avant « Records battus ce mois-ci » : le **total de trophées** des 6 derniers mois en grand, « en 6 mois » en petit gris (même présentation que « Suivi cardio » et « Poids corporel »), puis un graphique en **barres fines dorées** terminées par un **trophée**, le **nombre au-dessus** et les **mois en abscisse**. Un mois sans record : petit rond gris et « 0 ». Aucun détail, rien à toucher.

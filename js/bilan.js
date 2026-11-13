@@ -35,11 +35,13 @@ function bilanDoneKeys(scoped) {
 
 // Records du mois : exercices dont la meilleure valeur du mois bat tout l'historique antérieur
 // (même règle que la fenêtre de fin de séance : charge, ou durée pour le cardio et les exercices au temps)
-function bilanRecordCount(key, scoped) {
-  const H = bilanHist(scoped);
+function bilanRecordCount(key, scoped) { return bilanRecordCountIn(bilanHist(scoped), key); }
+
+// 1.7.68 : même règle, sur un historique donné (graphique Trophées de Progression)
+function bilanRecordCountIn(H, key) {
   const before = H.filter(h => (h.date || '') < key + '-01');
   const best = {};
-  bilanSessions(key, scoped).forEach(h => (h.exercises || []).forEach(ex => {
+  H.filter(h => (h.date || '').startsWith(key)).forEach(h => (h.exercises || []).forEach(ex => {
     const mode = exMode(ex.name);
     const byTime = ex.cardio || mode === 'time';
     if (!byTime && mode !== 'weight') return;
