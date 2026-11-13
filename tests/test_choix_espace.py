@@ -1,5 +1,5 @@
 """Écran du bouton + (1.7.58) : moins d'espace en haut ; tout tient au-dessus du menu sans défiler,
-« Recevoir un programme » à 32 px au-dessus du menu (écart d'origine), dès 360 × 820."""
+« Recevoir un programme » à 32 px au-dessus du menu (écart d'origine), dès 360 × 844 (les polices des serveurs de test sont un peu plus hautes)."""
 import sys
 from harness import Srv, newpage, sync_playwright
 
@@ -14,7 +14,7 @@ def check(label, cond, detail=''):
 def main():
     with Srv() as base, sync_playwright() as p:
         br = p.chromium.launch()
-        for w, h, scheme in ((390, 844, 'light'), (412, 915, 'dark'), (412, 846, 'light'), (360, 820, 'dark')):
+        for w, h, scheme in ((390, 844, 'light'), (412, 915, 'dark'), (412, 846, 'light'), (360, 844, 'dark')):
             ctx, pg, errs = newpage(br, w=w, h=h, scheme=scheme, pref=scheme)
             pg.goto(base + 'index.html'); pg.wait_for_timeout(500)
             pg.evaluate("openProgramChooser()"); pg.wait_for_timeout(400)

@@ -4,7 +4,10 @@
 - Sur ce téléphone : le fichier, au même nom que sur le Drive, avec un message ; un partage refusé télécharge aussi,
   un partage fermé ou réussi ne télécharge rien.
 Google Identity et l'API Drive sont simulés (aucun appel réseau réel)."""
-import json, re, sys
+import json, os, re, sys, tempfile
+# Captures d'écran facultatives (dossier SHOTS_DIR, sinon le dossier temporaire)
+SHOTS = os.environ.get('SHOTS_DIR') or tempfile.gettempdir()
+os.makedirs(SHOTS, exist_ok=True)
 from harness import Srv, newpage, sync_playwright
 from drive_mock import FakeDrive
 
@@ -79,14 +82,14 @@ with Srv() as url, sync_playwright() as p:
         rows = open_save(pg)
         ok(f'[{scheme}] Drive : deux choix, « Sur Google Drive » choisi par défaut',
            [r[0] for r in rows] == ['drive', 'file'] and rows[0][1] == 'true', rows)
-        if scheme == 'light': pg.screenshot(path='/home/claude/shots/sauvegarder-volet.png')
+        if scheme == 'light': pg.screenshot(path=os.path.join(SHOTS, 'sauvegarder-volet.png'))
         ok(f'[{scheme}] bouton « Sauvegarder sur le Drive »', pg.inner_text('#backup-save-go') == 'Sauvegarder sur le Drive')
         pg.click('#backup-save-go'); pg.wait_for_timeout(1500)
         ok(f'[{scheme}] Drive : une nouvelle version envoyée alors que rien n\'a changé', drive.posts == before + 1, (before, drive.posts))
         ok(f'[{scheme}] Drive : nom fitness-backup-AAAA-MM-JJ-HH-MM-SS.json', drive.post_names and NAME_RE.match(drive.post_names[-1]), drive.post_names)
         t = toast(pg)
         ok(f'[{scheme}] message : envoyée sur Google Drive, nom et dossier', 'Sauvegarde envoyée sur Google Drive' in t and drive.post_names[-1] in t and 'MON CARNET DE SALLE' in t, t)
-        if scheme == 'light': pg.screenshot(path='/home/claude/shots/sauvegarder-drive.png')
+        if scheme == 'light': pg.screenshot(path=os.path.join(SHOTS, 'sauvegarder-drive.png'))
         # choix « Sur ce téléphone » avec Drive connecté
         open_save(pg); pg.click('.sheet .backup-item.file'); pg.wait_for_timeout(150)
         ok(f'[{scheme}] choisir « Sur ce téléphone » : bouton « Télécharger le fichier »', pg.inner_text('#backup-save-go') == 'Télécharger le fichier')
