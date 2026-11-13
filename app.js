@@ -315,10 +315,16 @@ function renderWallpaperGrid() {
   if (sel) { const li = sel.parentElement; grid.scrollLeft = Math.max(0, li.offsetLeft - grid.offsetLeft - parseFloat(getComputedStyle(grid).paddingLeft || 0)); }
 }
 
-// Inviter quelqu'un (1.7.21) : QR code vers l'adresse de l'application (celle de cette page : dev ou production).
+// Inviter quelqu'un (1.7.21) : QR code vers l'adresse de l'application.
 // La personne installe l'app sur son téléphone et la connecte à son propre Google Drive.
+// 1.7.64 : depuis la version de test (…/suivi-fitness/dev/), les invitations et les programmes partagés
+// mènent toujours à la production (…/suivi-fitness/).
+function isTestVersion() { return /\/dev\/(index\.html)?$/.test(location.pathname); }
 function appShareUrl() {
-  return new URL('./', location.href).href;
+  const u = new URL('./', location.href);
+  if (/\/dev\/$/.test(u.pathname)) u.pathname = u.pathname.replace(/dev\/$/, '');
+  u.hash = ''; u.search = '';
+  return u.href;
 }
 
 function inviteQrSvg(url) {
@@ -1970,8 +1976,11 @@ async function submitWorkout(e) {
 
   saveState();
 
-  // Sauvegarde automatique Google Drive (si connecté) : fichier de sauvegarde complète mis à jour
-  backupToDrive();
+  // Sauvegarde automatique Google Drive (si connecté) : fichier de sauvegarde complète mis à jour.
+  // 1.7.63 : après une nouvelle séance, l'envoi (et une éventuelle reconnexion à Google, qui quitte l'application)
+  // attend le « OK » de la fenêtre de fin de séance, pour ne pas la faire disparaître avant qu'on l'ait lue.
+  if (isEditing) backupToDrive();
+  else finishPendingBackup = true;
 
   // Actualise la bannière de déload en temps réel
   displayDeloadNotificationIfNeeded();
@@ -1983,7 +1992,7 @@ async function submitWorkout(e) {
   } else {
     // Fin de séance (1.7.27) : fenêtre « Bravo ! » ; les éventuels avertissements suivent en message
     openFinishDialog(entry, previousEntry, records);
-    const notes = (weighNotice + driveSaveNotice()).replace(/^\n• /, '').replace(/\n• /g, '\n');
+    const notes = (weighNotice + driveSaveNotice(true)).replace(/^\n• /, '').replace(/\n• /g, '\n');
     if (notes) showToast(notes);
   }
 
@@ -2050,7 +2059,7 @@ function openFinishDialog(entry, previous, records) {
       <p class="finish-rec-title"><span>Nouveau record</span>${TROPHY_SVG}</p>
       ${records.map(r => `<p class="finish-rec">${escapeHtml(r.name)}, <b>${escapeHtml(r.value)}</b></p>`).join('')}`;
   }
-  html += `<button type="button" class="btn finish-ok" onclick="closeFinishDialog()">OK</button>`;
+  html += `<button type="button" class="btn finish-ok" onclick="finishDialogOk()">OK</button>`;
   const overlay = document.createElement('div');
   overlay.id = 'finish-overlay';
   overlay.className = 'finish-overlay';
@@ -2063,6 +2072,15 @@ function openFinishDialog(entry, previous, records) {
 function closeFinishDialog() {
   const overlay = document.getElementById('finish-overlay');
   if (overlay) overlay.remove();
+}
+
+// 1.7.63 : « OK » de la fenêtre de fin de séance → la sauvegarde Drive de la séance part maintenant
+// (reconnexion à Google comprise si l'accès a expiré). Sans « OK » (application fermée), elle part au
+// prochain lancement ou avec la prochaine séance, comme une sauvegarde en attente.
+let finishPendingBackup = false;
+function finishDialogOk() {
+  closeFinishDialog();
+  if (finishPendingBackup) { finishPendingBackup = false; backupToDrive(); }
 }
 
 document.addEventListener('submit', function(e) {
@@ -4487,9 +4505,10 @@ async function restoreDriveBackup(file) {
 
 // Ligne ajoutée au message « Séance enregistrée » quand l'accès Google a expiré dans l'application
 // installée : la reconnexion se lance toute seule juste après (voir backupToDrive).
-function driveSaveNotice() {
+function driveSaveNotice(afterOk) {
   if (isDriveWanted() && !getDriveToken() && isInstalledApp()) {
-    return '\n• Google Drive : accès expiré, reconnexion automatique…';
+    return afterOk ? '\n• Google Drive : accès expiré, reconnexion automatique après « OK »'
+      : '\n• Google Drive : accès expiré, reconnexion automatique…';
   }
   return '';
 }

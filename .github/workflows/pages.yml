@@ -1,0 +1,49 @@
+# Publication GitHub Pages (1.7.64, co-auteur : Claude)
+#   main -> https://jeepalexander.github.io/suivi-fitness/      (production, personnes invitées)
+#   dev  -> https://jeepalexander.github.io/suivi-fitness/dev/  (version de test)
+# Réglage nécessaire : Settings › Pages › Source = « GitHub Actions ».
+# Un envoi sur dev relance cette publication par dev-pages.yml (le déploiement part toujours de main).
+name: Publier le site (production + test)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: main
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          path: dev
+      - name: Assembler le site
+        run: python3 main/tools/assembler_site.py main dev site
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

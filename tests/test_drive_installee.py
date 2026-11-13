@@ -143,7 +143,11 @@ with Srv() as base, sync_playwright() as p:
     ctx, pg, log = run(br, base, seeds=[EXPIRED, FOLDER], installed=True)
     pg.wait_for_timeout(1200)
     n_before = len(json.loads(ls(pg, 'h49_state'))['history'])
-    save_form(pg); pg.wait_for_timeout(6000)
+    save_form(pg); pg.wait_for_timeout(1500)
+    # 1.7.63 : la reconnexion attend le « OK » de la fenêtre de fin de séance
+    check("installée + accès expiré : avant « OK », aucune reconnexion et la fenêtre de fin reste affichée",
+          not log['auth'] and pg.evaluate("!!document.getElementById('finish-overlay')"), f"{len(log['auth'])} redirection(s)")
+    pg.evaluate("finishDialogOk()"); pg.wait_for_timeout(5000)
     saved = pg.evaluate("JSON.parse(sessionStorage.getItem('__tl')||'[]')")
     check("installée + accès expiré : un message annonce la reconnexion automatique", any('Google Drive : accès expiré, reconnexion automatique' in d for d in saved), str(saved[-1:])[:160])
     check("installée + accès expiré : la reconnexion part toute seule (aucune question, aucun appui)", len(log['auth']) == 1 and not any('Reconnecter' in d for d in log['dialogs']), f"{len(log['auth'])} redirection(s)")
@@ -155,7 +159,7 @@ with Srv() as base, sync_playwright() as p:
     # Google refuse au retour : une seule tentative, pas de boucle
     ctx, pg, log = run(br, base, seeds=[EXPIRED, FOLDER], installed=True, auth_error=True)
     pg.wait_for_timeout(1200)
-    save_form(pg); pg.wait_for_timeout(5000)
+    save_form(pg); pg.wait_for_timeout(300); pg.evaluate("finishDialogOk()"); pg.wait_for_timeout(5000)
     pg.evaluate("state.history[0].tonnage += 2; saveState(); backupToDrive()"); pg.wait_for_timeout(2500)
     check("Google refuse au retour : une seule redirection, modifications gardées en attente, raison affichée",
           len(log['auth']) == 1 and json.loads(ls(pg, 'h49_drive_token'))['access_token'] != 'tokR' and pg.evaluate("driveNeedsBackup()") and 'Connexion Google refusée' in pg.evaluate("document.getElementById('drive-status').textContent"),
@@ -165,7 +169,7 @@ with Srv() as base, sync_playwright() as p:
     # navigateur : renouvellement silencieux par la fenêtre, pas de redirection ni de mention dans le message
     ctx, pg, log = run(br, base, seeds=[EXPIRED, FOLDER], installed=False)
     pg.wait_for_timeout(1200)
-    save_form(pg); pg.wait_for_timeout(3000)
+    save_form(pg); pg.wait_for_timeout(300); pg.evaluate("finishDialogOk()"); pg.wait_for_timeout(3000)
     saved = pg.evaluate("JSON.parse(sessionStorage.getItem('__tl')||'[]')")
     check("navigateur + accès expiré : renouvellement par la fenêtre, aucune redirection, aucun message de reconnexion, séance envoyée",
           not log['auth'] and pg.evaluate("window.__reqs.length") == 1 and not any('reconnexion' in d for d in saved) and len(sent(log, 'POST', '/upload/drive/v3/files')) == 1)
