@@ -128,6 +128,8 @@
   --warn-icon: #92400E;  --warn-icon-bg: #FDF0DC;   /* volet d'attention, « À compléter » */
   --info: #1B6FD8;       --info-icon-bg: #E3EEFB;   /* message d'information */
   --record: #B45309;                         /* coupe « Nouveau record » */
+  --trophy: #E0A800;                         /* 1.7.67 : trophées (carte « Trophées » de Progression) */
+  --trophy-stem: rgba(224, 168, 0, 0.35);
   --flame: #EA580C;                          /* flamme de l'échauffement */
   --qr-bg: #FFFFFF;                          /* fond du QR code (toujours blanc pour être lisible) */
   --sand-ico: rgba(74, 56, 24, 0.1);         /* boutons ronds sur la tuile sable */
@@ -145,6 +147,8 @@
 
 /* Thème sombre : noir profond, encre blanc cassé */
 :root[data-theme="dark"] {
+  --trophy: #F2C14E;                         /* 1.7.67 : trophées, plus clair sur fond sombre */
+  --trophy-stem: rgba(242, 193, 78, 0.35);
   color-scheme: dark;
 
   --bg: #0E0E11;
@@ -477,6 +481,18 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 .bar-fill.type-C { background: var(--accent-c); }
 
 /* Records et paliers */
+/* 1.7.67 : Trophées — barres fines dorées terminées par un trophée (planche 25d) */
+.trophy-chart { position: relative; height: 168px; margin-top: 4px; }
+.trophy-grid { position: absolute; left: 0; right: 0; top: 24px; height: 110px; display: flex; flex-direction: column; justify-content: space-between; }
+.trophy-grid span { display: block; border-top: 1px solid var(--chart-grid); }
+.trophy-cols { position: absolute; inset: 0; display: flex; }
+.trophy-col { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; }
+.trophy-bar { height: 134px; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+.trophy-n { font-family: var(--font-display); font-weight: 700; font-size: 0.9375rem; line-height: 1; color: var(--text); margin-bottom: 4px; }
+.trophy-ico svg { display: block; width: 22px; height: 22px; fill: none; stroke: var(--trophy); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.trophy-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--neutral); opacity: 0.5; flex: none; }
+.trophy-stem { width: 3px; margin-top: -1px; border-radius: 2px; background: var(--trophy-stem); flex: none; }
+.trophy-month { margin-top: 8px; font-size: 0.75rem; color: var(--chart-tick); }
 .records-list, .plateaus-list { display: flex; flex-direction: column; gap: 8px; }
 .record-item, .plateau-item { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 68px; box-sizing: border-box; padding: 12px 16px; border-radius: var(--radius-field); font-size: 1rem; line-height: 1.35; }   /* même gélule pour records et paliers ; textes à la taille des dates de l'Historique (1.7.33) */   /* textes : taille des dates de l'Historique (1.7.33) */
 .record-item { background: var(--success-tint); }

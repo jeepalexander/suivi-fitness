@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.67] - 2026-11-13
+### 🏆 Carte « Trophées » dans Progression (co-auteur : Claude)
+- Nouvelle carte avant « Records battus ce mois-ci » : le **total de trophées** des 6 derniers mois en grand, « en 6 mois » en petit gris (même présentation que « Suivi cardio » et « Poids corporel »), puis un graphique en **barres fines dorées** terminées par un **trophée**, le **nombre au-dessus** et les **mois en abscisse**. Un mois sans record : petit rond gris et « 0 ». Aucun détail, rien à toucher.
+- Un trophée = un record battu, compté comme « Records battus ce mois-ci » (`recordsForMonth`, extrait de `analyzeMonthlyProgress`) ; même périmètre que le reste de la page (programme choisi en haut ou « Tous les programmes »).
+- Nouvelles couleurs : `--trophy` #E0A800 (sombre #F2C14E) et `--trophy-stem` (même or à 35 %).
+- Maquette : planche 25d. Nouveau test `test_trophees.py` (groupe `progression`, 390 et 360 px, clair et sombre, données construites).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.67.
+
+---
+
 ## [1.7.66] - 2026-11-13
 ### 🧪 Pastille « TEST » dans la version de test (co-auteur : Claude)
 - Dans la version de test (`…/suivi-fitness/dev/`), une pastille « TEST » s'affiche à côté de « MON CARNET DE SALLE », sur tous les écrans (`markTestVersion`, `.test-pill`, couleurs de la pastille Déload : `warn`, `warn-tint`, `warn-border`). Jamais en production.
