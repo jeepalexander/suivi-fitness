@@ -872,7 +872,6 @@ body:not([data-tab="programme"]) #app-wallpaper::after, body[data-pview="editor"
 :root[data-wallpaper="barre"] #app-wallpaper { background-image: url('wallpapers/barre.jpg'); background-position: center 55%; }
 :root[data-wallpaper="halteres"] #app-wallpaper { background-image: url('wallpapers/halteres.jpg'); background-position: center 45%; }
 :root[data-wallpaper="kettlebell"] #app-wallpaper { background-image: url('wallpapers/kettlebell.jpg'); background-position: center 45%; }
-:root[data-wallpaper="studio"] #app-wallpaper { background-image: url('wallpapers/studio.jpg'); background-position: center 40%; }
 :root[data-wallpaper="ratelier"] #app-wallpaper { background-image: url('wallpapers/ratelier.jpg'); background-position: center 60%; }
 :root[data-wallpaper="squat"] #app-wallpaper { background-image: url('wallpapers/squat.jpg'); background-position: center 40%; }
 :root[data-wallpaper="poigne"] #app-wallpaper { background-image: url('wallpapers/poigne.jpg'); background-position: center 40%; }
@@ -880,7 +879,6 @@ body:not([data-tab="programme"]) #app-wallpaper::after, body[data-pview="editor"
 :root[data-wallpaper="cuivre"] #app-wallpaper { background-image: url('wallpapers/cuivre.jpg'); background-position: center 50%; }
 :root[data-wallpaper="geometrie"] #app-wallpaper { background-image: url('wallpapers/geometrie.jpg'); background-position: center 50%; }
 :root[data-wallpaper="salle"] #app-wallpaper { background-image: url('wallpapers/salle.jpg'); background-position: right center; }
-:root[data-wallpaper="poulie"] #app-wallpaper { background-image: url('wallpapers/poulie.jpg'); background-position: 55% center; }
 :root[data-wallpaper="cordes"] #app-wallpaper { background-image: url('wallpapers/cordes.jpg'); background-position: center 50%; }
 :root[data-wallpaper="fente"] #app-wallpaper { background-image: url('wallpapers/fente.jpg'); background-position: 45% center; }
 :root[data-wallpaper="rack"] #app-wallpaper { background-image: url('wallpapers/rack.jpg'); background-position: center 50%; }

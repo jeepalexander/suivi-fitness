@@ -24,7 +24,7 @@
         var m = document.querySelector('meta[name="theme-color"]');
         if (m) m.setAttribute('content', dark ? '#0E0E11' : '#FFFFFF');
         var w = localStorage.getItem('h49_wallpaper');
-        if (/^(course|barre|halteres|kettlebell|studio|ratelier|squat|poigne|disques|cuivre|geometrie|salle|poulie|cordes|fente|rack|silhouette|escaliers|traction)$/.test(w || '')) document.documentElement.setAttribute('data-wallpaper', w);
+        if (/^(course|barre|halteres|kettlebell|ratelier|squat|poigne|disques|cuivre|geometrie|salle|cordes|fente|rack|silhouette|escaliers|traction)$/.test(w || '')) document.documentElement.setAttribute('data-wallpaper', w);
       } catch (e) {}
     })();
   </script>

@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.56] - 2026-11-13
+### 🖼️ Fonds d'écran : Studio et Poulie retirés, Traction déplacé (co-auteur : Claude)
+- Les fonds Studio et Poulie sont retirés (images supprimées du dépôt et du cache). Il reste 17 images, plus « Aucun ».
+- Traction se place juste après Salle blanche.
+- Si Studio ou Poulie était choisi, l'app revient au fond blanc (« Aucun ») : une valeur inconnue est ignorée, comme avant.
+- Maquette : planche 29b. Tests : `test_fond_ecran.py` (18 choix, 17 vignettes, 34 images en cache).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.56.
+
+---
+
 ## [1.7.55] - 2026-11-13
 ### 🖼️ 10 nouveaux fonds d'écran (co-auteur : Claude)
 - Réglages › Fond d'écran propose 19 images (plus « Aucun ») : Cuivre, Géométrie, Salle blanche, Poulie, Cordes, Fente, Rack, Silhouette, Escaliers et Traction s'ajoutent après Disques.

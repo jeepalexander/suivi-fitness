@@ -241,7 +241,7 @@ function initTheme() {
   }
 }
 
-// Fond d'écran (1.7.7, 10 fonds ajoutés en 1.7.55) : préférence de l'appareil (h49_wallpaper), hors des données exportées, comme le thème.
+// Fond d'écran (1.7.7, 10 fonds ajoutés en 1.7.55, Studio et Poulie retirés en 1.7.56) : préférence de l'appareil (h49_wallpaper), hors des données exportées, comme le thème.
 // Aucun par défaut. Le script de index.html pose data-wallpaper avant le premier affichage.
 const WALLPAPER_KEY = 'h49_wallpaper';
 const WALLPAPERS = [
@@ -249,7 +249,6 @@ const WALLPAPERS = [
   { id: 'barre', name: 'Barre', pos: 'center 55%' },
   { id: 'halteres', name: 'Haltères', pos: 'center 45%' },
   { id: 'kettlebell', name: 'Kettlebell', pos: 'center 45%' },
-  { id: 'studio', name: 'Studio', pos: 'center 40%' },
   { id: 'ratelier', name: 'Râtelier', pos: 'center 60%' },
   { id: 'squat', name: 'Squat', pos: 'center 40%' },
   { id: 'poigne', name: 'Poigne', pos: 'center 40%' },
@@ -257,13 +256,12 @@ const WALLPAPERS = [
   { id: 'cuivre', name: 'Cuivre', pos: 'center 50%' },
   { id: 'geometrie', name: 'Géométrie', pos: 'center 50%' },
   { id: 'salle', name: 'Salle blanche', pos: 'right center' },
-  { id: 'poulie', name: 'Poulie', pos: '55% center' },
+  { id: 'traction', name: 'Traction', pos: '75% center' },
   { id: 'cordes', name: 'Cordes', pos: 'center 50%' },
   { id: 'fente', name: 'Fente', pos: '45% center' },
   { id: 'rack', name: 'Rack', pos: 'center 50%' },
   { id: 'silhouette', name: 'Silhouette', pos: 'center 40%' },
   { id: 'escaliers', name: 'Escaliers', pos: '45% center' },
-  { id: 'traction', name: 'Traction', pos: '75% center' },
   { id: 'none', name: 'Aucun' }
 ];
 
