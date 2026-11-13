@@ -241,7 +241,7 @@ function initTheme() {
   }
 }
 
-// Fond d'écran (1.7.7) : préférence de l'appareil (h49_wallpaper), hors des données exportées, comme le thème.
+// Fond d'écran (1.7.7, 10 fonds ajoutés en 1.7.55) : préférence de l'appareil (h49_wallpaper), hors des données exportées, comme le thème.
 // Aucun par défaut. Le script de index.html pose data-wallpaper avant le premier affichage.
 const WALLPAPER_KEY = 'h49_wallpaper';
 const WALLPAPERS = [
@@ -254,6 +254,16 @@ const WALLPAPERS = [
   { id: 'squat', name: 'Squat', pos: 'center 40%' },
   { id: 'poigne', name: 'Poigne', pos: 'center 40%' },
   { id: 'disques', name: 'Disques', pos: 'center 50%' },
+  { id: 'cuivre', name: 'Cuivre', pos: 'center 50%' },
+  { id: 'geometrie', name: 'Géométrie', pos: 'center 50%' },
+  { id: 'salle', name: 'Salle blanche', pos: 'right center' },
+  { id: 'poulie', name: 'Poulie', pos: '55% center' },
+  { id: 'cordes', name: 'Cordes', pos: 'center 50%' },
+  { id: 'fente', name: 'Fente', pos: '45% center' },
+  { id: 'rack', name: 'Rack', pos: 'center 50%' },
+  { id: 'silhouette', name: 'Silhouette', pos: 'center 40%' },
+  { id: 'escaliers', name: 'Escaliers', pos: '45% center' },
+  { id: 'traction', name: 'Traction', pos: '75% center' },
   { id: 'none', name: 'Aucun' }
 ];
 

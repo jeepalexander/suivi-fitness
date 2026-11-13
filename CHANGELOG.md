@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.55] - 2026-11-13
+### 🖼️ 10 nouveaux fonds d'écran (co-auteur : Claude)
+- Réglages › Fond d'écran propose 19 images (plus « Aucun ») : Cuivre, Géométrie, Salle blanche, Poulie, Cordes, Fente, Rack, Silhouette, Escaliers et Traction s'ajoutent après Disques.
+- Images au format des fonds existants (1000 px de large au plus, vignettes de 240 px), cadrées sur leur sujet, avec les mêmes voiles en clair et en sombre. Elles sont mises en cache par le service worker (environ 1,4 Mo de plus, disponibles hors connexion).
+- La rangée de vignettes se charge au fil du défilement, comme avant.
+- Maquette : planche 29b. Tests : `test_fond_ecran.py` (20 choix, les 19 vignettes chargées en faisant défiler la rangée, 38 images en cache).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.55.
+
+---
+
 ## [1.7.54] - 2026-11-13
 ### 🖼️ Icône de l'application agrandie (co-auteur : Claude)
 - Le disque de 10 kg occupe 8 % de place en plus dans l'icône : la marge transparente autour est réduite, rien n'est coupé (ressort compris).

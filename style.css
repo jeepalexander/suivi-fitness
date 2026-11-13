@@ -877,6 +877,16 @@ body:not([data-tab="programme"]) #app-wallpaper::after, body[data-pview="editor"
 :root[data-wallpaper="squat"] #app-wallpaper { background-image: url('wallpapers/squat.jpg'); background-position: center 40%; }
 :root[data-wallpaper="poigne"] #app-wallpaper { background-image: url('wallpapers/poigne.jpg'); background-position: center 40%; }
 :root[data-wallpaper="disques"] #app-wallpaper { background-image: url('wallpapers/disques.jpg'); background-position: center 50%; }
+:root[data-wallpaper="cuivre"] #app-wallpaper { background-image: url('wallpapers/cuivre.jpg'); background-position: center 50%; }
+:root[data-wallpaper="geometrie"] #app-wallpaper { background-image: url('wallpapers/geometrie.jpg'); background-position: center 50%; }
+:root[data-wallpaper="salle"] #app-wallpaper { background-image: url('wallpapers/salle.jpg'); background-position: right center; }
+:root[data-wallpaper="poulie"] #app-wallpaper { background-image: url('wallpapers/poulie.jpg'); background-position: 55% center; }
+:root[data-wallpaper="cordes"] #app-wallpaper { background-image: url('wallpapers/cordes.jpg'); background-position: center 50%; }
+:root[data-wallpaper="fente"] #app-wallpaper { background-image: url('wallpapers/fente.jpg'); background-position: 45% center; }
+:root[data-wallpaper="rack"] #app-wallpaper { background-image: url('wallpapers/rack.jpg'); background-position: center 50%; }
+:root[data-wallpaper="silhouette"] #app-wallpaper { background-image: url('wallpapers/silhouette.jpg'); background-position: center 40%; }
+:root[data-wallpaper="escaliers"] #app-wallpaper { background-image: url('wallpapers/escaliers.jpg'); background-position: 45% center; }
+:root[data-wallpaper="traction"] #app-wallpaper { background-image: url('wallpapers/traction.jpg'); background-position: 75% center; }
 /* Page Fond d'écran (1.7.19) : voile de l'accueil Programmes, pour voir le fond choisi */
 body[data-tab="fond"] #app-wallpaper::after { background: var(--veil-home); }
 :root[data-wallpaper] header, :root[data-wallpaper] .ed-row { background: transparent; }
