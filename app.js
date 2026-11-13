@@ -4581,11 +4581,32 @@ function confirmBackupSave() {
   closeSheet();
   if (sel === 'drive') saveBackupToDriveNow(); else exportData();
 }
+// 1.7.62 : accès expiré dans l'application installée → reconnexion forcée, comme à l'enregistrement d'une séance ;
+// la nouvelle version part au retour de Google (demande gardée 10 min dans DRIVE_FORCE_PENDING_KEY).
+const DRIVE_FORCE_PENDING_KEY = 'h49_drive_force_pending';
+function consumeDriveForcePending() {
+  let t = 0;
+  try { t = Number(localStorage.getItem(DRIVE_FORCE_PENDING_KEY) || 0); localStorage.removeItem(DRIVE_FORCE_PENDING_KEY); } catch (e) { return false; }
+  return t > 0 && Date.now() - t < 600000;
+}
+// Au démarrage ou au retour dans l'application : la sauvegarde demandée avant la reconnexion, sinon l'envoi habituel
+function driveSyncOnReturn() {
+  if (getDriveToken() && consumeDriveForcePending()) { saveBackupToDriveNow(); return true; }
+  syncDriveBackup();
+  return false;
+}
 async function saveBackupToDriveNow() {
   if (!getDriveToken()) {
-    // Accès expiré : renouvellement silencieux quand Google le permet (navigateur), sinon on le dit
+    // Accès expiré : renouvellement silencieux quand Google le permet (navigateur)
     let renewed = false;
     try { renewed = await renewDriveToken(); } catch (e) { renewed = false; }
+    if ((!renewed || !getDriveToken()) && isInstalledApp() && isDriveWanted()) {
+      // Application installée : on se reconnecte tout de suite ; la sauvegarde part au retour
+      try { localStorage.setItem(DRIVE_FORCE_PENDING_KEY, String(Date.now())); } catch (e) { /* ignoré */ }
+      showToast('Connexion Google expirée : reconnexion en cours. La sauvegarde partira sur le Drive au retour dans l’application.', 6000);
+      setTimeout(connectDriveByRedirect, DRIVE_CONNECT_DELAY_MS);
+      return;
+    }
     if (!renewed || !getDriveToken()) {
       showToast('Connexion Google expirée : rien n’a été envoyé. Touche «\u00a0Reconnecter maintenant\u00a0» dans Réglages, puis recommence.', 8000);
       updateDriveUI();
@@ -4800,20 +4821,22 @@ async function initApp() {
   const driveReturn = handleDriveRedirectReturn();
   setTimeout(() => {
     initDriveTokenClient(); updateDriveUI();
-    syncDriveBackup();
+    const forcedSave = driveSyncOnReturn(); // 1.7.62 : sauvegarde demandée par « Sauvegarder » avant la reconnexion
     if (isDriveConnected() && !getDriveAccount()) fetchDriveAccount();
-    // on revient sur Réglages pour voir le résultat de la connexion (ou on reprend la restauration de programmes demandée)
-    if (driveReturn && !(driveReturn === 'ok' && resumeProgramRestoreIfPending())) switchTab('reglages');
+    // on revient sur Réglages pour voir le résultat de la connexion (ou on reprend la restauration de programmes demandée ;
+    // ou sur l'Historique quand la reconnexion venait de « Sauvegarder »)
+    if (driveReturn && forcedSave) switchTab('historique');
+    else if (driveReturn && !(driveReturn === 'ok' && resumeProgramRestoreIfPending())) switchTab('reglages');
   }, 800);
   // Jeton écrit par un autre onglet (connexion faite dans Chrome pendant que l'application plein écran attend)
   window.addEventListener('storage', (e) => {
-    if (e.key === DRIVE_TOKEN_KEY || e.key === DRIVE_WANTED_KEY) { updateDriveUI(); if (isDriveConnected()) { syncDriveBackup(); if (!getDriveAccount()) fetchDriveAccount(); } }
+    if (e.key === DRIVE_TOKEN_KEY || e.key === DRIVE_WANTED_KEY) { updateDriveUI(); if (isDriveConnected()) { driveSyncOnReturn(); if (!getDriveAccount()) fetchDriveAccount(); } }
   });
   // Retour dans l'application (ex. après une connexion faite dans un onglet voisin) : on relit l'état de Drive
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) return;
     updateDriveUI();
-    if (isDriveConnected()) { syncDriveBackup(); if (!getDriveAccount()) fetchDriveAccount(); }
+    if (isDriveConnected()) { driveSyncOnReturn(); if (!getDriveAccount()) fetchDriveAccount(); }
   });
   const saved = localStorage.getItem('h49_state');
   if (saved) {

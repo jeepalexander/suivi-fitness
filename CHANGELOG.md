@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.62] - 2026-11-13
+### 💾 Sauvegarder sur le Drive : reconnexion forcée si l'accès a expiré (co-auteur : Claude)
+- Dans l'application installée, quand l'accès Google a expiré, « Sauvegarder › Sur Google Drive » lance tout de suite la reconnexion, comme l'enregistrement d'une séance (message « Connexion Google expirée : reconnexion en cours… »). La demande est gardée 10 minutes (`h49_drive_force_pending`) : au retour de Google, une nouvelle version part sur le Drive, même sans changement, l'Historique s'affiche avec le message « Sauvegarde envoyée sur Google Drive : … ». Elle n'est envoyée qu'une fois.
+- Contrairement à la reconnexion automatique après une séance, elle n'attend pas 2 minutes entre deux essais : c'est un appui explicite.
+- Dans le navigateur, le renouvellement silencieux reste tenté d'abord ; s'il échoue, le message renvoie vers Réglages comme avant.
+- Tests : `test_sauvegarde_fichier.py` (60 contrôles, dont l'application installée : reconnexion, envoi au retour, pas de doublon).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.62.
+
+---
+
 ## [1.7.61] - 2026-11-13
 ### 💾 « Sauvegarder » demande où enregistrer (co-auteur : Claude)
 - **Volet « Sauvegarder »** (Historique), dans le style de « Restaurer » : « Sur Google Drive » (nouvelle version maintenant, dans « MON CARNET DE SALLE ») ou « Sur ce téléphone » (fichier dans le dossier Téléchargements), puis « Sauvegarder sur le Drive » / « Télécharger le fichier » et « Annuler ». Le Drive est choisi par défaut s'il est connecté ; jamais connecté : seul « Sur ce téléphone » est proposé, avec « Se connecter à Google Drive ».

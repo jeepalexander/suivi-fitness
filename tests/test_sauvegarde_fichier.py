@@ -12,6 +12,8 @@ res = []
 NAME_RE = re.compile(r'^fitness-backup-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}\.json$')
 VALID = "if(!sessionStorage.getItem('seed')){localStorage.setItem('h49_drive_token', JSON.stringify({access_token:'tok1', expires_at: Date.now()+3600000}));localStorage.setItem('h49_drive_wanted','1');localStorage.setItem('h49_drive_folder_id','F1');sessionStorage.setItem('seed','1')}"
 EXPIRED = "if(!sessionStorage.getItem('seed')){localStorage.setItem('h49_drive_token', JSON.stringify({access_token:'old', expires_at: Date.now()-1000}));localStorage.setItem('h49_drive_wanted','1');sessionStorage.setItem('seed','1')}"
+INSTALLED = """(()=>{const mm=window.matchMedia.bind(window);
+window.matchMedia=q=>/display-mode:\\s*fullscreen/.test(q)?{matches:true,media:q,addEventListener(){},removeEventListener(){},addListener(){},removeListener(){}}:mm(q);})();"""
 NO_GOOGLE = "window.google={accounts:{oauth2:{initTokenClient(cfg){return {requestAccessToken(){ setTimeout(()=>cfg.error_callback&&cfg.error_callback({type:'popup_closed'}),20); }};},revoke(t,cb){if(cb)cb();}}}};"
 
 
@@ -108,6 +110,31 @@ with Srv() as url, sync_playwright() as p:
         t = toast(pg)
         ok(f'[{scheme}] accès expiré : rien envoyé, message « Reconnecter maintenant »', drive.posts == 0 and 'Connexion Google expirée' in t and 'Reconnecter maintenant' in t, (drive.posts, t))
         ok(f'[{scheme}] aucune erreur JavaScript (accès expiré)', not errs, errs)
+        ctx.close()
+
+        # --- Application installée, accès expiré : reconnexion forcée, la sauvegarde part au retour (1.7.62)
+        drive = FakeDrive(folder=True)
+        ctx, pg, errs = newpage(br, pref=scheme, scheme=scheme)
+        pg.add_init_script(INSTALLED); pg.add_init_script(NO_GOOGLE); pg.add_init_script(EXPIRED)
+        pg.route('**/www.googleapis.com/**', drive.handle)
+        pg.goto(url + 'index.html'); pg.wait_for_timeout(600)
+        pg.evaluate("connectDriveByRedirect = () => { window.__redir = (window.__redir || 0) + 1; }; 0")
+        open_save(pg)
+        pg.click('#backup-save-go'); pg.wait_for_timeout(1200)
+        t = toast(pg)
+        ok(f'[{scheme}] installée, accès expiré : reconnexion lancée tout de suite', pg.evaluate("window.__redir") == 1 and drive.posts == 0, pg.evaluate("window.__redir"))
+        ok(f'[{scheme}] installée : message « reconnexion en cours »', 'reconnexion en cours' in t, t)
+        ok(f'[{scheme}] installée : demande de sauvegarde gardée', bool(pg.evaluate("localStorage.getItem('h49_drive_force_pending')")))
+        # Retour de Google : jeton valide, l'application se recharge
+        pg.evaluate("localStorage.setItem('h49_drive_token', JSON.stringify({access_token:'tok2', expires_at: Date.now()+3600000})); localStorage.setItem('h49_drive_folder_id','F1')")
+        pg.reload(); pg.wait_for_timeout(2500)
+        t = toast(pg)
+        ok(f'[{scheme}] au retour : nouvelle version envoyée, même sans changement', drive.posts == 1 and NAME_RE.match(drive.post_names[-1]), drive.post_names)
+        ok(f'[{scheme}] au retour : message « Sauvegarde envoyée sur Google Drive »', 'Sauvegarde envoyée sur Google Drive' in t, t)
+        ok(f'[{scheme}] au retour : demande effacée', not pg.evaluate("localStorage.getItem('h49_drive_force_pending')"))
+        pg.reload(); pg.wait_for_timeout(2000)
+        ok(f'[{scheme}] rechargement suivant : pas d\'envoi en double', drive.posts == 1, drive.posts)
+        ok(f'[{scheme}] aucune erreur JavaScript (installée)', not errs, errs)
         ctx.close()
     br.close()
 print(f"\n {sum(res)} / {len(res)} contrôles OK")
