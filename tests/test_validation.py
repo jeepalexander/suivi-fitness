@@ -34,7 +34,9 @@ with Srv() as url, sync_playwright() as p:
     h=hist(); last=h[-1] if h else None
     ok('séance partielle enregistrée',len(h)==n0+1 and last and len(last['exercises'])==1 and len(last['exercises'][0]['sets'])==2,json.dumps(last['exercises'])[:120] if last else '')
     ok('tonnage = séries cochées seulement',last and last['tonnage']==round(sum(s['weight']*s['reps'] for s in last['exercises'][0]['sets'])))
-    ok('message : séries enregistrées',any('Séries enregistrées : 2' in m for m in pg.evaluate("window.__toastLog||[]")))
+    ok('fenêtre de fin : « Séance terminée » et tonnage (1.7.27)','Séance' in pg.inner_text('#finish-title') and 'terminée' in pg.inner_text('#finish-title') and 'Tonnage' in pg.inner_text('#finish-overlay'))
+    pg.click('.finish-ok'); pg.wait_for_timeout(100)
+    ok('fenêtre de fin : OK la ferme',not pg.evaluate("!!document.getElementById('finish-overlay')"))
     # 5 modification : seules les séries enregistrées sont précochées
     idx=len(h)-1
     pg.evaluate("i=>{switchTab('historique');openSessionModal(i)}",idx)

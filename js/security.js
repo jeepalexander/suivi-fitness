@@ -43,7 +43,7 @@
       return originalImportData({ target: { files: [cleanFile] } });
     } catch (error) {
       console.error('Import sécurisé : fichier JSON invalide.', error);
-      alert('Fichier de sauvegarde invalide.');
+      appAlert('Fichier invalide', 'Ce fichier de sauvegarde est invalide.', 'warn');
     }
   };
 })();

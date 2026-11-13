@@ -38,7 +38,7 @@ with Srv() as base, sync_playwright() as p:
     br = p.chromium.launch()
     ctx, pg, errs = page(br, base, ua=UA, installed=True)
     pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(300)
-    pg.evaluate("connectGoogleDrive()")
+    pg.evaluate("connectGoogleDrive()"); pg.wait_for_timeout(700)  # lancée ~0,4 s après l'appui (1.7.4), comme la reconnexion automatique
     nav = pg.evaluate("window.__nav")
     u = nav[0] if nav else ''
     check("Android + application installée : la connexion part vers le vrai Chrome (intent://)", len(nav) == 1 and u.startswith('intent://accounts.google.com/o/oauth2/v2/auth?') and 'package=com.android.chrome' in u, u[:120])
@@ -57,7 +57,7 @@ with Srv() as base, sync_playwright() as p:
     pg2.evaluate("t=>{localStorage.setItem('h49_drive_token', JSON.stringify(t)); localStorage.setItem('h49_drive_wanted','1')}", tok)
     pg.wait_for_timeout(2500)
     st = pg.inner_text('#drive-status')
-    check("jeton écrit par un autre onglet : l'application plein écran passe à « Connecté » sans rien faire", st.startswith('Sauvegarde automatique activée') or 'jean@example.com' in st, st)
+    check("jeton écrit par un autre onglet : l'application plein écran passe à « Connecté » sans rien faire", st.startswith('Sauvegarde automatique') or 'jean@example.com' in st, st)
     ctx.close()
 
     # retour dans un onglet Chrome (hors plein écran) : message explicite
@@ -74,7 +74,7 @@ with Srv() as base, sync_playwright() as p:
     # Firefox (cas réel : application installée avec Firefox) : la connexion s'ouvre dans un onglet Firefox, jamais dans Chrome
     ctx, pg, errs = page(br, base, ua=UA_FF, installed=True)
     pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(300)
-    pg.evaluate("connectGoogleDrive()")
+    pg.evaluate("connectGoogleDrive()"); pg.wait_for_timeout(700)  # lancée ~0,4 s après l'appui (1.7.4), comme la reconnexion automatique
     nav, tabs = pg.evaluate("window.__nav"), pg.evaluate("window.__tabs")
     tu = tabs[0][0] if tabs else ''
     q = parse_qs(urlparse(tu).query)
@@ -88,13 +88,42 @@ with Srv() as base, sync_playwright() as p:
     check("retour OAuth dans l'onglet Firefox : jeton mémorisé, message « fermer cet onglet »", pg2.evaluate("(JSON.parse(localStorage.getItem('h49_drive_token'))||{}).access_token") == 'tokF' and 'fermer cet onglet' in pg2.inner_text('#toast'))
     pg.wait_for_timeout(1500)
     st = pg.inner_text('#drive-status')
-    check("Firefox : l'application plein écran reprend le jeton et passe à « Connecté »", st.startswith('Sauvegarde automatique activée') or 'jean@example.com' in st, st)
+    check("Firefox : l'application plein écran reprend le jeton et passe à « Connecté »", st.startswith('Sauvegarde automatique') or 'jean@example.com' in st, st)
     ctx.close()
     # onglet refusé par Firefox (ex. reconnexion automatique sans appui) : pas de page blanche, message clair
     ctx, pg, errs = page(br, base, ua=UA_FF, installed=True)
     pg.evaluate("window.__blockTabs=true; connectDriveByRedirect()"); pg.wait_for_timeout(400)
     check("Firefox, onglet bloqué : l'application reste affichée et invite à « Reconnecter maintenant »", pg.evaluate("window.__nav") == [] and 'Reconnecter maintenant' in pg.inner_text('#toast'), pg.inner_text('#toast'))
     check("aucune erreur JavaScript (Firefox)", not errs, errs)
+    ctx.close()
+    # 1.7.11 : accès expiré, Firefox installé -> valider un programme ne quitte pas l'application (pas d'onglet Firefox) ;
+    # la sauvegarde attend, l'enregistrement d'une séance garde la reconnexion automatique
+    ctx, pg, errs = page(br, base, ua=UA_FF, installed=True)
+    pg.evaluate("localStorage.setItem('h49_drive_wanted','1'); localStorage.removeItem('h49_drive_token'); localStorage.removeItem('h49_drive_auto_reconnect'); window.__tabs=[]; window.__nav=[]")
+    pg.evaluate("programDraft={id:null,kind:'program',name:'Test FF',sessions:[{name:'Haut',exercises:[{exId:exInfo('Dips').id,sets:3}]}],idx:0}; saveProgramDraft()")
+    pg.wait_for_timeout(900)
+    check("Firefox installé, accès expiré : valider un programme n'ouvre pas Firefox (aucun onglet, aucune navigation)", pg.evaluate("window.__tabs") == [] and pg.evaluate("window.__nav") == [] and any(x.get('name') == 'Test FF' for x in pg.evaluate("state.programs")), pg.evaluate("window.__tabs"))
+    pg.evaluate("activateProgram(state.programs.find(x=>x.name==='Test FF').id)"); pg.wait_for_timeout(900)
+    check("… ni activer un programme", pg.evaluate("window.__tabs") == [] and pg.evaluate("window.__nav") == [])
+    pg.evaluate("backupToDrive()"); pg.wait_for_timeout(900)
+    check("l'enregistrement d'une séance garde la reconnexion automatique (onglet Google)", len(pg.evaluate("window.__tabs")) == 1, pg.evaluate("window.__tabs"))
+    check("aucune erreur JavaScript (programme + Firefox)", not errs, errs)
+    ctx.close()
+    # 1.7.26 : Firefox (non reconnu comme application installée), accès expiré -> réactiver / valider un programme
+    # n'ouvre aucune fenêtre Google (pas de renouvellement) ; seul l'enregistrement d'une séance le tente
+    ctx, pg, errs = page(br, base, ua=UA_FF, installed=False)
+    pg.evaluate("localStorage.setItem('h49_drive_wanted','1'); localStorage.removeItem('h49_drive_token'); window.__renew=0; const _r=renewDriveToken; window.renewDriveToken=()=>{window.__renew++; return _r()}; 0")
+    pg.evaluate("programDraft={id:null,kind:'program',name:'Test FF2',sessions:[{name:'Haut',exercises:[{exId:exInfo('Dips').id,sets:3}]},{name:'Bas',exercises:[{exId:exInfo('Mollets').id,sets:3}]}],idx:0}; saveProgramDraft(false)")
+    pg.wait_for_timeout(600)
+    pg.evaluate("programDraft={id:null,kind:'program',name:'Test FF3',sessions:[{name:'Haut',exercises:[{exId:exInfo('Dips').id,sets:3}]},{name:'Bas',exercises:[{exId:exInfo('Mollets').id,sets:3}]}],idx:0}; saveProgramDraft(false)"); pg.wait_for_timeout(400)
+    pg.evaluate("activateProgram(state.programs.find(x=>x.name==='Test FF2').id)"); pg.wait_for_timeout(400)
+    pg.evaluate("activateProgram(state.programs.find(x=>x.name==='Test FF3').id)"); pg.wait_for_timeout(400)
+    paused = pg.evaluate("(state.programs.find(x=>x.name==='Test FF2')||{}).status")
+    pg.evaluate("activateProgram(state.programs.find(x=>x.name==='Test FF2').id)"); pg.wait_for_timeout(600)  # « Réactiver »
+    check("Firefox (navigateur), accès expiré : créer, activer, réactiver un programme -> aucune fenêtre Google", paused == 'paused' and pg.evaluate("window.__renew") == 0 and pg.evaluate("window.__tabs") == [] and pg.evaluate("window.__nav") == [], [pg.evaluate("window.__renew"), pg.evaluate("window.__tabs")])
+    pg.evaluate("backupToDrive()"); pg.wait_for_timeout(400)
+    check("… l'enregistrement d'une séance tente toujours le renouvellement", pg.evaluate("window.__renew") == 1)
+    check("aucune erreur JavaScript (Firefox navigateur)", not errs, errs)
     ctx.close()
     # Samsung Internet : même principe que Firefox (son propre onglet, pas Chrome)
     ctx, pg, errs = page(br, base, ua=UA_SAMSUNG, installed=True)

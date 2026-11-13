@@ -47,10 +47,12 @@ def run(br, base, drive, seeds=(), confirm=True, history=None):
 
 
 def restore_pick(pg, i=0, wait=2500):
-    """« Restaurer depuis Drive » puis « Restaurer » sur la i-ème sauvegarde de la liste ; renvoie le nombre de lignes."""
+    """Fenêtre « Restaurer une sauvegarde » (1.7.3) : choisir la i-ème sauvegarde Drive puis « Restaurer cette sauvegarde » ;
+    renvoie le nombre de sauvegardes Drive proposées."""
     pg.evaluate("restoreFromDrive()"); pg.wait_for_timeout(1200)
-    n = pg.evaluate("document.querySelectorAll('#drive-backups .drive-backup-row button').length")
+    n = pg.evaluate("document.querySelectorAll('.sheet .backup-item.drive').length")
     if n > i:
-        pg.evaluate("i=>document.querySelectorAll('#drive-backups .drive-backup-row button')[i].click()", i)
+        pg.evaluate("i=>{if(backupRestore.sel!==i)document.querySelectorAll('.sheet .backup-item.drive')[i].click()}", i)
+        pg.evaluate("document.getElementById('backup-restore-go').click()")
         pg.wait_for_timeout(wait)
     return n

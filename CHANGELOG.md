@@ -7,6 +7,619 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.62] - 2026-11-13
+### 💾 Sauvegarder sur le Drive : reconnexion forcée si l'accès a expiré (co-auteur : Claude)
+- Dans l'application installée, quand l'accès Google a expiré, « Sauvegarder › Sur Google Drive » lance tout de suite la reconnexion, comme l'enregistrement d'une séance (message « Connexion Google expirée : reconnexion en cours… »). La demande est gardée 10 minutes (`h49_drive_force_pending`) : au retour de Google, une nouvelle version part sur le Drive, même sans changement, l'Historique s'affiche avec le message « Sauvegarde envoyée sur Google Drive : … ». Elle n'est envoyée qu'une fois.
+- Contrairement à la reconnexion automatique après une séance, elle n'attend pas 2 minutes entre deux essais : c'est un appui explicite.
+- Dans le navigateur, le renouvellement silencieux reste tenté d'abord ; s'il échoue, le message renvoie vers Réglages comme avant.
+- Tests : `test_sauvegarde_fichier.py` (60 contrôles, dont l'application installée : reconnexion, envoi au retour, pas de doublon).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.62.
+
+---
+
+## [1.7.61] - 2026-11-13
+### 💾 « Sauvegarder » demande où enregistrer (co-auteur : Claude)
+- **Volet « Sauvegarder »** (Historique), dans le style de « Restaurer » : « Sur Google Drive » (nouvelle version maintenant, dans « MON CARNET DE SALLE ») ou « Sur ce téléphone » (fichier dans le dossier Téléchargements), puis « Sauvegarder sur le Drive » / « Télécharger le fichier » et « Annuler ». Le Drive est choisi par défaut s'il est connecté ; jamais connecté : seul « Sur ce téléphone » est proposé, avec « Se connecter à Google Drive ».
+- **Sur Google Drive** : une nouvelle version est envoyée tout de suite, même sans changement depuis le dernier envoi (`syncDriveBackup({ force: true })`), avec un message qui donne son nom. Accès Google expiré (renouvellement silencieux impossible), conflit avec une sauvegarde plus complète ou envoi impossible : rien n'est envoyé et le message le dit. Les 5 versions les plus récentes restent gardées.
+- **Sur ce téléphone** : même nom que sur le Drive, `fitness-backup-AAAA-MM-JJ-HH-MM-SS.json` (au lieu de `mon-carnet-de-salle-AAAA-MM-JJ.json`). Message de confirmation et repli sur le téléchargement inchangés (1.7.60).
+- Guillemets insécables dans les messages de sauvegarde.
+- Maquette : nouvelle planche 27c. Tests : `test_sauvegarde_fichier.py` (44 contrôles : sans Drive, Drive connecté, accès expiré ; clair et sombre).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.61.
+
+---
+
+## [1.7.60] - 2026-11-13
+### 🐛 « Sauvegarder » ne montrait rien (co-auteur : Claude)
+- **Cause** : l'app passe d'abord par le menu de partage du téléphone, mais Chrome sur Android refuse de partager un fichier `.json`. Elle repassait alors en téléchargement, sans aucun signe à l'écran.
+- **Correctif** : après le téléchargement, un message le confirme : « Sauvegarde téléchargée : « mon-carnet-de-salle-AAAA-MM-JJ.json », dans le dossier Téléchargements du téléphone. Pour la remettre : Historique › Restaurer › Choisir un fichier… ». Un partage refusé ou impossible télécharge aussi le fichier ; un partage fermé par l'usager ne fait rien de plus.
+- Nom du fichier : `mon-carnet-de-salle-AAAA-MM-JJ.json` (avant : la date seule), plus facile à retrouver.
+- Nouveau test `test_sauvegarde_fichier.py` (groupe `historique`, clair et sombre).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.60.
+
+---
+
+## [1.7.59] - 2026-11-13
+### ✨ Le même exercice plusieurs fois dans une séance (co-auteur : Claude)
+- **Éditeur** : dans « Ajouter un exercice », un exercice déjà présent n'est plus grisé. Sa mention verte devient « Déjà dans la séance · ajouter encore » et il se coche comme les autres ; il est ajouté en fin de séance, puis se déplace avec Monter / Descendre. Valable aussi pour le cardio (rameur au début et à la fin, par exemple). Pas de numéro sur les passages.
+- **Séance** : chaque passage est une ligne à part, avec ses séries, ses coches, ses charges et le chrono, à sa place dans l'ordre. Le brouillon (rechargement) garde chaque passage séparément.
+- **Charges proposées** : chaque passage reprend les charges du même passage la dernière fois (le 2ᵉ passage celles du 2ᵉ). Un passage jamais fait reprend celles du premier. « Dernière fois · … » suit la même règle.
+- **Historique** : la séance garde les passages séparés, dans l'ordre ; le rang du passage est enregistré (`occ`, absent pour le premier, donc les anciennes séances et sauvegardes restent lisibles). Modifier une ancienne séance rouvre chaque passage avec ses séries.
+- **Progression, records, paliers, bilan du mois** : les passages d'un même exercice sont additionnés (séries mises bout à bout, tonnage additionné, charge max = la meilleure) ; un seul record par exercice en fin de séance.
+- **Programme** : le nombre de séries fait est reporté sur le bon passage. Le partage par lien ou QR code transporte les doublons.
+- Maquette : planches 6 et 7. Nouveau test `test_doublons.py` (groupes `seance` et `programmes`, clair et sombre). Suite complète : 37 tests OK.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.59.
+
+---
+
+## [1.7.58] - 2026-11-13
+### 📐 Écran du bouton + : moins d'espace en haut (co-auteur : Claude)
+- **Cause trouvée** : l'écran « Choisis comment t'entraîner » était plus haut que l'écran du téléphone (environ 794 px pour 785 disponibles à 390 × 844). La page débordait, l'espace élastique qui cale les tuiles en bas était à son minimum, et « Recevoir un programme » finissait contre le menu tant qu'on ne faisait pas défiler.
+- **Correction** : 28 px de moins en haut. « Choisis comment t'entraîner » remonte juste sous la flèche retour (4 px au lieu de 20) et l'espace élastique n'a plus de minimum sur cet écran. Tout tient sans défiler dès 360 × 820 ; « Recevoir un programme » retrouve son écart d'origine, 32 px au-dessus du menu.
+- **Retiré** : la marge de 24 px ajoutée sous « Recevoir un programme » et la hauteur « visible » (`--app-h`) de la 1.7.57, qui n'étaient pas la cause. Le corps de page reprend `100dvh`.
+- Tests : `test_choix_espace.py` remplace `test_hauteur_visible.py` (groupe `style`).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.58.
+
+---
+
+## [1.7.57] - 2026-11-13
+### 📐 Hauteur visible en plein écran ; « Recevoir un programme » plus haut (co-auteur : Claude)
+- **Hauteur de la page** : elle suit maintenant la hauteur réellement visible (`--app-h`, mesurée par `window.innerHeight` au lancement, à chaque changement de taille et à la rotation), au lieu de `100dvh`. En plein écran, Chrome Android peut compter dans `100dvh` la bande des gestes d'Android : le bas de la page passait alors sous l'écran et les blocs calés en bas se rapprochaient du menu. `100dvh` reste la valeur de secours.
+- **Écran du bouton +** : « Recevoir un programme » remonte de 24 px ; il est à 56 px au-dessus du menu du bas (32 px avant), sur tous les écrans.
+- Maquette : planche 4. Nouveau test `test_hauteur_visible.py` (groupe `style` : hauteur suivie à 390, 360 et 412 px, clair et sombre, après redimensionnement ; écart de 56 px).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.57.
+
+---
+
+## [1.7.56] - 2026-11-13
+### 🖼️ Fonds d'écran : Studio et Poulie retirés, Traction déplacé (co-auteur : Claude)
+- Les fonds Studio et Poulie sont retirés (images supprimées du dépôt et du cache). Il reste 17 images, plus « Aucun ».
+- Traction se place juste après Salle blanche.
+- Si Studio ou Poulie était choisi, l'app revient au fond blanc (« Aucun ») : une valeur inconnue est ignorée, comme avant.
+- Maquette : planche 29b. Tests : `test_fond_ecran.py` (18 choix, 17 vignettes, 34 images en cache).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.56.
+
+---
+
+## [1.7.55] - 2026-11-13
+### 🖼️ 10 nouveaux fonds d'écran (co-auteur : Claude)
+- Réglages › Fond d'écran propose 19 images (plus « Aucun ») : Cuivre, Géométrie, Salle blanche, Poulie, Cordes, Fente, Rack, Silhouette, Escaliers et Traction s'ajoutent après Disques.
+- Images au format des fonds existants (1000 px de large au plus, vignettes de 240 px), cadrées sur leur sujet, avec les mêmes voiles en clair et en sombre. Elles sont mises en cache par le service worker (environ 1,4 Mo de plus, disponibles hors connexion).
+- La rangée de vignettes se charge au fil du défilement, comme avant.
+- Maquette : planche 29b. Tests : `test_fond_ecran.py` (20 choix, les 19 vignettes chargées en faisant défiler la rangée, 38 images en cache).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.55.
+
+---
+
+## [1.7.54] - 2026-11-13
+### 🖼️ Icône de l'application agrandie (co-auteur : Claude)
+- Le disque de 10 kg occupe 8 % de place en plus dans l'icône : la marge transparente autour est réduite, rien n'est coupé (ressort compris).
+- Concerne `icons/icon-192.png`, `icons/icon-512.png` (écran d'accueil Android, écran de lancement, onglet, page de présentation) et `icons/apple-touch-icon.png` (iPhone, toujours sur fond blanc). Recadrées depuis `icons/source/icon-source-1600.png`.
+- Maquette : planche 36.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.54.
+
+---
+
+## [1.7.53] - 2026-11-12
+### 🖼️ Nouvelle icône de l'application (co-auteur : Claude)
+- Nouvelle icône « disque de 10 kg » pour l'écran d'accueil, l'onglet du navigateur et la page de présentation.
+- Manifest : deux tailles, `icons/icon-192.png` et `icons/icon-512.png` (fond transparent ; Chrome Android la pose sur un disque blanc).
+- iPhone : `icons/apple-touch-icon.png` (180 px) posée sur fond blanc, car iOS remplirait la transparence en noir.
+- Image source en 1600 × 1600 conservée dans `icons/source/icon-source-1600.png` (non mise en cache).
+- L'ancienne `icons/app-icon.png` est retirée ; favicon ajouté à `index.html` ; les trois icônes sont mises en cache par le service worker.
+- Tests : `test_presentation.py` suit le nouveau fichier.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.53.
+
+---
+
+## [1.7.52] - 2026-11-12
+### ✨ Partager et recevoir un programme (co-auteur : Claude)
+- **Partager** : en bas de l'éditeur d'un programme ou d'une séance libre déjà enregistré, « Partager le programme » (au-dessus de « Supprimer »). Le volet propose « Envoyer le lien » (menu de partage du téléphone : WhatsApp, SMS, mail…) ou « Afficher le QR code » (à scanner face à face).
+- **Ce qui part** : le nom, le type, les séances, les exercices et leur nombre de séries, rien d'autre (ni historique, ni charges, ni Google Drive). Tout tient dans le lien (environ 250 caractères, compressé), sans serveur.
+- **Recevoir** : le lien ou le QR ouvre l'app sur la fenêtre « Programme reçu » (séances avec leurs pastilles, exercices et séries), avec « Ajouter à mes programmes » ou « Annuler ». Le programme rejoint « En mémoire » avec la mention « Reçu » jusqu'à sa première activation, sans changer le programme actif (il devient actif s'il n'y en a pas). Un nom déjà pris devient « Hypertrophie (2) ».
+- **Menu + → « Recevoir un programme »** : coller le lien reçu (il peut être au milieu d'un message), ou « Scanner un QR code » avec la caméra arrière dans l'app (lecteur intégré à Chrome ; bouton caché si le navigateur n'en a pas). La caméra s'arrête dès la lecture ou à l'annulation.
+- **Sécurité** : le contenu reçu est vérifié (exercices du catalogue seulement, 1 à 10 séries, noms nettoyés, taille limitée) ; sinon « Lien illisible : ce lien ne contient pas de programme valide ».
+- Nouveau fichier `js/partage.js` (mis en cache par le service worker). Tests : `test_partage.py` (56 contrôles, clair et sombre ; caméra et lecteur simulés).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.52.
+
+---
+
+## [1.7.51] - 2026-11-12
+### ✨ Bilan du mois : même périmètre que Progression (co-auteur : Claude)
+- Ouvert depuis Progression (mois de « 4 derniers mois » ou « Tous les bilans »), le bilan ne compte que les séances du programme choisi en haut de l'écran (ou de tous) : les chiffres concordent avec les barres. Le sous-titre le dit : « Hypertrophie · comparé à septembre. »
+- « Tous les bilans » rappelle le programme sous son titre et ne liste que ses mois.
+- Le post-it de l'écran Programmes garde le bilan de toutes les séances du mois.
+- Design system en ligne : jetons `postit` et `postit-ink`, fiche « Bilan du mois ».
+- Tests : `test_bilan.py` (périmètre depuis Progression et depuis le post-it).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.51.
+
+---
+
+## [1.7.50] - 2026-11-12
+### ✨ Bilan du mois (co-auteur : Claude)
+- **Post-it sur l'écran Programmes** : du 1er au 10 du mois, s'il y a eu au moins une séance le mois précédent, un post-it jaune carré (100 px, incliné, écriture manuscrite) se colle à droite entre le message d'accueil et « Actif » : « Ton bilan du mois de septembre ». Pas de notification du téléphone.
+- **Pop-up centré** (style de la fenêtre d'une séance de l'Historique), comparé au mois précédent : séances, tonnage (+ %), régularité (séances par semaine), temps d'entraînement, cardio (distance et temps, s'il y en a), nombre de records battus. Un seul bouton « OK » : il ferme le bilan, l'archive et retire le post-it (aussi après un rechargement). Échap ou un toucher à côté font de même.
+- **Archives dans Progression** : dans « 4 derniers mois », chaque mois terminé avec des séances porte un chevron et ouvre son bilan. Sous les barres, le lien « Tous les bilans » ouvre la liste de tous les mois terminés (« 13 séances · 9 records », « aucun record »).
+- Le bilan couvre toutes les séances du mois, tous programmes confondus. Les records suivent la règle de la fenêtre de fin de séance (charge, ou durée pour le cardio et les exercices au temps), comparés à tout l'historique antérieur.
+- Nouvelles couleurs `--postit` (#FFE58A) et `--postit-ink` (#3A2E0A), identiques en clair et en sombre. Nouveau fichier `js/bilan.js` (mis en cache par le service worker).
+- Maquette : planches 35 (Bilan du mois) et 25 (Progression). Tests : `test_bilan.py` (post-it, pop-up, archivage, fin au 10 du mois, Progression, clair et sombre).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.50.
+
+---
+
+## [1.7.49] - 2026-11-11
+### 🧪 Version de test : mise à jour sans changement visible (co-auteur : Claude)
+- Seul le numéro de version change. Sert à vérifier si la mise à jour de l'application (rechargement) fait perdre le plein écran dans Firefox pour Android.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.49.
+
+---
+
+## [1.7.48] - 2026-11-11
+### ✨ Séance : bouton PAUSE ADAPTATIVE à côté du compteur de séries (co-auteur : Claude)
+- Le bouton PAUSE ADAPTATIVE (et le chrono vert une fois lancé) quitte le haut à droite pour se placer à droite de « 0 / 22 séries », juste au-dessus de la barre de progression : plus près de la saisie et du pouce.
+- « Durée : 00:00 » passe sous le compteur de séries, en 14 px ; les deux lignes tiennent dans la hauteur du bouton (44 px) et se centrent sur lui. Un toucher sur la durée met toujours le chrono de séance en pause.
+- Le titre de la page Séance n'a plus besoin de descendre sous le bouton : il reste à sa hauteur normale, quel que soit le nom ; l'en-tête gagne environ 16 px.
+- Tests : `test_titre_seance.py` (place du bouton, séries et durée dans sa hauteur, titre non décalé).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.48.
+
+---
+
+## [1.7.47] - 2026-11-11
+### 🌐 Page de présentation publique pour Google (co-auteur : Claude)
+- Nouvelle page `presentation.html` (planche 34 de la maquette), hors de l'application : nom exact « Mon Carnet de Salle », à quoi sert l'app, bouton « Ouvrir l'application », ce que fait l'app, usage de Google Drive (un seul dossier, portée `drive.file`), liens visibles vers les règles de confidentialité et les conditions d'utilisation, contact et résumé en anglais. Même style que les pages légales, clair ou sombre selon le téléphone.
+- Elle sert de page d'accueil déclarée dans Google Auth Platform › Branding : Google demande une page publique qui présente l'app et renvoie vers ses règles de confidentialité.
+- L'application elle-même ne change pas. Test test_presentation.py (390 / 360 px, ordinateur, clair et sombre).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.47.
+
+---
+
+## [1.7.46] - 2026-11-11
+### 🧪 Test de contraste automatique (co-auteur : Claude)
+- Nouveau `tests/test_contraste.py` (groupe `style`) : sur 18 écrans, en clair et en sombre, chaque texte visible doit avoir un contraste d'au moins 4,5:1 (3:1 en grand) et chaque icône d'au moins 3:1. Exception validée : le « 1× » doré des pastilles non remplies en sombre. Non mesurés : la tuile de progression (dégradé) et les valeurs suggérées pâles.
+- Aucun changement visible dans l'app.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.46.
+
+---
+
+## [1.7.45] - 2026-11-11
+### 🎨 Bouton de suppression lisible en sombre, tests par groupes (co-auteur : Claude)
+- Mode sombre : le bouton rouge des volets de suppression (« Supprimer la séance », « Retirer la séance »…) prend le même rouge qu'en mode clair ; le texte blanc devient lisible (contraste 2,5 → 5,5). Nouveau jeton `--danger-strong` ; le rose `--danger` reste pour l'icône poubelle et les valeurs négatives.
+- Tests : `run_tests.py` accepte des groupes par onglet (`seance`, `programmes`, `progression`, `historique`, `reglages`, `drive`, `style`), des fichiers précis et `-j N` pour lancer N tests en parallèle (2 par défaut) ; `--liste` affiche les groupes. `test_fenetres.py` vérifie la lisibilité du bouton de suppression.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.45.
+
+---
+
+## [1.7.44] - 2026-11-11
+### 🎨 Pastille « 1× » lisible partout (co-auteur : Claude)
+- Progression, bouton du haut (mode clair) : le « 1× » sur la pastille sable passe en brun (il était blanc, illisible).
+- Mode sombre, fenêtres « Voir les statistiques de » et « Restaurer un programme » : le « 1× » passe en doré, comme sur la page Séance depuis la 1.7.43.
+- Tests : `test_pastille_1x.py` (nouveau) mesure le contraste de chaque « 1× » visible sur 6 écrans, en clair et en sombre.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.44.
+
+---
+
+## [1.7.43] - 2026-11-11
+### 🎨 Séance libre : « 1× » lisible en mode sombre (co-auteur : Claude)
+- Page Séance, mode sombre : le « 1× » de la pastille séance libre prend la couleur dorée de ses pointillés (il était brun foncé sur fond sombre). Rien ne change en mode clair ni dans l'onglet Programmes.
+- Tests : `test_titre_seance.py` (couleur du 1× en clair et en sombre) ; `test_brouillon.py` ne lève plus d'erreur quand la même boîte de dialogue est acceptée deux fois.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.43.
+
+---
+
+## [1.7.42] - 2026-11-11
+### ✨ Séance : phrase d'échauffement juste avant le premier exercice de force, titre à hauteur constante (co-auteur : Claude)
+- La phrase « Ajoute 2 séries légères au premier exercice de force pour t'échauffer » se place à chaque affichage juste au-dessus du premier exercice de force, après le cardio éventuel (rameur, tapis…).
+- Elle s'affiche désormais aussi quand la séance ne commence pas par le rameur (avant : seulement si le rameur était en tête) ; cachée si la séance n'a que du cardio.
+- Titre de la page Séance à la même hauteur pour un programme et une séance libre, quel que soit le nom : il passe toujours sous le bouton PAUSE ADAPTATIVE, et la pastille 1× prend la taille de l'icône de cycle (44 px).
+- Tests mis à jour (`test_fin_seance.py`, `test_titre_seance.py`, `test_brouillon.py`) ; `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.42.
+
+---
+
+## [1.7.41] - 2026-11-11
+### ✨ Onglet Séance : icône du type de programme devant le titre (co-auteur : Claude)
+- Devant le nom du programme : l'icône de cycle (pastille sombre) ; devant le nom d'une séance libre : la pastille 1× en pointillés.
+- Séance libre : plus de ligne pastille 1× + nom sous le titre, seulement l'icône et le nom (la ligne « Modification · date » reste en modification d'une ancienne séance).
+- Phrase d'échauffement : « au premier exercice de force » (au lieu de « à la première séance de force »).
+- Tests mis à jour (`test_titre_seance.py`, `test_programmes.py`, `test_fin_seance.py`) ; `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.41.
+
+---
+
+## [1.7.40] - 2026-11-11
+### ✨ Onglet Séance : titre dynamique, échauffement reformulé, allure cardio sous la saisie (co-auteur : Claude)
+- Titre de la page Séance : nom du programme actif ou de la séance libre (au lieu de « Séance », qui reste quand rien n'est prévu). Un nom long passe sous le bouton PAUSE ADAPTATIVE et peut tenir sur deux lignes.
+- Phrase d'échauffement : « (i) Ajoute 2 séries légères à la première séance de force (poids) pour t'échauffer (flamme) ».
+- Cardio : le cadre Allure / Vitesse remonte juste sous la ligne de saisie en cours et passe sous son ombre ; il reprend sa place quand la ligne n'est plus en cours.
+- Tests : `test_titre_seance.py` (nouveau), `test_fin_seance.py` et `test_programmes.py` mis à jour.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.40.
+
+---
+
+## [1.7.39] - 2026-11-11
+### 🔄 « Reconnecter maintenant » : plus d'onglet Firefox ni de page blanche (co-auteur : Claude)
+- Accès Google expiré : le bouton suit désormais le même mécanisme que l'enregistrement d'une séance, qui se reconnectait déjà sans intervention : renouvellement silencieux avec le compte déjà connu. Avant, il forçait l'écran d'autorisation Google (« consent »), qui s'ouvrait dans un onglet Firefox, redemandait les autorisations et finissait sur une page blanche (Firefox ne se déclare pas toujours comme application installée).
+- Si Google exige quand même une confirmation : message « touche à nouveau », et l'appui suivant ouvre la connexion complète. Première connexion et application reconnue comme installée : inchangées.
+- Test : `test_drive_reconnexion.py` (reproduit le problème sans le correctif).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.39.
+
+---
+
+## [1.7.38] - 2026-11-11
+### 📝 Documentation remise en cohérence (co-auteur : Claude)
+- **README.md rétabli** : il avait été vidé par erreur en 1.7.13. Il reprend la présentation complète, mise à jour pour la 1.7.38 (fin de séance, bouton pause, polyarticulaires, 1RM estimé, poids du corps en répétitions, fonds d'écran, inviter quelqu'un, liens légaux, résumé des versions depuis la 1.7.0).
+- **tests/README.md** : les 28 fichiers lancés par `run_tests.py` sont décrits, avec leur nombre de contrôles (11 manquaient) ; descriptions d'invitation et de fond d'écran mises à jour.
+- Aucun changement de l'application elle-même. `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.38.
+
+---
+
+
+## [1.7.37] - 2026-11-11
+### 🔗 Inviter quelqu'un : QR code seul (co-auteur : Claude)
+- Le bouton « Partager le lien » est retiré de la fenêtre « Inviter quelqu'un » : il reste le QR code, l'adresse de l'application écrite dessous et « Fermer ». Sous Firefox pour Android, un partage abandonné restait en attente et s'affichait ensuite à la place des menus de choix (exercice du graphique) et du choix de fichier.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.37.
+
+---
+
+## [1.7.36] - 2026-11-11
+### 🔧 Restauration locale : plus de demande d'accès à la caméra et au micro (co-auteur : Claude)
+- Le champ de choix de fichier de « Restaurer › Choisir un fichier… » n'accepte plus que les sauvegardes `.json`. Sans type précisé, Firefox pour Android proposait aussi photo, vidéo et son, et demandait donc l'accès à la caméra et au micro ; un refus empêchait le sélecteur de s'ouvrir.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.36.
+
+---
+
+## [1.7.35] - 2026-11-11
+### 🤸 Exercices au poids du corps : progression en répétitions (co-auteur : Claude)
+- **Progression par exercice** : pour un exercice au poids du corps (tractions, dips, dips triceps, pompes lestées, relevés de jambes suspendu), le bouton « Charge max » devient **« Répétitions »** et la courbe suit la **meilleure série** de chaque séance (plus fort lest, puis le plus de répétitions), au lieu d'une charge qui ne bougeait pas. Graduations en nombres entiers, à partir de 0.
+- **Info-bulle** : « 12 rép. », avec le lest quand il y en a un (« 12 rép. · PDC +5 kg »).
+- **Légende** : « Meilleure série 15 rép. · Record 22 rép. » (sans 1RM estimé), et une phrase qui explique la lecture en répétitions.
+- **Records du mois** : un exercice au poids du corps bat son record avec plus de lest (« Tractions · PDC +5 kg · +5 kg ») ou plus de répétitions au même lest (« Dips · 22 rép. · +8 rép. »). Les anciennes séances sans lest comptent comme poids du corps seul.
+- « Volume cumulé » inchangé : pesée du jour + lest.
+- Test test_poids_du_corps.py (390/360 px, clair/sombre) ; test_poly_1rm.py ajusté à la nouvelle légende.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.35.
+
+---
+
+## [1.7.34] - 2026-11-10
+### 🏋️ Filtre « Polyarticulaires » et 1RM estimé (co-auteur : Claude)
+- **Ajouter un exercice : puce « Polyarticulaires »** juste après « Tous ». Elle liste les 34 exercices qui font bouger au moins deux articulations (définition de l'ACSM 2009, revues de Gentil 2017 et Paoli 2017) : squats, presse, fentes, montées sur banc, soulevé de terre, tirages, tractions, rowings, tirage facial, développés, dips, pompes, tirage menton, dips triceps. Le soulevé de terre roumain, le soulevé de terre jambes tendues et les hip thrusts restent monoarticulaires (mouvement de hanche seule). Cardio et abdos ne sont pas concernés. Catalogue v1.2 : champ `poly`.
+- **Progression par exercice : 1RM estimé en pointillé** sur le graphique « Charge max », formule d'Epley (charge × (1 + reps / 30)) appliquée à la meilleure série de 10 répétitions ou moins de chaque séance. Seulement pour les exercices saisis en kg × répétitions (pas pour les exercices au poids du corps, le gainage ni le cardio), pas en « Volume cumulé ».
+- **Légende sous le graphique** : « Charge max 82 kg · 1RM estimé 98,5 kg » (dernières valeurs), et une phrase qui explique le pointillé.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.34.
+
+---
+
+## [1.7.33] - 2026-11-10
+### 📊 Progression : chiffres et textes plus lisibles (co-auteur : Claude)
+- **Valeurs en 17 px** (taille du tonnage de l'Historique) : tonnages des 4 derniers mois, kg et gain des records, kg des paliers, % de la progression par séance / programme.
+- **Textes associés en 16 px** (taille des dates de l'Historique) : mois et nombre de séances, noms d'exercice, phrase des paliers, noms de la progression par programme.
+- **Paliers** : « sans progression depuis X séances » (sans la date), sur une ligne, directement sous le nom de l'exercice ; poids à droite sur la ligne du nom.
+- **Gélules des records et des paliers** : même hauteur (68 px).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.33.
+
+---
+
+## [1.7.32] - 2026-11-10
+### 📐 Rationalisation, suite : espacements, interlignes, mouvement, superpositions, rangement (co-auteur : Claude)
+- **Espacements** (marges et marges intérieures) sur une grille de 4 px : 33 → 15 valeurs (micro-ajustements de 1 et 2 px et décalages négatifs conservés, marge de page 26 px inchangée). Exception : la tuile active garde sa hauteur validée (écart sous la ligne de séance 12 px, pied 4 px).
+- **Écarts entre éléments** : 4 / 8 / 12 / 16 px (2, 3 → 4 ; 6 → 8 ; 10 → 12 ; 14 → 16).
+- **Interlignes** : 11 → 4 (1 ; 1,05 titres ; 1,35 petits textes ; 1,45 paragraphes).
+- **Mouvement** : deux durées nommées, `--t-fast` (0,15 s) et `--t-normal` (0,25 s) ; l'appui long garde 0,45 s.
+- **Superpositions** : échelle nommée `--z-wallpaper` … `--z-toast` (mêmes valeurs).
+- **Rangement de style.css** : un seul bloc de variables par thème ; échauffement, nom d'exercice et sous-titre de séance définis à un seul endroit ; sections nommées par composant.
+- **Restes** : classes inutilisées `.next-card-info` et `.type-letter` supprimées ; texte de Progression vide et écart des boutons Google Drive sortis du code en dur ; fenêtre de fin de séance à 20 px de marge pour que « Séance (A) terminée » tienne à 360 px.
+- Tests : suite complète au vert ; captures avant / après de 8 écrans.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.32.
+
+---
+
+## [1.7.31] - 2026-11-10
+### 📐 Rationalisation de la feuille de style (co-auteur : Claude)
+Aucun changement de couleur, de style ou de mise en page ; seules des valeurs nées écran par écran sont ramenées à quelques paliers (planches « Pastilles de séance : 3 tailles » et « Rationalisation, lot B » de la maquette).
+- **Pastilles de séance** : 3 tailles — 56 px (détail d'une séance), 44 px (par défaut, y compris le choix « programme ou séance libre », 42 → 44), 40 px (tuile active, fin de séance 38 → 40, « Presque prêt » 36 → 40). Classe `.type-pill.tiny`, inutilisée, supprimée.
+- **Tailles de texte** : 38 → 15 paliers (12, 13, 14, 15, 16, 17, 18, 20, 22, 24, 28, 30, 32, 42, 73 px). Plus visible : nom du programme dans la tuile active 26,6 → 28 px.
+- **Rayons** : 18 → 5 (pilule, 10, 16, 22, 32 px) ; les éléments dont le rayon valait la moitié de la hauteur deviennent des pilules ; tuiles et détail de séance 34 → 32 px.
+- **Hauteurs** : paliers 40 / 44 / 48 / 52 / 56 px (puces de filtre 38 → 40, puces de l'ajout 42 → 44, bascule du graphique 36 → 40, saisie des séries et coche 50 → 52).
+- **Icônes** : 16 / 20 / 24 px (+ l'icône d'écran vide à 34 px).
+- **Illustrations d'exercice** : éditeur 51 → 55 px (55 partout, 70 dans le détail).
+- **Couleurs et ombres en dur → variables** : `--on-color`, `--hero-ink`, `--hero-chip`, `--hero-axis`, `--warn-icon(-bg)`, `--info(-icon-bg)`, `--record`, `--flame`, `--qr-bg`, `--sand-ico`, `--live-glow`, `--sh-sand`, `--sh-danger`, `--sh-thumb(-lg)`, `--sh-badge`, `--sh-toast`, `--veil-home`, `--veil-page`, `--font-hand` (mêmes valeurs, thème sombre compris).
+- Tests : suite complète au vert ; captures avant / après de 8 écrans comparées.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.31.
+
+---
+
+## [1.7.30] - 2026-11-10
+### ⏸️ Mettre le programme actif en pause depuis sa tuile (co-auteur : Claude)
+- **Bouton pause** (rond de 40 px, pictogramme pause) en haut à droite de la tuile du programme actif, aligné sur son icône ; aussi sur la séance libre active (couleur sable).
+- Un appui passe le programme **En mémoire** (« En pause depuis le … ») ; plus aucun programme n'est actif (« Aucun programme actif »). « Réactiver » le remet en service.
+- Si une séance est en cours, un volet demande confirmation (« Mettre en pause « … » ? » / « Continuer la séance ») ; confirmer remet le chrono à zéro et supprime le brouillon.
+- Tests : `test_pause_actif.py` (18 contrôles, 390 px clair / 360 px sombre).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.30.
+
+---
+
+## [1.7.29] - 2026-11-10
+### 🎨 Fenêtres de l'app dans un seul style ; tuile de progression en dégradé (co-auteur : Claude)
+- **Plus aucune boîte système** (confirm / alert) : toutes deviennent le volet du bas de l'app, comme « Supprimer le programme » : pastille d'icône (ambre = attention, rouge = suppression, gris = Google Drive, bleu = information), titre, texte court, bouton principal (rouge pour une suppression) et bouton gris pour renoncer ; toucher le fond ou Échap = renoncer. Les messages d'information n'ont qu'un bouton OK.
+  - Éditeur : retour ou bouton Programmes avec une saisie non enregistrée (« Attention · Revenir en arrière annulera la saisie. Continuer ? »), retirer une séance remplie, abandonner une sélection d'exercices (le volet passe au-dessus de la liste).
+  - Séance : aucune série cochée, série à corriger, séries non cochées, annuler la séance en cours.
+  - Historique : supprimer une séance (au-dessus du détail), restaurer une sauvegarde Drive, remplacer / effacer la sauvegarde Drive, réinitialiser les données, import de fichier ; erreurs Google Drive.
+- **Progression** : la tuile principale passe à un dégradé indigo profond avec un reflet magenta en haut à droite ; son titre reste « Indice de progression » quel que soit le programme choisi.
+- Tests : `test_fenetres.py` (53 contrôles sur les vrais volets, 390 px clair / 360 px sombre, aucune boîte système, plus aucun `confirm()` / `alert()` dans le code) ; les tests existants répondent aux volets via un point d'accroche de test ; textes mis à jour.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.29.
+
+---
+
+## [1.7.28] - 2026-11-10
+### 🎨 Éditeur de programme : enregistrement plus clair ; liens légaux dans Réglages (co-auteur : Claude)
+- **Éditeur** : la phrase « Ajoute au moins un exercice dans chaque séance pour enregistrer » disparaît. Le bouton « Enregistrer le programme » apparaît et reste actif dès qu'un exercice est choisi.
+- **Séances vides à l'enregistrement** : un volet « Presque prêt » résume la situation (une ligne par séance : pastille, nom, nombre d'exercices et de séries avec une coche, ou « Aucun exercice · À compléter »), avec « Compléter la séance B » (ouvre la première séance vide) et « Fermer ». Rien n'est enregistré tant qu'une séance est vide.
+- **Réglages › Application** : liens « Règles de confidentialité » et « Conditions d'utilisation » (nouvel onglet).
+- Tests : `test_editeur_incomplet.py` (42 contrôles, 390/360 px, clair/sombre) ; `test_programmes.py` adapté.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.28.
+
+---
+
+## [1.7.27] - 2026-11-09
+### 🎨 Séance : en-tête allégé, échauffement, fenêtre de fin de séance (co-auteur : Claude)
+- **Bouton « Programmes »** de la barre : ramène toujours à la page de départ (choix d'un programme, éditeur ou détail refermés). Depuis l'éditeur avec une saisie non enregistrée, la confirmation « Quitter sans enregistrer ? » est demandée.
+- **En-tête de Séance** : plus de « Séance du jour · programme » ; seuls la pastille et le nom de la séance restent (la ligne « Modification · date » reste affichée quand on corrige une ancienne séance).
+- **Échauffement** : flamme orange, « 2 séries légères sur le 1er exercice de force » suivi du pictogramme poids (l'emoji 🚣 et « après le rameur » disparaissent).
+- **Noms d'exercice** : toujours sur une ligne, terminés par « … » s'ils sont trop longs (exercice ouvert ou fermé). La flèche reste en bout de ligne.
+- **Fenêtre de fin de séance** (après « Valider & Enregistrer ») à la place du message en bas d'écran : « Bravo ! » en manuscrit, « Séance (A) terminée » (« Séance terminée » pour une séance libre), tonnage, écart avec la précédente séance du même type (« +300 kg / précédente » en vert, baisse en gris ; absent sans séance précédente), puis « Nouveau record » avec la coupe et une ligne par record (charge maximale, ou durée pour le cardio et le gainage ; absent sans record), bouton OK. Une modification d'ancienne séance garde le message habituel. Les avertissements (pesée manquante, reconnexion Google Drive) s'affichent toujours en message.
+- Tests : `test_fin_seance.py` (56 contrôles à 390 et 360 px, clair et sombre) ; `test_validation.py`, `test_rameur.py`, `test_programmes.py`, `test_drive_sauvegarde.py`, `test_drive_installee.py` adaptés à la fenêtre de fin.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.27.
+
+---
+
+## [1.7.26] - 2026-11-09
+### 🐛 Réactiver un programme n'ouvre plus Firefox (co-auteur : Claude)
+- Accès Google expiré : créer, modifier, activer, réactiver ou supprimer un programme (ou supprimer une séance de l'historique) tentait encore de renouveler l'accès par la fenêtre Google, qui ouvre Firefox (Firefox ne se déclare pas toujours comme application installée, d'où le passage par cette fenêtre). Ces actions ne tentent plus aucun renouvellement : la sauvegarde reste en attente et part avec la prochaine séance enregistrée ou via « Reconnecter maintenant ». L'enregistrement d'une séance garde son comportement.
+- Test : `test_drive_android.py` (Firefox navigateur, accès expiré : créer / activer / réactiver un programme sans fenêtre Google ; reproduit le problème sans le correctif).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.26.
+
+---
+
+## [1.7.25] - 2026-11-09
+### 🎨 Tuile du programme actif selon la planche validée (co-auteur : Claude)
+- **Tuile du programme actif** : pastille de séance (A, B…) à la taille de l'icône du programme et dans la même colonne ; nom de la séance aligné sur le nom du programme, « exercices · séries » dessous ; trait pointillé de sous l'icône jusqu'à « + de détail », en passant derrière la pastille de séance ; « + de détail » en bas à gauche, aligné sur le bas de la flèche rouge en bas à droite ; marges intérieures de 12 px. La pastille « Déload −20 % » se place au bout de la ligne « exercices · séries » et passe à la ligne si la place manque (aucun texte coupé).
+- **Séance libre active** : « exercices · séries » sous le nom, même ligne du bas, pas de trait pointillé.
+- **Programmes en mémoire** : marges latérales de 12 px — icônes et boutons alignés avec la tuile active.
+- **« Actif »** (aussi pour la séance libre), aligné sur « En mémoire » ; point vert de 7 px à l'ombre centrée sur un cercle vert pâle de 18 px.
+- Tests : `test_accueil.py` (alignements, trait, taille de la pastille, « Actif »), `test_programmes.py`.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.25.
+
+---
+
+## [1.7.24] - 2026-11-09
+### ✨ Accueil Programmes : message manuscrit et tuile compacte (co-auteur : Claude)
+- **Message d'accueil manuscrit** en haut de l'onglet Programmes (police Caveat, licence OFL, hébergée avec l'app pour fonctionner hors connexion) : « Bonjour, » (5 h – 18 h) ou « Bonsoir, », puis une phrase selon le contexte — séance déjà faite aujourd'hui (« Belle séance aujourd'hui. Place à la récup ! »), retour après 10 jours ou plus (« Content de te revoir ! On s'y remet ? »), semaine de déload, pas encore de séance, pas de programme actif, sinon « Prêt à te dépasser aujourd'hui ? ».
+- **Tuile active −25 % de hauteur** (278 → 206 px avec le déload), sans perte d'information : bouton démarrer à droite du nom, pastille « Déload −20 % » au bout de la ligne de la prochaine séance, « exercices · séries » et « + de détail » sur la dernière ligne.
+- **Fond Poigne** recadré : le logo du short n'est plus dans l'image.
+- Test : `test_accueil.py` (19 contrôles).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.24.
+
+---
+
+## [1.7.23] - 2026-11-09
+### 🎨 4 nouveaux fonds d'écran (co-auteur : Claude)
+- **Réglages › Fond d'écran** : Râtelier (kettlebells colorées), Squat, Poigne et Disques s'ajoutent à Course, Barre, Haltères, Kettlebell et Studio — 9 images + « Aucun ». Images en 1000 px + vignettes, mises en cache pour fonctionner hors connexion.
+- Test : `test_fond_ecran.py` (10 choix, 18 images en cache).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.23.
+
+---
+
+## [1.7.22] - 2026-11-09
+### 📄 Pages publiques pour Google (co-auteur : Claude)
+- `confidentialite.html` (règles de confidentialité) et `conditions.html` (conditions d'utilisation), demandées par Google pour publier l'accès Google Drive de l'application (sortie du mode Test). Pages autonomes dans le style de l'app (polices locales, thème clair / sombre), avec un résumé en anglais pour les relecteurs Google : données sur l'appareil, sauvegarde facultative dans le Drive de l'utilisateur via `drive.file` uniquement, pas de serveur ni de traceur, respect de la Google API Services User Data Policy (Limited Use), suppression et retrait de l'accès. Contact : jeanphilippealexander@gmail.com.
+- Ces deux pages sont aussi publiées seules sur `main` (sans autre changement de l'app en production) pour être accessibles à https://jeepalexander.github.io/suivi-fitness/confidentialite.html et …/conditions.html.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.22.
+
+---
+
+## [1.7.21] - 2026-11-09
+### ✨ Inviter quelqu'un + astuce (co-auteur : Claude)
+- **Réglages › Inviter quelqu'un** (entre Google Drive et Application) : « Afficher le QR code » ouvre une fenêtre avec un QR code vers l'adresse de l'application, le lien en clair et « Partager le lien » (partage du téléphone) ou « Copier le lien ». La personne ouvre l'app sur son téléphone, l'installe et la connecte à son propre Google Drive. QR noir sur fond blanc, lisible aussi en thème sombre ; bibliothèque `js/qrcode.js` (qrcode-generator 2.0.4, Kazuhiko Arase, licence MIT) mise en cache pour fonctionner hors connexion.
+- **Programmes** : symbole (i) et « Astuce : » devant « Reste appuyé sur un programme… » ; « Tes autres programmes apparaîtront ici » centré.
+- Test : `test_invitation.py` (23 contrôles, dont la lecture du QR code).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.21.
+
+---
+
+## [1.7.20] - 2026-11-09
+### 🎨 Accueil Programmes : « Actif » et « En mémoire » (co-auteur : Claude)
+- « Programme actif » devient **« Actif »** (« Active » pour une séance libre), à la même taille que « En mémoire » ; pastille verte conservée.
+- La catégorie **« En mémoire »** reste affichée même vide, avec « Tes autres programmes apparaîtront ici ».
+- Test : `test_programmes.py` (88 contrôles).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.20.
+
+---
+
+## [1.7.19] - 2026-11-09
+### 🎨 Pause, « En mémoire » et page Fond d'écran (co-auteur : Claude)
+- **Gélule de pause au repos** : plus étroite (144 → 124 px), logo du chrono agrandi (18 → 24 px). Décompte et « GO ! » inchangés.
+- **Programmes** : symbole pause (couleur des mentions « En pause ») devant « En mémoire ».
+- **Réglages › Fond d'écran** : voile de l'accueil Programmes, pour bien voir le fond choisi au-dessus des vignettes.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.19.
+
+---
+
+## [1.7.18] - 2026-11-09
+### 🎨 Séance, Programmes, pause et fond d'écran (co-auteur : Claude)
+- **Séance** (planche, écran 22a) : l'en-tête fixe (titre, séance du jour, déload, progression) est sur fond uni ; l'image de fond ne se voit que sous les exercices.
+- **Programmes** : « Programme actif » / « Séance libre active » (et « Aucun programme actif ») en noir foncé, pastille verte conservée ; bouton + de l'en-tête en noir.
+- **Gélule de pause** : au repos, « PAUSE » / « ADAPTATIVE » sur 2 lignes, sans la durée tant que le décompte n'est pas lancé, gélule de même taille (144 × 44). Décompte et « GO ! » inchangés ; la durée qui sera lancée reste lue par les lecteurs d'écran.
+- **Réglages › Fond d'écran** : les vignettes défilent sur une seule ligne en bas de l'écran, positionnées sur le fond choisi.
+- Tests : `test_chrono.py` (libellé 2 lignes et taille), `test_programmes.py`, `test_annuler_seance.py` adaptés.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.18.
+
+---
+
+## [1.7.17] - 2026-11-09
+### 🎨 Éditeur : visuels d'exercice agrandis (co-auteur : Claude)
+- Création / modification d'un programme ou d'une séance libre : icône et pastille de chaque exercice +15 % (44 → 51 px) ; fenêtre « Ajouter à la séance » : +15 % (48 → 55 px).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.17.
+
+---
+
+## [1.7.16] - 2026-11-09
+### ✨ Éditeur : déplacement des exercices par le menu seulement (co-auteur : Claude)
+- Création / modification d'un programme ou d'une séance libre : la poignée de glisser-déposer (6 points) disparaît des lignes d'exercice.
+- Menu ⋮ d'un exercice : il reste ouvert après « Monter » ou « Descendre » et suit l'exercice à sa nouvelle place (plusieurs crans d'affilée possibles) ; « Annuler » devient « Fermer ».
+- Test : `test_editeur_deplacer.py` (26 contrôles, 390 et 360 px).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.16.
+
+---
+
+## [1.7.15] - 2026-11-09
+### 🎨 Éditeur de programme : voile des autres onglets (co-auteur : Claude)
+- Création et modification d'un programme ou d'une séance libre : même voile que Séance, Progression, Historique et Réglages (100 / 95 / 76 / 100 % à 0 / 30 / 72 / 100 % de la hauteur), au lieu de celui de l'accueil Programmes. Thème sombre : même chose en noir.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.15.
+
+---
+
+## [1.7.14] - 2026-11-09
+### 🎨 Séance : visuels d'exercice agrandis (co-auteur : Claude)
+- Icône et pastille grise de chaque exercice dans l'onglet Séance : +15 % (48 → 55 px), ouvert ou fermé.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.14.
+
+---
+
+## [1.7.13] - 2026-11-09
+### 🎨 Voile des autres onglets renforcé (co-auteur : Claude)
+- Séance, Progression, Historique, Réglages (planche, écran 32) : 100 % (haut) · 95 % à 30 % de la hauteur · 76 % à 72 % · 100 % (bas). Onglet Programmes inchangé. Même chose en noir pour le thème sombre.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.13.
+
+---
+
+## [1.7.12] - 2026-11-09
+### 🎨 Voile du fond d'écran ajusté (co-auteur : Claude)
+- Valeurs validées sur la planche (écrans 31 et 32), en opacité du voile selon la hauteur de l'écran :
+  - **Programmes** : 95 % (haut) · 82 % à 22 % · 15 % à 42 % · 60 % à 72 % · 88 % (bas) ;
+  - **autres onglets** : 100 % (haut) · 90 % à 22 % · 68 % à 72 % · 96 % (bas).
+- Thème sombre : mêmes opacités avec un voile noir.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.12.
+
+---
+
+## [1.7.11] - 2026-11-09
+### 🐛 Valider un programme n'ouvre plus Firefox (co-auteur : Claude)
+- Application installée, accès Google expiré : créer, modifier, activer ou supprimer un programme (ou supprimer une séance de l'historique) lançait la reconnexion automatique à Google, qui ouvrait Firefox en mode normal. Cette reconnexion est désormais réservée à l'enregistrement d'une séance ; pour les programmes, la sauvegarde reste en attente (« modifications en attente d'envoi ») et part avec la prochaine séance enregistrée ou via « Reconnecter maintenant ».
+- Test : `test_drive_android.py` (Firefox installé, accès expiré : programme validé / activé sans onglet ouvert).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.11.
+
+---
+
+## [1.7.10] - 2026-11-09
+### 🎨 Pastilles et voile (co-auteur : Claude)
+- Pastille grise réduite (86 % de la case de l'icône) : l'icône garde sa taille et déborde un peu plus du rond.
+- Fond d'écran : hors onglet Programmes, voile plus couvrant et plus régulier (88 → 72 → 88 %) pour garder l'image en retrait derrière la saisie ; l'onglet Programmes garde le dégradé de la planche.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.10.
+
+---
+
+## [1.7.9] - 2026-11-09
+### 🎨 Pastilles d'icônes (co-auteur : Claude)
+- Pastille plus grise derrière les icônes d'exercice (`--icon-pastille` : #E4E4E9, #2C2C33 en sombre).
+- Icônes plus grandes (96 % de la pastille) et non rognées : elles dépassent légèrement du rond, comme sur la planche.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.9.
+
+---
+
+## [1.7.8] - 2026-11-09
+### 🎨 Fond d'écran : alignement sur la planche de concept (co-auteur : Claude)
+- **Voile dégradé selon la hauteur** : plus couvrant en haut (titres) et en bas (navigation), plus léger au milieu où l'image se voit (82 % → 55 % → 30 % → 72 % → 84 %). Équivalent sombre en thème sombre.
+- **Tuile du programme actif légèrement transparente** quand un fond d'écran est choisi (84 %, image floutée dessous) ; idem pour la tuile sable de la séance libre.
+- **Pastilles grises derrière les icônes d'exercice** : détail du programme (70 px, ombre douce), Séance, éditeur, fenêtre d'ajout.
+- **Séance** : l'icône de l'exercice ouvert garde sa taille (48 px) au lieu de rétrécir sur les écrans étroits.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.8.
+
+---
+
+## [1.7.7] - 2026-11-08
+### ✨ Fond d'écran et bloc Drive (co-auteur : Claude)
+- **Réglages › Fond d'écran** (sous Apparence) : une ligne avec la vignette et le nom du fond choisi ouvre la page « Fond d'écran » (bouton retour, grille de vignettes). 5 images : Course, Barre, Haltères, Kettlebell, Studio, plus « Aucun » (par défaut, fond blanc comme avant). Le choix s'applique tout de suite sur toutes les pages, sous un voile clair (ou sombre en thème sombre) qui garde le texte lisible.
+- Le choix est propre à l'appareil, comme le thème : il ne fait pas partie des sauvegardes. Il est posé avant le premier affichage (pas de flash au lancement). Les images (`wallpapers/`, 1000 px + vignettes) sont mises en cache pour fonctionner hors connexion.
+- **Sauvegarde Google Drive** : « Sauvegarde automatique : JJ/MM HH:MM » sur la première ligne (ou « : envoi en cours… » / « : modifications en attente d'envoi »), le compte dessous ; la ligne « Dernière sauvegarde » disparaît.
+- Tests : nouveau `test_fond_ecran.py` (20 contrôles) ; textes Drive alignés.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.7.
+
+---
+
+## [1.7.6] - 2026-11-08
+### ✏️ Sauvegarde Google Drive (co-auteur : Claude)
+- **Dossier Drive renommé « MON CARNET DE SALLE »** (au lieu de « FITNESS AAP – Séances »). Le dossier existant est **renommé** automatiquement à la première sauvegarde (une seule fois par appareil) : les 5 sauvegardes restent dedans, rien n'est déplacé ni recréé. Un nouvel appareil retrouve le dossier sous l'un ou l'autre nom. En cas d'échec du renommage, les sauvegardes continuent normalement.
+- **Réglages, bloc simplifié** : le bouton (Connecter / Déconnecter) d'abord ; dessous, l'état avec une pastille verte devant « Sauvegarde automatique », le compte et la date de dernière sauvegarde ; puis : « Chaque séance validée déclenche une sauvegarde dans le dossier « MON CARNET DE SALLE ». 5 sauvegardes y sont conservées. Pour en reprendre une, touche « Restaurer » dans l'Historique. »
+- Tests : renommage du dossier (ancien nom retrouvé, dossier déjà connu, une seule fois) ; textes alignés.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.6.
+
+---
+
+## [1.7.5] - 2026-11-08
+### 🐛 Fenêtre « Restaurer une sauvegarde » (co-auteur : Claude)
+- **Choisir une sauvegarde ne rouvre plus la fenêtre** : la ligne cochée et le bouton se mettent à jour sur place (plus d'animation d'ouverture à chaque appui, défilement conservé). Même chose à l'arrivée de la liste Drive.
+- **Dates** : « Aujourd'hui à 18:42:00 », « Hier à 19:15:00 », sinon la date (« 05/11/2026 à 19:15:00 »). La confirmation garde la date complète.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.5.
+
+---
+
+## [1.7.4] - 2026-11-08
+### 🐛 Corrections (co-auteur : Claude)
+- **« Reconnecter maintenant » (application installée avec Firefox)** : le bouton ouvrait la page Google dans un onglet Firefox séparé, qui revenait sur l'application sans lui rendre l'accès. Il suit maintenant exactement le même chemin que la reconnexion automatique après l'enregistrement d'une séance (qui, elle, reste dans l'application et fonctionne) : connexion par redirection lancée environ 0,4 s après l'appui. Même chose pour « Connecter Google Drive » et le lien de la fenêtre « Restaurer une sauvegarde ». Navigateur (non installé) : inchangé.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.4.
+
+---
+
+## [1.7.3] - 2026-11-08
+### ✨ Restaurer une sauvegarde (co-auteur : Claude)
+- **Historique › Restaurer** ouvre la fenêtre **« Restaurer une sauvegarde »** (planche de concept, écran 27b) : les 5 dernières sauvegardes Google Drive (date et heure, « La plus récente » / « Version précédente ») et « Choisir un fichier… » pour un fichier créé avec « Sauvegarder ». Un seul choix (la plus récente cochée par défaut) ; bouton « Restaurer cette sauvegarde » ou « Choisir le fichier », puis la confirmation habituelle avant tout remplacement. Sans connexion Drive : le fichier seul et un lien « Se connecter à Google Drive ».
+- **Réglages** : « Restaurer depuis Drive » et la liste dans la page sont supprimés (redondants). Le bouton « Restaurer » ne reste qu'en cas de conflit de sauvegarde, et ouvre la même fenêtre. Texte d'aide : « pour en reprendre une, touche « Restaurer » dans l'Historique ».
+### ✏️ Onglet Programmes
+- Onglet et titre renommés **« Programmes »**.
+- Pastille verte : « Programme actif » ou « Séance libre active », sans le nom.
+- Tuile de l'élément actif : pictogramme du type et **nom du programme (ou de la séance libre) en grand** ; pastille et nom de la prochaine séance en petit (programme seulement) ; exercices et séries ; « + de détail » et démarrer.
+- Tests : `test_programmes` (84 contrôles), `test_drive_versions`, `test_drive_sauvegarde` et `test_reglages` alignés sur la fenêtre de restauration.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.3.
+
+---
+
+## [1.7.2] - 2026-11-08
+### ✏️ Nom de l'application (co-auteur : Claude)
+- L'application s'appelle **Mon Carnet de Salle**, comme sur la maquette : en-tête de toutes les pages (« MON CARNET DE SALLE »), titre de l'onglet du navigateur, nom à l'installation (`manifest.json` : « Mon Carnet de Salle », raccourci « Mon Carnet » sous l'icône) et titre du partage de la sauvegarde.
+- Inchangés pour ne rien casser : le dossier Google Drive « FITNESS AAP – Séances », les noms des fichiers de sauvegarde, le dépôt et l'adresse de l'application.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.2.
+
+---
+
+## [1.7.1] - 2026-11-08
+### 🐛 Corrections (co-auteur : Claude)
+- **Onglet Programme** : la tuile active, « En mémoire » et le texte d'aide sont alignés vers le bas de l'écran, au-dessus de la barre de navigation, comme sur la maquette (ils restaient collés en haut). Le détail déplié fait défiler la page normalement.
+- **Créer un programme ou une séance libre** (écran « Choisis comment t'entraîner ») : le texte et les deux cartes sont alignés vers le bas ; le bouton retour reste en haut.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.1.
+
+---
+
+## [1.7.0] - 2026-11-08
+### ✨ Programmes sur mesure (co-auteur : Claude)
+Spécification « Programmes sur mesure » et maquette « Programme nouvel usager » (écrans 1 à 30).
+- **Programmes** de 2 à 6 séances (A à F, nouvelles couleurs D vert, E violet, F framboise) qui tournent en boucle, et **séances libres** (sans récurrence, pastille 1× sable). Un seul élément actif ; les autres sont « En mémoire ».
+- **Onglet Programme** : bouton + (créer un programme ou une séance libre), éditeur (nom, séances, exercices réordonnables), feuille « Ajouter un exercice » (recherche, filtres par groupe, sélection multiple), activation sans confirmation (l'ancien actif passe en pause), « Nouveau » pour un élément jamais activé, appui long pour modifier ou supprimer, écran « rien de prévu » au premier lancement, restauration des programmes depuis la dernière sauvegarde Drive (cochés, arrivent en pause, sans doublon).
+- **Catalogue de 86 exercices** (`js/catalogue.js`) : séries, répétitions et repos par défaut sourcés (ACSM 2009, Schoenfeld 2016 et 2021, Singer 2024). Le chrono de pause prend le repos de l'exercice ouvert : 3:00 polyarticulaire lourd, 2:00 polyarticulaire, 1:30 isolation, 1:00 abdos et gainage.
+- **Modes de saisie** : kg × réps, poids du corps + lest (« Lest (kg) », vide = PDC, charge réelle = dernière pesée + lest), réps seules, durée, cardio durée + distance (allure /500 m pour rameur et ski trainer, /km pour le tapis, km/h pour les vélos) ou durée + étages (stair climber).
+- **Onglet Séance** : charge la séance de l'élément actif (« Séance du jour · programme » ou « Séance libre ») ; « Première fois · 3 × 6–10 réps » ; le nombre de séries fait devient la référence ; « Aucune séance prévue » si rien n'est actif.
+- **Déload** global inchangé, **reportable** d'une séance (« Reporter à la prochaine séance », annulable).
+- **Progression** : sélecteur (programme actif par défaut, autre programme, séance libre ou « Tous les programmes »), indice et analyses calculés sur l'élément choisi, lettres de séance du programme, progression par programme pour « Tous », suivi cardio par appareil avec menu.
+- **Historique** : filtres par programme, pastille de la séance ou 1×, programme d'origine sur chaque ligne et dans le détail ; un programme supprimé reste lisible.
+### 🔄 Migration (une seule fois)
+- L'historique existant est rattaché au programme **« Hypertrophie »** (séances A, B, C du programme fixe, même nombre de séries), actif, avec la séance suivante de la rotation.
+- Noms d'exercices alignés sur le catalogue (Leg extension, Leg curl, Oiseau) avec leur identifiant ; contrôle nombre de séances, tonnage et records avant / après, retour à l'original en cas d'écart. Copie intégrale d'origine conservée sur l'appareil (`h49_state_v1_backup`).
+- Le rameur s'affiche désormais en allure **/500 m** (données inchangées).
+- Une ancienne sauvegarde importée ou restaurée est convertie de la même façon.
+### 💾 Sauvegarde
+- Mode inchangé : un fichier complet horodaté, 5 versions conservées. Il contient désormais les programmes et séances libres ; créer, modifier, activer ou supprimer un programme déclenche une sauvegarde.
+### 🧪 Tests
+- Nouveau `tests/test_programmes.py` (79 contrôles) ; `test_chrono`, `test_rameur` et `test_drive_sauvegarde` alignés (repos du catalogue, allure /500 m, programmes dans la sauvegarde). `test_chrono` attend désormais le lancement du repos après le rameur, comportement voulu depuis 1.6.21.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.0.
+
+---
+
 ## [1.6.36] - 2026-11-07
 ### ✏️ Réglages
 - **Apparence** : texte d'explication supprimé (les boutons Clair / Sombre / Auto suffisent).

@@ -16,7 +16,7 @@ jobs:
           python-version: '3.12'
       - name: Installer Playwright et Chromium
         run: |
-          pip install playwright
+          pip install playwright pillow
           playwright install --with-deps chromium
       - name: Lancer les tests
         run: python3 tests/run_tests.py

@@ -56,7 +56,7 @@ with Srv() as base, sync_playwright() as p:
     pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(300)
     hints = pg.evaluate("[...document.querySelectorAll('#tab-reglages .theme-hint, .theme-hint')].map(e=>e.textContent.trim())")
     check("Apparence : plus aucun texte d'explication", not any('suit le réglage clair/sombre' in h or 'propre à cet appareil' in h for h in hints), hints)
-    check("Drive : nouveau texte sous « Restaurer depuis Drive »", any(h.startswith('Chaque enregistrement de séance (ou modification) déclenche une sauvegarde') and h.endswith('les 5 dernières sauvegardes sont conservées et peuvent être restaurées.') for h in hints), hints)
+    check("Drive : texte simplifié (dossier « MON CARNET DE SALLE », renvoi à « Restaurer » de l'Historique)", "Chaque séance validée déclenche une sauvegarde dans le dossier « MON CARNET DE SALLE ». 5 sauvegardes y sont conservées. Pour en reprendre une, touche « Restaurer » dans l'Historique." in hints, hints)
     pg.reload(); pg.wait_for_timeout(800)
     check("Version : nouveau texte sur les mises à jour", pg.evaluate("document.getElementById('update-status').textContent").startswith("La vérification de la disponibilité d'une nouvelle mise à jour se fait à chaque lancement") and 'Tu peux néanmoins cliquer sur « Vérifier »' in pg.evaluate("document.getElementById('update-status').textContent"), pg.evaluate("document.getElementById('update-status').textContent"))
     check('aucune erreur JS', not errs, str(errs))

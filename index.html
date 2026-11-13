@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
-  <title>SUIVI FITNESS</title>
+  <title>Mon Carnet de Salle</title>
 
   
   <!-- PWA Settings -->
@@ -12,7 +12,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#FFFFFF">
-  <meta name="apple-mobile-web-app-title" content="SUIVI FITNESS">
+  <meta name="apple-mobile-web-app-title" content="Mon Carnet">
 
   <!-- Thème : résolu avant le premier affichage pour éviter tout flash (clair par défaut) -->
   <script>
@@ -23,11 +23,14 @@
         document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
         var m = document.querySelector('meta[name="theme-color"]');
         if (m) m.setAttribute('content', dark ? '#0E0E11' : '#FFFFFF');
+        var w = localStorage.getItem('h49_wallpaper');
+        if (/^(course|barre|halteres|kettlebell|ratelier|squat|poigne|disques|cuivre|geometrie|salle|cordes|fente|rack|silhouette|escaliers|traction)$/.test(w || '')) document.documentElement.setAttribute('data-wallpaper', w);
       } catch (e) {}
     })();
   </script>
   
-  <link rel="apple-touch-icon" href="icons/app-icon.png">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 
   <!-- Chart.js & Fonts (Local for offline use) -->
   <script src="js/chart.umd.min.js"></script>
@@ -42,32 +45,51 @@
 </head>
 <body>
 
+  <!-- Fond d'écran choisi dans Réglages (image + voile), derrière tout le reste -->
+  <div id="app-wallpaper" aria-hidden="true"></div>
+
   <header>
     <div class="page-header">
-      <p id="app-title" class="app-kicker">SUIVI FITNESS</p>
-      <h1 id="page-title">Programme</h1>
+      <p id="app-title" class="app-kicker">MON CARNET DE SALLE</p>
+      <div class="page-title-row">
+        <button id="fond-back" class="ed-back" type="button" onclick="switchTab('reglages')" aria-label="Retour aux réglages">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+        </button>
+        <span id="seance-prog-ico" class="prog-ico" aria-hidden="true"></span>
+        <h1 id="page-title">Programmes</h1>
+      </div>
     </div>
 
     <div id="seance-sticky" class="seance-sticky">
-    <div class="session-head">
+    <div id="seance-head" class="session-head">
       <span id="seance-badge" class="type-pill type-pill-A">A</span>
       <div class="session-head-text">
-        <span id="seance-overline" class="overline">Séance du jour</span>
+        <span id="seance-overline" class="overline" hidden></span>
         <span id="seance-type-title" class="session-name">Séance</span>
       </div>
     </div>
 
     <span id="deload-subtitle" class="deload-pill" style="display: none;"></span>
+    <div id="deload-actions" class="deload-actions" hidden></div>
 
     <div class="workout-progress">
       <div class="workout-progress-row">
-        <span><strong id="sets-progress-text">0 / 0</strong> séries</span>
-        <span><span id="workout-duration-label">Durée :</span> <strong id="workout-duration-display" onclick="toggleWorkoutTimer()">00:00</strong></span>
+        <div class="workout-counts"><!-- 1.7.48 : séries et durée empilées, à la hauteur du bouton de pause -->
+          <span><strong id="sets-progress-text">0 / 0</strong> séries</span>
+          <span class="workout-duration"><span id="workout-duration-label">Durée :</span> <strong id="workout-duration-display" onclick="toggleWorkoutTimer()">00:00</strong></span>
+        </div>
+        <button id="timer-btn" class="timer-btn" onclick="toggleRestTimer()">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5M9 3h6"/></svg>
+          <span id="timer-display">PAUSE<br>ADAPTATIVE</span>
+        </button>
       </div>
       <div class="progress-track"><div id="sets-progress-bar" class="progress-fill"></div></div>
     </div>
     </div>
 
+    <button id="add-program-btn" class="hdr-btn hdr-btn-add" type="button" onclick="openProgramChooser()" aria-label="Ajouter un programme ou une séance libre">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
     <button id="settings-btn" class="hdr-btn" type="button" onclick="switchTab('reglages')" aria-label="Réglages">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
     </button>
@@ -76,10 +98,6 @@
       <span>Retour</span>
     </button>
 
-    <button id="timer-btn" class="timer-btn" onclick="toggleRestTimer()">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5M9 3h6"/></svg>
-      <span id="timer-display">PAUSE</span>
-    </button>
   </header>
 
   <main id="app-scroll">
@@ -89,8 +107,15 @@
   </div>
 
   <div id="tab-seance" class="container">
-    <p class="warmup-note">🚣 Échauffement : 2 séries légères sur le 1er exercice de force, après le rameur.</p>
+    <div id="seance-empty" class="seance-empty" hidden>
+      <div class="seance-empty-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/></svg></div>
+      <h2 class="seance-empty-title">Aucune séance prévue</h2>
+      <p class="seance-empty-text">Active un programme ou une séance libre dans l'onglet Programme, ou crée-en un pour commencer.</p>
+      <button type="button" class="btn" onclick="switchTab('programme')">Voir mes programmes</button>
+      <button type="button" class="btn btn-secondary" onclick="switchTab('programme'); openProgramChooser()">Créer un programme ou une séance</button>
+    </div>
     <form id="workout-form">
+    <p id="warmup-note" class="warmup-note"><svg class="warmup-info" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.4"/></svg><span>Ajoute 2 séries légères au premier exercice de force <svg class="warmup-weight" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7v10M3.5 9.5v5M17.5 7v10M20.5 9.5v5M6.5 12h11"/></svg> pour t'échauffer <svg class="warmup-flame" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c.9 3.1 4.6 4.9 4.6 9.7a4.6 4.6 0 0 1-9.2 0c0-2.5 1.3-3.9 2.5-4.9.2 1.7 1 2.7 2.2 3.1.2-3-.9-5.3-.1-7.9z"/></svg></span></p>
       <div id="exercises-list"></div>
       <div class="watch-memo">⌚ N'oublie pas d'arrêter le suivi de ta montre !</div>
       <p class="submit-hint">Seules les séries cochées sont enregistrées.</p>
@@ -101,9 +126,10 @@
   </div>
 
   <div id="tab-progression" class="container">
+    <button type="button" id="stats-scope-btn" class="stats-scope" onclick="openStatsScopeSheet()" aria-label="Choisir le programme des statistiques"></button>
     <div class="hero-card">
       <button type="button" id="btn-vol-calendar" class="hero-toggle" aria-pressed="false" aria-label="Afficher chaque jour écoulé" onclick="toggleVolumeCalendar()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18h18"/><path d="M5 18v-2M8.5 18v-2M12 18v-2M15.5 18v-2M19 18v-2"/><path d="M3.5 12.5l4-4.5 4 3.5 4.5-6 4.5 4"/></svg></button>
-      <div class="hero-label">Indice de progression global</div>
+      <div class="hero-label">Indice de progression</div>
       <div class="hero-row">
         <span id="hero-index" class="hero-index">–</span>
         <span id="hero-pill" class="hero-pill" hidden></span>
@@ -125,13 +151,20 @@
         <button class="filter-btn" id="btn-mode-vol" onclick="setExMetricMode('volume', this)">Volume cumulé</button>
       </div>
       <canvas id="exerciseChart" height="180"></canvas>
+      <div id="exercise-legend" class="ex-legend" hidden>
+        <span><svg viewBox="0 0 24 4" aria-hidden="true"><line x1="0" y1="2" x2="24" y2="2"></line></svg><span id="exercise-legend-max-label">Charge max</span> <b id="exercise-legend-max"></b></span>
+        <span><svg class="rm-line" viewBox="0 0 24 4" aria-hidden="true"><line class="dash" x1="0" y1="2" x2="24" y2="2"></line></svg><span id="exercise-legend-rm-label">1RM estimé</span> <b id="exercise-legend-rm"></b></span>
+      </div>
+      <p id="exercise-rm-note" class="analysis-note" hidden>Le pointillé estime la charge que tu pourrais soulever une seule fois (formule d’Epley, à partir de ta meilleure série de 10 répétitions ou moins). C’est une indication, pas un objectif à tester.</p>
+      <p id="exercise-bw-note" class="analysis-note" hidden>Au poids du corps, ta progression se lit en répétitions : la courbe suit ta meilleure série de chaque séance. Le volume cumulé compte ta pesée du jour, plus le lest s’il y en a un.</p>
       <p id="exercise-plateau-note" class="analysis-note" hidden>La bande ambre marque les séances sans progression (palier).</p>
     </div>
-    <div class="card">
+    <div class="card" id="cardio-card">
       <h3 class="analysis-section-title">Suivi cardio</h3>
-      <div class="weight-current"><span id="cardio-current" class="weight-value">–</span><span class="weight-unit">/km · Rameur</span></div>
+      <select id="cardio-filter" class="filter-select" onchange="renderCardioChart()" aria-label="Exercice cardio"></select>
+      <div class="weight-current"><span id="cardio-current" class="weight-value">–</span><span id="cardio-unit" class="weight-unit">/500 m · Rameur</span></div>
       <canvas id="cardioChart" height="150"></canvas>
-      <p id="cardio-empty" class="analysis-note">Pas encore de séance avec le rameur. L'allure au km s'affichera ici (plus bas = plus rapide).</p>
+      <p id="cardio-empty" class="analysis-note">Pas encore de séance avec le rameur.</p>
     </div>
     <div class="card">
       <h3 class="analysis-section-title">Poids corporel</h3>
@@ -147,10 +180,11 @@
   <div id="tab-historique" class="container">
     <p id="history-count" class="history-count"></p>
     <div class="card backup-card">
-      <input type="file" id="import-file" style="display:none" onchange="importData(event)">
-      <button onclick="exportData()" class="btn">Sauvegarder</button>
-      <button onclick="document.getElementById('import-file').click()" class="btn btn-secondary">Restaurer</button>
+      <input type="file" id="import-file" accept=".json,application/json" style="display:none" onchange="importData(event)">
+      <button onclick="openBackupSave()" class="btn">Sauvegarder</button>
+      <button onclick="openBackupRestore()" class="btn btn-secondary">Restaurer</button>
     </div>
+    <div id="history-filters" class="history-filters" hidden></div>
     <div id="history-list"></div>
     <div class="danger-zone">
       <button onclick="resetData()" class="btn-danger-link">Réinitialiser les données d'origine</button>
@@ -166,17 +200,29 @@
         <button type="button" class="filter-btn" role="radio" data-theme-choice="auto" onclick="setThemePreference('auto')">Auto</button>
       </div>
     </div>
+    <div class="card wallpaper-card">
+      <div class="card-title">Fond d'écran</div>
+      <button type="button" id="wallpaper-row" class="wallpaper-row" onclick="switchTab('fond')" aria-label="Fond d'écran : Aucun. Changer">
+        <span class="wallpaper-row-thumb" aria-hidden="true"><img id="wallpaper-row-img" alt="" hidden></span>
+        <span class="wallpaper-row-text"><span id="wallpaper-row-name" class="wallpaper-row-name">Aucun</span><span class="wallpaper-row-sub">Image affichée derrière tes écrans</span></span>
+        <svg class="wallpaper-row-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+    </div>
     <div class="card" id="drive-card">
       <div class="card-title">Sauvegarde Google Drive</div>
-      <p id="drive-status" class="theme-hint">Non connecté</p>
-      <div class="update-row" style="gap:8px;flex-wrap:wrap">
+      <div class="update-row drive-actions">
         <button type="button" id="drive-connect-btn" class="btn" onclick="connectGoogleDrive()">Connecter Google Drive</button>
         <button type="button" id="drive-disconnect-btn" class="btn btn-secondary" style="display:none" onclick="disconnectGoogleDrive()">Déconnecter</button>
-        <button type="button" id="drive-restore-btn" class="btn btn-secondary" style="display:none" onclick="restoreFromDrive()">Restaurer depuis Drive</button>
+        <button type="button" id="drive-restore-btn" class="btn btn-secondary" style="display:none" onclick="openBackupRestore()">Restaurer</button>
         <button type="button" id="drive-replace-btn" class="btn btn-secondary" style="display:none" onclick="replaceDriveBackupWithThisDevice()">Remplacer par cet appareil</button>
       </div>
-      <div id="drive-backups" hidden></div>
-      <p class="theme-hint">Chaque enregistrement de séance (ou modification) déclenche une sauvegarde sur le compte Drive dans le dossier « FITNESS AAP – Séances ». Par sécurité, les 5 dernières sauvegardes sont conservées et peuvent être restaurées.</p>
+      <p id="drive-status" class="theme-hint drive-status">Non connecté</p>
+      <p class="theme-hint">Chaque séance validée déclenche une sauvegarde dans le dossier « MON CARNET DE SALLE ». 5 sauvegardes y sont conservées. Pour en reprendre une, touche « Restaurer » dans l'Historique.</p>
+    </div>
+    <div class="card invite-card">
+      <div class="card-title">Inviter quelqu'un</div>
+      <p class="theme-hint">Fais scanner un QR code à la personne : elle ouvrira l'application sur son téléphone et pourra la connecter à son propre Google Drive. Ses séances restent les siennes.</p>
+      <button type="button" id="invite-btn" class="btn btn-secondary" onclick="openInviteSheet()">Afficher le QR code</button>
     </div>
     <div class="card update-card" id="update-card">
       <div class="card-title">Application</div>
@@ -189,15 +235,21 @@
         <span id="update-banner-text"></span>
         <button type="button" class="btn update-apply" onclick="applyUpdate()">Relancer maintenant</button>
       </div>
+      <p class="theme-hint legal-links"><a href="confidentialite.html" target="_blank" rel="noopener">Règles de confidentialité</a> · <a href="conditions.html" target="_blank" rel="noopener">Conditions d'utilisation</a></p>
     </div>
+  </div>
+
+  <div id="tab-fond" class="container">
+    <p class="wallpaper-lead">Choisis l'image affichée derrière tes écrans. Elle s'applique tout de suite, partout dans l'app.</p>
+    <ul id="wallpaper-grid" class="wallpaper-grid" role="radiogroup" aria-label="Fonds disponibles"></ul>
   </div>
 
   </main>
 
   <nav>
-    <button onclick="switchTab('programme')" id="nav-programme" aria-label="Programme" class="active">
+    <button onclick="goProgramsHome()" id="nav-programme" aria-label="Programmes" class="active">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
-      Programme
+      Programmes
     </button>
     <button onclick="switchTab('seance')" id="nav-seance" aria-label="Séance">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>
@@ -213,7 +265,12 @@
     </button>
   </nav>
 
+  <script src="js/catalogue.js"></script>
   <script src="app.js"></script>
+  <script src="js/programmes.js"></script>
+  <script src="js/bilan.js"></script>
+  <script src="js/partage.js"></script>
+  <script src="js/qrcode.js"></script>
   <script src="js/security.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

@@ -34,11 +34,13 @@ NAME_RE = re.compile(r'^fitness-backup-\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}\.json
 
 
 def restore_pick(pg, i=0, wait=2500):
-    """« Restaurer depuis Drive » puis « Restaurer » sur la i-ème sauvegarde de la liste."""
+    """Fenêtre « Restaurer une sauvegarde » (1.7.3) : choisir la i-ème sauvegarde Drive puis « Restaurer cette sauvegarde » ;
+    renvoie le nombre de sauvegardes Drive proposées."""
     pg.evaluate("restoreFromDrive()"); pg.wait_for_timeout(1200)
-    n = pg.evaluate("document.querySelectorAll('#drive-backups .drive-backup-row button').length")
+    n = pg.evaluate("document.querySelectorAll('.sheet .backup-item.drive').length")
     if n > i:
-        pg.evaluate("i=>document.querySelectorAll('#drive-backups .drive-backup-row button')[i].click()", i)
+        pg.evaluate("i=>{if(backupRestore.sel!==i)document.querySelectorAll('.sheet .backup-item.drive')[i].click()}", i)
+        pg.evaluate("document.getElementById('backup-restore-go').click()")
         pg.wait_for_timeout(wait)
     return n
 
@@ -87,10 +89,11 @@ with Srv() as base, sync_playwright() as p:
     c = d.content() or {}
     uploads = [u for (m, u) in d.calls if m == 'POST' and '/upload/' in u]
     check("dossier absent : créé une seule fois", d.folders_created == 1, d.folders_created)
+    check("dossier créé sous le nom « MON CARNET DE SALLE » (aucun renommage nécessaire)", d.folder_name == 'MON CARNET DE SALLE' and d.folder_renames == 0, (d.folder_name, d.folder_renames))
     check("UN seul fichier créé, nommé fitness-backup-AAAA-MM-JJ-HH-MM-SS.json", d.posts == 1 and len(uploads) == 1 and NAME_RE.match(d.post_names[0]), f'{len(uploads)} création(s) {d.post_names}')
-    check(f"le fichier contient tout l'état : {N} séances, poids, dernières charges, prochaine séance",
-          len(c.get('history', [])) == N and len(c.get('weights', [])) == len(DATA['weights']) and c.get('lastWeights') == DATA['lastWeights'] and c.get('nextType') == local_state(pg)['nextType'], f"{len(c.get('history', []))} séances")
-    check("identifiant du fichier et empreinte retenus, date de dernière sauvegarde affichée", ls(pg, 'h49_drive_backup_id') == 'BK1' and ls(pg, 'h49_drive_last_hash') and 'Dernière sauvegarde' in pg.evaluate(STATUS), pg.evaluate(STATUS))
+    check(f"le fichier contient tout l'état : {N} séances, poids, dernières charges, prochaine séance, programmes",
+          len(c.get('history', [])) == N and len(c.get('weights', [])) == len(DATA['weights']) and c.get('lastWeights') == local_state(pg)['lastWeights'] and len(c.get('lastWeights', {})) == len(DATA['lastWeights']) and c.get('nextType') == local_state(pg)['nextType'] and [p['name'] for p in c.get('programs', [])] == ['Hypertrophie'], f"{len(c.get('history', []))} séances")
+    check("identifiant du fichier et empreinte retenus, « Sauvegarde automatique : date et heure » affiché", ls(pg, 'h49_drive_backup_id') == 'BK1' and ls(pg, 'h49_drive_last_hash') and re.match(r'^Sauvegarde automatique : \d\d/\d\d \d\d:\d\d', pg.evaluate(STATUS)), pg.evaluate(STATUS))
     # 2) rien n'a changé : rien n'est renvoyé
     n0 = len(d.calls)
     r = pg.evaluate("syncDriveBackup()")
@@ -107,8 +110,9 @@ with Srv() as base, sync_playwright() as p:
     # 5) vrai formulaire : séance enregistrée
     p0, h0 = d.posts, len(local_state(pg)['history'])
     save_form(pg); pg.wait_for_timeout(2500)
-    saved = [m for m in pg.evaluate("window.__toastLog||[]") if 'Séance enregistrée' in m]
-    check("séance enregistrée (vrai formulaire) : sauvegarde mise à jour avec la nouvelle séance, sans mention de Drive", d.posts == p0 + 1 and len((d.content() or {}).get('history', [])) == h0 + 1 and saved and 'Drive' not in saved[-1], f'post={d.posts}')
+    toasts = pg.evaluate("window.__toastLog||[]")
+    check("séance enregistrée (vrai formulaire) : sauvegarde mise à jour avec la nouvelle séance, fenêtre de fin, sans mention de Drive", d.posts == p0 + 1 and len((d.content() or {}).get('history', [])) == h0 + 1 and pg.evaluate("!!document.getElementById('finish-overlay')") and not any('Drive' in m for m in toasts), f'post={d.posts}')
+    pg.evaluate("closeFinishDialog()")
     # 6) séance modifiée : une nouvelle version
     p0 = d.posts
     pg.evaluate("state.history[3].tonnage += 7; saveState(); backupToDrive()"); pg.wait_for_timeout(2500)
@@ -148,8 +152,8 @@ with Srv() as base, sync_playwright() as p:
     ctx, pg, dlg = run(br, base, d)
     pg.wait_for_timeout(1500)
     save_form(pg); pg.wait_for_timeout(1500)
-    saved = [m for m in pg.evaluate("window.__toastLog||[]") if 'Séance enregistrée' in m]
-    check("jamais connecté : aucune requête Drive, aucune mention de Drive", not d.calls and saved and 'Drive' not in saved[-1], d.calls[:2])
+    toasts = pg.evaluate("window.__toastLog||[]")
+    check("jamais connecté : aucune requête Drive, aucune mention de Drive", not d.calls and pg.evaluate("!!document.getElementById('finish-overlay')") and not any('Drive' in m for m in toasts), d.calls[:2])
     ctx.close()
 
     # 12) première connexion par le bouton : dossier + sauvegarde complète créés
@@ -181,14 +185,14 @@ with Srv() as base, sync_playwright() as p:
     ctx, pg, dlg = run(br, base, d, seeds=[VALID, FOLDER])
     pg.wait_for_timeout(2500)
     rows = restore_pick(pg, 0)
-    conf = [m for (t, m) in dlg if t == 'confirm' and 'Restaurer la sauvegarde Drive' in m]
-    check("« Restaurer depuis Drive » : liste des sauvegardes affichée avant toute restauration", rows == 1, rows)
-    check("« Restaurer depuis Drive » : confirmation avec le nombre de séances et l'avertissement de remplacement", conf and f'({N + 1} séances)' in conf[-1] and f'cet appareil ({N} séances)' in conf[-1], conf[-1:] )
+    conf = [m for (t, m) in dlg if t == 'confirm' and 'Restaurer la sauvegarde du' in m]
+    check("« Restaurer » : fenêtre avec la liste des sauvegardes affichée avant toute restauration", rows == 1, rows)
+    check("« Restaurer » : confirmation avec le nombre de séances et l'avertissement de remplacement", conf and f'contient {N + 1} séances' in conf[-1] and f'cet appareil ({N} séances)' in conf[-1], conf[-1:] )
     st = local_state(pg)
     check("restauration : les données de l'appareil deviennent celles du Drive (séance en plus incluse), conflit levé", len(st['history']) == N + 1 and any(h['id'] == 999999 for h in st['history']) and ls(pg, 'h49_drive_conflict') is None and ls(pg, 'h49_drive_backup_id') in {f['id'] for f in d.live()})
-    check("restauration : message « Sauvegarde importée avec succès »", any('importée avec succès' in m for (t, m) in dlg))
+    check("restauration : message « Sauvegarde importée »", any(m.startswith('Sauvegarde importée') for (t, m) in dlg))
     check("restauration : la sauvegarde restaurée reste sur le Drive, la plus récente version = données restaurées", any(f['id'] == 'BK1' for f in d.live()) and len((d.content() or {}).get('history', [])) == N + 1)
-    check("restauration : la liste des sauvegardes se referme", pg.evaluate("document.getElementById('drive-backups').hidden"))
+    check("restauration : la fenêtre des sauvegardes se referme", not pg.evaluate("!!document.querySelector('#sheet-overlay.open')"))
     ctx.close()
 
     # restauration refusée
@@ -205,7 +209,7 @@ with Srv() as base, sync_playwright() as p:
     pg.wait_for_timeout(2500)
     d.backup = None
     restore_pick(pg, 0, 1500)
-    check("restauration sans fichier sur le Drive : message clair, rien ne change", any('Aucune sauvegarde complète trouvée' in m for (t, m) in dlg) and len(local_state(pg)['history']) == N)
+    check("restauration sans fichier sur le Drive : message clair dans la fenêtre, rien ne change", 'Aucune sauvegarde dans le dossier' in pg.inner_text('.sheet') and len(local_state(pg)['history']) == N)
     ctx.close()
 
     # fichier illisible
@@ -259,6 +263,20 @@ with Srv() as base, sync_playwright() as p:
     ctx, pg, dlg = run(br, base, d, seeds=["['h49_drive_queue','h49_drive_uploaded','h49_drive_files','h49_drive_history_todo'].forEach(k=>localStorage.setItem(k,'[]'));"])
     pg.wait_for_timeout(1500)
     check("anciens repères (file d'attente, fichiers par séance) supprimés au démarrage", all(ls(pg, k) is None for k in ('h49_drive_queue', 'h49_drive_uploaded', 'h49_drive_files', 'h49_drive_history_todo')))
+    ctx.close()
+    # ---------- 1.7.6 : ancien dossier « FITNESS AAP – Séances » renommé « MON CARNET DE SALLE » ----------
+    d = FakeDrive(folder=True, versions=[('fitness-backup-2026-11-07-18-42-00.json', '2026-11-07T17:42:00.000Z', DATA)])
+    ctx, pg, dlg = run(br, base, d, seeds=[VALID])
+    pg.wait_for_timeout(3000)
+    check("ancien dossier retrouvé : renommé une seule fois en « MON CARNET DE SALLE », ses sauvegardes restent et aucun dossier n'est créé",
+          d.folder_name == 'MON CARNET DE SALLE' and d.folder_renames == 1 and d.folders_created == 0 and any(f['name'].startswith('fitness-backup-2026-11-07') for f in d.live()), (d.folder_name, d.folder_renames, d.folders_created))
+    pg.reload(); pg.wait_for_timeout(2500)
+    check("renommage mémorisé : pas de nouveau renommage au lancement suivant", d.folder_renames == 1, d.folder_renames)
+    ctx.close()
+    d = FakeDrive(folder=True)
+    ctx, pg, dlg = run(br, base, d, seeds=[VALID, FOLDER])
+    pg.wait_for_timeout(3000)
+    check("dossier déjà connu de l'appareil (ancienne version) : renommé aussi", d.folder_renames == 1 and d.folder_name == 'MON CARNET DE SALLE', (d.folder_renames, d.folder_name))
     ctx.close()
     br.close()
 

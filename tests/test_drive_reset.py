@@ -43,7 +43,7 @@ with Srv() as base, sync_playwright() as p:
     pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(300)
     pg.once('dialog', lambda x: None) if False else None
     dlg.clear(); pg.evaluate("replaceDriveBackupWithThisDevice()"); pg.wait_for_timeout(3000)
-    check("confirmation « Effacer DÉFINITIVEMENT » affichée", any('DÉFINITIVEMENT' in m for t, m in dlg), dlg)
+    check("confirmation « Effacer la sauvegarde Drive ? » affichée", any('Effacer la sauvegarde Drive' in m and 'irréversible' in m for t, m in dlg), dlg)
     check("« Remplacer » (choix explicite) : la sauvegarde Drive est vidée", len((d.content() or {}).get('history', ['x'])) == 0, len((d.content() or {}).get('history', ['x'])))
     pg.evaluate("state.history.push(%s); saveState();" % json.dumps(DATA['history'][0])); pg.wait_for_timeout(3000)
     check("ensuite, les nouvelles séances se sauvegardent normalement", len((d.content() or {}).get('history', [])) == 1)

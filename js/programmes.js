@@ -1,0 +1,963 @@
+// Suivi Fitness : onglet Programme (programmes sur mesure et séances libres, écrans 1 à 21 de la maquette).
+// Co-auteur : Claude. Chargé après app.js : utilise ses fonctions et son état global (state, saveState, switchTab…).
+//
+// SOMMAIRE
+//   1. ÉTAT DE L'ÉCRAN
+//   2. ACCUEIL : ÉLÉMENT ACTIF ET « EN MÉMOIRE »
+//   3. ACTIVATION
+//   4. CHOIX : PROGRAMME OU SÉANCE LIBRE
+//   5. ÉDITEUR (création et modification)
+//   6. AJOUTER UN EXERCICE
+//   7. SUPPRIMER
+//   8. RESTAURER DES PROGRAMMES DEPUIS GOOGLE DRIVE
+//   9. APPUI LONG ET FEUILLES DU BAS
+
+// ============================================================
+// 1. ÉTAT DE L'ÉCRAN
+// ============================================================
+// view : 'home' (accueil), 'choose' (écran 4), 'editor' (écrans 5, 6, 9, 17, 20)
+let programView = 'home';
+let programDetailOpen = false;
+// Brouillon de l'éditeur : { id (null = création), kind, name, sessions: [{ key, name, exercises: [{ exId, sets }] }], idx, start }
+let programDraft = null;
+
+const SWAP_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 2l3 3-3 3"/><path d="M20 5H8a5 5 0 0 0-5 5"/><path d="M7 22l-3-3 3-3"/><path d="M4 19h12a5 5 0 0 0 5-5"/></svg>';
+const BACK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
+const PEN_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>';
+const ARROW_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+const DOTS_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>';
+const TRASH_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
+const CLOSE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+const SEARCH_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>';
+const CLOUD_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a5 5 0 1 1 1-9.9A6 6 0 0 1 19.5 10 4 4 0 0 1 18 18"/><path d="M12 12v8M9 17l3 3 3-3"/></svg>';
+const PAUSE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/></svg>';
+const INFO_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.4"/></svg>';
+const GRID_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="2"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="2"/></svg>';
+
+function setProgramView(view) {
+  programView = view;
+  document.body.dataset.pview = view;
+  updateProgramHeader();
+  renderProgramOverview();
+  const scroller = document.getElementById('app-scroll');
+  if (scroller) scroller.scrollTop = 0;
+}
+
+// Bouton + de l'en-tête : seulement sur l'accueil de l'onglet Programme
+function updateProgramHeader() {
+  const add = document.getElementById('add-program-btn');
+  if (add) add.style.display = (document.body.dataset.tab || 'programme') === 'programme' && programView === 'home' ? 'flex' : 'none';
+}
+
+// ============================================================
+// 2. ACCUEIL : ÉLÉMENT ACTIF ET « EN MÉMOIRE »
+// ============================================================
+function programTilesHtml(exercises) {
+  return exercises.map(e => {
+    const name = exInfo(e.exId).name;
+    return `
+    <div class="ex-tile">
+      <div class="ex-icon-badge">${getIcon(name)}</div>
+      <span>${escapeHtml(name)}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderProgramOverview() {
+  const container = document.getElementById('program-overview');
+  if (!container || !state) return;
+  document.body.dataset.pview = programView;
+  updateProgramHeader();
+  if (programView === 'choose') { container.innerHTML = chooserHtml(); return; }
+  if (programView === 'editor' && programDraft) { container.innerHTML = editorHtml(); bindEditor(); return; }
+  programView = 'home';
+  document.body.dataset.pview = 'home';
+  updateProgramHeader();
+
+  const programs = getPrograms();
+  if (!programs.length) { container.innerHTML = emptyProgramsHtml(); return; }
+
+  const active = getActiveProgram();
+  const others = programs.filter(p => p !== active);
+  // Les tuiles sont alignées vers le bas de l'écran, au-dessus de la barre de navigation (maquette)
+  let html = programGreetingHtml(active) + '<div class="prog-spacer" aria-hidden="true"></div>';
+  html += bilanPostitHtml(); // 1.7.50 : post-it du bilan du mois, du 1er au 10
+  if (active) {
+    html += `<div class="prog-status"><span class="prog-dot-slot"><span class="prog-dot on"></span></span>Actif</div>`; // 1.7.25 : « Actif » aussi pour la séance libre
+    html += activeTileHtml(active);
+    if (programDetailOpen) html += activeDetailHtml(active);
+  } else {
+    html += `<div class="prog-status"><span class="prog-dot-slot"><span class="prog-dot"></span></span>Aucun programme actif</div>`;
+  }
+  // 1.7.20 : la catégorie « En mémoire » est toujours là ; vide, elle annonce où iront les autres programmes
+  html += `<h2 class="section-label prog-mem-title"><span class="mem-pause-ico">${PAUSE_SVG}</span>En mémoire</h2>`;
+  if (others.length) {
+    html += `<div class="mem-list">`;
+    others.forEach(p => { html += memTileHtml(p); });
+    html += `</div>`;
+  } else {
+    html += `<p class="mem-empty">Tes autres programmes apparaîtront ici</p>`;
+  }
+  html += `<p class="prog-hint"><span class="prog-hint-ico">${INFO_SVG}</span>Astuce : Reste appuyé sur un programme pour entrer en mode édition</p>`; // 1.7.21 : (i) + « Astuce : »
+  container.innerHTML = html;
+  bindLongPress(container);
+}
+
+// Message d'accueil manuscrit (1.7.24) : « Bonjour » ou « Bonsoir » selon l'heure, puis une phrase selon le contexte
+// (séance déjà faite aujourd'hui, retour après une pause, déload, pas de programme actif, sinon motivation).
+function programGreeting(active, now = new Date()) {
+  const h = now.getHours();
+  const hello = (h >= 5 && h < 18) ? 'Bonjour' : 'Bonsoir';
+  const hist = (typeof state !== 'undefined' && state && Array.isArray(state.history)) ? state.history : [];
+  const today = now.toISOString().slice(0, 10);
+  const last = hist.length ? hist[hist.length - 1].date : null;
+  const daysSince = last ? Math.floor((new Date(today) - new Date(last)) / 86400000) : null;
+  let line;
+  if (!active) line = 'Choisis ton programme, et c\'est parti !';
+  else if (last === today) line = 'Belle séance aujourd\'hui. Place à la récup !';
+  else if (daysSince !== null && daysSince >= 10) line = 'Content de te revoir ! On s\'y remet ?';
+  else if (!isLibre(active) && typeof checkDeloadStatus === 'function' && checkDeloadStatus()) line = 'Semaine légère : on récupère pour mieux repartir.';
+  else if (!hist.length) line = 'Prêt pour ta première séance ?';
+  else line = 'Prêt à te dépasser aujourd\'hui ?';
+  return { hello, line };
+}
+
+function programGreetingHtml(active) {
+  const g = programGreeting(active);
+  return `<p class="prog-greet"><span class="prog-greet-hello">${g.hello},</span><span class="prog-greet-line">${escapeHtml(g.line)}</span></p>`;
+}
+
+function emptyProgramsHtml() {
+  return `
+    <div class="prog-empty">
+      <svg class="prog-empty-arrow" viewBox="0 0 200 230" aria-hidden="true"><path d="M8 214 C 48 210, 94 196, 120 166 C 144 138, 130 110, 112 118 C 96 126, 108 154, 134 142 C 162 128, 164 76, 154 20"/><path d="M141 36 L 154 18 L 165 37"/></svg>
+      <p class="prog-empty-title">Tu n'as pour l'instant rien de prévu au programme.</p>
+      <p class="prog-empty-sub">Clique sur le bouton + pour en créer un !</p>
+      <p class="prog-empty-restore">Tu as déjà un programme sauvegardé ? <button type="button" class="link-btn" onclick="openProgramRestore()">Restaurer</button></p>
+    </div>`;
+}
+
+function activeTileHtml(p) {
+  const def = currentSessionDef();
+  const session = def ? def.session : p.sessions[0];
+  const libre = isLibre(p);
+  const nEx = (session.exercises || []).length;
+  const nSets = sessionSetCount(session);
+  const BOLT_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>';
+  const deload = checkDeloadStatus() ? `<span class="deload-pill deload-inline">${BOLT_SVG}Déload −20 %</span>` : '';
+  const count = `<span class="next-card-count">${nEx} exercice${nEx > 1 ? 's' : ''} · ${nSets} série${nSets > 1 ? 's' : ''}</span>`;
+  // 1.7.25 (planche validée) : pictogramme + nom du programme ; pastille de séance de même taille, nom de la séance
+  // aligné sur celui du programme, exercices · séries dessous (déload au bout, à la ligne si la place manque) ; trait pointillé de l'icône jusqu'à
+  // « + de détail » (programme seulement) ; « + de détail » en bas à gauche, démarrer en bas à droite.
+  const middle = libre
+    ? `<div class="prog-tile-sum">${count}${deload}</div>`
+    : `<div class="prog-tile-next">${programPillHtml(p, session.key, 'mid')}<div class="prog-tile-next-text"><span class="prog-tile-session">${escapeHtml(sessionLabel(p, session))}</span><div class="prog-tile-sum">${count}${deload}</div></div></div>`;
+  return `
+    <div class="next-card prog-tile${libre ? ' libre' : ''}" data-lp="${escapeHtml(p.id)}">
+      ${libre ? '' : '<span class="prog-tile-line" aria-hidden="true"></span>'}
+      <div class="prog-tile-top">
+        ${libre ? '<span class="prog-ico libre">1×</span>' : `<span class="prog-ico">${SWAP_SVG}</span>`}
+        <span class="session-name prog-tile-name">${escapeHtml(p.name)}</span>
+        <button type="button" class="prog-pause-btn" aria-label="Mettre « ${escapeHtml(p.name)} » en pause (en mémoire)" title="Mettre en pause" onclick="pauseActiveProgram()">${PAUSE_SVG}</button>
+      </div>
+      ${middle}
+      <div class="next-card-row prog-tile-foot">
+        <button type="button" class="prog-detail-btn" aria-expanded="${programDetailOpen}" onclick="toggleProgramDetail()">${programDetailOpen ? '- de détail' : '+ de détail'}</button>
+        <button type="button" class="btn-start${libre ? ' libre' : ''}" aria-label="Démarrer la séance" onclick="switchTab('seance')">${ARROW_SVG}</button>
+      </div>
+    </div>`;
+}
+
+function activeDetailHtml(p) {
+  const def = currentSessionDef();
+  const session = def ? def.session : p.sessions[0];
+  let html = `<div class="section-block prog-detail"><div class="tile-grid">${programTilesHtml(session.exercises || [])}</div></div>`;
+  if (!isLibre(p) && p.sessions.length > 1) {
+    const start = p.sessions.indexOf(session);
+    const rest = [];
+    for (let i = 1; i < p.sessions.length; i++) rest.push(p.sessions[(start + i) % p.sessions.length]);
+    html += `<div class="section-block"><h2 class="section-label">Ensuite</h2>` + rest.map(s => `
+      <div class="next-row-wrap">
+        <button type="button" class="next-row" aria-expanded="false" onclick="toggleProgramRow(this)">
+          <span class="type-pill type-pill-${s.key} small">${s.key}</span>
+          <span class="next-row-name">${escapeHtml(sessionLabel(p, s))}</span>
+          <span class="next-row-chevron">${CHEVRON_SVG}</span>
+        </button>
+        <div class="tile-grid next-row-panel" hidden>${programTilesHtml(s.exercises || [])}</div>
+      </div>`).join('') + `</div>`;
+  }
+  return html;
+}
+
+function toggleProgramDetail() {
+  programDetailOpen = !programDetailOpen;
+  renderProgramOverview();
+}
+
+// Déplie / replie la liste des exercices d'une séance dans « Ensuite »
+function toggleProgramRow(btn) {
+  const panel = btn.nextElementSibling;
+  const open = btn.getAttribute('aria-expanded') === 'true';
+  btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+  if (panel) panel.hidden = open;
+}
+
+function formatShortDate(iso) {
+  const d = iso ? new Date(iso) : null;
+  if (!d || isNaN(d)) return '';
+  return `${d.getDate()} ${HISTORY_MONTHS_SHORT[d.getMonth()]}`;
+}
+
+// Sous-titre d'une mini-tuile : « Nouveau · 18 exercices », « En pause depuis le 12 oct. », « 3 exercices »
+function memSubHtml(p) {
+  const n = programExerciseCount(p);
+  const count = `${n} exercice${n > 1 ? 's' : ''}`;
+  if (p.status === 'new') return `<span class="mem-flag">${p.receivedAt ? 'Reçu' : 'Nouveau'}</span> · ${count}`; // 1.7.52 : programme reçu
+  if (!isLibre(p) && p.pausedAt) return `<span class="mem-flag">En pause depuis le ${formatShortDate(p.pausedAt)}</span>`;
+  return count;
+}
+
+function memTileHtml(p) {
+  const libre = isLibre(p);
+  const label = !libre && p.status === 'paused' ? 'Réactiver' : 'Activer';
+  return `
+    <div class="mem-tile${libre ? ' libre' : ''}" data-lp="${escapeHtml(p.id)}">
+      <span class="mem-ico">${libre ? '1×' : SWAP_SVG}</span>
+      <div class="mem-text"><div class="mem-name">${escapeHtml(p.name)}</div><div class="mem-sub">${memSubHtml(p)}</div></div>
+      <button type="button" class="mem-btn" onclick="activateProgram('${escapeHtml(p.id)}')">${label}</button>
+    </div>`;
+}
+
+// ============================================================
+// 3. ACTIVATION
+// ============================================================
+// Activer / Réactiver : l'élément devient actif, l'ancien actif passe en pause sans confirmation
+function activateProgram(id) {
+  const p = getProgram(id);
+  if (!p) return;
+  const now = new Date().toISOString();
+  getPrograms().forEach(o => {
+    if (o !== p && o.status === 'active') { o.status = 'paused'; o.pausedAt = now; }
+  });
+  p.status = 'active';
+  p.activatedAt = now;
+  p.pausedAt = null;
+  if (!isLibre(p)) p.nextKey = nextKeyFromHistory(p);
+  syncNextType();
+  saveState();
+  backupToDrive({ autoReconnect: false });
+  programDetailOpen = false;
+  clearDraft();
+  initWorkoutForm();
+  renderProgramOverview();
+}
+
+// Pause (1.7.30) : bouton en haut à droite de la tuile active ; le programme passe « En mémoire »
+// (« En pause depuis le … »), aucun programme n'est alors actif. Une séance en cours demande confirmation.
+async function pauseActiveProgram() {
+  const p = getActiveProgram();
+  if (!p) return;
+  let started = false;
+  try { started = localStorage.getItem('workout_start_time') !== null; } catch (e) { /* ignoré */ }
+  if (started && !await askSheet({ tone: 'warn', title: `Mettre en pause « ${p.name} » ?`,
+    text: 'Une séance est en cours : les séries saisies et le chrono seront supprimés.', ok: 'Mettre en pause', cancel: 'Continuer la séance' })) return;
+  if (getActiveProgram() !== p) return;
+  p.status = 'paused';
+  p.pausedAt = new Date().toISOString();
+  syncNextType();
+  saveState();
+  backupToDrive({ autoReconnect: false });
+  programDetailOpen = false;
+  if (started) {
+    resetWorkoutTimer();
+    if (restTimerInterval) { clearInterval(restTimerInterval); restTimerInterval = null; }
+    try { localStorage.removeItem('rest_end_time'); } catch (e) { /* ignoré */ }
+    resetRestTimerUi();
+  }
+  clearDraft();
+  initWorkoutForm();
+  renderProgramOverview();
+}
+
+// ============================================================
+// 4. CHOIX : PROGRAMME OU SÉANCE LIBRE (écran 4)
+// ============================================================
+function openProgramChooser() {
+  setProgramView('choose');
+}
+
+function chooserHtml() {
+  return `
+    <div class="ed-top"><button type="button" class="ed-back" aria-label="Retour" onclick="setProgramView('home')">${BACK_SVG}</button></div>
+    <div class="prog-spacer" aria-hidden="true"></div>
+    <p class="choose-lead">Choisis comment t'entraîner</p>
+    <button type="button" class="choose-card" onclick="startProgramEditor('program')">
+      <span class="choose-over">Séances qui reviennent</span>
+      <span class="choose-title">Créer un programme</span>
+      <span class="choose-text">Tes séances tournent en boucle. L'app te propose toujours la suivante.</span>
+      <span class="choose-foot">
+        <span class="choose-pills"><span class="type-pill type-pill-A small">A</span><span class="type-pill type-pill-B small">B</span><span class="type-pill choose-more small">···</span><span class="choose-swap">${SWAP_SVG}</span></span>
+        <span class="btn-start" aria-hidden="true">${ARROW_SVG}</span>
+      </span>
+    </button>
+    <button type="button" class="choose-card libre" onclick="startProgramEditor('libre')">
+      <span class="choose-over">Une seule fois</span>
+      <span class="choose-title">Séance libre</span>
+      <span class="choose-text">Une séance isolée, sans récurrence. Elle rejoint l'historique, rien de plus.</span>
+      <span class="choose-foot">
+        <span class="type-pill type-pill-libre">1×</span>
+        <span class="btn-start libre" aria-hidden="true">${ARROW_SVG}</span>
+      </span>
+    </button>
+    ${receiveProgramButtonHtml()}`;
+}
+
+// ============================================================
+// 5. ÉDITEUR (création et modification)
+// ============================================================
+function draftSnapshot(d) { return JSON.stringify({ n: d.name, s: d.sessions }); }
+
+function startProgramEditor(kind, id) {
+  const p = id ? getProgram(id) : null;
+  const sessions = p
+    ? JSON.parse(JSON.stringify(p.sessions))
+    : (kind === 'libre' ? [{ key: '', name: '', exercises: [] }] : SESSION_KEYS.slice(0, 3).map(k => ({ key: k, name: '', exercises: [] })));
+  programDraft = { id: p ? p.id : null, kind: p ? p.kind : kind, name: p ? p.name : '', sessions, idx: 0 };
+  if (p && !isLibre(p)) {
+    const i = p.sessions.findIndex(s => s.key === p.nextKey);
+    programDraft.idx = i >= 0 ? i : 0;
+  }
+  programDraft.start = draftSnapshot(programDraft);
+  setProgramView('editor');
+}
+
+function editProgram(id) {
+  const p = getProgram(id);
+  if (p) startProgramEditor(p.kind, id);
+}
+
+function draftSession() { return programDraft.sessions[programDraft.idx] || programDraft.sessions[0]; }
+function draftIsLibre() { return programDraft.kind === 'libre'; }
+
+function exerciseSubText(e) {
+  const info = exInfo(e.exId);
+  if (info.cardio) {
+    if (info.mode === 'time') return 'Cardio · durée';
+    if (info.name === ROWER_NAME) {
+      const sg = getSuggestedCardioValues(info.name, ROWER_DEFAULTS.seconds, ROWER_DEFAULTS.meters);
+      return `Cardio · ${formatDurationMS(sg.seconds)} · ${Number(sg.meters).toLocaleString('fr-FR')} m`;
+    }
+    return info.mode === 'floors' ? 'Cardio · durée, étages' : 'Cardio · durée, distance';
+  }
+  const n = e.sets || info.sets || 3;
+  return `${n} série${n > 1 ? 's' : ''} · ${info.mode === 'time' ? info.reps : (info.reps || '') + ' reps'}`;
+}
+
+function editorHtml() {
+  const d = programDraft;
+  const libre = draftIsLibre();
+  const s = draftSession();
+  const isNew = !d.id;
+  const nEx = s.exercises.length;
+  const nSets = sessionSetCount(s);
+  let html = `
+    <div class="ed-top">
+      <button type="button" class="ed-back" aria-label="Retour" onclick="programEditorBack()">${BACK_SVG}</button>
+      <label class="ed-field ed-name">
+        <input id="ed-name" type="text" maxlength="40" autocomplete="off" placeholder="${libre ? 'Nomme ta séance' : 'Mon programme'}" value="${escapeHtml(d.name)}" aria-label="${libre ? 'Nom de la séance libre' : 'Nom du programme'}">
+        <span class="ed-pen">${PEN_SVG}</span>
+      </label>
+    </div>`;
+  if (libre) {
+    html += `
+    <div class="ed-kind"><span class="type-pill type-pill-libre">1×</span><div><div class="ed-kind-title">Séance libre</div><div class="ed-kind-sub">Sans récurrence</div></div></div>`;
+  } else {
+    html += `
+    <div class="ed-kind"><span class="prog-ico dark">${SWAP_SVG}</span><div><div class="ed-kind-title">Séances A, B…</div><div class="ed-kind-sub">Elles tournent en boucle (${SESSION_MIN} minimum)</div></div></div>
+    <div class="ed-seg" role="tablist" aria-label="Séances du programme">
+      ${d.sessions.map((x, i) => `<button type="button" role="tab" class="ed-seg-btn${i === d.idx ? ' active' : ''}" aria-selected="${i === d.idx}" onclick="selectDraftSession(${i})">${x.key}</button>`).join('')}
+      <span class="ed-seg-gap"></span>
+      <button type="button" class="ed-seg-btn ed-seg-op" aria-label="Retirer la séance ${s.key}" onclick="removeDraftSession()" ${d.sessions.length <= SESSION_MIN ? 'disabled' : ''}>${MINUS_SVG}</button>
+      <button type="button" class="ed-seg-btn ed-seg-op plus" aria-label="Ajouter une séance" onclick="addDraftSession()" ${d.sessions.length >= SESSION_MAX ? 'disabled' : ''}>${PLUS_SVG}</button>
+    </div>
+    <div class="ed-session">
+      <span class="type-pill type-pill-${s.key}">${s.key}</span>
+      <label class="ed-field ed-sname">
+        <input id="ed-sname" type="text" maxlength="40" autocomplete="off" placeholder="Nomme la séance ${s.key}" value="${escapeHtml(s.name)}" aria-label="Nom de la séance ${s.key}">
+        <span class="ed-pen">${PEN_SVG}</span>
+      </label>
+    </div>`;
+  }
+  html += nEx
+    ? `<p class="ed-count">${nEx} exercice${nEx > 1 ? 's' : ''} · ${nSets} série${nSets > 1 ? 's' : ''}</p>`
+    : `<p class="ed-count">Aucun exercice dans cette séance pour l'instant.</p>`;
+  html += `<div class="ed-list" id="ed-list">` + s.exercises.map((e, i) => {
+    const name = exInfo(e.exId).name;
+    return `
+      <div class="ed-row" data-i="${i}">
+        <span class="ex-icon-badge">${getIcon(name, true)}</span>
+        <span class="ed-row-text"><span class="ed-row-name">${escapeHtml(name)}</span><span class="ed-row-sub">${exerciseSubText(e)}</span></span>
+        <button type="button" class="ed-more" aria-label="Options de ${escapeHtml(name)}" onclick="openExerciseMenu(${i})">${DOTS_SVG}</button>
+      </div>`;
+  }).join('') + `</div>`;
+  html += `<button type="button" class="ed-add" onclick="openAddExercise()"><span class="ed-add-plus">${PLUS_SVG}</span>Ajouter un exercice</button>`;
+
+  // 1.7.28 : le bouton apparaît dès qu'un exercice est choisi dans une séance ;
+  // s'il reste des séances vides, l'appui ouvre un résumé (rien n'est enregistré).
+  const anyExercise = d.sessions.some(x => x.exercises.length > 0);
+  html += `<div class="ed-footer">`;
+  if (!isNew) html += shareProgramButtonHtml(); // 1.7.52 : partager par lien ou QR code
+  if (!isNew) html += `<button type="button" class="ed-delete" onclick="openDeleteProgram()">${TRASH_SVG}${libre ? 'Supprimer la séance libre' : 'Supprimer le programme'}</button>`;
+  if (anyExercise) {
+    let label;
+    if (!isNew) label = 'Enregistrer';
+    else if (libre) label = getActiveProgram() ? 'Enregistrer la séance libre' : 'Démarrer la séance';
+    else label = 'Enregistrer le programme';
+    if (isNew && !libre) html += `<p class="ed-note">Tu pourras tout modifier plus tard, dans Programme.</p>`;
+    html += `<button type="button" class="btn${libre ? ' btn-sand' : ''}" id="ed-save" onclick="saveProgramDraft()">${label}</button>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+function bindEditor() {
+  const name = document.getElementById('ed-name');
+  if (name) name.addEventListener('input', () => { programDraft.name = name.value; });
+  const sname = document.getElementById('ed-sname');
+  if (sname) sname.addEventListener('input', () => { draftSession().name = sname.value; });
+}
+
+function selectDraftSession(i) {
+  programDraft.idx = i;
+  renderProgramOverview();
+}
+
+function addDraftSession() {
+  const d = programDraft;
+  if (d.sessions.length >= SESSION_MAX) return;
+  d.sessions.push({ key: SESSION_KEYS[d.sessions.length], name: '', exercises: [] });
+  d.idx = d.sessions.length - 1;
+  renderProgramOverview();
+}
+
+async function removeDraftSession() {
+  const d = programDraft;
+  if (d.sessions.length <= SESSION_MIN) return;
+  const s = draftSession();
+  const n = s.exercises.length;
+  if (n && !await askSheet({ tone: 'danger', danger: true, title: `Retirer la séance ${s.key} ?`,
+    text: `${n === 1 ? 'Son exercice sera retiré' : `Ses ${n} exercices seront retirés`} du programme.`, ok: 'Retirer la séance', cancel: 'Annuler' })) return;
+  if (programDraft !== d) return;
+  d.sessions.splice(d.idx, 1);
+  d.sessions.forEach((x, i) => { x.key = SESSION_KEYS[i]; });
+  d.idx = Math.min(d.idx, d.sessions.length - 1);
+  renderProgramOverview();
+}
+
+// Bouton « Programmes » de la barre : toujours la page de départ (1.7.27).
+// Depuis l'éditeur, une saisie non enregistrée demande confirmation.
+async function goProgramsHome() {
+  if (programView === 'editor' && programDraft && draftSnapshot(programDraft) !== programDraft.start
+      && !await askSheet(LEAVE_EDITOR_ASK)) return;
+  if (programView !== 'home') programDraft = null;
+  programView = 'home';
+  programDetailOpen = false;
+  switchTab('programme');
+}
+
+async function programEditorBack() {
+  if (programDraft && draftSnapshot(programDraft) !== programDraft.start
+      && !await askSheet(LEAVE_EDITOR_ASK)) return;
+  const wasNew = programDraft && !programDraft.id;
+  programDraft = null;
+  setProgramView(wasNew ? 'choose' : 'home');
+}
+
+// Résumé quand des séances sont encore vides à l'enregistrement (1.7.28)
+function openMissingSessions() {
+  const d = programDraft;
+  if (!d) return;
+  const empty = d.sessions.filter(x => !x.exercises.length);
+  if (!empty.length) return;
+  const n = empty.length;
+  const text = n === 1
+    ? `La séance ${empty[0].key} n'a encore aucun exercice. Ajoutes-en au moins un pour enregistrer le programme.`
+    : `${n} séances n'ont encore aucun exercice. Ajoutes-en au moins un dans chacune pour enregistrer le programme.`;
+  const rows = d.sessions.map(x => {
+    const ne = x.exercises.length;
+    const ns = x.exercises.reduce((t, e) => t + (Number(e.sets) || exInfo(e.exId).sets || 3), 0);
+    const name = (x.name || '').trim() || `Séance ${x.key}`;
+    return `<li class="miss-row${ne ? '' : ' empty'}">
+      <span class="type-pill type-pill-${x.key}">${x.key}</span>
+      <span class="miss-text"><span class="miss-name">${escapeHtml(name)}</span><span class="miss-sub">${ne ? `${ne} exercice${ne > 1 ? 's' : ''} · ${ns} série${ns > 1 ? 's' : ''}` : 'Aucun exercice'}</span></span>
+      ${ne ? `<svg class="miss-ok" viewBox="0 0 24 24" role="img" aria-label="complète"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>` : `<span class="miss-todo">À compléter</span>`}
+    </li>`;
+  }).join('');
+  openSheet(`
+    <h3 class="sheet-title center">Presque prêt</h3>
+    <p class="sheet-text center">${text}</p>
+    <ul class="miss-list">${rows}</ul>
+    <button type="button" class="btn" id="miss-go" onclick="completeMissingSession()">Compléter la séance ${empty[0].key}</button>
+    <button type="button" class="btn btn-secondary" onclick="closeSheet()">Fermer</button>`);
+}
+
+function completeMissingSession() {
+  const d = programDraft;
+  closeSheet();
+  if (!d) return;
+  const i = d.sessions.findIndex(x => !x.exercises.length);
+  if (i >= 0) selectDraftSession(i);
+}
+
+function saveProgramDraft() {
+  const d = programDraft;
+  if (!d || !d.sessions.some(x => x.exercises.length > 0)) return;
+  if (!d.sessions.every(x => x.exercises.length > 0)) { openMissingSessions(); return; }
+  const libre = d.kind === 'libre';
+  const name = (d.name || '').replace(/[<>]/g, '').trim() || (libre ? 'Séance libre' : 'Mon programme');
+  const now = new Date().toISOString();
+  const sessions = d.sessions.map((s, i) => ({
+    key: libre ? '' : SESSION_KEYS[i],
+    name: libre ? name : (s.name || '').replace(/[<>]/g, '').trim(),
+    exercises: s.exercises.map(e => ({ exId: e.exId, sets: e.sets || exInfo(e.exId).sets || 3 }))
+  }));
+  if (!Array.isArray(state.programs)) state.programs = [];
+  let startNow = false;
+  if (d.id) {
+    const p = getProgram(d.id);
+    if (!p) return;
+    p.name = name;
+    p.sessions = sessions;
+    p.savedAt = now;
+    if (!libre && !sessions.some(s => s.key === p.nextKey)) p.nextKey = sessions[0].key;
+  } else {
+    const active = getActiveProgram();
+    const p = {
+      id: newProgramId(), name, kind: libre ? 'libre' : 'program', status: active ? 'new' : 'active',
+      createdAt: now, activatedAt: active ? null : now, pausedAt: null, savedAt: now,
+      nextKey: libre ? '' : 'A', sessions
+    };
+    state.programs.push(p);
+    startNow = libre && !active;
+  }
+  normalizePrograms();
+  saveState();
+  backupToDrive({ autoReconnect: false }); // la sauvegarde complète Drive contient désormais ce programme (sans quitter l'application)
+  programDraft = null;
+  programDetailOpen = false;
+  clearDraft();
+  initWorkoutForm();
+  setProgramView('home');
+  if (startNow) switchTab('seance');
+}
+
+// --- Menu d'un exercice (⋮) : monter, descendre, retirer ---
+// 1.7.16 : plus de poignée de glisser-déposer ; le menu reste ouvert après « Monter » / « Descendre »
+// (l'exercice peut être déplacé de plusieurs crans d'affilée), « Fermer » le referme.
+function exerciseMenuHtml(i) {
+  const s = draftSession();
+  const e = s.exercises[i];
+  const name = exInfo(e.exId).name;
+  return `
+    <h3 class="sheet-title small">${escapeHtml(name)}</h3>
+    <button type="button" class="btn btn-secondary" id="ed-move-up" ${i === 0 ? 'disabled' : ''} onclick="moveDraftExercise(${i}, -1)">Monter</button>
+    <button type="button" class="btn btn-secondary" id="ed-move-down" ${i === s.exercises.length - 1 ? 'disabled' : ''} onclick="moveDraftExercise(${i}, 1)">Descendre</button>
+    <button type="button" class="btn btn-danger" onclick="removeDraftExercise(${i})">Retirer de la séance</button>
+    <button type="button" class="btn btn-secondary" onclick="closeSheet()">Fermer</button>`;
+}
+
+function openExerciseMenu(i) {
+  if (!draftSession().exercises[i]) return;
+  openSheet(exerciseMenuHtml(i));
+}
+
+function moveDraftExercise(i, dir) {
+  const list = draftSession().exercises;
+  const j = i + dir;
+  if (j < 0 || j >= list.length) return;
+  [list[i], list[j]] = [list[j], list[i]];
+  renderProgramOverview();
+  openSheet(exerciseMenuHtml(j), { update: true }); // le menu reste ouvert, sur l'exercice à sa nouvelle place
+}
+
+function removeDraftExercise(i) {
+  draftSession().exercises.splice(i, 1);
+  closeSheet();
+  renderProgramOverview();
+}
+
+// ============================================================
+// 6. AJOUTER UN EXERCICE (écrans 7, 8, 10, 18)
+// ============================================================
+let addSheet = null; // { filter, query, selected: Set(exId) }
+
+function openAddExercise() {
+  addSheet = { filter: 'Tous', query: '', selected: new Set() };
+  openSheet(addSheetHtml(), { tall: true, onClose: () => { addSheet = null; } });
+  bindAddSheet();
+}
+
+function addSheetHtml() {
+  const s = draftSession();
+  const title = draftIsLibre() ? 'Ajouter à la séance' : `Ajouter à la séance ${s.key}`;
+  return `
+    <div class="sheet-head">
+      <h3 class="sheet-title">${title}</h3>
+      <button type="button" class="sheet-close" aria-label="Fermer" onclick="cancelAddExercise()">${CLOSE_SVG}</button>
+    </div>
+    <label class="add-search">${SEARCH_SVG}<input id="add-search" type="search" placeholder="Rechercher un exercice" autocomplete="off" aria-label="Rechercher un exercice"></label>
+    <div class="add-chips" role="tablist">${EXERCISE_FILTERS.map(f => `<button type="button" class="filter-btn${f === 'Tous' ? ' active' : ''}" data-f="${f}">${f}</button>`).join('')}</div>
+    <div class="add-list" id="add-list">${addListHtml()}</div>
+    <div class="sheet-actions" id="add-actions">${addActionsHtml()}</div>`;
+}
+
+function normalizeSearch(t) { return String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+
+function addMetaText(e) {
+  if (e.cardio) {
+    const u = CARDIO_UNITS[e.unit];
+    if (e.mode === 'time') return 'Cardio · Durée';
+    return `Cardio · Durée, ${e.mode === 'floors' ? 'étages' : 'distance'}${u ? ' · ' + u.suffix : ''}`;
+  }
+  return e.group;
+}
+
+function addListHtml() {
+  const s = draftSession();
+  const inSession = new Set(s.exercises.map(e => e.exId));
+  const q = normalizeSearch(addSheet.query);
+  const items = CATALOGUE.filter(e => (addSheet.filter === 'Tous' || (addSheet.filter === 'Polyarticulaires' ? !!e.poly : e.group === addSheet.filter)) && (!q || normalizeSearch(e.name).includes(q)));
+  if (!items.length) return `<p class="add-empty">Aucun exercice trouvé.</p>`;
+  return items.map(e => {
+    const already = inSession.has(e.id); // 1.7.59 : reste choisissable (un exercice peut revenir plusieurs fois)
+    const on = addSheet.selected.has(e.id);
+    return `
+      <button type="button" class="add-item${already ? ' already' : ''}${on ? ' on' : ''}" data-id="${e.id}" aria-pressed="${on}">
+        <span class="ex-icon-badge">${getIcon(e.name, true)}</span>
+        <span class="add-text"><span class="add-name">${escapeHtml(e.name)}</span><span class="add-meta">${already ? 'Déjà dans la séance · ajouter encore' : addMetaText(e)}</span></span>
+        <span class="add-check">${on ? CHECK_SVG : PLUS_SVG}</span>
+      </button>`;
+  }).join('');
+}
+
+function addActionsHtml() {
+  const n = addSheet ? addSheet.selected.size : 0;
+  return (n ? `<button type="button" class="btn" onclick="confirmAddExercise()">${n === 1 ? 'Ajouter l’exercice' : `Ajouter les ${n} exercices`}</button>` : '')
+    + `<button type="button" class="btn btn-secondary" onclick="cancelAddExercise()">Annuler</button>`;
+}
+
+function refreshAddSheet() {
+  const list = document.getElementById('add-list');
+  if (list) list.innerHTML = addListHtml();
+  const actions = document.getElementById('add-actions');
+  if (actions) actions.innerHTML = addActionsHtml();
+}
+
+function bindAddSheet() {
+  const search = document.getElementById('add-search');
+  if (search) search.addEventListener('input', () => { addSheet.query = search.value; refreshAddSheet(); });
+  document.querySelectorAll('.add-chips .filter-btn').forEach(b => b.addEventListener('click', () => {
+    addSheet.filter = b.dataset.f;
+    document.querySelectorAll('.add-chips .filter-btn').forEach(x => x.classList.toggle('active', x === b));
+    refreshAddSheet();
+  }));
+  const list = document.getElementById('add-list');
+  if (list) list.addEventListener('click', ev => {
+    const item = ev.target.closest('.add-item');
+    if (!item || item.disabled) return;
+    const id = +item.dataset.id;
+    if (addSheet.selected.has(id)) addSheet.selected.delete(id); else addSheet.selected.add(id);
+    refreshAddSheet();
+  });
+}
+
+function confirmAddExercise() {
+  if (!addSheet || !addSheet.selected.size) return;
+  const s = draftSession();
+  // Ajoutés dans l'ordre où ils ont été cochés (réordonnables ensuite par la poignée ou le menu ⋮)
+  Array.from(addSheet.selected).forEach(id => {
+    const e = exInfo(id);
+    s.exercises.push({ exId: e.id, sets: e.cardio ? 1 : (e.sets || 3) });
+  });
+  closeSheet();
+  renderProgramOverview();
+}
+
+async function cancelAddExercise() {
+  const n = addSheet ? addSheet.selected.size : 0;
+  if (n && !await askSheet({ tone: 'warn', title: 'Abandonner la sélection ?',
+    text: n === 1 ? "L'exercice coché ne sera pas ajouté à la séance." : `Les ${n} exercices cochés ne seront pas ajoutés à la séance.`,
+    ok: 'Abandonner', cancel: 'Continuer la sélection' })) return;
+  closeSheet();
+}
+
+// ============================================================
+// 7. SUPPRIMER (écrans 19 et 21)
+// ============================================================
+function openDeleteProgram() {
+  const d = programDraft;
+  if (!d || !d.id) return;
+  const p = getProgram(d.id);
+  if (!p) return;
+  const libre = isLibre(p);
+  const keys = p.sessions.map(s => s.key);
+  const text = libre
+    ? 'La séance libre sera supprimée. Les séances déjà faites restent dans l’historique et les graphiques.'
+    : `Les ${keys.length} séances ${keys.slice(0, -1).join(', ')} et ${keys[keys.length - 1]} seront supprimées. Les séances déjà faites restent dans l’historique et les graphiques.`;
+  openSheet(`
+    <div class="sheet-icon danger">${TRASH_SVG}</div>
+    <h3 class="sheet-title center">Supprimer « ${escapeHtml(p.name)} » ?</h3>
+    <p class="sheet-text center">${text}</p>
+    <button type="button" class="btn btn-delete" onclick="deleteProgram('${escapeHtml(p.id)}')">${libre ? 'Supprimer la séance libre' : 'Supprimer le programme'}</button>
+    <button type="button" class="btn btn-secondary" onclick="closeSheet()">Annuler</button>`);
+}
+
+// L'historique et les graphiques ne sont jamais touchés : les séances gardent le nom recopié du programme
+function deleteProgram(id) {
+  state.programs = getPrograms().filter(p => p.id !== id);
+  normalizePrograms();
+  saveState();
+  backupToDrive({ autoReconnect: false });
+  closeSheet();
+  programDraft = null;
+  programDetailOpen = false;
+  clearDraft();
+  initWorkoutForm();
+  setProgramView('home');
+}
+
+// ============================================================
+// 8. RESTAURER DES PROGRAMMES DEPUIS GOOGLE DRIVE (écrans 2 et 3)
+// ============================================================
+// Lit la sauvegarde complète la plus récente du Drive et propose ses programmes et séances libres à cocher.
+// Les éléments cochés arrivent en pause ; un élément déjà présent (même identifiant) n'est pas dupliqué ;
+// l'historique n'est pas concerné.
+const PROGRAM_RESTORE_PENDING_KEY = 'h49_program_restore_pending';
+let restoreCandidates = [];
+let restoreSelected = new Set();
+
+function openProgramRestore() {
+  if (!getDriveToken()) {
+    openSheet(`
+      <div class="sheet-icon">${CLOUD_SVG}</div>
+      <h3 class="sheet-title center">Restaurer un programme</h3>
+      <p class="sheet-text center">Connecte ton compte Google pour retrouver tes programmes sauvegardés.</p>
+      <button type="button" class="btn" onclick="connectDriveForRestore()">Se connecter à Google Drive</button>
+      <button type="button" class="btn btn-secondary" onclick="closeSheet()">Annuler</button>`);
+    return;
+  }
+  loadProgramRestoreList();
+}
+
+function connectDriveForRestore() {
+  try { localStorage.setItem(PROGRAM_RESTORE_PENDING_KEY, '1'); } catch (e) { /* ignoré */ }
+  closeSheet();
+  connectGoogleDrive();
+}
+
+// Appelée quand l'accès Drive vient d'être obtenu : reprend la restauration demandée avant la connexion
+function resumeProgramRestoreIfPending() {
+  let pending = false;
+  try { pending = localStorage.getItem(PROGRAM_RESTORE_PENDING_KEY) === '1'; localStorage.removeItem(PROGRAM_RESTORE_PENDING_KEY); } catch (e) { /* ignoré */ }
+  if (!pending || !getDriveToken()) return false;
+  switchTab('programme');
+  loadProgramRestoreList();
+  return true;
+}
+
+async function loadProgramRestoreList() {
+  const token = getDriveToken();
+  if (!token) return;
+  openSheet(`<h3 class="sheet-title">Restaurer un programme</h3><p class="sheet-text">Recherche de tes programmes sur Google Drive…</p>`);
+  try {
+    const folderId = await ensureDriveFolder(token.access_token);
+    const files = await listDriveBackups(token.access_token, folderId);
+    if (!files.length) throw new Error('aucune sauvegarde');
+    const dl = await downloadDriveBackup(token.access_token, files[0].id);
+    if (!dl.ok || !dl.data) throw new Error('sauvegarde illisible');
+    const data = migrateState(sanitizeImported(dl.data)).state;
+    restoreCandidates = (data.programs || []).filter(p => p && p.id && Array.isArray(p.sessions) && p.sessions.length);
+    restoreSelected = new Set();
+    if (!restoreCandidates.length) {
+      openSheet(`<h3 class="sheet-title">Restaurer un programme</h3><p class="sheet-text">La dernière sauvegarde de ton Drive ne contient aucun programme.</p><button type="button" class="btn btn-secondary" onclick="closeSheet()">Fermer</button>`);
+      return;
+    }
+    renderProgramRestoreList();
+  } catch (e) {
+    openSheet(`<h3 class="sheet-title">Restaurer un programme</h3><p class="sheet-text">Aucun programme trouvé sur ton Drive (${escapeHtml(e && e.message ? e.message : 'erreur réseau')}).</p><button type="button" class="btn btn-secondary" onclick="closeSheet()">Fermer</button>`);
+  }
+}
+
+function renderProgramRestoreList() {
+  const n = restoreSelected.size;
+  const rows = restoreCandidates.map((p, i) => {
+    const libre = isLibre(p);
+    const on = restoreSelected.has(i);
+    const meta = libre ? 'Séance libre' : `${p.sessions.length} séances`;
+    const when = p.savedAt ? new Date(p.savedAt) : null;
+    const whenText = when && !isNaN(when) ? `Enregistré le ${when.getDate()} ${HISTORY_MONTHS_SHORT[when.getMonth()]} · ${String(when.getHours()).padStart(2, '0')}:${String(when.getMinutes()).padStart(2, '0')}` : '';
+    const present = !!getProgram(p.id);
+    return `
+      <button type="button" class="restore-item${on ? ' on' : ''}${libre ? ' libre' : ''}" ${present ? 'disabled' : ''} aria-pressed="${on}" onclick="toggleRestoreItem(${i})">
+        <span class="mem-ico">${libre ? '1×' : SWAP_SVG}</span>
+        <span class="restore-text"><span class="restore-name"><b>${escapeHtml(p.name)}</b> · ${meta}</span><span class="restore-when">${present ? 'Déjà sur cet appareil' : whenText}</span></span>
+        <span class="restore-box">${on ? CHECK_SVG : ''}</span>
+      </button>`;
+  }).join('');
+  openSheet(`
+    <h3 class="sheet-title">Restaurer un programme</h3>
+    <p class="sheet-text">Coche les programmes à reprendre. Ils arriveront en pause, à toi de réactiver celui de ton choix. Ton historique de séances n'est pas concerné.</p>
+    <div class="restore-list">${rows}</div>
+    ${n ? `<button type="button" class="btn" onclick="restoreSelectedPrograms()">${n > 1 ? `Restaurer les ${n} programmes` : 'Restaurer le programme'}</button>` : ''}
+    <button type="button" class="btn btn-secondary" onclick="closeSheet()">Annuler</button>`, { tall: true });
+}
+
+function toggleRestoreItem(i) {
+  if (restoreSelected.has(i)) restoreSelected.delete(i); else restoreSelected.add(i);
+  renderProgramRestoreList();
+}
+
+function restoreSelectedPrograms() {
+  if (!Array.isArray(state.programs)) state.programs = [];
+  const now = new Date().toISOString();
+  restoreCandidates.forEach((p, i) => {
+    if (!restoreSelected.has(i) || getProgram(p.id)) return;
+    const copy = JSON.parse(JSON.stringify(p));
+    copy.status = 'paused';
+    copy.pausedAt = now;
+    state.programs.push(copy);
+  });
+  normalizePrograms();
+  saveState();
+  closeSheet();
+  setProgramView('home');
+}
+
+// Même assainissement que l'import (security.js) : aucun « < » ni « > » dans les chaînes
+function sanitizeImported(value) {
+  if (typeof value === 'string') return value.replace(/[<>]/g, '');
+  if (Array.isArray(value)) return value.map(sanitizeImported);
+  if (value && typeof value === 'object') {
+    const clean = {};
+    Object.keys(value).forEach(k => { clean[k] = sanitizeImported(value[k]); });
+    return clean;
+  }
+  return value;
+}
+
+// ============================================================
+// 9. APPUI LONG ET FEUILLES DU BAS
+// ============================================================
+// Appui long (≈ 0,5 s, légère vibration) sur une tuile : ouvre l'éditeur du programme ou de la séance libre
+const LONG_PRESS_MS = 550;
+function bindLongPress(root) {
+  root.querySelectorAll('[data-lp]').forEach(el => {
+    let timer = null, x0 = 0, y0 = 0, fired = false;
+    const cancel = () => { clearTimeout(timer); timer = null; el.classList.remove('pressing'); };
+    el.addEventListener('pointerdown', ev => {
+      if (ev.target.closest('button')) return; // boutons de la tuile : comportement normal
+      fired = false; x0 = ev.clientX; y0 = ev.clientY;
+      el.classList.add('pressing');
+      timer = setTimeout(() => {
+        fired = true;
+        el.classList.remove('pressing');
+        try { if (navigator.vibrate) navigator.vibrate(15); } catch (e) { /* ignoré */ }
+        editProgram(el.dataset.lp);
+      }, LONG_PRESS_MS);
+    });
+    el.addEventListener('pointermove', ev => { if (timer && (Math.abs(ev.clientX - x0) > 10 || Math.abs(ev.clientY - y0) > 10)) cancel(); });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => el.addEventListener(t, cancel));
+    el.addEventListener('contextmenu', ev => ev.preventDefault());
+    el.addEventListener('click', ev => { if (fired) { ev.preventDefault(); ev.stopPropagation(); } }, true);
+  });
+}
+
+// Feuille du bas (un seul à la fois) : contenu HTML libre ; touche sur le fond = fermer
+let sheetOnClose = null;
+function openSheet(html, opts = {}) {
+  let overlay = document.getElementById('sheet-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'sheet-overlay';
+    overlay.className = 'sheet-overlay';
+    overlay.addEventListener('click', ev => { if (ev.target === overlay) { if (addSheet) cancelAddExercise(); else closeSheet(); } });
+    document.body.appendChild(overlay);
+  }
+  if (opts.onClose) sheetOnClose = opts.onClose;
+  // update : la feuille déjà ouverte est mise à jour sur place (pas de nouvelle animation, défilement conservé)
+  const current = overlay.classList.contains('open') ? overlay.querySelector('.sheet') : null;
+  if (opts.update && current) {
+    const scroller = current.querySelector('.backup-scroll');
+    const top = scroller ? scroller.scrollTop : 0;
+    current.innerHTML = `<span class="sheet-grip" aria-hidden="true"></span>${html}`;
+    const again = current.querySelector('.backup-scroll');
+    if (again) again.scrollTop = top;
+    return;
+  }
+  overlay.innerHTML = `<div class="sheet${opts.tall ? ' tall' : ''}" role="dialog" aria-modal="true"><span class="sheet-grip" aria-hidden="true"></span>${html}</div>`;
+  overlay.classList.add('open');
+}
+
+// ============================================================
+// FENÊTRES DE CONFIRMATION ET MESSAGES (1.7.29)
+// Remplacent confirm() et alert() : même volet du bas que « Supprimer le programme ».
+// Une couche à part (#ask-overlay), au-dessus des autres volets et fenêtres.
+// askSheet(...) renvoie une promesse : true = bouton principal, false = renoncer (bouton gris, fond, Échap).
+// ============================================================
+const WARN_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4l9 16H3z"/><path d="M12 10v4.5M12 17.5v.5"/></svg>';
+let askResolve = null;
+function askSheet({ tone = 'warn', title = '', text = '', ok = 'OK', cancel = null, danger = false } = {}) {
+  // Point d'accroche des tests automatiques (jamais défini dans l'application)
+  if (typeof window.__askHook === 'function') return Promise.resolve(!!window.__askHook({ tone, title, text, ok, cancel, danger }));
+  if (askResolve) finishAsk(false);
+  let overlay = document.getElementById('ask-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'ask-overlay';
+    overlay.className = 'sheet-overlay ask-overlay';
+    overlay.addEventListener('click', ev => {
+      if (ev.target === overlay) return finishAsk(false);
+      const b = ev.target.closest('[data-ask]');
+      if (b) finishAsk(b.dataset.ask === 'ok');
+    });
+    document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && askResolve) finishAsk(false); });
+    document.body.appendChild(overlay);
+  }
+  const icon = { warn: WARN_SVG, danger: TRASH_SVG, cloud: CLOUD_SVG, info: INFO_SVG }[tone] || WARN_SVG;
+  const paras = String(text || '').split(/\n\s*\n/).filter(Boolean).map(t => `<p class="sheet-text center">${escapeHtml(t.trim()).replace(/\n/g, '<br>')}</p>`).join('');
+  overlay.innerHTML = `<div class="sheet ask-sheet" role="alertdialog" aria-modal="true" aria-labelledby="ask-title">
+    <span class="sheet-grip" aria-hidden="true"></span>
+    <div class="sheet-icon ${tone}">${icon}</div>
+    <h3 class="sheet-title center" id="ask-title">${escapeHtml(title)}</h3>
+    ${paras}
+    <button type="button" class="btn${danger ? ' btn-delete' : ''}" id="ask-ok" data-ask="ok">${escapeHtml(ok)}</button>
+    ${cancel ? `<button type="button" class="btn btn-secondary" id="ask-cancel" data-ask="cancel">${escapeHtml(cancel)}</button>` : ''}
+  </div>`;
+  overlay.classList.add('open');
+  const focus = overlay.querySelector(cancel ? '#ask-cancel' : '#ask-ok');
+  if (focus) focus.focus({ preventScroll: true });
+  return new Promise(res => { askResolve = res; });
+}
+
+function finishAsk(value) {
+  const overlay = document.getElementById('ask-overlay');
+  if (overlay) { overlay.classList.remove('open'); overlay.innerHTML = ''; }
+  const res = askResolve;
+  askResolve = null;
+  if (res) res(value);
+}
+
+// Message d'information (un seul bouton OK)
+function appAlert(title, text = '', tone = 'info') {
+  return askSheet({ tone, title, text, ok: 'OK' });
+}
+
+const LEAVE_EDITOR_ASK = { tone: 'warn', title: 'Attention', text: 'Revenir en arrière annulera la saisie. Continuer ?', ok: 'Revenir en arrière', cancel: 'Rester sur le programme' };
+
+function closeSheet() {
+  const overlay = document.getElementById('sheet-overlay');
+  if (overlay) { overlay.classList.remove('open'); overlay.innerHTML = ''; }
+  const cb = sheetOnClose;
+  sheetOnClose = null;
+  if (cb) cb();
+}

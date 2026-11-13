@@ -47,7 +47,7 @@ try:
         check('service worker installé et actif', ok)
         pg.wait_for_timeout(600)
         check(f'version exécutée affichée dans Historique ({version})', pg.inner_text('#update-version') == f'Version {version}', pg.inner_text('#update-version'))
-        check('titre de l\'en-tête : sans numéro de version (il est dans Réglages)', pg.inner_text('#app-title').strip() == 'SUIVI FITNESS')
+        check('titre de l\'en-tête : sans numéro de version (il est dans Réglages)', pg.inner_text('#app-title').strip() == 'MON CARNET DE SALLE')
         check('première installation : aucun avis de mise à jour', pg.evaluate("document.getElementById('update-banner').hidden") is True and not pg.evaluate("document.getElementById('nav-historique').classList.contains('has-update')"))
 
         # vérification sans nouvelle version

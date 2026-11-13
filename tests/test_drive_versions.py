@@ -1,6 +1,6 @@
 """Google Drive, versions (1.6.33) : chaque sauvegarde crée fitness-backup-AAAA-MM-JJ-HH-MM-SS.json, seules les 5 plus
 récentes sont gardées (les autres vont à la corbeille), un échec de suppression ne fait pas échouer la sauvegarde,
-et « Restaurer depuis Drive » liste les 5 dernières sauvegardes pour restaurer n'importe laquelle."""
+et la fenêtre « Restaurer une sauvegarde » (Historique) liste les 5 dernières sauvegardes pour restaurer n'importe laquelle."""
 import json, re, sys
 from datetime import datetime
 from harness import *
@@ -91,7 +91,7 @@ with Srv() as base, sync_playwright() as p:
     st = pg.evaluate(STATUS)
     warn = [t for (ty, t) in logs if ty == 'warning' and 'ancienne sauvegarde' in t]
     check("suppression refusée (500) : nouvelle sauvegarde envoyée et enregistrée comme réussie", d.posts == 1 and d.trash_attempts == 1 and ls(pg, 'h49_drive_last_hash') and ls(pg, 'h49_drive_last_backup'), (d.posts, d.trash_attempts))
-    check("suppression refusée : aucune erreur affichée dans Réglages, juste « dernière sauvegarde »", 'Dernière sauvegarde' in st and 'Google refuse' not in st and not ls(pg, 'h49_drive_error'), st)
+    check("suppression refusée : aucune erreur affichée dans Réglages, juste « Sauvegarde automatique : date »", re.match(r'^Sauvegarde automatique : \d\d/\d\d \d\d:\d\d', st) and 'Google refuse' not in st and not ls(pg, 'h49_drive_error'), st)
     check("suppression refusée : l'erreur est journalisée dans la console", warn, warn)
     r = pg.evaluate("state.weights.push({date:'2026-11-07', weight:79}); syncDriveBackup()")
     check("suppression refusée : les sauvegardes suivantes continuent de partir", r.get('ok') and d.posts == 2, r)
@@ -110,22 +110,37 @@ with Srv() as base, sync_playwright() as p:
     ctx, pg, dlg, logs, errs = run(br, base, d, seeds=[VALID, FOLDER, BKID])
     pg.wait_for_timeout(1500)
     pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(300)
-    hidden0 = pg.evaluate("document.getElementById('drive-backups').hidden")
-    pg.click('#drive-restore-btn'); pg.wait_for_timeout(1500)
-    rows = pg.evaluate("[...document.querySelectorAll('#drive-backups .drive-backup-row')].map(r=>({t:r.querySelector('.ex-name').textContent,s:r.querySelector('.ex-sub').textContent,b:r.querySelector('button').textContent}))")
-    check("liste fermée par défaut ; « Restaurer depuis Drive » affiche les 5 dernières sauvegardes (sur 7)", hidden0 and len(rows) == 5 and not pg.evaluate("document.getElementById('drive-backups').hidden"), len(rows))
+    hidden0 = not pg.evaluate("!!document.querySelector('#sheet-overlay.open')")
+    check("Réglages : plus de bouton « Restaurer depuis Drive » hors conflit (la restauration se fait depuis l'Historique)", not pg.evaluate("document.getElementById('drive-restore-btn').offsetParent"))
+    pg.evaluate("switchTab('historique')"); pg.wait_for_timeout(200)
+    pg.click('#tab-historique .backup-card .btn-secondary'); pg.wait_for_timeout(1500)
+    ROWS = "[...document.querySelectorAll('.sheet .backup-item.drive')].map(r=>({t:r.querySelector('.restore-name').textContent,s:r.querySelector('.restore-when').textContent,on:r.classList.contains('on')}))"
+    rows = pg.evaluate(ROWS)
+    check("Historique « Restaurer » : fenêtre « Restaurer une sauvegarde » avec les 5 dernières sauvegardes Drive (sur 7)", hidden0 and len(rows) == 5 and 'Restaurer une sauvegarde' in pg.inner_text('.sheet'), len(rows))
+    check("fenêtre : ligne « Choisir un fichier… » (sauvegarde de cet appareil)", pg.evaluate("document.querySelectorAll('.sheet .backup-item.file').length") == 1)
     exp = [datetime.fromisoformat(vs[i][1].replace('Z', '+00:00')) for i in (6, 5, 4, 3, 2)]
-    shown = pg.evaluate("isos=>isos.map(formatDriveBackupDate)", [vs[i][1] for i in (6, 5, 4, 3, 2)])
+    shown = pg.evaluate("isos=>isos.map(i=>formatBackupDayLabel(i))", [vs[i][1] for i in (6, 5, 4, 3, 2)])
+    lbl = pg.evaluate("[formatBackupDayLabel('2026-11-08T17:42:00', new Date('2026-11-08T21:00:00')), formatBackupDayLabel('2026-11-07T19:15:00', new Date('2026-11-08T21:00:00')), formatBackupDayLabel('2026-11-05T19:15:00', new Date('2026-11-08T21:00:00'))]")
+    check("dates de la fenêtre : « Aujourd'hui », « Hier », sinon la date", lbl == ["Aujourd'hui à 17:42:00", 'Hier à 19:15:00', '05/11/2026 à 19:15:00'], lbl)
     check("triées de la plus récente à la plus ancienne, avec date et heure (secondes comprises)", [r['t'] for r in rows] == shown and all(re.match(r'^\d{2}/\d{2}/2026 à \d{2}:\d{2}:\d{2}$', r['t']) for r in rows), [r['t'] for r in rows])
-    check("chaque ligne a son bouton « Restaurer », la première est marquée « La plus récente »", all(r['b'] == 'Restaurer' for r in rows) and rows[0]['s'] == 'La plus récente' and rows[1]['s'] == 'Version précédente', rows[:2])
+    check("un seul choix, la plus récente cochée par défaut et marquée « La plus récente »", [r['on'] for r in rows] == [True, False, False, False, False] and rows[0]['s'] == 'La plus récente' and rows[1]['s'] == 'Version précédente', rows[:2])
+    pg.evaluate("document.querySelector('.sheet').dataset.mark='1'")
+    pg.evaluate("document.querySelectorAll('.sheet .backup-item.drive')[2].click()"); pg.wait_for_timeout(100)
+    check("choisir une ligne ne rouvre pas la fenêtre (mise à jour sur place)", pg.evaluate("document.querySelector('.sheet').dataset.mark") == '1')
+    check("choix d'une autre ligne : elle seule est cochée, bouton « Restaurer cette sauvegarde »", [r['on'] for r in pg.evaluate(ROWS)] == [False, False, True, False, False] and pg.inner_text('#backup-restore-go') == 'Restaurer cette sauvegarde')
+    pg.evaluate("document.querySelectorAll('.sheet .backup-item.drive')[2].click()"); pg.wait_for_timeout(100)
+    check("ligne décochée : plus de bouton de restauration (seul « Annuler » reste)", not pg.evaluate("!!document.getElementById('backup-restore-go')"))
+    pg.evaluate("document.querySelector('.sheet .backup-item.file').click()"); pg.wait_for_timeout(100)
+    check("« Choisir un fichier… » : bouton « Choisir le fichier »", pg.inner_text('#backup-restore-go') == 'Choisir le fichier')
+    pg.evaluate("document.querySelectorAll('.sheet .backup-item.drive')[2].click()"); pg.wait_for_timeout(100)
     dlg.clear()
-    pg.evaluate("document.querySelectorAll('#drive-backups .drive-backup-row button')[2].click()"); pg.wait_for_timeout(2500)
+    pg.evaluate("document.getElementById('backup-restore-go').click()"); pg.wait_for_timeout(2500)
     conf = [mm for (t, mm) in dlg if t == 'confirm']
-    check("restaurer la 3e sauvegarde : confirmation avec SA date et SON nombre de séances", conf and rows[2]['t'] in conf[-1] and '(14 séances)' in conf[-1], conf[-1:])
+    check("restaurer la 3e sauvegarde : confirmation avec SA date et SON nombre de séances", conf and rows[2]['t'] in conf[-1] and 'contient 14 séances' in conf[-1], conf[-1:])
     check("restaurer la 3e sauvegarde : l'appareil contient exactement cette version", len(local_state(pg)['history']) == 14 and ls(pg, 'h49_drive_backup_id') == 'V5', len(local_state(pg)['history']))
-    check("après restauration : liste refermée", pg.evaluate("document.getElementById('drive-backups').hidden"))
+    check("après restauration : fenêtre refermée", not pg.evaluate("!!document.querySelector('#sheet-overlay.open')"))
     # restaurer la plus ancienne de la liste (5e)
-    restore = lambda i: (pg.evaluate("restoreFromDrive()"), pg.wait_for_timeout(1200), pg.evaluate("i=>document.querySelectorAll('#drive-backups .drive-backup-row button')[i].click()", i), pg.wait_for_timeout(2500))
+    restore = lambda i: (pg.evaluate("restoreFromDrive()"), pg.wait_for_timeout(1200), pg.evaluate("i=>{document.querySelectorAll('.sheet .backup-item.drive')[i].click();document.getElementById('backup-restore-go').click()}", i), pg.wait_for_timeout(2500))
     restore(4)
     check("restaurer la 5e (la plus ancienne affichée) : 12 séances", len(local_state(pg)['history']) == 12, len(local_state(pg)['history']))
     # sauvegarde disparue entre l'affichage et le choix
@@ -133,12 +148,12 @@ with Srv() as base, sync_playwright() as p:
     for f in d.files:
         if f['id'] == 'V7': f['trashed'] = True
     dlg.clear(); n0 = len(local_state(pg)['history'])
-    pg.evaluate("document.querySelectorAll('#drive-backups .drive-backup-row button')[0].click()"); pg.wait_for_timeout(2500)
-    check("sauvegarde supprimée entre-temps : message, données intactes, liste rafraîchie", any("n'existe plus" in mm for (t, mm) in dlg) and len(local_state(pg)['history']) == n0 and pg.evaluate("document.querySelectorAll('#drive-backups .drive-backup-row').length") == 5, dlg[-1:])
+    pg.evaluate("document.getElementById('backup-restore-go').click()"); pg.wait_for_timeout(2500)
+    check("sauvegarde supprimée entre-temps : message, données intactes, fenêtre rouverte avec la liste à jour", any("n'existe plus" in mm for (t, mm) in dlg) and len(local_state(pg)['history']) == n0 and pg.evaluate("document.querySelectorAll('.sheet .backup-item.drive').length") == 5, dlg[-1:])
     check("aucune erreur JavaScript", not [e for e in errs if 'Failed to load resource' not in e], errs[:3])
-    # déconnexion : la liste disparaît
+    # déconnexion : la fenêtre se ferme
     pg.evaluate("disconnectGoogleDrive()"); pg.wait_for_timeout(300)
-    check("« Déconnecter » : la liste des sauvegardes est masquée", pg.evaluate("document.getElementById('drive-backups').hidden"))
+    check("« Déconnecter » : la fenêtre des sauvegardes se ferme", not pg.evaluate("!!document.querySelector('#sheet-overlay.open')"))
     ctx.close()
 
     # 5) appareil vidé : aucune version vide n'est envoyée par-dessus la plus récente (protection inchangée)
