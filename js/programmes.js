@@ -737,6 +737,7 @@ let restoreCandidates = [];
 let restoreSelected = new Set();
 
 function openProgramRestore() {
+  if (typeof loadGoogleIdentity === 'function') loadGoogleIdentity(); // 1.7.65 : connexion Drive possible depuis ce volet
   if (!getDriveToken()) {
     openSheet(`
       <div class="sheet-icon">${CLOUD_SVG}</div>

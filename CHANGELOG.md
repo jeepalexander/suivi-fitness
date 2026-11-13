@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.65] - 2026-11-13
+### 🔒 Script de connexion Google chargé seulement quand le Drive sert (co-auteur : Claude)
+- Google Safe Browsing signale `jeepalexander.github.io/suivi-fitness/` comme « pages trompeuses », sans URL précise : probable faux positif d'une petite app en `github.io` qui charge la connexion Google sur chaque page. Le script Google Identity Services n'est plus dans `index.html` : `loadGoogleIdentity()` le charge à la demande — au lancement si le Drive est déjà connecté (navigateur), à l'ouverture de Réglages, de « Sauvegarder », de « Restaurer » et de la restauration de programmes, et à l'appui sur « Se connecter » / au renouvellement silencieux. Un visiteur qui n'utilise pas le Drive (ou un robot d'exploration) ne charge rien de Google.
+- Déconnexion : le script est chargé si besoin pour révoquer l'accès. Application installée : inchangé (connexion par redirection).
+- Aucun changement visible. Tests : `test_prod_test.py` (aucun script Google au lancement sans Drive, préchargé à l'ouverture de Réglages, chargé au lancement si le Drive est connecté). Suite complète : tous les tests passent.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.65.
+
+---
+
 ## [1.7.64] - 2026-11-13
 ### 🧪 Production et version de test publiées séparément (co-auteur : Claude)
 - **Publication** (`.github/workflows/pages.yml`, `tools/assembler_site.py`) : `main` à l'adresse actuelle `…/suivi-fitness/` (production, personnes invitées) et `dev` dans `…/suivi-fitness/dev/` (version de test), publiées ensemble par GitHub Actions. Un envoi sur `dev` relance la publication (`dev-pages.yml`). Les tests et outils ne sont pas publiés. Réglage nécessaire : Settings › Pages › Source = « GitHub Actions ».
