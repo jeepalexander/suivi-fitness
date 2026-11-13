@@ -320,6 +320,15 @@ function renderWallpaperGrid() {
 // 1.7.64 : depuis la version de test (…/suivi-fitness/dev/), les invitations et les programmes partagés
 // mènent toujours à la production (…/suivi-fitness/).
 function isTestVersion() { return /\/dev\/(index\.html)?$/.test(location.pathname); }
+// 1.7.66 : pastille « TEST » à côté de « MON CARNET DE SALLE », dans la version de test seulement
+function markTestVersion() {
+  const t = document.getElementById('app-title');
+  if (!t || !isTestVersion() || t.querySelector('.test-pill')) return;
+  const pill = document.createElement('span');
+  pill.className = 'test-pill';
+  pill.textContent = 'TEST';
+  t.appendChild(pill);
+}
 function appShareUrl() {
   const u = new URL('./', location.href);
   if (/\/dev\/$/.test(u.pathname)) u.pathname = u.pathname.replace(/dev\/$/, '');
@@ -4860,6 +4869,7 @@ async function initApp() {
   if (!document.body.dataset.tab) document.body.dataset.tab = 'programme';
   initTheme();
   applyWallpaper();
+  markTestVersion();
   initUpdateIndicator();
   // Google Drive : retour d'une connexion par redirection (application installée), puis statut + sauvegarde à envoyer
   cleanupLegacyDriveKeys();

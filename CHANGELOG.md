@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.66] - 2026-11-13
+### 🧪 Pastille « TEST » dans la version de test (co-auteur : Claude)
+- Dans la version de test (`…/suivi-fitness/dev/`), une pastille « TEST » s'affiche à côté de « MON CARNET DE SALLE », sur tous les écrans (`markTestVersion`, `.test-pill`, couleurs de la pastille Déload : `warn`, `warn-tint`, `warn-border`). Jamais en production.
+- Maquette : planche 37. Tests : `test_prod_test.py` (pastille présente en test, absente en production).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.66.
+
+---
+
 ## [1.7.65] - 2026-11-13
 ### 🔒 Script de connexion Google chargé seulement quand le Drive sert (co-auteur : Claude)
 - Google Safe Browsing signale `jeepalexander.github.io/suivi-fitness/` comme « pages trompeuses », sans URL précise : probable faux positif d'une petite app en `github.io` qui charge la connexion Google sur chaque page. Le script Google Identity Services n'est plus dans `index.html` : `loadGoogleIdentity()` le charge à la demande — au lancement si le Drive est déjà connecté (navigateur), à l'ouverture de Réglages, de « Sauvegarder », de « Restaurer » et de la restauration de programmes, et à l'appui sur « Se connecter » / au renouvellement silencieux. Un visiteur qui n'utilise pas le Drive (ou un robot d'exploration) ne charge rien de Google.

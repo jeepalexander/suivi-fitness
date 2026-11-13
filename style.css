@@ -230,6 +230,8 @@ header { position: relative; flex: none; width: 100%; z-index: var(--z-header); 
 body[data-tab="seance"] header { padding-bottom: 0; }
 .page-header { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .app-kicker { font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
+/* 1.7.66 : version de test (…/dev/) — pastille « TEST » à côté du nom, couleurs de la pastille Déload (planche 37) */
+.test-pill { display: inline-flex; align-items: center; height: 22px; margin-left: 8px; padding: 0 8px; box-sizing: border-box; vertical-align: middle; border-radius: 999px; border: 1px solid var(--warn-border); background: var(--warn-tint); color: var(--warn); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; }
 header h1 { font-family: var(--font-display); font-size: 2.625rem; font-weight: 700; line-height: 1.05; letter-spacing: -0.01em; }
 
 /* Bouton d'en-tête, en haut à droite : roue dentée (Historique) ou « Retour » (Réglages) */
