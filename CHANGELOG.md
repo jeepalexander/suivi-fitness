@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.82] - 2026-11-14
+### 📱 En-tête remonté de 10 px de plus (co-auteur : Claude)
+- Application installée, écran avec caméra en haut : le nom de l'app commence **juste sous la zone de la caméra** (10 px dessous en 1.7.81). Tout le contenu remonte de 10 px.
+- Les boutons de l'en-tête (+, Réglages, Retour) gardent leur alignement avec le nom de l'app (4 px plus haut, comme sur un écran sans encoche) : leur bord supérieur entre donc de 4 px dans la zone, sur le côté droit.
+- Écran sans encoche ou navigateur : inchangé (28 px).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.82.
+
+---
+
 ## [1.7.81] - 2026-11-14
 ### 📱 En-tête remonté : 10 px sous la caméra (co-auteur : Claude)
 - Application installée, écran avec caméra en haut : le nom de l'app commence **10 px sous la zone de la caméra** (28 px en 1.7.79), les boutons de l'en-tête (+, Réglages, Retour) 6 px dessous. Tout le contenu remonte de 18 px.

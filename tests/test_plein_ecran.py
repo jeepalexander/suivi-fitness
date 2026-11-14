@@ -1,5 +1,5 @@
 """Plein écran avec Chrome (1.7.79) : l'application installée monte jusqu'en haut de l'écran (viewport-fit=cover)
-et rien ne passe sous la caméra : le nom de l'app commence 10 px sous la zone réservée (--safe-top), 1.7.81.
+et rien ne passe sous la caméra : le nom de l'app commence juste sous la zone réservée (--safe-top), 1.7.82.
 Sans encoche (--safe-top = 0) ou avec une petite zone, l'en-tête reste à 28 px (390 et 360 px, clair et sombre)."""
 import sys
 from harness import Srv, newpage, sync_playwright
@@ -30,8 +30,8 @@ with Srv() as url, sync_playwright() as p:
             ok(f'[{scheme} {w}] petite zone (10 px) : l\'en-tête ne remonte pas au-dessus de 28 px', c == a, (a, c))
             pg.evaluate("document.documentElement.style.setProperty('--safe-top', '%dpx'); 0" % SAFE); pg.wait_for_timeout(200)
             b = pg.evaluate(TOPS)
-            ok(f'[{scheme} {w}] caméra de {SAFE} px : nom de l\'app 10 px dessous, bouton 6 px dessous, titre décalé d\'autant',
-               b[0] == SAFE + 10 and b[2] == SAFE + 6 and b[1] - a[1] == SAFE + 10 - 28, (a, b))
+            ok(f'[{scheme} {w}] caméra de {SAFE} px : nom de l\'app juste dessous, bouton 4 px plus haut (comme sans encoche), titre décalé d\'autant',
+               b[0] == SAFE and b[2] == SAFE - 4 and b[1] - a[1] == SAFE - 28, (a, b))
             hb = pg.evaluate("Math.round(document.querySelector('header').getBoundingClientRect().top)")
             ok(f'[{scheme} {w}] le fond de l\'en-tête part du bord haut de l\'écran', hb == 0, hb)
             ok(f'[{scheme} {w}] aucune erreur JavaScript', not errs, errs)
