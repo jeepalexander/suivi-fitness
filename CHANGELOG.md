@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.74] - 2026-11-14
+### 📐 Séance : nom du programme et nom de la séance alignés (co-auteur : Claude)
+- 12 px entre l'icône de 44 px et le titre, partout : le nom du programme (16 px jusqu'ici) commence maintenant au même endroit que le nom de la séance. La page Fond d'écran (flèche retour puis titre) suit la même règle, comme l'éditeur. Maquette : planches 22 et 23.
+- Nouveau test `test_alignement_titres.py` (groupe `seance`, 16 contrôles).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.74.
+
+---
+
 ## [1.7.73] - 2026-11-14
 ### 📐 Accueil Programmes : moins d'espace sous l'astuce (co-auteur : Claude)
 - 16 px au lieu de 32 entre « Astuce : Reste appuyé… » et le menu, seulement sur l'accueil Programmes. Le contenu laisse ainsi du jeu : l'écran ne doit plus bouger sous le doigt quand un programme est actif. Les autres onglets, l'éditeur et l'écran du + ne changent pas. Maquette : planche 12.

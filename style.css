@@ -920,7 +920,7 @@ body[data-tab="fond"] #app-wallpaper::after { background: var(--veil-home); }
 :root[data-wallpaper] .prog-tile.libre { background: color-mix(in srgb, var(--sand) 84%, transparent); }
 
 /* En-tête : bouton retour à gauche du titre, sur la page Fond d'écran seulement */
-.page-title-row { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.page-title-row { display: flex; align-items: center; gap: 12px; min-width: 0; } /* 1.7.74 : 12 px entre l'icône (ou la flèche retour) et le titre, comme la ligne de la séance et l'éditeur */
 #fond-back { display: none; }
 body[data-tab="fond"] #fond-back { display: flex; }
 body[data-tab="fond"] header h1 { font-size: 2rem; }
