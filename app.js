@@ -35,8 +35,11 @@ const EXERCISE_ALIASES = {
   "Leg Extension": "Leg extension",
   "Leg Curl": "Leg curl",
   "Oiseau (Arrière d'épaule)": "Oiseau",
-  "Mollets / Finition": "Mollets"
+  "Mollets / Finition": "Mollets",
+  "Extension triceps à la poulie": "Extension triceps" // 1.7.76 : exercice retiré, déjà couvert par « Extension triceps »
 };
+// Identifiants retirés du catalogue -> identifiant qui les remplace (1.7.76 : 67 « Extension triceps à la poulie » -> 66)
+const EXERCISE_ID_ALIASES = { 67: 66 };
 const CATALOGUE_BY_ID = {};
 const CATALOGUE_BY_NAME = {};
 (typeof CATALOGUE !== 'undefined' ? CATALOGUE : []).forEach(e => { CATALOGUE_BY_ID[e.id] = e; CATALOGUE_BY_NAME[e.name] = e; });
@@ -417,6 +420,7 @@ function canonicalExerciseName(name) {
 
 // Fiche d'un exercice (par identifiant ou par nom) ; un nom hors catalogue reçoit des réglages neutres
 function exInfo(ref) {
+  if (typeof ref === 'number' && EXERCISE_ID_ALIASES[ref]) ref = EXERCISE_ID_ALIASES[ref];
   if (typeof ref === 'number' && CATALOGUE_BY_ID[ref]) return CATALOGUE_BY_ID[ref];
   const name = canonicalExerciseName(String(ref == null ? '' : ref));
   return CATALOGUE_BY_NAME[name] || { id: null, name, group: '', mode: 'weight', sets: 3, reps: '8–12', rest: REST_DURATION };
@@ -586,8 +590,28 @@ function migrateState(s) {
 }
 
 // Programmes cohérents : un seul actif, rotation valide, séances libres avec une seule séance
+// Exercices retirés du catalogue (1.7.76) : programmes, historique et dernières charges passent à l'exercice
+// qui les remplace (« Extension triceps à la poulie » -> « Extension triceps »). Sans effet s'il n'y a rien à changer.
+function mergeRemovedExercises() {
+  if (!state) return;
+  (state.programs || []).forEach(p => (p.sessions || []).forEach(se => (se.exercises || []).forEach(e => {
+    if (EXERCISE_ID_ALIASES[e.exId]) e.exId = EXERCISE_ID_ALIASES[e.exId];
+  })));
+  (state.history || []).forEach(h => (h.exercises || []).forEach(ex => {
+    const name = canonicalExerciseName(ex.name);
+    if (name !== ex.name) ex.name = name;
+    if (EXERCISE_ID_ALIASES[ex.exId]) ex.exId = EXERCISE_ID_ALIASES[ex.exId];
+  }));
+  const lw = state.lastWeights;
+  if (lw && typeof lw === 'object') Object.keys(lw).forEach(k => {
+    const name = canonicalExerciseName(k);
+    if (name !== k) { if (lw[name] === undefined) lw[name] = lw[k]; delete lw[k]; }
+  });
+}
+
 function normalizePrograms() {
   if (!state) return;
+  mergeRemovedExercises();
   if (!Array.isArray(state.programs)) state.programs = [];
   if (!state.deload || typeof state.deload !== 'object') state.deload = { shift: 0, postponedAt: null };
   let seenActive = false;

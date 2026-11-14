@@ -2,7 +2,7 @@
 // APP_VERSION doit être incrémenté à chaque release (en même temps que
 // manifest.json) : le navigateur ne réinstalle le service worker que si
 // le contenu de ce fichier change.
-const APP_VERSION = '1.7.75';
+const APP_VERSION = '1.7.76';
 // 1.7.64 (co-auteur : Claude) : production (…/suivi-fitness/) et test (…/suivi-fitness/dev/) sont sur le même
 // domaine et partagent le stockage des caches : chaque version nomme ses caches d'après son dossier et ne
 // supprime que les siens (plus les anciens caches sans dossier, d'avant la 1.7.64).
@@ -74,7 +74,7 @@ const ASSETS = [
   './icons/deadlift.png',
   './icons/dips.png',
   './icons/dumbbell_row.png',
-  './icons/incline_bench.png',
+  './icons/incline_dumbbell_press.png',
   './icons/lat_pulldown.png',
   './icons/lateral_raise.png',
   './icons/leg_curl.png',
@@ -87,6 +87,11 @@ const ASSETS = [
   './icons/seated_row.png',
   './icons/triceps_extension.png',
   './icons/walking_lunge.png',
+  './icons/hanging_leg_raises.png',
+  './icons/burpees.png',
+  './icons/ski_erg.png',
+  './icons/elliptical.png',
+  './icons/stair_climber.png',
   './icons/barbell_row.png',
   './icons/barbell_squat.png',
   './icons/bulgarian_split_squat.png',
@@ -110,7 +115,6 @@ const ASSETS = [
   './icons/plank.png',
   './icons/push_ups.png',
   './icons/romanian_deadlift.png',
-  './icons/russian_twist.png',
   './icons/seated_calf_raise.png',
   './icons/seated_dumbbell_press.png',
   './icons/seated_leg_curl.png',
@@ -118,8 +122,7 @@ const ASSETS = [
   './icons/stationary_bike.png',
   './icons/step_up.png',
   './icons/stiff_leg_deadlift.png',
-  './icons/triceps_kickback.png',
-  './icons/triceps_pushdown.png'
+  './icons/triceps_kickback.png'
 ];
 
 self.addEventListener('install', (event) => {

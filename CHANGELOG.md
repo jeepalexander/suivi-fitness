@@ -7,6 +7,17 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.76] - 2026-11-14
+### 🖼️ Icônes corrigées et complétées, « Extension triceps à la poulie » retiré (co-auteur : Claude)
+- **Nouvelles icônes** : Relevés de jambes suspendu, Burpees, Ski trainer, Vélo elliptique et Stair climber (recadrés sur les jambes).
+- **Icônes remplacées** : Soulevé de terre (photo « SDT classique »), Rameur (nouvelle photo, zoom moyen), Montées de genoux (nouvelle photo, zoom fort).
+- **Corrections** : icônes de Fentes et Fentes marchées inversées ; l'icône du Développé incliné, qui montrait des haltères, passe au **Développé incliné haltères** (fichier `incline_dumbbell_press.png`) — le Développé incliné à la barre reprend l'icône générique ; la Rotation russe reprend l'icône générique en attendant une photo avec les pieds visibles.
+- **« Extension triceps à la poulie » (n° 67) retiré du catalogue**, déjà couvert par « Extension triceps » : au chargement, programmes, historique et dernière charge qui l'utilisaient passent à « Extension triceps » (n° 66) ; un programme partagé qui le contient s'ouvre aussi sur « Extension triceps ».
+- Nouveau test `test_exercice_retire.py` (groupe `programmes`, 12 contrôles) : rattachement, liste d'ajout, icônes présentes et en cache. `test_poly_1rm.py` : 11 exercices de Bras.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.76.
+
+---
+
 ## [1.7.75] - 2026-11-14
 ### 🏷️ Accueil sans titre, Historique indépendant des programmes (co-auteur : Claude)
 - **Accueil Programmes** : plus de titre « Programmes » (« MON CARNET DE SALLE » et le bouton + restent) ; l'accueil manuscrit remonte. « Actif » devient **« Programme actif »**, ou **« Séance libre active »** pour une séance libre.
