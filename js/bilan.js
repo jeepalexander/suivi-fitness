@@ -40,7 +40,7 @@ function bilanRecordCount(key, scoped) { return bilanRecordCountIn(bilanHist(sco
 // 1.7.68 : même règle, sur un historique donné (graphique Trophées de Progression)
 function bilanRecordCountIn(H, key) { return bilanRecordsIn(H, key).length; }
 
-// 1.7.69 : le détail des records d'un mois, règle commune aux bilans, aux trophées et à la liste « Records battus
+// 1.7.69 (1.7.89 : allure ou vitesse pour le cardio, recordRule dans app.js) : le détail des records d'un mois, règle commune aux bilans, aux trophées et à la liste « Records battus
 // ce mois-ci » : pour un exercice déjà fait avant, meilleure charge, meilleur temps (cardio, exercices au temps) ou,
 // au poids du corps, meilleure série (plus de lest, ou plus de répétitions au même lest) qui bat tout l'historique précédent
 function bilanRecordsIn(H, key) {
@@ -56,11 +56,10 @@ function bilanRecordsIn(H, key) {
       if (c && (!best[ex.name] || betterBw(c, best[ex.name].bw))) best[ex.name] = { bw: c, exId: ex.exId };
       return;
     }
-    const byTime = ex.cardio || mode === 'time';
-    if (!byTime && mode !== 'weight') return;
-    const val = st => byTime ? (Number(st.seconds) || 0) : (Number(st.weight) || 0);
-    const v = Math.max(0, ...(ex.sets || []).map(val));
-    if (v > (best[ex.name] ? best[ex.name].v : 0)) best[ex.name] = { v, byTime, exId: ex.exId };
+    const rule = recordRule(ex.name, ex.cardio);   // 1.7.89 : charge, durée, ou allure / vitesse pour le cardio
+    if (!rule) return;
+    const v = recordBest(rule, ex.sets);
+    if (v > 0 && (!best[ex.name] || (best[ex.name].rule && (rule.lower ? v < best[ex.name].v : v > best[ex.name].v)))) best[ex.name] = { v, rule, exId: ex.exId };
   }));
   const out = [];
   Object.keys(best).forEach(name => {
@@ -76,14 +75,14 @@ function bilanRecordsIn(H, key) {
       if (prev && betterBw(b.bw, prev)) out.push({ name, bw: true, cur: b.bw, prevBw: prev });
       return;
     }
-    const val = st => b.byTime ? (Number(st.seconds) || 0) : (Number(st.weight) || 0);
-    let prev = 0, seen = false;
+    let prevSets = [], seen = false;
     before.forEach(h => (h.exercises || []).forEach(x => {
       if (!same(x)) return;
       seen = true;
-      (x.sets || []).forEach(st => { prev = Math.max(prev, val(st)); });
+      prevSets = prevSets.concat(x.sets || []);
     }));
-    if (seen && b.v > prev) out.push({ name, value: b.v, prev, byTime: b.byTime });
+    const prev = recordBest(b.rule, prevSets);
+    if (seen && recordBeats(b.rule, b.v, prev)) out.push({ name, value: b.v, prev, rule: b.rule, byTime: b.rule.kind !== 'weight' });
   });
   return out;
 }

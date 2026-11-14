@@ -57,7 +57,7 @@ with Srv() as base, sync_playwright() as p:
               and pg.inner_text('#seance-prog-ico') == '1×' and not pg.is_visible('#seance-head') and not pg.evaluate(OVERFLOW_JS)['out'])
         pg.evaluate("switchTab('programme')"); pg.wait_for_timeout(200)
         hauteurs = {}
-        for tab in ('programme', 'progression', 'historique', 'reglages', 'seance'):
+        for tab in ('progression', 'historique', 'reglages', 'seance'):  # 1.7.75 : l'accueil Programmes n'a plus de titre
             pg.evaluate(f"switchTab('{tab}')"); pg.wait_for_timeout(150)
             hauteurs[tab] = pg.evaluate(f"({RECT})('#page-title')")['t']
         check(tag + "1.7.48 : titre de Séance à la même hauteur que celui des autres onglets", len(set(hauteurs.values())) == 1, hauteurs)

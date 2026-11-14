@@ -48,7 +48,7 @@ with Srv() as url, sync_playwright() as p:
         ok(tag + "volet : rien ne déborde", ov['docW'] <= ov['vw'] and not ov['out'], ov)
         if SHOTS: pg.screenshot(path=f'/tmp/claude-0/poly_{w}_{theme}.png')
         pg.click('.add-chips .filter-btn[data-f="Bras"]'); pg.wait_for_timeout(150)
-        ok(tag + "les autres puces marchent toujours (Bras : 12)", pg.locator('#add-list .add-item').count() == 12)
+        ok(tag + "les autres puces marchent toujours (Bras : 11 depuis la 1.7.76)", pg.locator("#add-list .add-item").count() == 11)
         pg.evaluate("cancelAddExercise()"); pg.wait_for_timeout(200)
 
         # --- 1RM estimé

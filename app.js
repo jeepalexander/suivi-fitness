@@ -35,8 +35,11 @@ const EXERCISE_ALIASES = {
   "Leg Extension": "Leg extension",
   "Leg Curl": "Leg curl",
   "Oiseau (Arrière d'épaule)": "Oiseau",
-  "Mollets / Finition": "Mollets"
+  "Mollets / Finition": "Mollets",
+  "Extension triceps à la poulie": "Extension triceps" // 1.7.76 : exercice retiré, déjà couvert par « Extension triceps »
 };
+// Identifiants retirés du catalogue -> identifiant qui les remplace (1.7.76 : 67 « Extension triceps à la poulie » -> 66)
+const EXERCISE_ID_ALIASES = { 67: 66 };
 const CATALOGUE_BY_ID = {};
 const CATALOGUE_BY_NAME = {};
 (typeof CATALOGUE !== 'undefined' ? CATALOGUE : []).forEach(e => { CATALOGUE_BY_ID[e.id] = e; CATALOGUE_BY_NAME[e.name] = e; });
@@ -244,22 +247,30 @@ function initTheme() {
 // Fond d'écran (1.7.7, 10 fonds ajoutés en 1.7.55, Studio et Poulie retirés en 1.7.56) : préférence de l'appareil (h49_wallpaper), hors des données exportées, comme le thème.
 // Aucun par défaut. Le script de index.html pose data-wallpaper avant le premier affichage.
 const WALLPAPER_KEY = 'h49_wallpaper';
+// 1.7.94 : rangés par style ; Traction retiré (un fond retiré ramène à « Aucun ») ; Squat avant, Suspension, Carnet WOD ajoutés
 const WALLPAPERS = [
+  // Illustrations
   { id: 'course', name: 'Course', pos: 'center 30%' },
-  { id: 'barre', name: 'Barre', pos: 'center 55%' },
+  { id: 'frontsquat', name: 'Squat avant', pos: '75% center' },
+  // Clairs
+  { id: 'salle', name: 'Salle blanche', pos: 'right center' },
   { id: 'halteres', name: 'Haltères', pos: 'center 45%' },
+  { id: 'barre', name: 'Barre', pos: 'center 55%' },
   { id: 'kettlebell', name: 'Kettlebell', pos: 'center 45%' },
+  { id: 'cuivre', name: 'Cuivre', pos: 'center 50%' },
+  // Ambiance de salle
   { id: 'ratelier', name: 'Râtelier', pos: 'center 60%' },
+  { id: 'suspension', name: 'Suspension', pos: 'right center' },
+  { id: 'wod', name: 'Carnet WOD', pos: 'center 62%' },
+  { id: 'cordes', name: 'Cordes', pos: 'center 50%' },
+  { id: 'fente', name: 'Fente', pos: '45% center' },
+  // Gros plans sombres
   { id: 'squat', name: 'Squat', pos: 'center 40%' },
   { id: 'poigne', name: 'Poigne', pos: 'center 40%' },
   { id: 'disques', name: 'Disques', pos: 'center 50%' },
-  { id: 'cuivre', name: 'Cuivre', pos: 'center 50%' },
-  { id: 'geometrie', name: 'Géométrie', pos: 'center 50%' },
-  { id: 'salle', name: 'Salle blanche', pos: 'right center' },
-  { id: 'traction', name: 'Traction', pos: '75% center' },
-  { id: 'cordes', name: 'Cordes', pos: 'center 50%' },
-  { id: 'fente', name: 'Fente', pos: '45% center' },
   { id: 'rack', name: 'Rack', pos: 'center 50%' },
+  // Graphiques et couleurs vives
+  { id: 'geometrie', name: 'Géométrie', pos: 'center 50%' },
   { id: 'silhouette', name: 'Silhouette', pos: 'center 40%' },
   { id: 'escaliers', name: 'Escaliers', pos: '45% center' },
   { id: 'none', name: 'Aucun' }
@@ -417,6 +428,7 @@ function canonicalExerciseName(name) {
 
 // Fiche d'un exercice (par identifiant ou par nom) ; un nom hors catalogue reçoit des réglages neutres
 function exInfo(ref) {
+  if (typeof ref === 'number' && EXERCISE_ID_ALIASES[ref]) ref = EXERCISE_ID_ALIASES[ref];
   if (typeof ref === 'number' && CATALOGUE_BY_ID[ref]) return CATALOGUE_BY_ID[ref];
   const name = canonicalExerciseName(String(ref == null ? '' : ref));
   return CATALOGUE_BY_NAME[name] || { id: null, name, group: '', mode: 'weight', sets: 3, reps: '8–12', rest: REST_DURATION };
@@ -441,9 +453,11 @@ const GENERIC_CARDIO_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d=
 const GENERIC_STRENGTH_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>';
 function getIcon(exName, decorative = false) {
   const e = exInfo(exName);
-  if (e.icon) return `<img src="${e.icon}" alt="${decorative ? '' : escapeHtml(e.name)}">`;
+  // 1.7.84 : data-ex = l'exercice, pour ouvrir sa fiche par un appui long (js/fiches.js)
+  const ref = escapeHtml(e.name || String(exName));
+  if (e.icon) return `<img src="${e.icon}" alt="${decorative ? '' : escapeHtml(e.name)}" data-ex="${ref}" draggable="false">`;
   const cardio = e.group === 'Cardio';
-  return `<span class="ex-generic${cardio ? ' cardio' : ''}"${decorative ? ' aria-hidden="true"' : ` role="img" aria-label="${escapeHtml(e.name)}"`}>${cardio ? GENERIC_CARDIO_SVG : GENERIC_STRENGTH_SVG}</span>`;
+  return `<span class="ex-generic${cardio ? ' cardio' : ''}" data-ex="${ref}"${decorative ? ' aria-hidden="true"' : ` role="img" aria-label="${escapeHtml(e.name)}"`}>${cardio ? GENERIC_CARDIO_SVG : GENERIC_STRENGTH_SVG}</span>`;
 }
 
 function escapeHtml(str) {
@@ -586,8 +600,28 @@ function migrateState(s) {
 }
 
 // Programmes cohérents : un seul actif, rotation valide, séances libres avec une seule séance
+// Exercices retirés du catalogue (1.7.76) : programmes, historique et dernières charges passent à l'exercice
+// qui les remplace (« Extension triceps à la poulie » -> « Extension triceps »). Sans effet s'il n'y a rien à changer.
+function mergeRemovedExercises() {
+  if (!state) return;
+  (state.programs || []).forEach(p => (p.sessions || []).forEach(se => (se.exercises || []).forEach(e => {
+    if (EXERCISE_ID_ALIASES[e.exId]) e.exId = EXERCISE_ID_ALIASES[e.exId];
+  })));
+  (state.history || []).forEach(h => (h.exercises || []).forEach(ex => {
+    const name = canonicalExerciseName(ex.name);
+    if (name !== ex.name) ex.name = name;
+    if (EXERCISE_ID_ALIASES[ex.exId]) ex.exId = EXERCISE_ID_ALIASES[ex.exId];
+  }));
+  const lw = state.lastWeights;
+  if (lw && typeof lw === 'object') Object.keys(lw).forEach(k => {
+    const name = canonicalExerciseName(k);
+    if (name !== k) { if (lw[name] === undefined) lw[name] = lw[k]; delete lw[k]; }
+  });
+}
+
 function normalizePrograms() {
   if (!state) return;
+  mergeRemovedExercises();
   if (!Array.isArray(state.programs)) state.programs = [];
   if (!state.deload || typeof state.deload !== 'object') state.deload = { shift: 0, postponedAt: null };
   let seenActive = false;
@@ -653,6 +687,37 @@ function cardioMetric(name, set) {
 function cardioMetricText(name, v) {
   const u = cardioUnit(name);
   return u && v > 0 ? `${u.fmt(v)} ${u.suffix}` : '–';
+}
+
+// 1.7.89 : ce qui fait un record, par exercice. Cardio avec distance ou étages : la meilleure allure (rameur, ski,
+// tapis : plus bas = mieux) ou la meilleure vitesse / le meilleur rythme (vélos, stair climber : plus haut = mieux),
+// jamais la durée (plus long ≠ record). Durée seule (planche, corde à sauter) : la plus longue. Charge : la plus lourde.
+// Le poids du corps a sa propre règle (lest puis répétitions, bestBodyweightSet). null = pas de record pour cet exercice.
+function recordRule(name, cardio) {
+  const e = exInfo(name), mode = exMode(name);
+  const u = (cardio || e.cardio) ? cardioUnit(name) : null;
+  if (u) return { kind: 'pace', lower: !!u.lowerIsBetter, val: st => cardioMetric(name, st) };
+  if (cardio || e.cardio || mode === 'time') return { kind: 'time', lower: false, val: st => Number(st.seconds) || 0 };
+  if (mode === 'weight') return { kind: 'weight', lower: false, val: st => Number(st.weight) || 0 };
+  return null;
+}
+// Meilleure valeur d'une liste de séries selon la règle (0 = aucune valeur exploitable)
+function recordBest(rule, sets) {
+  const vals = (sets || []).map(rule.val).filter(v => v > 0);
+  if (!vals.length) return 0;
+  return rule.lower ? Math.min(...vals) : Math.max(...vals);
+}
+function recordBeats(rule, cur, prev) { return cur > 0 && (rule.lower ? (prev > 0 && cur < prev) : cur > prev); }
+// Textes d'un record : valeur et gain (« 2:05 /500 m » et « −0:03 », « 85 kg » et « +2,5 kg »)
+function recordTexts(name, rule, cur, prev) {
+  const kg = v => `${String(Math.round(v * 100) / 100).replace('.', ',')} kg`;
+  if (rule.kind === 'pace') {
+    const u = cardioUnit(name);
+    const d = Math.abs(cur - prev);
+    return { value: cardioMetricText(name, cur), gain: rule.lower ? `−${u.fmt(d)}` : `+${u.fmt(d)}` };
+  }
+  if (rule.kind === 'time') return { value: formatDurationMS(cur), gain: '+' + formatDurationMS(cur - prev) };
+  return { value: kg(cur), gain: '+' + kg(cur - prev) };
 }
 // Montant saisi (champ de droite) -> mètres ou étages
 function parseCardioAmount(name, str) {
@@ -2032,19 +2097,18 @@ function sessionRecords(entry) {
   const others = (state.history || []).filter(h => h.id !== entry.id);
   const out = [];
   mergeExercises(entry.exercises).forEach(ex => {
-    const mode = exMode(ex.name);
-    const byTime = ex.cardio || mode === 'time';
-    if (!byTime && mode !== 'weight') return;
-    const val = st => byTime ? (Number(st.seconds) || 0) : (Number(st.weight) || 0);
-    const cur = Math.max(0, ...ex.sets.map(val));
+    const rule = recordRule(ex.name, ex.cardio);   // 1.7.89 : allure ou vitesse pour le cardio, pas la durée
+    if (!rule) return;
+    const cur = recordBest(rule, ex.sets);
     if (!cur) return;
-    let prev = 0, seen = false;
+    let prevSets = [], seen = false;
     others.forEach(h => (h.exercises || []).forEach(x => {
       if (x.name !== ex.name && !(ex.exId && x.exId === ex.exId)) return;
       seen = true;
-      (x.sets || []).forEach(st => { prev = Math.max(prev, val(st)); });
+      prevSets = prevSets.concat(x.sets || []);
     }));
-    if (seen && cur > prev) out.push({ name: ex.name, value: byTime ? formatDurationMS(cur) : `${cur.toLocaleString('fr-FR')} kg` });
+    const prev = recordBest(rule, prevSets);
+    if (seen && recordBeats(rule, cur, prev)) out.push({ name: ex.name, value: rule.kind === 'weight' ? `${cur.toLocaleString('fr-FR')} kg` : recordTexts(ex.name, rule, cur, prev).value });
   });
   return out;
 }
@@ -2099,10 +2163,15 @@ document.addEventListener('submit', function(e) {
 // ============================================================
 // 11. ÉCRAN HISTORIQUE ET MODIFICATION D'UNE SÉANCE
 // ============================================================
-// Filtre par programme (« Tout » ou un programme / une séance libre ayant des séances, même supprimé)
-let historyFilter = 'all';
+// 1.7.75 : l'Historique est indépendant des programmes : toujours toutes les séances, sans filtre ;
+// le titre de la page donne leur nombre, le sous-titre le mois de la première (« depuis juillet 2026 »)
+function historyTitle() {
+  const n = (state && state.history || []).length;
+  return `${n} séance${n > 1 ? 's' : ''}`;
+}
 
-// Programmes présents dans l'historique, dans l'ordre de leur dernière séance (le plus récent d'abord)
+// Programmes présents dans l'historique, dans l'ordre de leur dernière séance (le plus récent d'abord) ;
+// sert au choix du périmètre de Progression
 function historyProgramList() {
   const seen = new Map();
   (state.history || []).forEach(h => {
@@ -2111,22 +2180,6 @@ function historyProgramList() {
     seen.set(h.programId, { id: h.programId, name: p ? p.name : (h.programName || 'Programme'), last: h.date || '' });
   });
   return Array.from(seen.values()).sort((a, b) => (a.last < b.last ? 1 : a.last > b.last ? -1 : 0));
-}
-
-function setHistoryFilter(id) {
-  historyFilter = id;
-  renderHistory();
-}
-
-function renderHistoryFilters() {
-  const box = document.getElementById('history-filters');
-  if (!box) return;
-  const list = historyProgramList();
-  if (historyFilter !== 'all' && !list.some(p => p.id === historyFilter)) historyFilter = 'all';
-  if (list.length < 2) { box.hidden = true; box.innerHTML = ''; historyFilter = 'all'; return; }
-  box.hidden = false;
-  box.innerHTML = [{ id: 'all', name: 'Tout' }].concat(list).map(p =>
-    `<button type="button" class="filter-btn${historyFilter === p.id ? ' active' : ''}" onclick="setHistoryFilter('${escapeHtml(p.id)}')">${escapeHtml(p.name)}</button>`).join('');
 }
 
 // Nom du programme d'une séance de l'historique (nom actuel s'il existe encore, sinon le nom recopié)
@@ -2139,13 +2192,16 @@ function renderHistory() {
   const container = document.getElementById('history-list');
   if(!container) return;
   container.innerHTML = '';
-  renderHistoryFilters();
 
   const history = state.history || [];
-  const visible = i => historyFilter === 'all' || history[i].programId === historyFilter;
-  const shownCount = history.filter((h, i) => visible(i)).length;
+  const visible = () => true;
   const countEl = document.getElementById('history-count');
-  if (countEl) countEl.textContent = `${shownCount} séance${shownCount > 1 ? 's' : ''} enregistrée${shownCount > 1 ? 's' : ''}`;
+  const first = history.map(h => (h.date || '').slice(0, 7)).filter(k => /^\d{4}-\d{2}$/.test(k)).sort()[0];
+  if (countEl) countEl.textContent = first ? 'depuis ' + monthLabelLower(first) : '';
+  if (document.body.dataset.tab === 'historique') {
+    const pageTitle = document.getElementById('page-title');
+    if (pageTitle) pageTitle.innerText = historyTitle();
+  }
 
   // Index réels triés du plus récent au plus ancien, regroupés par mois
   const order = history.map((h, i) => i).filter(visible).sort((x, y) => {
@@ -3192,8 +3248,8 @@ function analyzeMonthlyProgress(hist = statsHistory(), scope = currentStatsScope
       ? (r.cur.lest > r.prevBw.lest
         ? { exercise: r.name, newMax: r.cur.lest, improvement: r.cur.lest - r.prevBw.lest, valueText: lestText(r.cur.lest), improvementText: `+${String(r.cur.lest - r.prevBw.lest).replace('.', ',')} kg` }
         : { exercise: r.name, newMax: r.cur.reps, improvement: r.cur.reps - r.prevBw.reps, valueText: repsText(r.cur.reps), improvementText: `+${r.cur.reps - r.prevBw.reps} rép.` })
-      : r.byTime
-      ? { exercise: r.name, newMax: r.value, improvement: r.value - r.prev, valueText: formatDurationMS(r.value), improvementText: '+' + formatDurationMS(r.value - r.prev) }
+      : r.rule && r.rule.kind !== 'weight'   // 1.7.89 : durée ou allure / vitesse (cardio)
+      ? (t => ({ exercise: r.name, newMax: r.value, improvement: Math.abs(r.value - r.prev), valueText: t.value, improvementText: t.gain }))(recordTexts(r.name, r.rule, r.value, r.prev))
       : { exercise: r.name, newMax: r.value, improvement: r.value - r.prev });
   // 1.7.67–1.7.68 : trophées = records battus chaque mois, comptés comme les bilans du mois (bilanRecordCountIn,
   // même périmètre que la page), depuis le premier mois du périmètre jusqu'au mois en cours
@@ -3480,17 +3536,14 @@ function renderProgressAnalysis() {
     html += `</div></div>`;
   }
 
-  // 3. Paliers détectés
+  // 3. Paliers détectés (1.7.88 : une ligne par palier, nom et charge, dans un seul bloc ambré)
   html += `<div class="card"><h3 class="analysis-section-title">Paliers détectés</h3>`;
   if (analysis.plateaus.length > 0) {
     html += `<div class="plateaus-list">`;
     analysis.plateaus.forEach(plateau => {
       html += `
         <div class="plateau-item">
-          <span class="plateau-text">
-            <span class="plateau-exercise">${plateau.exercise}</span>
-            <span class="plateau-duration">sans progression depuis ${plateau.sessionsCount} séance${plateau.sessionsCount > 1 ? 's' : ''}</span>
-          </span>
+          <span class="plateau-exercise">${plateau.exercise}</span>
           <span class="plateau-value">${plateau.currentMax} kg</span>
         </div>`;
     });
@@ -3607,6 +3660,7 @@ function switchTab(tabName) {
   const pageTitle = document.getElementById('page-title');
   if (pageTitle) pageTitle.innerText = PAGE_TITLES[tabName] || '';
   if (tabName === 'seance') updateSeancePageTitle();
+  if (tabName === 'historique' && pageTitle) pageTitle.innerText = historyTitle(); // 1.7.75
 
   if (tabName === 'programme') renderProgramOverview();
   updateProgramHeader();

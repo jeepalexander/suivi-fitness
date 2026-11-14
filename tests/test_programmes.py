@@ -65,12 +65,12 @@ with Srv() as base, sync_playwright() as p:
 
     # Accueil Programme
     txt = pg.inner_text('#program-overview')
-    check('accueil : « Actif » (sans nom), tuile au nom du programme', pg.inner_text('.prog-status').strip() == 'Actif' and 'Hypertrophie' in pg.inner_text('.prog-tile-name') and pg.inner_text('.prog-tile-next .type-pill') == attendu and 'Presse' in pg.inner_text('.prog-tile-next') if attendu == 'A' else 'Hypertrophie' in pg.inner_text('.prog-tile-name') and pg.inner_text('.prog-tile-next .type-pill') == attendu, txt[:120])
+    check('accueil : « Programme actif », tuile au nom du programme', pg.inner_text('.prog-status').strip() == 'Programme actif' and 'Hypertrophie' in pg.inner_text('.prog-tile-name') and pg.inner_text('.prog-tile-next .type-pill') == attendu and 'Presse' in pg.inner_text('.prog-tile-next') if attendu == 'A' else 'Hypertrophie' in pg.inner_text('.prog-tile-name') and pg.inner_text('.prog-tile-next .type-pill') == attendu, txt[:120])
     check('« En mémoire » présent ; vide : « Tes autres programmes apparaîtront ici »',
           pg.locator('.prog-mem-title').count() == 1 and ((pg.locator('.mem-tile').count() == 0) == (pg.locator('.mem-empty').count() == 1))
           and (pg.locator('.mem-empty').count() == 0 or pg.inner_text('.mem-empty') == 'Tes autres programmes apparaîtront ici'))
     check('« Actif » à la même taille que « En mémoire »', pg.evaluate("getComputedStyle(document.querySelector('.prog-status')).fontSize===getComputedStyle(document.querySelector('.prog-mem-title')).fontSize"))
-    check('onglet et titre « Programmes »', pg.inner_text('#page-title') == 'Programmes' and pg.inner_text('#nav-programme').strip() == 'Programmes')
+    check('onglet « Programmes », accueil sans titre de page (1.7.75)', not pg.is_visible('#page-title') and pg.inner_text('#nav-programme').strip() == 'Programmes' and pg.is_visible('#add-program-btn'))
     check('accueil : bouton + visible dans l\'en-tête', pg.is_visible('#add-program-btn'))
     gap = pg.evaluate("document.querySelector('nav').getBoundingClientRect().top - document.querySelector('.prog-hint').getBoundingClientRect().bottom")
     check('accueil : tuiles alignées vers le bas, juste au-dessus de la navigation', 0 <= gap <= 60, f'{gap:.0f} px')
@@ -170,7 +170,7 @@ with Srv() as base, sync_playwright() as p:
     # ---------- 6. Séance libre : activée, reste active après la séance, jamais « En pause » ----------
     pg.evaluate("switchTab('programme')"); pg.wait_for_timeout(200)
     pg.click('.mem-tile.libre .mem-btn'); pg.wait_for_timeout(300)
-    check('séance libre activée : « Actif », tuile sable « Dorsaux » sans ligne de prochaine séance', pg.inner_text('.prog-status').strip() == 'Actif' and pg.inner_text('.prog-tile-name') == 'Dorsaux' and not pg.locator('.prog-tile .prog-tile-next').count() and pg.locator('.prog-tile.libre').count() == 1)
+    check('séance libre activée : « Séance libre active », tuile sable « Dorsaux » sans ligne de prochaine séance', pg.inner_text('.prog-status').strip() == 'Séance libre active' and pg.inner_text('.prog-tile-name') == 'Dorsaux' and not pg.locator('.prog-tile .prog-tile-next').count() and pg.locator('.prog-tile.libre').count() == 1)
     pg.evaluate("switchTab('seance')"); pg.wait_for_timeout(300)
     check('Séance libre (1.7.41) : plus de ligne pastille + nom sous le titre, icône 1× devant le titre', not pg.is_visible('#seance-head') and pg.inner_text('#seance-prog-ico') == '1×' and 'libre' in pg.get_attribute('#seance-prog-ico', 'class'))
     check('Séance libre : titre de la page = son nom (1.7.40)', pg.inner_text('#page-title') == 'Dorsaux', pg.inner_text('#page-title'))
@@ -196,17 +196,17 @@ with Srv() as base, sync_playwright() as p:
     st = state(pg)
     check('suppression : la séance libre disparaît, ses séances restent dans l\'historique', not any(x['name'] == 'Dorsaux' for x in st['programs']) and len(st['history']) == n_hist and any(h.get('programName') == 'Dorsaux' for h in st['history']))
 
-    # ---------- 8. Historique : filtres par programme, origine, programme supprimé lisible ----------
+    # ---------- 8. Historique (1.7.75) : sans filtre, toutes les séances, titre = leur nombre ----------
     pg.evaluate("switchTab('historique')"); pg.wait_for_timeout(300)
-    chips = pg.evaluate("[...document.querySelectorAll('#history-filters .filter-btn')].map(b=>b.textContent)")
-    check('Historique : filtres Tout + programmes ayant des séances (Dorsaux supprimé compris)', chips[0] == 'Tout' and set(chips[1:]) == {'Hypertrophie', 'Sèche', 'Dorsaux'}, str(chips))
-    pg.click('#history-filters .filter-btn >> text=Sèche'); pg.wait_for_timeout(200)
-    check('filtre Sèche : 2 séances et compteur suivi', pg.locator('.history-item').count() == 2 and pg.inner_text('#history-count') == '2 séances enregistrées')
-    check('ligne : sous-titre « Sèche · durée »', 'Sèche ·' in pg.inner_text('.history-item'))
-    pg.click('#history-filters .filter-btn >> text=Dorsaux'); pg.wait_for_timeout(200)
-    pg.click('.history-item'); pg.wait_for_timeout(200)
+    nh = len(state(pg)['history'])
+    check('Historique : plus de filtres par programme', pg.locator('#history-filters, #tab-historique .filter-btn').count() == 0)
+    check('Historique : titre = nombre de toutes les séances', pg.inner_text('#page-title') == f'{nh} séance' + ('s' if nh > 1 else ''), pg.inner_text('#page-title'))
+    check('Historique : toutes les séances listées, tous programmes confondus', pg.locator('.history-item').count() == nh, (pg.locator('.history-item').count(), nh))
+    check('Historique : sous-titre « depuis <mois année> »', pg.inner_text('#history-count').startswith('depuis '), pg.inner_text('#history-count'))
+    check('ligne : sous-titre « Sèche · durée »', any('Sèche ·' in x for x in pg.locator('.history-item').all_inner_texts()))
+    pg.locator('.history-item', has_text='Dorsaux').first.click(); pg.wait_for_timeout(200)
     check('détail d\'une séance libre : « Dorsaux du jj/mm », origine « Séance libre », pastille 1×', 'Dorsaux du' in pg.inner_text('#modal-session-title') and pg.inner_text('#modal-session-origin') == 'Séance libre' and pg.inner_text('#modal-session-pill') == '1×')
-    pg.evaluate("closeSessionModal(); setHistoryFilter('all')")
+    pg.evaluate("closeSessionModal(); 0")
 
     # ---------- 9. Progression : périmètre par défaut = actif, sélecteur, Tous ----------
     pg.evaluate("switchTab('progression')"); pg.wait_for_timeout(500)

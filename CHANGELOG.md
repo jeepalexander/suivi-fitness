@@ -7,6 +7,187 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.95] - 2026-11-14
+### 🖼️ Fond Suspension recadré (co-auteur : Claude)
+- **Suspension** : image calée sur son bord droit (au lieu de 85 %), la sportive est entière à l'écran, autant que la photo le permet.
+
+---
+
+## [1.7.94] - 2026-11-14
+### 🖼️ Fonds d'écran : 3 nouveaux, Traction retiré, rangement par style (co-auteur : Claude)
+- **Ajoutés** : *Squat avant* (illustration aquarelle claire), *Suspension* (box CrossFit, ambiance sombre), *Carnet WOD* (carnet « No Excuses »), chacun avec sa vignette.
+- **Retiré** : *Traction* (si c'était ton fond, l'app revient à « Aucun »).
+- **Rangement par style** dans Réglages › Fond d'écran : illustrations, fonds clairs, ambiance de salle, gros plans sombres, graphiques et couleurs vives, puis « Aucun ».
+- Règles CSS et script de démarrage mis à jour ; nouveau test : chaque fond a sa règle CSS et son entrée au démarrage.
+
+---
+
+## [1.7.93] - 2026-11-14
+### 🖼️ Icônes Pull-over et Shrugs barre (co-auteur : Claude)
+- **Pull-over** : allongée sur le banc, haltère derrière la tête, zoom fort sur le buste et les bras (`pullover.png`).
+- **Shrugs barre** : barre hexagonale, zoom jusqu'aux genoux (`barbell_shrugs.png`).
+- Fichiers ajoutés au cache du service worker.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.93.
+
+---
+
+## [1.7.92] - 2026-11-14
+### 🖼️ Icône Mollets haltères (co-auteur : Claude)
+- Nouvelle icône **Mollets haltères** : vue de dos sur la pointe des pieds, zoom fort sur les jambes (fichier `dumbbell_calf_raise.png`, ajouté au cache du service worker).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.92.
+
+---
+
+## [1.7.91] - 2026-11-14
+### 🖼️ Quatre nouvelles icônes d'exercices (co-auteur : Claude)
+- **Shrugs haltères** (vue de dos, haltères entiers, la tête dépasse légèrement du rond), **Tirage facial** (zoom sur le buste) et **Rowing poulie basse** (câble et poignée) : corde ou câble coloriés en jaune avec un liseré noir épais, pour les voir sur fond clair comme sombre.
+- **Développé incliné** (barre) : nouvelle photo ; le fichier `incline_bench.png` est recréé pour lui (l'ancienne photo, avec haltères, reste celle du Développé incliné haltères).
+- Fichiers ajoutés au cache du service worker.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.91.
+
+---
+
+## [1.7.90] - 2026-11-14
+### 🖼️ Six icônes d'exercices nouvelles ou refaites (co-auteur : Claude)
+- **Nouvelles** : Tractions assistées (élastique colorié en jaune avec un liseré noir, pour le voir sur fond clair comme sombre), Tractions prise neutre (zoom sur le haut, barre remise), Rowing haltères (zoom sur le buste ; fichier `bent_over_dumbbell_row.png`, distinct du Rowing unilatéral), Tirage bras tendus (zoom fort, corde et câble en jaune avec un liseré noir).
+- **Remplacées** : Développé couché (jambes et pieds entiers), Tirage horizontal (machine, zoom sur la personne).
+- Toutes ajoutées au cache du service worker.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.90.
+
+---
+
+## [1.7.89] - 2026-11-14
+### 🚣 Records de cardio : la vitesse, pas la durée (co-auteur : Claude)
+- Pour le cardio avec distance ou étages, un record est maintenant **la meilleure allure** (rameur, ski trainer : /500 m ; tapis : /km — plus bas = mieux) ou **la meilleure vitesse / le meilleur rythme** (vélos : km/h ; stair climber : étages/min — plus haut = mieux). Ramer plus longtemps mais moins vite n'est plus un record. La durée reste le critère pour la planche, le gainage et la corde à sauter.
+- Même règle partout (`recordRule` dans `app.js`) : bilans du mois, trophées, « Records battus ce mois-ci » (« 2:00 /500 m · −0:05 ») et fenêtre de fin de séance.
+- `test_trophees.py` et `test_fin_seance.py` adaptés (allure du rameur, vitesse du vélo).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.89.
+
+---
+
+## [1.7.88] - 2026-11-14
+### 📐 Progression : records et paliers en un seul bloc (co-auteur : Claude)
+- « Records battus ce mois-ci » tient dans **un seul bloc vert** et « Paliers détectés » dans **un seul bloc ambré** : la hauteur suit le nombre de lignes, un trait fin de la couleur du bloc sépare deux lignes. Une ligne fait 48 px au lieu d'une gélule de 68 px.
+- Paliers : une ligne par exercice, nom et charge ; « sans progression depuis X séances » est retiré.
+- Maquette : planche 25.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.88.
+
+---
+
+## [1.7.87] - 2026-11-14
+### ✖️ Volets sans barre grise, croix sur la fiche d'exercice (co-auteur : Claude)
+- La petite barre grise en haut des volets est retirée **de tous les volets** : aucun ne se fermait en glissant vers le bas. La marge du haut passe à 28 px (`section-gap`).
+- **Fiche d'exercice** : une croix de 44 px en haut à droite (la même que dans « Ajouter un exercice ») ; elle défile avec la fiche, et « Fermer » reste en bas. Maquette : planche 38.
+- `test_fiches.py` : croix, plus de barre grise (60 contrôles).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.87.
+
+---
+
+## [1.7.86] - 2026-11-14
+### 📖 Fiches d'exercice : défilement au doigt (co-auteur : Claude)
+- Sur le téléphone, la fiche ne défilait pas : la règle des grands volets (`.sheet.tall`, contenu non défilant) la bloquait. Elle défile maintenant au doigt, sans faire bouger l'écran derrière.
+- `test_fiches.py` : glissement du doigt sur un téléphone simulé (48 contrôles).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.86.
+
+---
+
+## [1.7.85] - 2026-11-14
+### 📖 Fiches d'exercice : relecture (co-auteur : Claude)
+- Presse à cuisses : « Pieds à largeur de hanches, au milieu (voire plus bas) de la plateforme ».
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.85.
+
+---
+
+## [1.7.84] - 2026-11-14
+### 📖 Fiches d'exercice : appui long sur une image (co-auteur : Claude)
+- **Appui long** (≈ 0,5 s) sur **n'importe quelle image d'exercice** — Séance, éditeur, Ajouter un exercice, détail de la tuile active — ouvre la **fiche de l'exercice** : image en grand (220 px), groupe, « Polyarticulaire », séries × répétitions et repos, **Bien faire** (4 à 5 étapes), **À éviter**, **Muscles**, puis « Fermer ». Le toucher simple garde son effet habituel ; la fiche s'ouvre au-dessus d'un volet sans le fermer ; Échap ou un toucher à côté la referment.
+- **85 fiches** rédigées, une par exercice du catalogue (`js/fiches.js`). Un exercice sans image montre son pictogramme.
+- Maquette : planche 38. Nouveau test `test_fiches.py` (groupes `seance` et `programmes`, 47 contrôles).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.84.
+
+---
+
+## [1.7.83] - 2026-11-14
+### 🖼️ Abductions et Adductions recadrées (co-auteur : Claude)
+- Icônes **Abductions machine** et **Adductions machine** refaites : cadrage serré sur la partie basse (jambes, coussins, pieds), buste gardé jusqu'à la poitrine au lieu d'être coupé à la taille ; détourage refait (un trou dans une chaussure d'Abductions corrigé). Adductions décalée pour garder le pied gauche entier.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.83.
+
+---
+
+## [1.7.82] - 2026-11-14
+### 📱 En-tête remonté de 10 px de plus (co-auteur : Claude)
+- Application installée, écran avec caméra en haut : le nom de l'app commence **juste sous la zone de la caméra** (10 px dessous en 1.7.81). Tout le contenu remonte de 10 px.
+- Les boutons de l'en-tête (+, Réglages, Retour) gardent leur alignement avec le nom de l'app (4 px plus haut, comme sur un écran sans encoche) : leur bord supérieur entre donc de 4 px dans la zone, sur le côté droit.
+- Écran sans encoche ou navigateur : inchangé (28 px).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.82.
+
+---
+
+## [1.7.81] - 2026-11-14
+### 📱 En-tête remonté : 10 px sous la caméra (co-auteur : Claude)
+- Application installée, écran avec caméra en haut : le nom de l'app commence **10 px sous la zone de la caméra** (28 px en 1.7.79), les boutons de l'en-tête (+, Réglages, Retour) 6 px dessous. Tout le contenu remonte de 18 px.
+- Écran sans encoche ou navigateur : inchangé (28 px), l'en-tête ne remonte jamais au-dessus de cette marge.
+- `test_plein_ecran.py` : 24 contrôles (petite zone, zone de 40 px).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.81.
+
+---
+
+## [1.7.80] - 2026-11-14
+### ✍️ Premier lancement : « Bienvenue ! » à la place de « Bonjour, » (co-auteur : Claude)
+- Sur l'écran vide du tout premier lancement, l'accueil manuscrit dit seulement « Bienvenue ! » (à la taille de « Bonjour, »), à gauche de la flèche. Le reste de l'accueil ne change pas. Maquette : planche 1.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.80.
+
+---
+
+## [1.7.79] - 2026-11-14
+### 📱 Plein écran jusqu'en haut avec Chrome (co-auteur : Claude)
+- **Correction** : l'application installée depuis Chrome (Android) laissait une bande vide en haut de l'écran, à hauteur de la caméra, alors que celle de Firefox montait jusqu'au bord. Chrome réserve cette zone tant que la page ne dit pas qu'elle sait s'y afficher : `viewport-fit=cover` ajouté à `index.html`.
+- L'en-tête et ses boutons (+, Réglages, Retour) descendent de la hauteur de cette zone (`--safe-top`) : les titres restent exactement où ils étaient, rien ne passe sous la caméra. Le fond de l'app (blanc, sombre ou fond d'écran) remplit désormais la bande.
+- Aucun changement dans un navigateur ni sur un écran sans encoche (`--safe-top` vaut 0).
+- `test_plein_ecran.py` (groupe `style`) : balise présente, en-tête inchangé sans encoche, décalé d'exactement la zone réservée avec encoche (390 et 360 px, clair et sombre).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.79.
+
+---
+
+## [1.7.78] - 2026-11-14
+### ✍️ Accueil manuscrit : date locale, variantes, bilan du mois, « Semaine de déload », Bienvenue (co-auteur : Claude)
+- **Correction** : la date du jour vient du téléphone (heure locale) et non plus de l'heure UTC. Entre minuit et 1 h (2 h en été), l'app se croyait encore la veille : « Belle séance aujourd'hui » pouvait viser la séance de la veille, et le compte des 10 jours avait un jour d'écart.
+- **Variantes** : chaque situation a plusieurs phrases ; une variante est tirée par jour et reste la même toute la journée. Ordre : aucun programme actif, séance faite aujourd'hui, **bilan du mois disponible** (nouveau, du 1er au 10 tant que le post-it est là : « Ton bilan d'octobre t'attend ! »…), retour après 10 jours, **semaine de déload** (« Semaine de déload : … »), première séance, sinon motivation (8 phrases).
+- **Premier lancement** (aucun programme, aucune séance) : « Bonjour, Bienvenue ! » en manuscrit à gauche de la flèche. Un usager qui a supprimé tous ses programmes mais garde un historique ne le voit pas. Maquette : planche 1.
+- `test_accueil.py` : variantes, phrase stable dans la journée, date locale à 0 h 30, bilan, Bienvenue (390 et 360 px).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.78.
+
+---
+
+## [1.7.77] - 2026-11-14
+### 🔎 Pastilles d'icônes d'exercices +10 % (co-auteur : Claude)
+- Illustration et rond gris agrandis de 10 % par rapport à la 1.7.76, dans tous les onglets : détail du programme 77 → 84,7 px ; « Ajouter un exercice », éditeur de programme et lignes de Séance 60,5 → 66,55 px.
+- +15 % a été essayé puis écarté : à 360 px de large, « Développé militaire » ouvert dans Séance aurait été coupé (« … »).
+- Aucun débordement à 390 et 360 px, clair et sombre, et les noms d'exercice ouverts tiennent sur une ligne (vérifié dans Chromium).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.77.
+
+---
+
+## [1.7.76] - 2026-11-14
+### 🖼️ Icônes corrigées et complétées, « Extension triceps à la poulie » retiré (co-auteur : Claude)
+- **Nouvelles icônes** : Relevés de jambes suspendu, Burpees, Ski trainer, Vélo elliptique et Stair climber (recadrés sur les jambes).
+- **Icônes remplacées** : Soulevé de terre (photo « SDT classique »), Rameur (nouvelle photo, zoom moyen), Montées de genoux (nouvelle photo, zoom fort).
+- **Corrections** : icônes de Fentes et Fentes marchées inversées ; l'icône du Développé incliné, qui montrait des haltères, passe au **Développé incliné haltères** (fichier `incline_dumbbell_press.png`) — le Développé incliné à la barre reprend l'icône générique ; la Rotation russe reprend l'icône générique en attendant une photo avec les pieds visibles.
+- **« Extension triceps à la poulie » (n° 67) retiré du catalogue**, déjà couvert par « Extension triceps » : au chargement, programmes, historique et dernière charge qui l'utilisaient passent à « Extension triceps » (n° 66) ; un programme partagé qui le contient s'ouvre aussi sur « Extension triceps ».
+- Nouveau test `test_exercice_retire.py` (groupe `programmes`, 12 contrôles) : rattachement, liste d'ajout, icônes présentes et en cache. `test_poly_1rm.py` : 11 exercices de Bras.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.76.
+
+---
+
+## [1.7.75] - 2026-11-14
+### 🏷️ Accueil sans titre, Historique indépendant des programmes (co-auteur : Claude)
+- **Accueil Programmes** : plus de titre « Programmes » (« MON CARNET DE SALLE » et le bouton + restent) ; l'accueil manuscrit remonte. « Actif » devient **« Programme actif »**, ou **« Séance libre active »** pour une séance libre.
+- **Historique** : le titre de la page donne le **nombre de toutes les séances** (« 33 séances ») et le sous-titre le mois de la première (« depuis juillet 2026 »). L'Historique est **indépendant des programmes** : les filtres par programme sont retirés, toutes les séances sont toujours listées ; chaque ligne garde le nom de son programme.
+- Maquette : planches 12, 15 et 27. Tests adaptés (`test_programmes.py`, `test_accueil.py`, `test_reglages.py`, `test_supprimer_seance.py`, `test_titre_seance.py`).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.75.
+
+---
+
 ## [1.7.74] - 2026-11-14
 ### 📐 Séance : nom du programme et nom de la séance alignés (co-auteur : Claude)
 - 12 px entre l'icône de 44 px et le titre, partout : le nom du programme (16 px jusqu'ici) commence maintenant au même endroit que le nom de la séance. La page Fond d'écran (flèche retour puis titre) suit la même règle, comme l'éditeur. Maquette : planches 22 et 23.
