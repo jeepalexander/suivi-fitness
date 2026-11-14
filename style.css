@@ -649,7 +649,7 @@ body[data-tab="programme"][data-pview="choose"] header h1 { display: none; }
 .prog-tile-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* 1.7.25 (planche validée) : tuile active — marges de 12 px, pastille de séance de 40 px dans la colonne des icônes,
    textes alignés sur le nom du programme, trait pointillé de l'icône à « + de détail », boutons en bas */
-.next-card.prog-tile { position: relative; gap: 0; padding: 12px; }
+.next-card.prog-tile { position: relative; gap: 0; padding: 12px; margin-bottom: 0; } /* 1.7.70 : seul section-gap (28 px) sépare la tuile de « En mémoire », détail ouvert ou fermé */
 .prog-tile-line { position: absolute; left: 31px; top: 52px; bottom: 56px; border-left: 2px dotted color-mix(in srgb, var(--pill-ink) 40%, transparent); pointer-events: none; }
 .prog-tile-next { display: flex; align-items: center; gap: 12px; min-width: 0; margin-top: 12px; }
 .prog-tile-next .type-pill { position: relative; }

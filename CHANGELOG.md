@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.70] - 2026-11-14
+### 📐 Écart réduit entre la tuile active et « En mémoire » (co-auteur : Claude)
+- Détail fermé, la tuile active gardait une ancienne marge de 16 px qui s'ajoutait aux 28 px prévus avant « En mémoire » (44 px en tout). Il ne reste que l'espacement standard `section-gap` (28 px), comme lorsque le détail est ouvert. Maquette : planche 12 alignée sur 28 px.
+- Nouveau test `test_ecart_memoire.py` (groupe `programmes`, 12 contrôles).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.70.
+
+---
+
 ## [1.7.69] - 2026-11-13
 ### 🏆 Une seule règle de record : bilans, trophées et « Records battus ce mois-ci » (co-auteur : Claude)
 - La liste « Records battus ce mois-ci » suit maintenant la même règle que les bilans et le graphique Trophées, donc le chiffre du mois en cours est identique partout : un exercice **déjà fait avant** dont la meilleure charge, le meilleur **temps** (cardio, exercices au temps) ou la meilleure série au **poids du corps** (plus de lest, ou plus de répétitions au même lest) bat tout l'historique précédent.
