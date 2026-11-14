@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.91] - 2026-11-14
+### 🖼️ Quatre nouvelles icônes d'exercices (co-auteur : Claude)
+- **Shrugs haltères** (vue de dos, haltères entiers, la tête dépasse légèrement du rond), **Tirage facial** (zoom sur le buste) et **Rowing poulie basse** (câble et poignée) : corde ou câble coloriés en jaune avec un liseré noir épais, pour les voir sur fond clair comme sombre.
+- **Développé incliné** (barre) : nouvelle photo ; le fichier `incline_bench.png` est recréé pour lui (l'ancienne photo, avec haltères, reste celle du Développé incliné haltères).
+- Fichiers ajoutés au cache du service worker.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.91.
+
+---
+
 ## [1.7.90] - 2026-11-14
 ### 🖼️ Six icônes d'exercices nouvelles ou refaites (co-auteur : Claude)
 - **Nouvelles** : Tractions assistées (élastique colorié en jaune avec un liseré noir, pour le voir sur fond clair comme sombre), Tractions prise neutre (zoom sur le haut, barre remise), Rowing haltères (zoom sur le buste ; fichier `bent_over_dumbbell_row.png`, distinct du Rowing unilatéral), Tirage bras tendus (zoom fort, corde et câble en jaune avec un liseré noir).
