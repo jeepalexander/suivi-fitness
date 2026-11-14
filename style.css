@@ -911,7 +911,7 @@ body:not([data-tab="programme"]) #app-wallpaper::after, body[data-pview="editor"
 :root[data-wallpaper="silhouette"] #app-wallpaper { background-image: url('wallpapers/silhouette.jpg'); background-position: center 40%; }
 :root[data-wallpaper="escaliers"] #app-wallpaper { background-image: url('wallpapers/escaliers.jpg'); background-position: 45% center; }
 :root[data-wallpaper="frontsquat"] #app-wallpaper { background-image: url('wallpapers/frontsquat.jpg'); background-position: 75% center; }   /* 1.7.94 */
-:root[data-wallpaper="suspension"] #app-wallpaper { background-image: url('wallpapers/suspension.jpg'); background-position: 85% center; }
+:root[data-wallpaper="suspension"] #app-wallpaper { background-image: url('wallpapers/suspension.jpg'); background-position: right center; }
 :root[data-wallpaper="wod"] #app-wallpaper { background-image: url('wallpapers/wod.jpg'); background-position: center 62%; }
 /* Page Fond d'écran (1.7.19) : voile de l'accueil Programmes, pour voir le fond choisi */
 body[data-tab="fond"] #app-wallpaper::after { background: var(--veil-home); }

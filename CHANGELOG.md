@@ -7,6 +7,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.95] - 2026-11-14
+### 🖼️ Fond Suspension recadré (co-auteur : Claude)
+- **Suspension** : image calée sur son bord droit (au lieu de 85 %), la sportive est entière à l'écran, autant que la photo le permet.
+
+---
+
 ## [1.7.94] - 2026-11-14
 ### 🖼️ Fonds d'écran : 3 nouveaux, Traction retiré, rangement par style (co-auteur : Claude)
 - **Ajoutés** : *Squat avant* (illustration aquarelle claire), *Suspension* (box CrossFit, ambiance sombre), *Carnet WOD* (carnet « No Excuses »), chacun avec sa vignette.

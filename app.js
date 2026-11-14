@@ -260,7 +260,7 @@ const WALLPAPERS = [
   { id: 'cuivre', name: 'Cuivre', pos: 'center 50%' },
   // Ambiance de salle
   { id: 'ratelier', name: 'Râtelier', pos: 'center 60%' },
-  { id: 'suspension', name: 'Suspension', pos: '85% center' },
+  { id: 'suspension', name: 'Suspension', pos: 'right center' },
   { id: 'wod', name: 'Carnet WOD', pos: 'center 62%' },
   { id: 'cordes', name: 'Cordes', pos: 'center 50%' },
   { id: 'fente', name: 'Fente', pos: '45% center' },
