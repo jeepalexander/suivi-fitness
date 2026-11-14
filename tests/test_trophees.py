@@ -65,8 +65,8 @@ with Srv() as url, sync_playwright() as p:
     # 1.7.69 : la liste « Records battus ce mois-ci » suit la règle des bilans (cardio compris, pas de 1er passage)
     ctx, pg, errs = newpage(br, seed=False)
     pg.add_init_script("""(()=>{const d=new Date();const iso=(m,day)=>{const x=new Date(d.getFullYear(),d.getMonth()-m,day);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
-      const s=(m,day,w,sec,extra)=>({id:Date.now()-m*1e7-day,date:iso(m,day),type:'A',isDeload:false,tonnage:0,exercises:[{name:'Squat',sets:[{weight:w,reps:8}],maxWeight:w,totalVolume:w*8},{name:'Rameur',cardio:true,sets:[{seconds:sec}]}].concat(extra||[])});
-      if(!localStorage.getItem('h49_state'))localStorage.setItem('h49_state',JSON.stringify({history:[s(1,5,80,600),s(0,1,85,720,[{name:'Développé couché',sets:[{weight:60,reps:8}],maxWeight:60,totalVolume:480}])],weights:[]}));})()""")
+      const s=(m,day,w,sec,mt,extra)=>({id:Date.now()-m*1e7-day,date:iso(m,day),type:'A',isDeload:false,tonnage:0,exercises:[{name:'Squat',sets:[{weight:w,reps:8}],maxWeight:w,totalVolume:w*8},{name:'Rameur',cardio:true,sets:[{seconds:sec,meters:mt}]}].concat(extra||[])});
+      if(!localStorage.getItem('h49_state'))localStorage.setItem('h49_state',JSON.stringify({history:[s(1,5,80,600,2400),s(0,1,85,720,3000,[{name:'Développé couché',sets:[{weight:60,reps:8}],maxWeight:60,totalVolume:480}])],weights:[]}));})()""")
     pg.goto(url + 'index.html'); pg.wait_for_timeout(500)
     pg.evaluate("switchTab('progression')"); pg.wait_for_timeout(600)
     r = pg.evaluate("""(()=>{const items=[...document.querySelectorAll('.records-list .record-item')].map(e=>[e.querySelector('.record-exercise').textContent,e.querySelector('.record-value').textContent,e.querySelector('.record-improvement').textContent]);
@@ -74,8 +74,14 @@ with Srv() as url, sync_playwright() as p:
     names = sorted(i[0] for i in r['items'])
     ok('liste du mois = trophées du mois (2)', len(r['items']) == r['last'] == 2, r)
     ok('liste : Squat et Rameur, pas le 1er passage au développé couché', names == ['Rameur', 'Squat'], names)
-    ok('liste : record de cardio affiché en temps (12:00, +2:00)', ['Rameur', '12:00', '+2:00'] in r['items'], r['items'])
+    ok('liste : record de cardio = meilleure allure (2:00 /500 m, −0:05), pas la durée (1.7.89)', ['Rameur', '2:00 /500 m', '−0:05'] in r['items'], r['items'])
     ok('liste : record de charge inchangé (85 kg, +5 kg)', ['Squat', '85 kg', '+5 kg'] in r['items'], r['items'])
+    r2 = pg.evaluate("""(()=>{const H=[{date:'2026-09-03',exercises:[{name:'Rameur',cardio:true,sets:[{seconds:600,meters:2400}]},{name:'Vélo',cardio:true,sets:[{seconds:1800,meters:12000}]}]},
+        {date:'2026-10-03',exercises:[{name:'Rameur',cardio:true,sets:[{seconds:1200,meters:4000}]},{name:'Vélo',cardio:true,sets:[{seconds:1800,meters:15000}]}]}];
+      const rec=bilanRecordsIn(H,'2026-10').map(r=>r.name);
+      state.history=[H[0],Object.assign({id:'x'},H[1])];const fin=sessionRecords(state.history[1]).map(r=>r.name+' '+r.value);return {rec,fin}})()""")
+    ok('cardio : ramer plus longtemps mais moins vite n\'est pas un record ; vélo plus rapide (km/h) en est un', r2['rec'] == ['Vélo'], r2)
+    ok('fin de séance : même règle (vitesse, pas la durée)', r2['fin'] == ['Vélo 30,0 km/h'], r2)
     ok('aucune erreur JavaScript (liste alignée)', not errs, errs)
     ctx.close()
     # Historique long (14 mois) : la rangée défile et s'ouvre sur le mois en cours, sans déborder de la carte

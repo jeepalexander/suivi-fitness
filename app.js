@@ -680,6 +680,37 @@ function cardioMetricText(name, v) {
   const u = cardioUnit(name);
   return u && v > 0 ? `${u.fmt(v)} ${u.suffix}` : '–';
 }
+
+// 1.7.89 : ce qui fait un record, par exercice. Cardio avec distance ou étages : la meilleure allure (rameur, ski,
+// tapis : plus bas = mieux) ou la meilleure vitesse / le meilleur rythme (vélos, stair climber : plus haut = mieux),
+// jamais la durée (plus long ≠ record). Durée seule (planche, corde à sauter) : la plus longue. Charge : la plus lourde.
+// Le poids du corps a sa propre règle (lest puis répétitions, bestBodyweightSet). null = pas de record pour cet exercice.
+function recordRule(name, cardio) {
+  const e = exInfo(name), mode = exMode(name);
+  const u = (cardio || e.cardio) ? cardioUnit(name) : null;
+  if (u) return { kind: 'pace', lower: !!u.lowerIsBetter, val: st => cardioMetric(name, st) };
+  if (cardio || e.cardio || mode === 'time') return { kind: 'time', lower: false, val: st => Number(st.seconds) || 0 };
+  if (mode === 'weight') return { kind: 'weight', lower: false, val: st => Number(st.weight) || 0 };
+  return null;
+}
+// Meilleure valeur d'une liste de séries selon la règle (0 = aucune valeur exploitable)
+function recordBest(rule, sets) {
+  const vals = (sets || []).map(rule.val).filter(v => v > 0);
+  if (!vals.length) return 0;
+  return rule.lower ? Math.min(...vals) : Math.max(...vals);
+}
+function recordBeats(rule, cur, prev) { return cur > 0 && (rule.lower ? (prev > 0 && cur < prev) : cur > prev); }
+// Textes d'un record : valeur et gain (« 2:05 /500 m » et « −0:03 », « 85 kg » et « +2,5 kg »)
+function recordTexts(name, rule, cur, prev) {
+  const kg = v => `${String(Math.round(v * 100) / 100).replace('.', ',')} kg`;
+  if (rule.kind === 'pace') {
+    const u = cardioUnit(name);
+    const d = Math.abs(cur - prev);
+    return { value: cardioMetricText(name, cur), gain: rule.lower ? `−${u.fmt(d)}` : `+${u.fmt(d)}` };
+  }
+  if (rule.kind === 'time') return { value: formatDurationMS(cur), gain: '+' + formatDurationMS(cur - prev) };
+  return { value: kg(cur), gain: '+' + kg(cur - prev) };
+}
 // Montant saisi (champ de droite) -> mètres ou étages
 function parseCardioAmount(name, str) {
   const v = parseFloat(String(str == null ? '' : str).replace(',', '.'));
@@ -2058,19 +2089,18 @@ function sessionRecords(entry) {
   const others = (state.history || []).filter(h => h.id !== entry.id);
   const out = [];
   mergeExercises(entry.exercises).forEach(ex => {
-    const mode = exMode(ex.name);
-    const byTime = ex.cardio || mode === 'time';
-    if (!byTime && mode !== 'weight') return;
-    const val = st => byTime ? (Number(st.seconds) || 0) : (Number(st.weight) || 0);
-    const cur = Math.max(0, ...ex.sets.map(val));
+    const rule = recordRule(ex.name, ex.cardio);   // 1.7.89 : allure ou vitesse pour le cardio, pas la durée
+    if (!rule) return;
+    const cur = recordBest(rule, ex.sets);
     if (!cur) return;
-    let prev = 0, seen = false;
+    let prevSets = [], seen = false;
     others.forEach(h => (h.exercises || []).forEach(x => {
       if (x.name !== ex.name && !(ex.exId && x.exId === ex.exId)) return;
       seen = true;
-      (x.sets || []).forEach(st => { prev = Math.max(prev, val(st)); });
+      prevSets = prevSets.concat(x.sets || []);
     }));
-    if (seen && cur > prev) out.push({ name: ex.name, value: byTime ? formatDurationMS(cur) : `${cur.toLocaleString('fr-FR')} kg` });
+    const prev = recordBest(rule, prevSets);
+    if (seen && recordBeats(rule, cur, prev)) out.push({ name: ex.name, value: rule.kind === 'weight' ? `${cur.toLocaleString('fr-FR')} kg` : recordTexts(ex.name, rule, cur, prev).value });
   });
   return out;
 }
@@ -3210,8 +3240,8 @@ function analyzeMonthlyProgress(hist = statsHistory(), scope = currentStatsScope
       ? (r.cur.lest > r.prevBw.lest
         ? { exercise: r.name, newMax: r.cur.lest, improvement: r.cur.lest - r.prevBw.lest, valueText: lestText(r.cur.lest), improvementText: `+${String(r.cur.lest - r.prevBw.lest).replace('.', ',')} kg` }
         : { exercise: r.name, newMax: r.cur.reps, improvement: r.cur.reps - r.prevBw.reps, valueText: repsText(r.cur.reps), improvementText: `+${r.cur.reps - r.prevBw.reps} rép.` })
-      : r.byTime
-      ? { exercise: r.name, newMax: r.value, improvement: r.value - r.prev, valueText: formatDurationMS(r.value), improvementText: '+' + formatDurationMS(r.value - r.prev) }
+      : r.rule && r.rule.kind !== 'weight'   // 1.7.89 : durée ou allure / vitesse (cardio)
+      ? (t => ({ exercise: r.name, newMax: r.value, improvement: Math.abs(r.value - r.prev), valueText: t.value, improvementText: t.gain }))(recordTexts(r.name, r.rule, r.value, r.prev))
       : { exercise: r.name, newMax: r.value, improvement: r.value - r.prev });
   // 1.7.67–1.7.68 : trophées = records battus chaque mois, comptés comme les bilans du mois (bilanRecordCountIn,
   // même périmètre que la page), depuis le premier mois du périmètre jusqu'au mois en cours

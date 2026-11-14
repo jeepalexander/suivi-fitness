@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.89] - 2026-11-14
+### 🚣 Records de cardio : la vitesse, pas la durée (co-auteur : Claude)
+- Pour le cardio avec distance ou étages, un record est maintenant **la meilleure allure** (rameur, ski trainer : /500 m ; tapis : /km — plus bas = mieux) ou **la meilleure vitesse / le meilleur rythme** (vélos : km/h ; stair climber : étages/min — plus haut = mieux). Ramer plus longtemps mais moins vite n'est plus un record. La durée reste le critère pour la planche, le gainage et la corde à sauter.
+- Même règle partout (`recordRule` dans `app.js`) : bilans du mois, trophées, « Records battus ce mois-ci » (« 2:00 /500 m · −0:05 ») et fenêtre de fin de séance.
+- `test_trophees.py` et `test_fin_seance.py` adaptés (allure du rameur, vitesse du vélo).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.89.
+
+---
+
 ## [1.7.88] - 2026-11-14
 ### 📐 Progression : records et paliers en un seul bloc (co-auteur : Claude)
 - « Records battus ce mois-ci » tient dans **un seul bloc vert** et « Paliers détectés » dans **un seul bloc ambré** : la hauteur suit le nombre de lignes, un trait fin de la couleur du bloc sépare deux lignes. Une ligne fait 48 px au lieu d'une gélule de 68 px.
