@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.77] - 2026-11-14
+### 🔎 Pastilles d'icônes d'exercices +10 % (co-auteur : Claude)
+- Illustration et rond gris agrandis de 10 % par rapport à la 1.7.76, dans tous les onglets : détail du programme 77 → 84,7 px ; « Ajouter un exercice », éditeur de programme et lignes de Séance 60,5 → 66,55 px.
+- +15 % a été essayé puis écarté : à 360 px de large, « Développé militaire » ouvert dans Séance aurait été coupé (« … »).
+- Aucun débordement à 390 et 360 px, clair et sombre, et les noms d'exercice ouverts tiennent sur une ligne (vérifié dans Chromium).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.77.
+
+---
+
 ## [1.7.76] - 2026-11-14
 ### 🖼️ Icônes corrigées et complétées, « Extension triceps à la poulie » retiré (co-auteur : Claude)
 - **Nouvelles icônes** : Relevés de jambes suspendu, Burpees, Ski trainer, Vélo elliptique et Stair climber (recadrés sur les jambes).
