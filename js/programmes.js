@@ -170,8 +170,7 @@ function activeTileHtml(p) {
   const libre = isLibre(p);
   const nEx = (session.exercises || []).length;
   const nSets = sessionSetCount(session);
-  const BOLT_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>';
-  const deload = checkDeloadStatus() ? `<span class="deload-pill deload-inline">${BOLT_SVG}Déload −20 %</span>` : '';
+  const deload = checkDeloadStatus() ? `<span class="deload-pill deload-inline">${DELOAD_SVG}Déload −20 %</span>` : '';
   const count = `<span class="next-card-count">${nEx} exercice${nEx > 1 ? 's' : ''} · ${nSets} série${nSets > 1 ? 's' : ''}</span>`;
   // 1.7.25 (planche validée) : pictogramme + nom du programme ; pastille de séance de même taille, nom de la séance
   // aligné sur celui du programme, exercices · séries dessous (déload au bout, à la ligne si la place manque) ; trait pointillé de l'icône jusqu'à
@@ -934,9 +933,11 @@ function openSheet(html, opts = {}) {
 // ============================================================
 const WARN_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4l9 16H3z"/><path d="M12 10v4.5M12 17.5v.5"/></svg>';
 let askResolve = null;
-function askSheet({ tone = 'warn', title = '', text = '', ok = 'OK', cancel = null, danger = false } = {}) {
+let askCancelValue = false;
+function askSheet({ tone = 'warn', title = '', text = '', ok = 'OK', cancel = null, danger = false, cancelValue = false } = {}) {
+  // 1.7.96 : cancelValue distingue le second bouton d'une fermeture (fond, Échap), qui rend toujours false
   // Point d'accroche des tests automatiques (jamais défini dans l'application)
-  if (typeof window.__askHook === 'function') return Promise.resolve(!!window.__askHook({ tone, title, text, ok, cancel, danger }));
+  if (typeof window.__askHook === 'function') { const r = window.__askHook({ tone, title, text, ok, cancel, danger }); return Promise.resolve(r === 'cancel' ? cancelValue : !!r); }
   if (askResolve) finishAsk(false);
   let overlay = document.getElementById('ask-overlay');
   if (!overlay) {
@@ -946,7 +947,7 @@ function askSheet({ tone = 'warn', title = '', text = '', ok = 'OK', cancel = nu
     overlay.addEventListener('click', ev => {
       if (ev.target === overlay) return finishAsk(false);
       const b = ev.target.closest('[data-ask]');
-      if (b) finishAsk(b.dataset.ask === 'ok');
+      if (b) finishAsk(b.dataset.ask === 'ok' ? true : askCancelValue);
     });
     document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && askResolve) finishAsk(false); });
     document.body.appendChild(overlay);
@@ -960,6 +961,7 @@ function askSheet({ tone = 'warn', title = '', text = '', ok = 'OK', cancel = nu
     <button type="button" class="btn${danger ? ' btn-delete' : ''}" id="ask-ok" data-ask="ok">${escapeHtml(ok)}</button>
     ${cancel ? `<button type="button" class="btn btn-secondary" id="ask-cancel" data-ask="cancel">${escapeHtml(cancel)}</button>` : ''}
   </div>`;
+  askCancelValue = cancelValue;
   overlay.classList.add('open');
   const focus = overlay.querySelector(cancel ? '#ask-cancel' : '#ask-ok');
   if (focus) focus.focus({ preventScroll: true });

@@ -89,6 +89,8 @@ const CHECK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l
 const MINUS_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"/></svg>';
 const PLUS_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>';
 const CHEVRON_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+// 1.7.96 : plume (semaine légère) à la place de l'éclair, partout où le déload apparaît
+const DELOAD_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 12.2a6 6 0 0 0-8.5-8.5L5 10.5V19h8.5z"/><path d="M16 8L2 22"/><path d="M17.5 15H9"/></svg>';
 
 const HISTORY_MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const HISTORY_DAYS = ['Dim.','Lun.','Mar.','Mer.','Jeu.','Ven.','Sam.'];
@@ -801,6 +803,13 @@ function checkDeloadStatus() {
 function isDeloadPostponed() {
   return !!(state && state.deload && state.deload.postponedAt !== null && state.deload.postponedAt !== undefined
     && state.deload.postponedAt === state.history.length);
+}
+async function openDeloadInfo() { // 1.7.96
+  if (!isDeloadActive() || editingOriginalId !== null) return;
+  const choix = await askSheet({ tone: 'info', title: 'Déload −20 %',
+    text: 'Le déload (appelé semaine de décharge) est automatiquement proposé toutes les 12 séances. Il permet aux muscles de récupérer. Si tu te sens vraiment bien, tu peux le reporter à la prochaine séance.',
+    ok: 'Suivre le conseil de déload', cancel: 'Reporter', cancelValue: 'reporter' });
+  if (choix === 'reporter') postponeDeload(); // « Suivre le conseil » ou fermer : le déload reste
 }
 function postponeDeload() {
   if (!state || !checkDeloadStatus() || editingOriginalId !== null) return;
@@ -1684,11 +1693,12 @@ function renderSeanceHead(def, customSession) {
 
   const deloadSubEl = document.getElementById('deload-subtitle');
   const actionsEl = document.getElementById('deload-actions');
-  const BOLT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>';
   if (deloadSubEl) {
     if (isDeloadActive()) {
-      deloadSubEl.innerHTML = BOLT + 'Déload actif · −20 % sur les charges';
-      deloadSubEl.style.display = 'inline-flex';
+      // 1.7.96 : bouton pleine largeur, ouvre l'explication avec « Reporter »
+      deloadSubEl.innerHTML = DELOAD_SVG + '<span class="deload-btn-label">Déload −20 %</span><span class="deload-btn-chevron">' + CHEVRON_SVG + '</span>';
+      deloadSubEl.disabled = !!customSession;
+      deloadSubEl.style.display = 'flex';
     } else {
       deloadSubEl.innerHTML = '';
       deloadSubEl.style.display = 'none';
@@ -1696,7 +1706,6 @@ function renderSeanceHead(def, customSession) {
   }
   if (actionsEl) {
     if (customSession) actionsEl.innerHTML = '';
-    else if (isDeloadActive()) actionsEl.innerHTML = '<button type="button" class="link-btn deload-link" onclick="postponeDeload()">Reporter à la prochaine séance</button>';
     else if (isDeloadPostponed()) actionsEl.innerHTML = '<span class="deload-postponed">Déload reporté à la prochaine séance</span> <button type="button" class="link-btn deload-link" onclick="cancelDeloadPostpone()">Annuler</button>';
     else actionsEl.innerHTML = '';
     actionsEl.hidden = !actionsEl.innerHTML;
@@ -2242,7 +2251,7 @@ function renderHistory() {
       row.innerHTML = `
         ${sessionPillHtml(h)}
         <span class="history-main">
-          <span class="history-date">${formatHistoryDate(h.date)}${h.isDeload ? ' <span class="deload-tag"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>Déload</span>' : ''}</span>
+          <span class="history-date">${formatHistoryDate(h.date)}${h.isDeload ? ' <span class="deload-tag">${DELOAD_SVG}Déload</span>' : ''}</span>
           <span class="history-duration">${escapeHtml(sub)}</span>
         </span>
         <span class="history-tonnage">${historyTonnes(h.tonnage)} T</span>

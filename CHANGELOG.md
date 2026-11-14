@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.96] - 2026-11-14
+### 🪶 Déload : plume, bouton et explication ; flamme plus grande (co-auteur : Claude)
+- **Icône du déload** : une plume (semaine légère) remplace l'éclair, sur la tuile, dans la Séance et dans l'Historique.
+- **Séance** : le déload devient un bouton pleine largeur de 36 px, « Déload −20 % › ». Il ouvre une fenêtre ⓘ qui l'explique (semaine de décharge, toutes les 12 séances, récupération) avec « Suivre le conseil de déload » (en noir) et « Reporter » (en gris). Fermer la fenêtre ne reporte rien. Le lien « Reporter à la prochaine séance » sous le bouton est retiré.
+- **Échauffement** : flamme agrandie de 18 à 24 px.
+- `askSheet` accepte `cancelValue` pour distinguer le second bouton d'une simple fermeture.
+
+---
+
 ## [1.7.95] - 2026-11-14
 ### 🖼️ Fond Suspension recadré (co-auteur : Claude)
 - **Suspension** : image calée sur son bord droit (au lieu de 85 %), la sportive est entière à l'écran, autant que la photo le permet.

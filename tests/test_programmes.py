@@ -231,8 +231,22 @@ with Srv() as base, sync_playwright() as p:
     deload_now = n % 12 == 0 or n % 12 >= 10
     if not deload_now:
         pg.evaluate("state.deload.shift = (state.history.length + 1) - 10; saveState(); initWorkoutForm()"); pg.wait_for_timeout(200)
-    check('déload actif : lien « Reporter à la prochaine séance »', pg.is_visible('#deload-subtitle') and 'Reporter à la prochaine séance' in pg.inner_text('#deload-actions'))
-    pg.click('#deload-actions .link-btn'); pg.wait_for_timeout(200)
+    check('1.7.96 : bouton « Déload −20 % › » pleine largeur, plume, plus de lien sous le bouton',
+          pg.is_visible('#deload-subtitle') and pg.inner_text('#deload-subtitle').strip() == 'Déload −20 %'
+          and pg.evaluate("document.getElementById('deload-actions').hidden")
+          and pg.evaluate("document.querySelector('#deload-subtitle svg path').getAttribute('d').startsWith('M20.2')")
+          and abs(pg.evaluate("document.getElementById('deload-subtitle').getBoundingClientRect().width") - pg.evaluate("document.getElementById('deload-subtitle').parentElement.getBoundingClientRect().width") + pg.evaluate("parseFloat(getComputedStyle(document.getElementById('deload-subtitle').parentElement).paddingLeft)*2")) < 2
+          and pg.evaluate("document.getElementById('deload-subtitle').offsetHeight") == 36)
+    pg.evaluate("window.__lastAsk=null; window.__askHook=o=>{window.__lastAsk=o; return false}")
+    pg.click('#deload-subtitle'); pg.wait_for_timeout(200)
+    a = pg.evaluate("window.__lastAsk")
+    check('le bouton ouvre l\'explication : ⓘ, « Suivre le conseil de déload » en noir, « Reporter » en gris',
+          a and a['tone'] == 'info' and a['ok'] == 'Suivre le conseil de déload' and a['cancel'] == 'Reporter' and 'toutes les 12 séances' in a['text'])
+    check('fermer la fenêtre : le déload reste', pg.is_visible('#deload-subtitle'))
+    pg.evaluate("window.__askHook=o=>true"); pg.click('#deload-subtitle'); pg.wait_for_timeout(200)
+    check('« Suivre le conseil de déload » : le déload reste', pg.is_visible('#deload-subtitle'))
+    pg.evaluate("window.__askHook=o=>'cancel'")
+    pg.click('#deload-subtitle'); pg.wait_for_timeout(200)
     check('reporté : plus de déload sur cette séance, « Déload reporté à la prochaine séance · Annuler »', not pg.is_visible('#deload-subtitle') and 'Déload reporté à la prochaine séance' in pg.inner_text('#deload-actions'))
     pg.click('#deload-actions .link-btn'); pg.wait_for_timeout(200)
     check('report annulé : déload de retour', pg.is_visible('#deload-subtitle'))
