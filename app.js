@@ -247,22 +247,30 @@ function initTheme() {
 // Fond d'écran (1.7.7, 10 fonds ajoutés en 1.7.55, Studio et Poulie retirés en 1.7.56) : préférence de l'appareil (h49_wallpaper), hors des données exportées, comme le thème.
 // Aucun par défaut. Le script de index.html pose data-wallpaper avant le premier affichage.
 const WALLPAPER_KEY = 'h49_wallpaper';
+// 1.7.94 : rangés par style ; Traction retiré (un fond retiré ramène à « Aucun ») ; Squat avant, Suspension, Carnet WOD ajoutés
 const WALLPAPERS = [
+  // Illustrations
   { id: 'course', name: 'Course', pos: 'center 30%' },
-  { id: 'barre', name: 'Barre', pos: 'center 55%' },
+  { id: 'frontsquat', name: 'Squat avant', pos: '75% center' },
+  // Clairs
+  { id: 'salle', name: 'Salle blanche', pos: 'right center' },
   { id: 'halteres', name: 'Haltères', pos: 'center 45%' },
+  { id: 'barre', name: 'Barre', pos: 'center 55%' },
   { id: 'kettlebell', name: 'Kettlebell', pos: 'center 45%' },
+  { id: 'cuivre', name: 'Cuivre', pos: 'center 50%' },
+  // Ambiance de salle
   { id: 'ratelier', name: 'Râtelier', pos: 'center 60%' },
+  { id: 'suspension', name: 'Suspension', pos: '85% center' },
+  { id: 'wod', name: 'Carnet WOD', pos: 'center 62%' },
+  { id: 'cordes', name: 'Cordes', pos: 'center 50%' },
+  { id: 'fente', name: 'Fente', pos: '45% center' },
+  // Gros plans sombres
   { id: 'squat', name: 'Squat', pos: 'center 40%' },
   { id: 'poigne', name: 'Poigne', pos: 'center 40%' },
   { id: 'disques', name: 'Disques', pos: 'center 50%' },
-  { id: 'cuivre', name: 'Cuivre', pos: 'center 50%' },
-  { id: 'geometrie', name: 'Géométrie', pos: 'center 50%' },
-  { id: 'salle', name: 'Salle blanche', pos: 'right center' },
-  { id: 'traction', name: 'Traction', pos: '75% center' },
-  { id: 'cordes', name: 'Cordes', pos: 'center 50%' },
-  { id: 'fente', name: 'Fente', pos: '45% center' },
   { id: 'rack', name: 'Rack', pos: 'center 50%' },
+  // Graphiques et couleurs vives
+  { id: 'geometrie', name: 'Géométrie', pos: 'center 50%' },
   { id: 'silhouette', name: 'Silhouette', pos: 'center 40%' },
   { id: 'escaliers', name: 'Escaliers', pos: '45% center' },
   { id: 'none', name: 'Aucun' }

@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.94] - 2026-11-14
+### 🖼️ Fonds d'écran : 3 nouveaux, Traction retiré, rangement par style (co-auteur : Claude)
+- **Ajoutés** : *Squat avant* (illustration aquarelle claire), *Suspension* (box CrossFit, ambiance sombre), *Carnet WOD* (carnet « No Excuses »), chacun avec sa vignette.
+- **Retiré** : *Traction* (si c'était ton fond, l'app revient à « Aucun »).
+- **Rangement par style** dans Réglages › Fond d'écran : illustrations, fonds clairs, ambiance de salle, gros plans sombres, graphiques et couleurs vives, puis « Aucun ».
+- Règles CSS et script de démarrage mis à jour ; nouveau test : chaque fond a sa règle CSS et son entrée au démarrage.
+
+---
+
 ## [1.7.93] - 2026-11-14
 ### 🖼️ Icônes Pull-over et Shrugs barre (co-auteur : Claude)
 - **Pull-over** : allongée sur le banc, haltère derrière la tête, zoom fort sur le buste et les bras (`pullover.png`).
