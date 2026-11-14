@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.72] - 2026-11-14
+### 🖼️ 33 nouvelles icônes d'exercices, pastilles plus grandes (co-auteur : Claude)
+- **33 nouvelles icônes** validées sur la planche de contrôle : Squat, Squat haltères, Squat goblet, Squat bulgare, Hack squat, Fentes, Montées sur banc, Soulevé de terre roumain et jambes tendues, Hip thrust, Hip thrust haltères, Leg extension unilatéral, Leg curl assis, Abductions et Adductions machine, Mollets assis, Rowing barre, Développé haltères, Pompes, Pull-over poulie, Développé haltères assis, Élévations frontales, Curl marteau, Curl concentration, Extension triceps à la poulie, Extension triceps en arrière, Relevé de buste, Relevés de jambes au sol, Planche, Rotation russe, Corde à sauter, Vélo, Montées de genoux. PNG 512 × 512 détourés, même cadrage que les icônes existantes ; ajoutées au catalogue (champ `icon`) et au cache du service worker.
+- **12 icônes d'origine agrandies** de 11 à 12 % (le maximum sans rien couper) pour remplir la pastille comme les nouvelles : Tractions, Mollets, Oiseau, Fentes marchées, Leg extension, Leg curl, Élévations latérales, Rameur, Dips, Presse à cuisses, Développé militaire, Tirage vertical. Les 7 autres sont inchangées.
+- **Pastilles d'icônes +10 %** (image et rond gris) dans tous les onglets : détail du programme 70 → 77 px ; ajout d'exercice, éditeur de programme et Séance 55 → 60,5 px. Aucun débordement à 390 et 360 px, clair et sombre (vérifié dans Chromium).
+- 34 exercices gardent l'icône générique en attendant leur image (liste dans le projet : `ICONES_MANQUANTES.md`).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.72.
+
+---
+
 ## [1.7.71] - 2026-11-14
 ### 🧹 Plus de marges qui s'additionnent (co-auteur : Claude)
 - Tuile active ouverte : les 28 px entre la tuile et son détail (16 + 12 jusqu'ici) tiennent en une seule marge ; la 1.7.70 les avait ramenés par erreur à 12 px.
