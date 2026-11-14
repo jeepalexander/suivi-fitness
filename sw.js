@@ -2,7 +2,7 @@
 // APP_VERSION doit être incrémenté à chaque release (en même temps que
 // manifest.json) : le navigateur ne réinstalle le service worker que si
 // le contenu de ce fichier change.
-const APP_VERSION = '1.7.69';
+const APP_VERSION = '1.7.74';
 // 1.7.64 (co-auteur : Claude) : production (…/suivi-fitness/) et test (…/suivi-fitness/dev/) sont sur le même
 // domaine et partagent le stockage des caches : chaque version nomme ses caches d'après son dossier et ne
 // supprime que les siens (plus les anciens caches sans dossier, d'avant la 1.7.64).
@@ -86,7 +86,40 @@ const ASSETS = [
   './icons/rower.png',
   './icons/seated_row.png',
   './icons/triceps_extension.png',
-  './icons/walking_lunge.png'
+  './icons/walking_lunge.png',
+  './icons/barbell_row.png',
+  './icons/barbell_squat.png',
+  './icons/bulgarian_split_squat.png',
+  './icons/cable_pullover.png',
+  './icons/concentration_curl.png',
+  './icons/crunch.png',
+  './icons/dumbbell_bench_press.png',
+  './icons/dumbbell_hip_thrust.png',
+  './icons/dumbbell_squat.png',
+  './icons/front_raises.png',
+  './icons/goblet_squat.png',
+  './icons/hack_squat.png',
+  './icons/hammer_curl.png',
+  './icons/hip_abduction.png',
+  './icons/hip_adduction.png',
+  './icons/hip_thrust.png',
+  './icons/jump_rope.png',
+  './icons/lunges.png',
+  './icons/lying_leg_raises.png',
+  './icons/mountain_climbers.png',
+  './icons/plank.png',
+  './icons/push_ups.png',
+  './icons/romanian_deadlift.png',
+  './icons/russian_twist.png',
+  './icons/seated_calf_raise.png',
+  './icons/seated_dumbbell_press.png',
+  './icons/seated_leg_curl.png',
+  './icons/single_leg_extension.png',
+  './icons/stationary_bike.png',
+  './icons/step_up.png',
+  './icons/stiff_leg_deadlift.png',
+  './icons/triceps_kickback.png',
+  './icons/triceps_pushdown.png'
 ];
 
 self.addEventListener('install', (event) => {

@@ -369,7 +369,7 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 
 .tile-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 8px; }
 .ex-tile { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 0; background: none; border: none; border-radius: 0; text-align: center; font-size: 0.9375rem; font-weight: 600; line-height: 1.35; }
-.ex-tile .ex-icon-badge { width: 70px; height: 70px; }
+.ex-tile .ex-icon-badge { width: 77px; height: 77px; } /* +10 % (1.7.72) */
 .ex-tile .ex-icon-badge::before { box-shadow: var(--sh-badge); }
 
 .next-row-wrap { display: flex; flex-direction: column; gap: 16px; }
@@ -409,7 +409,7 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 .ex-chevron { display: flex; color: var(--text-muted); }
 .ex-chevron svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .exercise-item.open .ex-chevron { display: none; }
-.exercise-item .ex-icon-badge { width: 55px; height: 55px; flex-shrink: 0; } /* +15 % (1.7.14) */
+.exercise-item .ex-icon-badge { width: 60.5px; height: 60.5px; flex-shrink: 0; } /* +15 % (1.7.14), +10 % (1.7.72) */
 .ex-body { margin-top: 12px; }
 .ex-body[hidden], .ex-controls[hidden] { display: none; }
 
@@ -649,7 +649,7 @@ body[data-tab="programme"][data-pview="choose"] header h1 { display: none; }
 .prog-tile-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* 1.7.25 (planche validée) : tuile active — marges de 12 px, pastille de séance de 40 px dans la colonne des icônes,
    textes alignés sur le nom du programme, trait pointillé de l'icône à « + de détail », boutons en bas */
-.next-card.prog-tile { position: relative; gap: 0; padding: 12px; }
+.next-card.prog-tile { position: relative; gap: 0; padding: 12px; margin-bottom: 0; } /* 1.7.70 : seul section-gap (28 px) sépare la tuile de « En mémoire », détail ouvert ou fermé */
 .prog-tile-line { position: absolute; left: 31px; top: 52px; bottom: 56px; border-left: 2px dotted color-mix(in srgb, var(--pill-ink) 40%, transparent); pointer-events: none; }
 .prog-tile-next { display: flex; align-items: center; gap: 12px; min-width: 0; margin-top: 12px; }
 .prog-tile-next .type-pill { position: relative; }
@@ -676,7 +676,7 @@ body[data-tab="programme"][data-pview="choose"] header h1 { display: none; }
 .prog-tile.libre .prog-tile-name { color: var(--sand-ink); }
 .prog-tile.libre .prog-detail-btn { background: var(--sand-ico); color: var(--sand-ink); }
 .btn-start.libre { background: var(--sand-ink); box-shadow: var(--sh-sand); }
-.prog-detail { margin-top: 12px; }
+.prog-detail { margin-top: 28px; } /* 1.7.70 : 28 px sous la tuile active, comme avant (16 + 12 qui s'additionnaient) */
 
 .prog-mem-title { margin: 28px 0 12px; display: flex; align-items: center; gap: 8px; }
 /* 1.7.19 : symbole pause devant « En mémoire » (couleur des mentions « En pause ») */
@@ -747,7 +747,7 @@ body[data-tab="programme"][data-pview="choose"] header h1 { display: none; }
 .ed-count { margin-bottom: 8px; font-size: 0.875rem; color: var(--text-muted); }
 .ed-list { display: flex; flex-direction: column; }
 .ed-row { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 4px 0; background: var(--bg); border-radius: 16px; }
-.ed-row .ex-icon-badge { width: 55px; height: 55px; flex: none; } /* +15 % (1.7.17) */
+.ed-row .ex-icon-badge { width: 60.5px; height: 60.5px; flex: none; } /* +15 % (1.7.17), +10 % (1.7.72) */
 .ed-row-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .ed-row-name { font-size: 1.0625rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ed-row-sub { font-size: 0.875rem; color: var(--text-muted); }
@@ -792,7 +792,7 @@ body[data-tab="programme"][data-pview="choose"] header h1 { display: none; }
 .add-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; margin: 0 calc(-1 * var(--gutter)); padding: 0 var(--gutter); }
 .add-empty { padding: 20px 0; color: var(--text-muted); text-align: center; }
 .add-item { width: 100%; display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 4px 0; border: none; background: none; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
-.add-item .ex-icon-badge { width: 55px; height: 55px; flex: none; } /* +15 % (1.7.17) */
+.add-item .ex-icon-badge { width: 60.5px; height: 60.5px; flex: none; } /* +15 % (1.7.17), +10 % (1.7.72) */
 .add-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .add-name { font-size: 1.0625rem; font-weight: 600; }
 .add-meta { font-size: 0.875rem; color: var(--text-muted); }
@@ -863,6 +863,8 @@ body[data-seance="empty"] .seance-sticky { display: none; }
 #tab-programme.active { display: flex; flex-direction: column; min-height: 100%; }
 #program-overview { flex: 1 0 auto; display: flex; flex-direction: column; }
 .prog-spacer { flex: 1 1 auto; min-height: 12px; }
+/* 1.7.73 : accueil Programmes, 16 px entre l'astuce et le menu (32 avant) : le contenu laisse du jeu et l'écran ne bouge plus sous le doigt */
+body[data-pview="home"] #app-scroll:has(#tab-programme.active) { padding-bottom: 96px; }
 body[data-pview="choose"] .choose-lead { margin-top: 0; }
 /* 1.7.58 : moins d'espace en haut de l'écran du bouton +, pour que tout tienne au-dessus du menu */
 body[data-pview="choose"] .ed-top { margin-bottom: 4px; }
@@ -918,7 +920,7 @@ body[data-tab="fond"] #app-wallpaper::after { background: var(--veil-home); }
 :root[data-wallpaper] .prog-tile.libre { background: color-mix(in srgb, var(--sand) 84%, transparent); }
 
 /* En-tête : bouton retour à gauche du titre, sur la page Fond d'écran seulement */
-.page-title-row { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.page-title-row { display: flex; align-items: center; gap: 12px; min-width: 0; } /* 1.7.74 : 12 px entre l'icône (ou la flèche retour) et le titre, comme la ligne de la séance et l'éditeur */
 #fond-back { display: none; }
 body[data-tab="fond"] #fond-back { display: flex; }
 body[data-tab="fond"] header h1 { font-size: 2rem; }
@@ -959,10 +961,11 @@ body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 /* ============================================
    Réglages › Inviter quelqu'un (1.7.21) : QR code vers l'application
    ============================================ */
-.invite-qr { width: 220px; max-width: 70vw; margin: 4px auto 12px; padding: 16px; box-sizing: border-box; border-radius: 22px; background: var(--qr-bg); box-shadow: var(--sh-card); }
+.invite-qr { width: 220px; max-width: 70vw; margin: 0 auto 12px; padding: 16px; box-sizing: border-box; border-radius: 22px; background: var(--qr-bg); box-shadow: var(--sh-card); }
 .invite-qr svg { display: block; width: 100%; height: auto; }
-.invite-link { margin: 0 0 8px; font-size: 0.8125rem; line-height: 1.45; color: var(--text-muted); text-align: center; overflow-wrap: anywhere; }
-.invite-link + .btn-secondary { margin-top: 4px; }   /* 1.7.37 : seul bouton sous l’adresse, 12 px d’écart comme sur la maquette */
+.invite-link { margin: 0; font-size: 0.8125rem; line-height: 1.45; color: var(--text-muted); text-align: center; overflow-wrap: anywhere; }
+.invite-link + .btn-secondary { margin-top: 12px; }   /* 1.7.37 : seul bouton sous l’adresse, 12 px d’écart comme sur la maquette (1.7.70 : une seule marge) */
+.sheet-text:has(+ .invite-qr) { margin-bottom: 20px; }   /* 1.7.70 : 20 px au-dessus du QR, en une seule marge (16 + 4 avant) */
 
 /* ============================================
    Accueil Programmes : message manuscrit (1.7.24)
@@ -1057,8 +1060,10 @@ body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 .ed-share svg, .share-ico svg, .share-chev svg, .choose-recv svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .share-ico { flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--primary-strong); color: var(--on-strong); display: flex; align-items: center; justify-content: center; }
 .share-chev { flex: none; display: flex; color: var(--text-muted); }
-.choose-recv { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 44px; margin-top: 8px; border: 0; background: none; color: var(--text); font: inherit; font-size: 1.0625rem; font-weight: 600; cursor: pointer; }
-.recv-field { width: 100%; height: 52px; padding: 0 20px; margin: 0 0 12px; border: 0; border-radius: var(--radius-field, 25px); background: var(--fill); color: var(--text); font: inherit; font-size: 1rem; }
+.choose-card:has(+ .choose-recv) { margin-bottom: 0; }   /* 1.7.70 : 24 px au-dessus de « Recevoir », en une seule marge (16 + 8 avant) */
+.choose-recv { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 44px; margin-top: 24px; border: 0; background: none; color: var(--text); font: inherit; font-size: 1.0625rem; font-weight: 600; cursor: pointer; }
+.recv-field + .btn { margin-top: 0; }   /* 1.7.70 : 24 px sous le champ, en une seule marge (12 + 12 avant) */
+.recv-field { width: 100%; height: 52px; padding: 0 20px; margin: 0 0 24px; border: 0; border-radius: var(--radius-field, 25px); background: var(--fill); color: var(--text); font: inherit; font-size: 1rem; }
 .qr-cam { position: relative; width: 100%; max-width: 280px; aspect-ratio: 1; margin: 4px auto 12px; border-radius: 22px; overflow: hidden; background: #111114; }
 .qr-cam video { width: 100%; height: 100%; object-fit: cover; display: block; }
 .qr-frame { position: absolute; inset: 18%; border: 3px solid rgba(255, 255, 255, 0.9); border-radius: 16px; box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.25); }

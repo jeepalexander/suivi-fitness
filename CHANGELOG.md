@@ -7,6 +7,49 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.74] - 2026-11-14
+### 📐 Séance : nom du programme et nom de la séance alignés (co-auteur : Claude)
+- 12 px entre l'icône de 44 px et le titre, partout : le nom du programme (16 px jusqu'ici) commence maintenant au même endroit que le nom de la séance. La page Fond d'écran (flèche retour puis titre) suit la même règle, comme l'éditeur. Maquette : planches 22 et 23.
+- Nouveau test `test_alignement_titres.py` (groupe `seance`, 16 contrôles).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.74.
+
+---
+
+## [1.7.73] - 2026-11-14
+### 📐 Accueil Programmes : moins d'espace sous l'astuce (co-auteur : Claude)
+- 16 px au lieu de 32 entre « Astuce : Reste appuyé… » et le menu, seulement sur l'accueil Programmes. Le contenu laisse ainsi du jeu : l'écran ne doit plus bouger sous le doigt quand un programme est actif. Les autres onglets, l'éditeur et l'écran du + ne changent pas. Maquette : planche 12.
+- `test_ecart_memoire.py` vérifie les 16 px et l'absence de défilement (20 contrôles).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.73.
+
+---
+
+## [1.7.72] - 2026-11-14
+### 🖼️ 33 nouvelles icônes d'exercices, pastilles plus grandes (co-auteur : Claude)
+- **33 nouvelles icônes** validées sur la planche de contrôle : Squat, Squat haltères, Squat goblet, Squat bulgare, Hack squat, Fentes, Montées sur banc, Soulevé de terre roumain et jambes tendues, Hip thrust, Hip thrust haltères, Leg extension unilatéral, Leg curl assis, Abductions et Adductions machine, Mollets assis, Rowing barre, Développé haltères, Pompes, Pull-over poulie, Développé haltères assis, Élévations frontales, Curl marteau, Curl concentration, Extension triceps à la poulie, Extension triceps en arrière, Relevé de buste, Relevés de jambes au sol, Planche, Rotation russe, Corde à sauter, Vélo, Montées de genoux. PNG 512 × 512 détourés, même cadrage que les icônes existantes ; ajoutées au catalogue (champ `icon`) et au cache du service worker.
+- **12 icônes d'origine agrandies** de 11 à 12 % (le maximum sans rien couper) pour remplir la pastille comme les nouvelles : Tractions, Mollets, Oiseau, Fentes marchées, Leg extension, Leg curl, Élévations latérales, Rameur, Dips, Presse à cuisses, Développé militaire, Tirage vertical. Les 7 autres sont inchangées.
+- **Pastilles d'icônes +10 %** (image et rond gris) dans tous les onglets : détail du programme 70 → 77 px ; ajout d'exercice, éditeur de programme et Séance 55 → 60,5 px. Aucun débordement à 390 et 360 px, clair et sombre (vérifié dans Chromium).
+- 34 exercices gardent l'icône générique en attendant leur image (liste dans le projet : `ICONES_MANQUANTES.md`).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.72.
+
+---
+
+## [1.7.71] - 2026-11-14
+### 🧹 Plus de marges qui s'additionnent (co-auteur : Claude)
+- Tuile active ouverte : les 28 px entre la tuile et son détail (16 + 12 jusqu'ici) tiennent en une seule marge ; la 1.7.70 les avait ramenés par erreur à 12 px.
+- Quatre écarts faits de deux marges additionnées passent à une seule marge, **sans rien changer à l'écran** (positions identiques au pixel, vérifiées dans Chromium) : écran du + (24 px au-dessus de « Recevoir un programme »), Inviter quelqu'un et QR code d'un programme (20 px au-dessus du QR, 12 px au-dessus de « Fermer »), Recevoir un programme (24 px sous le champ).
+- Nouveau test `test_marges_doublees.py` (groupe `programmes`, 30 contrôles) : il échoue dès que deux marges voisines s'additionnent quelque part (onglets, écran du +, éditeur, bilans, volets). `test_ecart_memoire.py` vérifie aussi l'écart tuile / détail.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.71.
+
+---
+
+## [1.7.70] - 2026-11-14
+### 📐 Écart réduit entre la tuile active et « En mémoire » (co-auteur : Claude)
+- Détail fermé, la tuile active gardait une ancienne marge de 16 px qui s'ajoutait aux 28 px prévus avant « En mémoire » (44 px en tout). Il ne reste que l'espacement standard `section-gap` (28 px), comme lorsque le détail est ouvert. Maquette : planche 12 alignée sur 28 px.
+- Nouveau test `test_ecart_memoire.py` (groupe `programmes`, 12 contrôles).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.70.
+
+---
+
 ## [1.7.69] - 2026-11-13
 ### 🏆 Une seule règle de record : bilans, trophées et « Records battus ce mois-ci » (co-auteur : Claude)
 - La liste « Records battus ce mois-ci » suit maintenant la même règle que les bilans et le graphique Trophées, donc le chiffre du mois en cours est identique partout : un exercice **déjà fait avant** dont la meilleure charge, le meilleur **temps** (cardio, exercices au temps) ou la meilleure série au **poids du corps** (plus de lest, ou plus de répétitions au même lest) bat tout l'historique précédent.
