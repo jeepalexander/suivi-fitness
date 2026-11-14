@@ -700,6 +700,7 @@ body[data-tab="programme"][data-pview="choose"] header h1 { display: none; }
 
 /* Écran 1 : rien de prévu */
 .prog-empty { position: relative; min-height: calc(100dvh - 300px); padding-top: 250px; }
+.prog-empty .prog-greet-welcome { position: absolute; top: 0; left: 0; margin-top: 8px; } /* 1.7.78 : premier lancement, à gauche de la flèche */
 .prog-empty-arrow { position: absolute; top: -6px; right: -6px; width: 170px; height: 196px; fill: none; stroke: var(--text); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 .prog-empty-title { font-family: var(--font-display); font-weight: 700; font-size: 1.75rem; line-height: 1.05; }
 .prog-empty-sub { margin-top: 12px; font-size: 1.0625rem; line-height: 1.45; color: var(--text-muted); }

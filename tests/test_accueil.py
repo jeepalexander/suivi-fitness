@@ -45,12 +45,37 @@ with Srv() as base, sync_playwright() as p:
             check("9 h : « Bonjour »", g('2026-11-09T09:00:00', [{'date': '2026-11-07'}]).startswith('Bonjour |'))
             check("20 h : « Bonsoir »", g('2026-11-09T20:00:00', [{'date': '2026-11-07'}]).startswith('Bonsoir |'))
             check("2 h du matin : « Bonsoir »", g('2026-11-09T02:00:00', [{'date': '2026-11-07'}]).startswith('Bonsoir |'))
-            check("séance déjà faite aujourd'hui : récup", 'récup' in g('2026-11-09T12:00:00', [{'date': '2026-11-09'}]))
-            check("10 jours sans séance : « Content de te revoir »", 'revoir' in g('2026-11-20T12:00:00', [{'date': '2026-11-09'}]))
-            check("aucune séance encore : « première séance »", 'première séance' in g('2026-11-09T12:00:00', []))
-            check("pas de programme actif : « Choisis ton programme »", 'Choisis ton programme' in g('2026-11-09T12:00:00', [{'date': '2026-11-07'}], 'none'))
-            l = g('2026-11-09T12:00:00', [{'date': '2026-11-07'}])
-            check("sinon : « Prêt à te dépasser » (ou semaine légère en déload)", ('dépasser' in l) or ('Semaine légère' in l), l)
+            def inl(cat, line): return pg.evaluate(f"GREET.{cat}.some(x => typeof x === 'string' && x === {line!r})")
+            l = g('2026-11-09T12:00:00', [{'date': '2026-11-09'}]); check("séance déjà faite aujourd'hui : une phrase « faite »", inl('faite', l.split(' | ')[1]), l)
+            l = g('2026-11-20T12:00:00', [{'date': '2026-11-09'}]); check("10 jours sans séance : une phrase « retour »", inl('retour', l.split(' | ')[1]), l)
+            l = g('2026-11-09T12:00:00', []); check("aucune séance encore : une phrase « première »", inl('premiere', l.split(' | ')[1]), l)
+            l = g('2026-11-09T12:00:00', [{'date': '2026-11-07'}], 'none'); check("pas de programme actif : une phrase « aucunActif »", inl('aucunActif', l.split(' | ')[1]), l)
+            l = g('2026-11-09T12:00:00', [{'date': '2026-11-07'}]); check("sinon : motivation ou semaine de déload", inl('motivation', l.split(' | ')[1]) or l.split(' | ')[1].startswith('Semaine de déload'), l)
+            check("même phrase toute la journée (8 h et 22 h)", g('2026-11-12T08:00:00', [{'date': '2026-11-10'}]).split(' | ')[1] == g('2026-11-12T22:00:00', [{'date': '2026-11-10'}]).split(' | ')[1])
+            check("phrases variées d'un jour à l'autre", len({g(f'2026-11-{d:02d}T12:00:00', [{'date': '2026-11-01'}]).split(' | ')[1] for d in range(2, 10)}) >= 3)
+            check("déload : toutes les phrases disent « Semaine de déload »", pg.evaluate("GREET.deload.every(x => x.startsWith('Semaine de déload'))"))
+            # 1.7.78 : date locale — à 0 h 30 heure de Paris (23 h 30 UTC la veille), une séance du jour compte bien comme « aujourd'hui »
+            l = g('2026-11-09T00:30:00', [{'date': '2026-11-09'}]); check("0 h 30 : séance du jour reconnue (date locale)", inl('faite', l.split(' | ')[1]), l)
+            l = g('2026-11-09T00:30:00', [{'date': '2026-11-08'}]); check("0 h 30 : séance de la veille ≠ aujourd'hui", not inl('faite', l.split(' | ')[1]), l)
+            # Bilan du mois : du 1er au 10, tant qu'il n'est pas archivé
+            l = pg.evaluate("""() => { window.__bilanNow = '2026-11-05T12:00:00'; state.bilanVu = null; state.history = [{date:'2026-10-20', exercises:[]}];
+                const g = programGreeting(getActiveProgram(), new Date('2026-11-05T12:00:00')); delete window.__bilanNow; return g.line; }""")
+            check("bilan du mois disponible : phrase sur le bilan d'octobre", 'bilan' in l and ('octobre' in l.lower()), l)
+        ctx.close()
+    br.close()
+# 1.7.78 : « Bonjour, Bienvenue ! » seulement au premier lancement (aucun programme, aucune séance), à gauche de la flèche
+with Srv() as url, sync_playwright() as p:
+    br = p.chromium.launch()
+    for w in (390, 360):
+        ctx, pg, errs = newpage(br, w=w, seed=False)
+        pg.goto(url + 'index.html'); pg.wait_for_timeout(500)
+        r = pg.evaluate("""(()=>{const g=document.querySelector('.prog-greet-welcome'),a=document.querySelector('.prog-empty-arrow'),t=document.querySelector('.prog-empty-title');
+          if(!g) return null; const gr=g.getBoundingClientRect(),ar=a.getBoundingClientRect(),tr=t.getBoundingClientRect();
+          return {txt:g.innerText.replace(/\\s+/g,' '), libre:gr.right<=ar.left+20 || gr.bottom<=ar.top, auDessus:gr.bottom<tr.top}})()""")
+        check(f"[{w}px] premier lancement : « Bienvenue ! » sans chevaucher la flèche ni le texte", r and 'Bienvenue !' in r['txt'] and r['libre'] and r['auDessus'], r)
+        pg.evaluate("state.history=[{id:1,date:'2026-10-01',type:'A',exercises:[],tonnage:0}]; renderProgramOverview(); 0"); pg.wait_for_timeout(200)
+        check(f"[{w}px] plus de programme mais un historique : pas de « Bienvenue »", pg.locator('.prog-greet-welcome').count() == 0)
+        check(f"[{w}px] aucune erreur JavaScript (écran vide)", not errs, errs)
         ctx.close()
     br.close()
 from PIL import Image

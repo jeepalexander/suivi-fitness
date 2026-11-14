@@ -103,22 +103,45 @@ function renderProgramOverview() {
   bindLongPress(container);
 }
 
-// Message d'accueil manuscrit (1.7.24) : « Bonjour » ou « Bonsoir » selon l'heure, puis une phrase selon le contexte
-// (séance déjà faite aujourd'hui, retour après une pause, déload, pas de programme actif, sinon motivation).
+// Message d'accueil manuscrit (1.7.24, variantes en 1.7.78) : « Bonjour » ou « Bonsoir » selon l'heure, puis une phrase
+// selon le contexte. La première situation qui s'applique décide ; une variante est tirée par jour (la même toute la journée).
+const GREET = {
+  aucunActif: ["Choisis ton programme, et c'est parti !", 'Un programme à activer, et on y va ?', 'Réactive un programme pour reprendre.'],
+  faite: ["Belle séance aujourd'hui. Place à la récup !", "Mission accomplie pour aujourd'hui !", 'Bien joué ! Repos et protéines.', 'Séance validée. Tes muscles te remercient.'],
+  bilan: [m => `Ton bilan ${m.de} t'attend !`, m => `${m.Nom} est bouclé : jette un œil à ton bilan.`, m => `Ton bilan ${m.de} est prêt. Alors, ce mois ?`],
+  retour: ["Content de te revoir ! On s'y remet ?", 'Te revoilà ! On reprend en douceur ?', 'Ça fait un moment… Prêt à repartir ?'],
+  deload: ['Semaine de déload : on récupère pour mieux repartir.', 'Semaine de déload : charges légères, technique propre.', 'Semaine de déload : on lève le pied, pas les bras.'],
+  premiere: ['Prêt pour ta première séance ?', 'Première séance : on pose les bases !'],
+  motivation: ["Prêt à te dépasser aujourd'hui ?", "Une série après l'autre.", "Aujourd'hui compte. On y va ?", 'Chaque séance te rapproche du but.',
+    'La régularité fait la force.', "Un peu plus fort qu'hier ?", "Ta meilleure série t'attend.", "Pas d'excuse, juste des séries."]
+};
+
+// Date du téléphone au format AAAA-MM-JJ (1.7.78 : heure locale, plus l'heure UTC qui décalait d'un jour après minuit)
+function localDateKey(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
 function programGreeting(active, now = new Date()) {
   const h = now.getHours();
   const hello = (h >= 5 && h < 18) ? 'Bonjour' : 'Bonsoir';
   const hist = (typeof state !== 'undefined' && state && Array.isArray(state.history)) ? state.history : [];
-  const today = now.toISOString().slice(0, 10);
-  const last = hist.length ? hist[hist.length - 1].date : null;
-  const daysSince = last ? Math.floor((new Date(today) - new Date(last)) / 86400000) : null;
+  const today = localDateKey(now);
+  const last = hist.length ? hist.map(x => x.date || '').sort().pop() : null;
+  const daysSince = last ? Math.round((Date.UTC(...today.split('-').map((v, i) => i === 1 ? v - 1 : +v)) - Date.UTC(...last.split('-').map((v, i) => i === 1 ? v - 1 : +v))) / 86400000) : null;
+  const day = Math.round(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 86400000);
+  const pick = list => list[day % list.length];
+  const bilanKey = (typeof bilanPostitKey === 'function') ? bilanPostitKey() : null;
   let line;
-  if (!active) line = 'Choisis ton programme, et c\'est parti !';
-  else if (last === today) line = 'Belle séance aujourd\'hui. Place à la récup !';
-  else if (daysSince !== null && daysSince >= 10) line = 'Content de te revoir ! On s\'y remet ?';
-  else if (!isLibre(active) && typeof checkDeloadStatus === 'function' && checkDeloadStatus()) line = 'Semaine légère : on récupère pour mieux repartir.';
-  else if (!hist.length) line = 'Prêt pour ta première séance ?';
-  else line = 'Prêt à te dépasser aujourd\'hui ?';
+  if (!active) line = pick(GREET.aucunActif);
+  else if (last === today) line = pick(GREET.faite);
+  else if (bilanKey) {
+    const nom = bilanMonthName(bilanKey);
+    line = pick(GREET.bilan)({ de: bilanDeMois(bilanKey), Nom: nom.charAt(0).toUpperCase() + nom.slice(1) });
+  }
+  else if (daysSince !== null && daysSince >= 10) line = pick(GREET.retour);
+  else if (!isLibre(active) && typeof checkDeloadStatus === 'function' && checkDeloadStatus()) line = pick(GREET.deload);
+  else if (!hist.length) line = pick(GREET.premiere);
+  else line = pick(GREET.motivation);
   return { hello, line };
 }
 
@@ -128,8 +151,12 @@ function programGreetingHtml(active) {
 }
 
 function emptyProgramsHtml() {
+  // 1.7.78 : premier lancement (aucun programme, aucune séance) : « Bonjour, Bienvenue ! » à gauche de la flèche
+  const hist = (state && Array.isArray(state.history)) ? state.history : [];
+  const h = new Date().getHours();
+  const welcome = hist.length ? '' : `<p class="prog-greet prog-greet-welcome"><span class="prog-greet-hello">${(h >= 5 && h < 18) ? 'Bonjour' : 'Bonsoir'},</span><span class="prog-greet-line">Bienvenue !</span></p>`;
   return `
-    <div class="prog-empty">
+    <div class="prog-empty">${welcome}
       <svg class="prog-empty-arrow" viewBox="0 0 200 230" aria-hidden="true"><path d="M8 214 C 48 210, 94 196, 120 166 C 144 138, 130 110, 112 118 C 96 126, 108 154, 134 142 C 162 128, 164 76, 154 20"/><path d="M141 36 L 154 18 L 165 37"/></svg>
       <p class="prog-empty-title">Tu n'as pour l'instant rien de prévu au programme.</p>
       <p class="prog-empty-sub">Clique sur le bouton + pour en créer un !</p>

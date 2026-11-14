@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.78] - 2026-11-14
+### ✍️ Accueil manuscrit : date locale, variantes, bilan du mois, « Semaine de déload », Bienvenue (co-auteur : Claude)
+- **Correction** : la date du jour vient du téléphone (heure locale) et non plus de l'heure UTC. Entre minuit et 1 h (2 h en été), l'app se croyait encore la veille : « Belle séance aujourd'hui » pouvait viser la séance de la veille, et le compte des 10 jours avait un jour d'écart.
+- **Variantes** : chaque situation a plusieurs phrases ; une variante est tirée par jour et reste la même toute la journée. Ordre : aucun programme actif, séance faite aujourd'hui, **bilan du mois disponible** (nouveau, du 1er au 10 tant que le post-it est là : « Ton bilan d'octobre t'attend ! »…), retour après 10 jours, **semaine de déload** (« Semaine de déload : … »), première séance, sinon motivation (8 phrases).
+- **Premier lancement** (aucun programme, aucune séance) : « Bonjour, Bienvenue ! » en manuscrit à gauche de la flèche. Un usager qui a supprimé tous ses programmes mais garde un historique ne le voit pas. Maquette : planche 1.
+- `test_accueil.py` : variantes, phrase stable dans la journée, date locale à 0 h 30, bilan, Bienvenue (390 et 360 px).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.78.
+
+---
+
 ## [1.7.77] - 2026-11-14
 ### 🔎 Pastilles d'icônes d'exercices +10 % (co-auteur : Claude)
 - Illustration et rond gris agrandis de 10 % par rapport à la 1.7.76, dans tous les onglets : détail du programme 77 → 84,7 px ; « Ajouter un exercice », éditeur de programme et lignes de Séance 60,5 → 66,55 px.
