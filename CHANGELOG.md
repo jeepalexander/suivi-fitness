@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.93] - 2026-11-14
+### 🖼️ Icônes Pull-over et Shrugs barre (co-auteur : Claude)
+- **Pull-over** : allongée sur le banc, haltère derrière la tête, zoom fort sur le buste et les bras (`pullover.png`).
+- **Shrugs barre** : barre hexagonale, zoom jusqu'aux genoux (`barbell_shrugs.png`).
+- Fichiers ajoutés au cache du service worker.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.93.
+
+---
+
 ## [1.7.92] - 2026-11-14
 ### 🖼️ Icône Mollets haltères (co-auteur : Claude)
 - Nouvelle icône **Mollets haltères** : vue de dos sur la pointe des pieds, zoom fort sur les jambes (fichier `dumbbell_calf_raise.png`, ajouté au cache du service worker).
