@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.85] - 2026-11-14
+### 📖 Fiches d'exercice : relecture (co-auteur : Claude)
+- Presse à cuisses : « Pieds à largeur de hanches, au milieu (voire plus bas) de la plateforme ».
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.85.
+
+---
+
 ## [1.7.84] - 2026-11-14
 ### 📖 Fiches d'exercice : appui long sur une image (co-auteur : Claude)
 - **Appui long** (≈ 0,5 s) sur **n'importe quelle image d'exercice** — Séance, éditeur, Ajouter un exercice, détail de la tuile active — ouvre la **fiche de l'exercice** : image en grand (220 px), groupe, « Polyarticulaire », séries × répétitions et repos, **Bien faire** (4 à 5 étapes), **À éviter**, **Muscles**, puis « Fermer ». Le toucher simple garde son effet habituel ; la fiche s'ouvre au-dessus d'un volet sans le fermer ; Échap ou un toucher à côté la referment.

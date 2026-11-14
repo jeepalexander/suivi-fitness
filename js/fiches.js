@@ -4,7 +4,7 @@
 // Conseils généraux de technique ; ils ne remplacent pas l'avis d'un coach ou d'un professionnel de santé.
 const FICHES = {
   // ---------- Jambes ----------
-  1: { f: ["Dos et bassin bien plaqués contre le dossier.", "Pieds à largeur de hanches au milieu de la plateforme.", "Descends jusqu'à ce que les genoux forment un angle droit environ, sans décoller le bas du dos.", "Pousse avec tout le pied, genoux dans l'axe des pieds, sans verrouiller en haut."],
+  1: { f: ["Dos et bassin bien plaqués contre le dossier.", "Pieds à largeur de hanches, au milieu (voire plus bas) de la plateforme.", "Descends jusqu'à ce que les genoux forment un angle droit environ, sans décoller le bas du dos.", "Pousse avec tout le pied, genoux dans l'axe des pieds, sans verrouiller en haut."],
        e: ["Laisser les genoux rentrer vers l'intérieur.", "Descendre si bas que le bassin s'enroule.", "Verrouiller les genoux en extension."], m: "Quadriceps, fessiers, ischio-jambiers." },
   2: { f: ["Barre posée sur le haut du dos, mains serrées, coudes sous la barre.", "Pieds à largeur d'épaules, pointes légèrement ouvertes.", "Inspire, gaine le ventre, puis descends en poussant les hanches en arrière et les genoux vers l'avant.", "Descends au moins cuisses parallèles au sol, dos neutre, puis remonte en poussant dans le sol."],
        e: ["Arrondir le bas du dos en bas du mouvement.", "Décoller les talons.", "Laisser les genoux rentrer en montant."], m: "Quadriceps, fessiers, adducteurs, lombaires." },
