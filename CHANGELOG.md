@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.81] - 2026-11-14
+### 📱 En-tête remonté : 10 px sous la caméra (co-auteur : Claude)
+- Application installée, écran avec caméra en haut : le nom de l'app commence **10 px sous la zone de la caméra** (28 px en 1.7.79), les boutons de l'en-tête (+, Réglages, Retour) 6 px dessous. Tout le contenu remonte de 18 px.
+- Écran sans encoche ou navigateur : inchangé (28 px), l'en-tête ne remonte jamais au-dessus de cette marge.
+- `test_plein_ecran.py` : 24 contrôles (petite zone, zone de 40 px).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.81.
+
+---
+
 ## [1.7.80] - 2026-11-14
 ### ✍️ Premier lancement : « Bienvenue ! » à la place de « Bonjour, » (co-auteur : Claude)
 - Sur l'écran vide du tout premier lancement, l'accueil manuscrit dit seulement « Bienvenue ! » (à la taille de « Bonjour, »), à gauche de la flèche. Le reste de l'accueil ne change pas. Maquette : planche 1.
