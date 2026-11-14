@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.86] - 2026-11-14
+### 📖 Fiches d'exercice : défilement au doigt (co-auteur : Claude)
+- Sur le téléphone, la fiche ne défilait pas : la règle des grands volets (`.sheet.tall`, contenu non défilant) la bloquait. Elle défile maintenant au doigt, sans faire bouger l'écran derrière.
+- `test_fiches.py` : glissement du doigt sur un téléphone simulé (48 contrôles).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.86.
+
+---
+
 ## [1.7.85] - 2026-11-14
 ### 📖 Fiches d'exercice : relecture (co-auteur : Claude)
 - Presse à cuisses : « Pieds à largeur de hanches, au milieu (voire plus bas) de la plateforme ».

@@ -1074,6 +1074,7 @@ body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 
 /* 1.7.84 : fiche d'un exercice (appui long sur son image) — au-dessus des volets, mêmes styles de volet */
 .fiche-overlay { z-index: var(--z-ask); }
+.sheet.tall.fiche-sheet { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; } /* 1.7.86 : la fiche défile au doigt (.sheet.tall la bloquait) */
 .fiche-sheet > * { flex-shrink: 0; }
 .exf-hero { display: flex; justify-content: center; margin: 4px 0 12px; }
 .exf-hero .ex-icon-badge { width: 220px; height: 220px; }
