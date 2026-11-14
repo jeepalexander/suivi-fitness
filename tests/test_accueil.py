@@ -63,7 +63,7 @@ with Srv() as base, sync_playwright() as p:
             check("bilan du mois disponible : phrase sur le bilan d'octobre", 'bilan' in l and ('octobre' in l.lower()), l)
         ctx.close()
     br.close()
-# 1.7.78 : « Bonjour, Bienvenue ! » seulement au premier lancement (aucun programme, aucune séance), à gauche de la flèche
+# 1.7.80 : « Bienvenue ! » (à la place de « Bonjour, ») seulement au premier lancement (aucun programme, aucune séance), à gauche de la flèche
 with Srv() as url, sync_playwright() as p:
     br = p.chromium.launch()
     for w in (390, 360):
@@ -72,7 +72,7 @@ with Srv() as url, sync_playwright() as p:
         r = pg.evaluate("""(()=>{const g=document.querySelector('.prog-greet-welcome'),a=document.querySelector('.prog-empty-arrow'),t=document.querySelector('.prog-empty-title');
           if(!g) return null; const gr=g.getBoundingClientRect(),ar=a.getBoundingClientRect(),tr=t.getBoundingClientRect();
           return {txt:g.innerText.replace(/\\s+/g,' '), libre:gr.right<=ar.left+20 || gr.bottom<=ar.top, auDessus:gr.bottom<tr.top}})()""")
-        check(f"[{w}px] premier lancement : « Bienvenue ! » sans chevaucher la flèche ni le texte", r and 'Bienvenue !' in r['txt'] and r['libre'] and r['auDessus'], r)
+        check(f"[{w}px] premier lancement : « Bienvenue ! » seul (pas de Bonjour), sans chevaucher la flèche ni le texte", r and r['txt'].strip() == 'Bienvenue !' and r['libre'] and r['auDessus'], r)
         pg.evaluate("state.history=[{id:1,date:'2026-10-01',type:'A',exercises:[],tonnage:0}]; renderProgramOverview(); 0"); pg.wait_for_timeout(200)
         check(f"[{w}px] plus de programme mais un historique : pas de « Bienvenue »", pg.locator('.prog-greet-welcome').count() == 0)
         check(f"[{w}px] aucune erreur JavaScript (écran vide)", not errs, errs)

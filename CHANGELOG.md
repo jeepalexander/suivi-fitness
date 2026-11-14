@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.80] - 2026-11-14
+### ✍️ Premier lancement : « Bienvenue ! » à la place de « Bonjour, » (co-auteur : Claude)
+- Sur l'écran vide du tout premier lancement, l'accueil manuscrit dit seulement « Bienvenue ! » (à la taille de « Bonjour, »), à gauche de la flèche. Le reste de l'accueil ne change pas. Maquette : planche 1.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.80.
+
+---
+
 ## [1.7.79] - 2026-11-14
 ### 📱 Plein écran jusqu'en haut avec Chrome (co-auteur : Claude)
 - **Correction** : l'application installée depuis Chrome (Android) laissait une bande vide en haut de l'écran, à hauteur de la caméra, alors que celle de Firefox montait jusqu'au bord. Chrome réserve cette zone tant que la page ne dit pas qu'elle sait s'y afficher : `viewport-fit=cover` ajouté à `index.html`.

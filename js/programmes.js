@@ -151,10 +151,10 @@ function programGreetingHtml(active) {
 }
 
 function emptyProgramsHtml() {
-  // 1.7.78 : premier lancement (aucun programme, aucune séance) : « Bonjour, Bienvenue ! » à gauche de la flèche
+  // 1.7.78–1.7.80 : premier lancement (aucun programme, aucune séance) : « Bienvenue ! » à la place de « Bonjour, »,
+  // à gauche de la flèche
   const hist = (state && Array.isArray(state.history)) ? state.history : [];
-  const h = new Date().getHours();
-  const welcome = hist.length ? '' : `<p class="prog-greet prog-greet-welcome"><span class="prog-greet-hello">${(h >= 5 && h < 18) ? 'Bonjour' : 'Bonsoir'},</span><span class="prog-greet-line">Bienvenue !</span></p>`;
+  const welcome = hist.length ? '' : `<p class="prog-greet prog-greet-welcome"><span class="prog-greet-hello">Bienvenue !</span></p>`;
   return `
     <div class="prog-empty">${welcome}
       <svg class="prog-empty-arrow" viewBox="0 0 200 230" aria-hidden="true"><path d="M8 214 C 48 210, 94 196, 120 166 C 144 138, 130 110, 112 118 C 96 126, 108 154, 134 142 C 162 128, 164 76, 154 20"/><path d="M141 36 L 154 18 L 165 37"/></svg>
