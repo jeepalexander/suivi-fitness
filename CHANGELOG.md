@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.97] - 2026-11-14
+### 🖼️ 5 nouvelles icônes d'exercices, Presse à cuisses refaite (co-auteur : Claude)
+- **Nouvelles icônes** : Développé rotatif haltères, Développé épaules machine, Tirage menton (kettlebell), Curl barre EZ, Ab wheel.
+- **Presse à cuisses** : nouvelle image, zoom sur la personne, pieds en entier, sans les résidus de fond de l'ancienne.
+- Les 5 nouvelles icônes sont ajoutées au cache hors ligne. Il reste 14 exercices sans icône.
+
+---
+
 ## [1.7.96] - 2026-11-14
 ### 🪶 Déload : plume, bouton et explication ; flamme plus grande (co-auteur : Claude)
 - **Icône du déload** : une plume (semaine légère) remplace l'éclair, sur la tuile, dans la Séance et dans l'Historique.
