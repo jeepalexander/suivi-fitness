@@ -1,5 +1,5 @@
 """Programmes (1.7.70) : entre la tuile active et « En mémoire », seulement section-gap (28 px),
-détail fermé comme ouvert, programme comme séance libre, à 390 et 360 px, clair et sombre."""
+détail fermé comme ouvert (et 28 px, inchangés, entre la tuile et son détail), programme comme séance libre, à 390 et 360 px, clair et sombre."""
 import sys
 from harness import Srv, newpage, sync_playwright
 
@@ -22,6 +22,8 @@ with Srv() as url, sync_playwright() as p:
             ok(f'[{scheme} {w}] détail fermé : 28 px', pg.evaluate(GAP) == 28, pg.evaluate(GAP))
             pg.evaluate("programDetailOpen=true; renderProgramOverview(); 0"); pg.wait_for_timeout(200)
             ok(f'[{scheme} {w}] détail ouvert : 28 px', pg.evaluate(GAP) == 28, pg.evaluate(GAP))
+            g = pg.evaluate("Math.round(document.querySelector('.prog-detail').getBoundingClientRect().top-document.querySelector('.next-card.prog-tile').getBoundingClientRect().bottom)")
+            ok(f'[{scheme} {w}] détail ouvert : 28 px entre la tuile et les exercices (inchangé)', g == 28, g)
             ok(f'[{scheme} {w}] aucune erreur JavaScript', not errs, errs)
             ctx.close()
     br.close()

@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.71] - 2026-11-14
+### 🧹 Plus de marges qui s'additionnent (co-auteur : Claude)
+- Tuile active ouverte : les 28 px entre la tuile et son détail (16 + 12 jusqu'ici) tiennent en une seule marge ; la 1.7.70 les avait ramenés par erreur à 12 px.
+- Quatre écarts faits de deux marges additionnées passent à une seule marge, **sans rien changer à l'écran** (positions identiques au pixel, vérifiées dans Chromium) : écran du + (24 px au-dessus de « Recevoir un programme »), Inviter quelqu'un et QR code d'un programme (20 px au-dessus du QR, 12 px au-dessus de « Fermer »), Recevoir un programme (24 px sous le champ).
+- Nouveau test `test_marges_doublees.py` (groupe `programmes`, 30 contrôles) : il échoue dès que deux marges voisines s'additionnent quelque part (onglets, écran du +, éditeur, bilans, volets). `test_ecart_memoire.py` vérifie aussi l'écart tuile / détail.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.71.
+
+---
+
 ## [1.7.70] - 2026-11-14
 ### 📐 Écart réduit entre la tuile active et « En mémoire » (co-auteur : Claude)
 - Détail fermé, la tuile active gardait une ancienne marge de 16 px qui s'ajoutait aux 28 px prévus avant « En mémoire » (44 px en tout). Il ne reste que l'espacement standard `section-gap` (28 px), comme lorsque le détail est ouvert. Maquette : planche 12 alignée sur 28 px.

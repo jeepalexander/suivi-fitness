@@ -676,7 +676,7 @@ body[data-tab="programme"][data-pview="choose"] header h1 { display: none; }
 .prog-tile.libre .prog-tile-name { color: var(--sand-ink); }
 .prog-tile.libre .prog-detail-btn { background: var(--sand-ico); color: var(--sand-ink); }
 .btn-start.libre { background: var(--sand-ink); box-shadow: var(--sh-sand); }
-.prog-detail { margin-top: 12px; }
+.prog-detail { margin-top: 28px; } /* 1.7.70 : 28 px sous la tuile active, comme avant (16 + 12 qui s'additionnaient) */
 
 .prog-mem-title { margin: 28px 0 12px; display: flex; align-items: center; gap: 8px; }
 /* 1.7.19 : symbole pause devant « En mémoire » (couleur des mentions « En pause ») */
@@ -959,10 +959,11 @@ body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 /* ============================================
    Réglages › Inviter quelqu'un (1.7.21) : QR code vers l'application
    ============================================ */
-.invite-qr { width: 220px; max-width: 70vw; margin: 4px auto 12px; padding: 16px; box-sizing: border-box; border-radius: 22px; background: var(--qr-bg); box-shadow: var(--sh-card); }
+.invite-qr { width: 220px; max-width: 70vw; margin: 0 auto 12px; padding: 16px; box-sizing: border-box; border-radius: 22px; background: var(--qr-bg); box-shadow: var(--sh-card); }
 .invite-qr svg { display: block; width: 100%; height: auto; }
-.invite-link { margin: 0 0 8px; font-size: 0.8125rem; line-height: 1.45; color: var(--text-muted); text-align: center; overflow-wrap: anywhere; }
-.invite-link + .btn-secondary { margin-top: 4px; }   /* 1.7.37 : seul bouton sous l’adresse, 12 px d’écart comme sur la maquette */
+.invite-link { margin: 0; font-size: 0.8125rem; line-height: 1.45; color: var(--text-muted); text-align: center; overflow-wrap: anywhere; }
+.invite-link + .btn-secondary { margin-top: 12px; }   /* 1.7.37 : seul bouton sous l’adresse, 12 px d’écart comme sur la maquette (1.7.70 : une seule marge) */
+.sheet-text:has(+ .invite-qr) { margin-bottom: 20px; }   /* 1.7.70 : 20 px au-dessus du QR, en une seule marge (16 + 4 avant) */
 
 /* ============================================
    Accueil Programmes : message manuscrit (1.7.24)
@@ -1057,8 +1058,10 @@ body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 .ed-share svg, .share-ico svg, .share-chev svg, .choose-recv svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .share-ico { flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--primary-strong); color: var(--on-strong); display: flex; align-items: center; justify-content: center; }
 .share-chev { flex: none; display: flex; color: var(--text-muted); }
-.choose-recv { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 44px; margin-top: 8px; border: 0; background: none; color: var(--text); font: inherit; font-size: 1.0625rem; font-weight: 600; cursor: pointer; }
-.recv-field { width: 100%; height: 52px; padding: 0 20px; margin: 0 0 12px; border: 0; border-radius: var(--radius-field, 25px); background: var(--fill); color: var(--text); font: inherit; font-size: 1rem; }
+.choose-card:has(+ .choose-recv) { margin-bottom: 0; }   /* 1.7.70 : 24 px au-dessus de « Recevoir », en une seule marge (16 + 8 avant) */
+.choose-recv { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 44px; margin-top: 24px; border: 0; background: none; color: var(--text); font: inherit; font-size: 1.0625rem; font-weight: 600; cursor: pointer; }
+.recv-field + .btn { margin-top: 0; }   /* 1.7.70 : 24 px sous le champ, en une seule marge (12 + 12 avant) */
+.recv-field { width: 100%; height: 52px; padding: 0 20px; margin: 0 0 24px; border: 0; border-radius: var(--radius-field, 25px); background: var(--fill); color: var(--text); font: inherit; font-size: 1rem; }
 .qr-cam { position: relative; width: 100%; max-width: 280px; aspect-ratio: 1; margin: 4px auto 12px; border-radius: 22px; overflow: hidden; background: #111114; }
 .qr-cam video { width: 100%; height: 100%; object-fit: cover; display: block; }
 .qr-frame { position: absolute; inset: 18%; border: 3px solid rgba(255, 255, 255, 0.9); border-radius: 16px; box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.25); }
