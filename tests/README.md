@@ -43,6 +43,7 @@ Un test seul : `python3 tests/test_validation.py` ou `python3 tests/run_tests.py
 | `test_ecart_memoire.py` | 20 | Programmes : 16 px entre l'astuce et le menu sans défilement ; 28 px entre la tuile active et « En mémoire », détail fermé et ouvert ; 28 px entre la tuile et son détail (390 et 360 px, clair et sombre) |
 | `test_marges_doublees.py` | 30 | Mise en page : aucune marge du bas + marge du haut qui s'additionnent entre deux voisins (onglets, écran du +, éditeur, bilans, volets) |
 | `test_alignement_titres.py` | 16 | En-têtes : 12 px entre l'icône et le titre, programme et séance alignés dans Séance, page Fond d'écran (390 et 360 px, clair et sombre) |
+| `test_fiches.py` | 47 | Fiches d'exercice : une par exercice, appui long sur l'image (Séance, Ajouter un exercice), toucher simple inchangé, au-dessus d'un volet, Fermer / Échap / toucher à côté (390 et 360 px, clair et sombre) |
 | `test_fond_ecran.py` | 20 | Réglages › Fond d'écran : ligne sous Apparence, page avec 18 choix (17 images + « Aucun », vignettes chargées au défilement), application immédiate sur toutes les pages, mémorisé et posé avant le premier affichage, voile sombre en thème sombre, « Aucun », valeur inconnue ignorée, hors des données sauvegardées, images en cache |
 | `test_mise_en_page.py` | 12 | À 360 et 390 px, thèmes clair et sombre : aucun débordement sur les 5 pages, noms d'exercice sur une ligne, aucune erreur JavaScript |
 | `test_rameur.py` | 28 | Rameur : exercice durée + distance sur une ligne en tête de séance, allure /500 m |

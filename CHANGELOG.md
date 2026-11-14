@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.84] - 2026-11-14
+### 📖 Fiches d'exercice : appui long sur une image (co-auteur : Claude)
+- **Appui long** (≈ 0,5 s) sur **n'importe quelle image d'exercice** — Séance, éditeur, Ajouter un exercice, détail de la tuile active — ouvre la **fiche de l'exercice** : image en grand (220 px), groupe, « Polyarticulaire », séries × répétitions et repos, **Bien faire** (4 à 5 étapes), **À éviter**, **Muscles**, puis « Fermer ». Le toucher simple garde son effet habituel ; la fiche s'ouvre au-dessus d'un volet sans le fermer ; Échap ou un toucher à côté la referment.
+- **85 fiches** rédigées, une par exercice du catalogue (`js/fiches.js`). Un exercice sans image montre son pictogramme.
+- Maquette : planche 38. Nouveau test `test_fiches.py` (groupes `seance` et `programmes`, 47 contrôles).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.84.
+
+---
+
 ## [1.7.83] - 2026-11-14
 ### 🖼️ Abductions et Adductions recadrées (co-auteur : Claude)
 - Icônes **Abductions machine** et **Adductions machine** refaites : cadrage serré sur la partie basse (jambes, coussins, pieds), buste gardé jusqu'à la poitrine au lieu d'être coupé à la taille ; détourage refait (un trou dans une chaussure d'Abductions corrigé). Adductions décalée pour garder le pied gauche entier.

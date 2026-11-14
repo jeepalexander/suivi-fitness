@@ -1071,3 +1071,18 @@ body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 .qr-cam { position: relative; width: 100%; max-width: 280px; aspect-ratio: 1; margin: 4px auto 12px; border-radius: 22px; overflow: hidden; background: #111114; }
 .qr-cam video { width: 100%; height: 100%; object-fit: cover; display: block; }
 .qr-frame { position: absolute; inset: 18%; border: 3px solid rgba(255, 255, 255, 0.9); border-radius: 16px; box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.25); }
+
+/* 1.7.84 : fiche d'un exercice (appui long sur son image) — au-dessus des volets, mêmes styles de volet */
+.fiche-overlay { z-index: var(--z-ask); }
+.fiche-sheet > * { flex-shrink: 0; }
+.exf-hero { display: flex; justify-content: center; margin: 4px 0 12px; }
+.exf-hero .ex-icon-badge { width: 220px; height: 220px; }
+.exf-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 0 0 20px; }
+.exf-chip { height: 32px; padding: 0 12px; border-radius: var(--radius-pill, 999px); background: var(--fill); color: var(--text); font-size: 0.875rem; font-weight: 600; display: inline-flex; align-items: center; }
+.exf-h { font-family: var(--font-display); font-weight: 700; font-size: 1.25rem; margin: 0 0 8px; }
+.exf-list { margin: 0 0 20px; padding-left: 20px; font-size: 0.9375rem; line-height: 1.45; color: var(--text); }
+.exf-list li { margin-bottom: 4px; }
+.exf-list.avoid { list-style: none; padding-left: 0; }
+.exf-list.avoid li { display: flex; gap: 8px; }
+.exf-list.avoid li::before { content: '×'; color: var(--danger); font-weight: 700; }
+.ex-icon-badge img { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }

@@ -445,9 +445,11 @@ const GENERIC_CARDIO_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d=
 const GENERIC_STRENGTH_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>';
 function getIcon(exName, decorative = false) {
   const e = exInfo(exName);
-  if (e.icon) return `<img src="${e.icon}" alt="${decorative ? '' : escapeHtml(e.name)}">`;
+  // 1.7.84 : data-ex = l'exercice, pour ouvrir sa fiche par un appui long (js/fiches.js)
+  const ref = escapeHtml(e.name || String(exName));
+  if (e.icon) return `<img src="${e.icon}" alt="${decorative ? '' : escapeHtml(e.name)}" data-ex="${ref}" draggable="false">`;
   const cardio = e.group === 'Cardio';
-  return `<span class="ex-generic${cardio ? ' cardio' : ''}"${decorative ? ' aria-hidden="true"' : ` role="img" aria-label="${escapeHtml(e.name)}"`}>${cardio ? GENERIC_CARDIO_SVG : GENERIC_STRENGTH_SVG}</span>`;
+  return `<span class="ex-generic${cardio ? ' cardio' : ''}" data-ex="${ref}"${decorative ? ' aria-hidden="true"' : ` role="img" aria-label="${escapeHtml(e.name)}"`}>${cardio ? GENERIC_CARDIO_SVG : GENERIC_STRENGTH_SVG}</span>`;
 }
 
 function escapeHtml(str) {
