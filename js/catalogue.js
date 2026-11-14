@@ -29,7 +29,7 @@ const CATALOGUE = [
   {"id": 20, "name": "Adductions machine", "group": "Jambes", "mode": "weight", "sets": 3, "reps": "12–15", "rest": 90, "icon": "icons/hip_adduction.png"},
   {"id": 21, "name": "Mollets", "group": "Jambes", "mode": "weight", "sets": 3, "reps": "12–15", "rest": 90, "icon": "icons/calf_raise.png"},
   {"id": 22, "name": "Mollets assis", "group": "Jambes", "mode": "weight", "sets": 3, "reps": "12–15", "rest": 90, "icon": "icons/seated_calf_raise.png"},
-  {"id": 23, "name": "Mollets haltères", "group": "Jambes", "mode": "weight", "sets": 3, "reps": "12–15", "rest": 90},
+  {"id": 23, "name": "Mollets haltères", "group": "Jambes", "mode": "weight", "sets": 3, "reps": "12–15", "rest": 90, "icon": "icons/dumbbell_calf_raise.png"},
   {"id": 25, "name": "Tirage vertical", "group": "Dos", "poly": true, "mode": "weight", "sets": 3, "reps": "8–12", "rest": 120, "icon": "icons/lat_pulldown.png"},
   {"id": 26, "name": "Tractions", "group": "Dos", "poly": true, "mode": "bw", "sets": 3, "reps": "8–12", "rest": 120, "icon": "icons/pull_up.png"},
   {"id": 27, "name": "Tractions assistées", "group": "Dos", "poly": true, "mode": "bw", "sets": 3, "reps": "8–12", "rest": 120, "icon": "icons/assisted_pull_up.png"},

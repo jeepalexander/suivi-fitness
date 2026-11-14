@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.92] - 2026-11-14
+### 🖼️ Icône Mollets haltères (co-auteur : Claude)
+- Nouvelle icône **Mollets haltères** : vue de dos sur la pointe des pieds, zoom fort sur les jambes (fichier `dumbbell_calf_raise.png`, ajouté au cache du service worker).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.92.
+
+---
+
 ## [1.7.91] - 2026-11-14
 ### 🖼️ Quatre nouvelles icônes d'exercices (co-auteur : Claude)
 - **Shrugs haltères** (vue de dos, haltères entiers, la tête dépasse légèrement du rond), **Tirage facial** (zoom sur le buste) et **Rowing poulie basse** (câble et poignée) : corde ou câble coloriés en jaune avec un liseré noir épais, pour les voir sur fond clair comme sombre.
