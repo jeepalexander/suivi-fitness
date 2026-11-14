@@ -32,7 +32,7 @@ with Srv() as base, sync_playwright() as p:
         check(f"[{w}px] trait pointillé : de sous l'icône jusqu'à « + de détail », sur l'axe de l'icône", tile['line'][2] == tile['ico'][3] and tile['line'][3] == tile['det'][2] and abs((tile['line'][0] + tile['line'][1]) / 2 - (tile['ico'][0] + tile['ico'][1]) / 2) <= 1, tile)
         st = pg.evaluate("""(()=>{const tx=sel=>{const e=document.querySelector(sel);const n=[...e.childNodes].reverse().find(n=>n.nodeType===3&&n.textContent.trim());const R=document.createRange();R.selectNodeContents(n);return [Math.round(R.getBoundingClientRect().left), n.textContent.trim()]};
             return {actif:tx('.prog-status'), mem:tx('.prog-mem-title')}})()""")
-        check(f"[{w}px] « Actif » aligné sur « En mémoire »", st['actif'][1] == 'Actif' and st['actif'][0] == st['mem'][0], st)
+        check(f"[{w}px] « Programme actif » aligné sur « En mémoire »", st['actif'][1] == 'Programme actif' and st['actif'][0] == st['mem'][0], st)
         pg.evaluate("programDraft={id:null,kind:'program',name:'Force',sessions:[{name:'Haut',exercises:[{exId:exInfo('Dips').id,sets:3}]},{name:'Bas',exercises:[{exId:exInfo('Mollets').id,sets:3}]}],idx:0}; saveProgramDraft(false)"); pg.wait_for_timeout(400)
         al = pg.evaluate("(()=>{const r=e=>{const b=e.getBoundingClientRect();return [Math.round(b.left),Math.round(b.right)]};return {ico:r(document.querySelector('.prog-tile .prog-ico')), start:r(document.querySelector('.prog-tile .btn-start')), mi:r(document.querySelector('.mem-tile .mem-ico')), mb:r(document.querySelector('.mem-tile button'))}})()")
         check(f"[{w}px] tuile active alignée sur les programmes en mémoire (icônes à gauche, boutons à droite)", al['ico'][0] == al['mi'][0] and al['start'][1] == al['mb'][1], al)

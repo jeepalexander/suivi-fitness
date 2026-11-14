@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.75] - 2026-11-14
+### 🏷️ Accueil sans titre, Historique indépendant des programmes (co-auteur : Claude)
+- **Accueil Programmes** : plus de titre « Programmes » (« MON CARNET DE SALLE » et le bouton + restent) ; l'accueil manuscrit remonte. « Actif » devient **« Programme actif »**, ou **« Séance libre active »** pour une séance libre.
+- **Historique** : le titre de la page donne le **nombre de toutes les séances** (« 33 séances ») et le sous-titre le mois de la première (« depuis juillet 2026 »). L'Historique est **indépendant des programmes** : les filtres par programme sont retirés, toutes les séances sont toujours listées ; chaque ligne garde le nom de son programme.
+- Maquette : planches 12, 15 et 27. Tests adaptés (`test_programmes.py`, `test_accueil.py`, `test_reglages.py`, `test_supprimer_seance.py`, `test_titre_seance.py`).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.75.
+
+---
+
 ## [1.7.74] - 2026-11-14
 ### 📐 Séance : nom du programme et nom de la séance alignés (co-auteur : Claude)
 - 12 px entre l'icône de 44 px et le titre, partout : le nom du programme (16 px jusqu'ici) commence maintenant au même endroit que le nom de la séance. La page Fond d'écran (flèche retour puis titre) suit la même règle, comme l'éditeur. Maquette : planches 22 et 23.

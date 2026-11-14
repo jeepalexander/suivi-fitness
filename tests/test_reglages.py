@@ -44,7 +44,7 @@ with Srv() as base, sync_playwright() as p:
     pg.click('[data-theme-choice="light"]'); pg.wait_for_timeout(200)
 
     pg.click('#settings-back'); pg.wait_for_timeout(300)
-    check('Retour ramène à l\'Historique', pg.inner_text('#page-title') == 'Historique' and pg.evaluate(vis, 'settings-btn'))
+    check('Retour ramène à l\'Historique', pg.inner_text('#page-title').endswith('séances') and pg.evaluate(vis, 'settings-btn'))
 
     # pastille de mise à jour sur la roue dentée
     pg.evaluate("runningVersion='1.5.1'; activeVersion='9.9.9'; renderUpdateStatus()"); pg.wait_for_timeout(100)

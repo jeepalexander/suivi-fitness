@@ -83,7 +83,7 @@ function renderProgramOverview() {
   let html = programGreetingHtml(active) + '<div class="prog-spacer" aria-hidden="true"></div>';
   html += bilanPostitHtml(); // 1.7.50 : post-it du bilan du mois, du 1er au 10
   if (active) {
-    html += `<div class="prog-status"><span class="prog-dot-slot"><span class="prog-dot on"></span></span>Actif</div>`; // 1.7.25 : « Actif » aussi pour la séance libre
+    html += `<div class="prog-status"><span class="prog-dot-slot"><span class="prog-dot on"></span></span>${isLibre(active) ? 'Séance libre active' : 'Programme actif'}</div>`; // 1.7.75 : « Programme actif » ou « Séance libre active »
     html += activeTileHtml(active);
     if (programDetailOpen) html += activeDetailHtml(active);
   } else {

@@ -851,10 +851,6 @@ body[data-seance="empty"] .seance-sticky { display: none; }
 #cardio-filter[hidden] { display: none; }
 
 /* --- Historique : filtres par programme, origine dans la fenêtre de détail --- */
-.history-filters { display: flex; gap: 8px; margin: 16px calc(-1 * var(--gutter)) 0; padding: 0 var(--gutter) 4px; overflow-x: auto; scrollbar-width: none; }
-.history-filters::-webkit-scrollbar { display: none; }
-.history-filters[hidden] { display: none; }
-.history-filters .filter-btn { flex: none; }
 .modal-origin { margin: -2px 0 2px; font-size: 0.9375rem; font-weight: 600; }
 .modal-origin[hidden] { display: none; }
 #modal-session-pill .type-pill-libre { font-size: 1.25rem; }
@@ -863,6 +859,8 @@ body[data-seance="empty"] .seance-sticky { display: none; }
 #tab-programme.active { display: flex; flex-direction: column; min-height: 100%; }
 #program-overview { flex: 1 0 auto; display: flex; flex-direction: column; }
 .prog-spacer { flex: 1 1 auto; min-height: 12px; }
+/* 1.7.75 : accueil Programmes sans titre « Programmes » : « MON CARNET DE SALLE » et le bouton + suffisent */
+body[data-tab="programme"][data-pview="home"] #page-title { display: none; }
 /* 1.7.73 : accueil Programmes, 16 px entre l'astuce et le menu (32 avant) : le contenu laisse du jeu et l'écran ne bouge plus sous le doigt */
 body[data-pview="home"] #app-scroll:has(#tab-programme.active) { padding-bottom: 96px; }
 body[data-pview="choose"] .choose-lead { margin-top: 0; }

@@ -39,7 +39,7 @@ with Srv() as base, sync_playwright() as p:
     check('sauvegarde Drive mise à jour : la séance en a disparu', len(c.get('history', [])) == N - 1 and all(h['id'] != sid for h in c.get('history', [])), len(c.get('history', [])))
     check('une nouvelle version envoyée, l\'ancienne n\'est pas écrasée', d.posts >= 1 and d.patches == 0 and any(f['id'] == 'BK1' for f in d.live()), (d.posts, d.patches))
     check('prochaine séance recalculée depuis l\'historique restant', st['nextType'] == {'A': 'B', 'B': 'C', 'C': 'A'}[st['history'][-1]['type']], st['nextType'])
-    check('l\'écran Historique est rafraîchi', f'{N-1} séance' in pg.inner_text('#history-count'), pg.inner_text('#history-count'))
+    check('l\'écran Historique est rafraîchi', pg.inner_text('#page-title') == f'{N-1} séances', pg.inner_text('#page-title'))
     check('liste des suppressions en attente vidée après envoi réussi', pg.evaluate("localStorage.getItem('h49_drive_deleted_ids')") is None)
     check('aucune erreur JS', not (pg.evaluate("window.__err||null")))
 

@@ -2099,10 +2099,15 @@ document.addEventListener('submit', function(e) {
 // ============================================================
 // 11. ÉCRAN HISTORIQUE ET MODIFICATION D'UNE SÉANCE
 // ============================================================
-// Filtre par programme (« Tout » ou un programme / une séance libre ayant des séances, même supprimé)
-let historyFilter = 'all';
+// 1.7.75 : l'Historique est indépendant des programmes : toujours toutes les séances, sans filtre ;
+// le titre de la page donne leur nombre, le sous-titre le mois de la première (« depuis juillet 2026 »)
+function historyTitle() {
+  const n = (state && state.history || []).length;
+  return `${n} séance${n > 1 ? 's' : ''}`;
+}
 
-// Programmes présents dans l'historique, dans l'ordre de leur dernière séance (le plus récent d'abord)
+// Programmes présents dans l'historique, dans l'ordre de leur dernière séance (le plus récent d'abord) ;
+// sert au choix du périmètre de Progression
 function historyProgramList() {
   const seen = new Map();
   (state.history || []).forEach(h => {
@@ -2111,22 +2116,6 @@ function historyProgramList() {
     seen.set(h.programId, { id: h.programId, name: p ? p.name : (h.programName || 'Programme'), last: h.date || '' });
   });
   return Array.from(seen.values()).sort((a, b) => (a.last < b.last ? 1 : a.last > b.last ? -1 : 0));
-}
-
-function setHistoryFilter(id) {
-  historyFilter = id;
-  renderHistory();
-}
-
-function renderHistoryFilters() {
-  const box = document.getElementById('history-filters');
-  if (!box) return;
-  const list = historyProgramList();
-  if (historyFilter !== 'all' && !list.some(p => p.id === historyFilter)) historyFilter = 'all';
-  if (list.length < 2) { box.hidden = true; box.innerHTML = ''; historyFilter = 'all'; return; }
-  box.hidden = false;
-  box.innerHTML = [{ id: 'all', name: 'Tout' }].concat(list).map(p =>
-    `<button type="button" class="filter-btn${historyFilter === p.id ? ' active' : ''}" onclick="setHistoryFilter('${escapeHtml(p.id)}')">${escapeHtml(p.name)}</button>`).join('');
 }
 
 // Nom du programme d'une séance de l'historique (nom actuel s'il existe encore, sinon le nom recopié)
@@ -2139,13 +2128,16 @@ function renderHistory() {
   const container = document.getElementById('history-list');
   if(!container) return;
   container.innerHTML = '';
-  renderHistoryFilters();
 
   const history = state.history || [];
-  const visible = i => historyFilter === 'all' || history[i].programId === historyFilter;
-  const shownCount = history.filter((h, i) => visible(i)).length;
+  const visible = () => true;
   const countEl = document.getElementById('history-count');
-  if (countEl) countEl.textContent = `${shownCount} séance${shownCount > 1 ? 's' : ''} enregistrée${shownCount > 1 ? 's' : ''}`;
+  const first = history.map(h => (h.date || '').slice(0, 7)).filter(k => /^\d{4}-\d{2}$/.test(k)).sort()[0];
+  if (countEl) countEl.textContent = first ? 'depuis ' + monthLabelLower(first) : '';
+  if (document.body.dataset.tab === 'historique') {
+    const pageTitle = document.getElementById('page-title');
+    if (pageTitle) pageTitle.innerText = historyTitle();
+  }
 
   // Index réels triés du plus récent au plus ancien, regroupés par mois
   const order = history.map((h, i) => i).filter(visible).sort((x, y) => {
@@ -3607,6 +3599,7 @@ function switchTab(tabName) {
   const pageTitle = document.getElementById('page-title');
   if (pageTitle) pageTitle.innerText = PAGE_TITLES[tabName] || '';
   if (tabName === 'seance') updateSeancePageTitle();
+  if (tabName === 'historique' && pageTitle) pageTitle.innerText = historyTitle(); // 1.7.75
 
   if (tabName === 'programme') renderProgramOverview();
   updateProgramHeader();
