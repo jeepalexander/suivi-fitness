@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.90] - 2026-11-14
+### 🖼️ Six icônes d'exercices nouvelles ou refaites (co-auteur : Claude)
+- **Nouvelles** : Tractions assistées (élastique colorié en jaune avec un liseré noir, pour le voir sur fond clair comme sombre), Tractions prise neutre (zoom sur le haut, barre remise), Rowing haltères (zoom sur le buste ; fichier `bent_over_dumbbell_row.png`, distinct du Rowing unilatéral), Tirage bras tendus (zoom fort, corde et câble en jaune avec un liseré noir).
+- **Remplacées** : Développé couché (jambes et pieds entiers), Tirage horizontal (machine, zoom sur la personne).
+- Toutes ajoutées au cache du service worker.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.90.
+
+---
+
 ## [1.7.89] - 2026-11-14
 ### 🚣 Records de cardio : la vitesse, pas la durée (co-auteur : Claude)
 - Pour le cardio avec distance ou étages, un record est maintenant **la meilleure allure** (rameur, ski trainer : /500 m ; tapis : /km — plus bas = mieux) ou **la meilleure vitesse / le meilleur rythme** (vélos : km/h ; stair climber : étages/min — plus haut = mieux). Ramer plus longtemps mais moins vite n'est plus un record. La durée reste le critère pour la planche, le gainage et la corde à sauter.
