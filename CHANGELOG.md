@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.88] - 2026-11-14
+### 📐 Progression : records et paliers en un seul bloc (co-auteur : Claude)
+- « Records battus ce mois-ci » tient dans **un seul bloc vert** et « Paliers détectés » dans **un seul bloc ambré** : la hauteur suit le nombre de lignes, un trait fin de la couleur du bloc sépare deux lignes. Une ligne fait 48 px au lieu d'une gélule de 68 px.
+- Paliers : une ligne par exercice, nom et charge ; « sans progression depuis X séances » est retiré.
+- Maquette : planche 25.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.88.
+
+---
+
 ## [1.7.87] - 2026-11-14
 ### ✖️ Volets sans barre grise, croix sur la fiche d'exercice (co-auteur : Claude)
 - La petite barre grise en haut des volets est retirée **de tous les volets** : aucun ne se fermait en glissant vers le bas. La marge du haut passe à 28 px (`section-gap`).

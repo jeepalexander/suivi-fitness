@@ -3498,17 +3498,14 @@ function renderProgressAnalysis() {
     html += `</div></div>`;
   }
 
-  // 3. Paliers détectés
+  // 3. Paliers détectés (1.7.88 : une ligne par palier, nom et charge, dans un seul bloc ambré)
   html += `<div class="card"><h3 class="analysis-section-title">Paliers détectés</h3>`;
   if (analysis.plateaus.length > 0) {
     html += `<div class="plateaus-list">`;
     analysis.plateaus.forEach(plateau => {
       html += `
         <div class="plateau-item">
-          <span class="plateau-text">
-            <span class="plateau-exercise">${plateau.exercise}</span>
-            <span class="plateau-duration">sans progression depuis ${plateau.sessionsCount} séance${plateau.sessionsCount > 1 ? 's' : ''}</span>
-          </span>
+          <span class="plateau-exercise">${plateau.exercise}</span>
           <span class="plateau-value">${plateau.currentMax} kg</span>
         </div>`;
     });
