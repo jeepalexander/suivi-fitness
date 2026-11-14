@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.73] - 2026-11-14
+### 📐 Accueil Programmes : moins d'espace sous l'astuce (co-auteur : Claude)
+- 16 px au lieu de 32 entre « Astuce : Reste appuyé… » et le menu, seulement sur l'accueil Programmes. Le contenu laisse ainsi du jeu : l'écran ne doit plus bouger sous le doigt quand un programme est actif. Les autres onglets, l'éditeur et l'écran du + ne changent pas. Maquette : planche 12.
+- `test_ecart_memoire.py` vérifie les 16 px et l'absence de défilement (20 contrôles).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.73.
+
+---
+
 ## [1.7.72] - 2026-11-14
 ### 🖼️ 33 nouvelles icônes d'exercices, pastilles plus grandes (co-auteur : Claude)
 - **33 nouvelles icônes** validées sur la planche de contrôle : Squat, Squat haltères, Squat goblet, Squat bulgare, Hack squat, Fentes, Montées sur banc, Soulevé de terre roumain et jambes tendues, Hip thrust, Hip thrust haltères, Leg extension unilatéral, Leg curl assis, Abductions et Adductions machine, Mollets assis, Rowing barre, Développé haltères, Pompes, Pull-over poulie, Développé haltères assis, Élévations frontales, Curl marteau, Curl concentration, Extension triceps à la poulie, Extension triceps en arrière, Relevé de buste, Relevés de jambes au sol, Planche, Rotation russe, Corde à sauter, Vélo, Montées de genoux. PNG 512 × 512 détourés, même cadrage que les icônes existantes ; ajoutées au catalogue (champ `icon`) et au cache du service worker.

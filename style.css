@@ -863,6 +863,8 @@ body[data-seance="empty"] .seance-sticky { display: none; }
 #tab-programme.active { display: flex; flex-direction: column; min-height: 100%; }
 #program-overview { flex: 1 0 auto; display: flex; flex-direction: column; }
 .prog-spacer { flex: 1 1 auto; min-height: 12px; }
+/* 1.7.73 : accueil Programmes, 16 px entre l'astuce et le menu (32 avant) : le contenu laisse du jeu et l'écran ne bouge plus sous le doigt */
+body[data-pview="home"] #app-scroll:has(#tab-programme.active) { padding-bottom: 96px; }
 body[data-pview="choose"] .choose-lead { margin-top: 0; }
 /* 1.7.58 : moins d'espace en haut de l'écran du bouton +, pour que tout tienne au-dessus du menu */
 body[data-pview="choose"] .ed-top { margin-bottom: 4px; }

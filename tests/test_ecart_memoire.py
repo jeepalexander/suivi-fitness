@@ -1,4 +1,4 @@
-"""Programmes (1.7.70) : entre la tuile active et « En mémoire », seulement section-gap (28 px),
+"""Programmes (1.7.70–1.7.73) : 16 px entre l'astuce et le menu. : entre la tuile active et « En mémoire », seulement section-gap (28 px),
 détail fermé comme ouvert (et 28 px, inchangés, entre la tuile et son détail), programme comme séance libre, à 390 et 360 px, clair et sombre."""
 import sys
 from harness import Srv, newpage, sync_playwright
@@ -20,6 +20,8 @@ with Srv() as url, sync_playwright() as p:
             ctx, pg, errs = newpage(br, w=w, pref=scheme, scheme=scheme)
             pg.goto(url + 'index.html'); pg.wait_for_timeout(500)
             ok(f'[{scheme} {w}] détail fermé : 28 px', pg.evaluate(GAP) == 28, pg.evaluate(GAP))
+            r = pg.evaluate("(()=>{const h=document.querySelector('.prog-hint').getBoundingClientRect(),n=document.querySelector('nav').getBoundingClientRect(),s=document.getElementById('app-scroll');return [Math.round(n.top-h.bottom),s.scrollHeight-s.clientHeight]})()")
+            ok(f'[{scheme} {w}] 16 px entre l\'astuce et le menu, rien ne dépasse (1.7.73)', r == [16, 0], r)
             pg.evaluate("programDetailOpen=true; renderProgramOverview(); 0"); pg.wait_for_timeout(200)
             ok(f'[{scheme} {w}] détail ouvert : 28 px', pg.evaluate(GAP) == 28, pg.evaluate(GAP))
             g = pg.evaluate("Math.round(document.querySelector('.prog-detail').getBoundingClientRect().top-document.querySelector('.next-card.prog-tile').getBoundingClientRect().bottom)")
