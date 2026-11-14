@@ -230,7 +230,10 @@ body { background-color: var(--bg); color: var(--text); font-size: 17px; height:
    Nom + version de l'app et titre de la page, collés en haut de l'écran sur toutes les pages ;
    sur Séance, la bannière (nom, progression, durée) en fait partie : UN SEUL bloc collé.
    ============================================ */
-header { position: relative; flex: none; width: 100%; z-index: var(--z-header); max-width: 600px; margin: 0 auto; padding: 28px var(--gutter) 12px; background: var(--bg); text-align: left; }
+/* 1.7.79 : application installée avec Chrome (Android) — viewport-fit=cover étend l'app jusqu'en haut de l'écran
+   (plus de bande noire à hauteur de la caméra) ; --safe-top décale l'en-tête d'autant : rien ne bouge à l'écran, rien sous la caméra. */
+:root { --safe-top: env(safe-area-inset-top, 0px); }
+header { position: relative; flex: none; width: 100%; z-index: var(--z-header); max-width: 600px; margin: 0 auto; padding: calc(28px + var(--safe-top)) var(--gutter) 12px; background: var(--bg); text-align: left; }
 body[data-tab="seance"] header { padding-bottom: 0; }
 .page-header { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .app-kicker { font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
@@ -239,7 +242,7 @@ body[data-tab="seance"] header { padding-bottom: 0; }
 header h1 { font-family: var(--font-display); font-size: 2.625rem; font-weight: 700; line-height: 1.05; letter-spacing: -0.01em; }
 
 /* Bouton d'en-tête, en haut à droite : roue dentée (Historique) ou « Retour » (Réglages) */
-.hdr-btn { position: absolute; top: 24px; right: var(--gutter); z-index: var(--z-header-btn); display: none; align-items: center; justify-content: center; gap: 4px; width: 48px; height: 48px; padding: 0; border-radius: 999px; border: none; background: var(--surface); color: var(--text); box-shadow: var(--sh-card); cursor: pointer; }
+.hdr-btn { position: absolute; top: calc(24px + var(--safe-top)); right: var(--gutter); z-index: var(--z-header-btn); display: none; align-items: center; justify-content: center; gap: 4px; width: 48px; height: 48px; padding: 0; border-radius: 999px; border: none; background: var(--surface); color: var(--text); box-shadow: var(--sh-card); cursor: pointer; }
 .hdr-btn svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .hdr-btn-text { width: auto; padding: 0 20px 0 12px; font-size: 0.9375rem; font-weight: 600; }
 .hdr-btn.has-update::after { content: ''; position: absolute; top: 8px; right: 8px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--surface); }

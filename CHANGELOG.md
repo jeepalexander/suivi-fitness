@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.79] - 2026-11-14
+### 📱 Plein écran jusqu'en haut avec Chrome (co-auteur : Claude)
+- **Correction** : l'application installée depuis Chrome (Android) laissait une bande vide en haut de l'écran, à hauteur de la caméra, alors que celle de Firefox montait jusqu'au bord. Chrome réserve cette zone tant que la page ne dit pas qu'elle sait s'y afficher : `viewport-fit=cover` ajouté à `index.html`.
+- L'en-tête et ses boutons (+, Réglages, Retour) descendent de la hauteur de cette zone (`--safe-top`) : les titres restent exactement où ils étaient, rien ne passe sous la caméra. Le fond de l'app (blanc, sombre ou fond d'écran) remplit désormais la bande.
+- Aucun changement dans un navigateur ni sur un écran sans encoche (`--safe-top` vaut 0).
+- `test_plein_ecran.py` (groupe `style`) : balise présente, en-tête inchangé sans encoche, décalé d'exactement la zone réservée avec encoche (390 et 360 px, clair et sombre).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.79.
+
+---
+
 ## [1.7.78] - 2026-11-14
 ### ✍️ Accueil manuscrit : date locale, variantes, bilan du mois, « Semaine de déload », Bienvenue (co-auteur : Claude)
 - **Correction** : la date du jour vient du téléphone (heure locale) et non plus de l'heure UTC. Entre minuit et 1 h (2 h en été), l'app se croyait encore la veille : « Belle séance aujourd'hui » pouvait viser la séance de la veille, et le compte des 10 jours avait un jour d'écart.

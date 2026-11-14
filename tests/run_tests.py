@@ -28,7 +28,7 @@ GROUPES = {
     'reglages': ['test_reglages.py', 'test_prod_test.py', 'test_fond_ecran.py', 'test_invitation.py', 'test_mise_a_jour.py', 'test_presentation.py'],
     'drive': ['test_drive_reset.py', 'test_drive_compte.py', 'test_drive_sauvegarde.py', 'test_drive_versions.py',
               'test_drive_installee.py', 'test_drive_android.py', 'test_drive_reconnexion.py'],
-    'style': ['test_fenetres.py', 'test_mise_en_page.py', 'test_choix_espace.py', 'test_pastille_1x.py', 'test_titre_seance.py', 'test_contraste.py'],
+    'style': ['test_fenetres.py', 'test_mise_en_page.py', 'test_choix_espace.py', 'test_pastille_1x.py', 'test_titre_seance.py', 'test_contraste.py', 'test_plein_ecran.py'],
 }
 
 
