@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.87] - 2026-11-14
+### ✖️ Volets sans barre grise, croix sur la fiche d'exercice (co-auteur : Claude)
+- La petite barre grise en haut des volets est retirée **de tous les volets** : aucun ne se fermait en glissant vers le bas. La marge du haut passe à 28 px (`section-gap`).
+- **Fiche d'exercice** : une croix de 44 px en haut à droite (la même que dans « Ajouter un exercice ») ; elle défile avec la fiche, et « Fermer » reste en bas. Maquette : planche 38.
+- `test_fiches.py` : croix, plus de barre grise (60 contrôles).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.87.
+
+---
+
 ## [1.7.86] - 2026-11-14
 ### 📖 Fiches d'exercice : défilement au doigt (co-auteur : Claude)
 - Sur le téléphone, la fiche ne défilait pas : la règle des grands volets (`.sheet.tall`, contenu non défilant) la bloquait. Elle défile maintenant au doigt, sans faire bouger l'écran derrière.

@@ -44,6 +44,11 @@ with Srv() as url, sync_playwright() as p:
             pg.screenshot(path=f"{__import__('os').environ.get('SHOTS_DIR', '/tmp')}/fiche-{scheme}-{w}.png")
             pg.click('.fiche-sheet .btn-secondary'); pg.wait_for_timeout(200)
             ok(tag + 'Fermer referme la fiche', not pg.evaluate(FICHE_OPEN))
+            long_press(pg, badge)
+            ok(tag + 'croix en haut à droite, pas de barre grise (1.7.87)', pg.locator('.fiche-sheet .fiche-close').count() == 1 and pg.locator('.sheet-grip').count() == 0
+               and pg.evaluate("(()=>{const x=document.querySelector('.fiche-close').getBoundingClientRect(),s=document.querySelector('.fiche-sheet').getBoundingClientRect();return x.right<=s.right && s.right-x.right<40 && x.top-s.top<30})()"))
+            pg.click('.fiche-sheet .fiche-close'); pg.wait_for_timeout(200)
+            ok(tag + 'la croix referme la fiche', not pg.evaluate(FICHE_OPEN))
             long_press(pg, badge); pg.keyboard.press('Escape'); pg.wait_for_timeout(150)
             ok(tag + 'Échap referme la fiche', not pg.evaluate(FICHE_OPEN))
             # Toucher court : pas de fiche

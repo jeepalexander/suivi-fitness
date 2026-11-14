@@ -917,12 +917,12 @@ function openSheet(html, opts = {}) {
   if (opts.update && current) {
     const scroller = current.querySelector('.backup-scroll');
     const top = scroller ? scroller.scrollTop : 0;
-    current.innerHTML = `<span class="sheet-grip" aria-hidden="true"></span>${html}`;
+    current.innerHTML = html; // 1.7.87 : plus de barre grise (aucun volet ne se ferme en glissant)
     const again = current.querySelector('.backup-scroll');
     if (again) again.scrollTop = top;
     return;
   }
-  overlay.innerHTML = `<div class="sheet${opts.tall ? ' tall' : ''}" role="dialog" aria-modal="true"><span class="sheet-grip" aria-hidden="true"></span>${html}</div>`;
+  overlay.innerHTML = `<div class="sheet${opts.tall ? ' tall' : ''}" role="dialog" aria-modal="true">${html}</div>`;
   overlay.classList.add('open');
 }
 
@@ -954,7 +954,6 @@ function askSheet({ tone = 'warn', title = '', text = '', ok = 'OK', cancel = nu
   const icon = { warn: WARN_SVG, danger: TRASH_SVG, cloud: CLOUD_SVG, info: INFO_SVG }[tone] || WARN_SVG;
   const paras = String(text || '').split(/\n\s*\n/).filter(Boolean).map(t => `<p class="sheet-text center">${escapeHtml(t.trim()).replace(/\n/g, '<br>')}</p>`).join('');
   overlay.innerHTML = `<div class="sheet ask-sheet" role="alertdialog" aria-modal="true" aria-labelledby="ask-title">
-    <span class="sheet-grip" aria-hidden="true"></span>
     <div class="sheet-icon ${tone}">${icon}</div>
     <h3 class="sheet-title center" id="ask-title">${escapeHtml(title)}</h3>
     ${paras}

@@ -213,7 +213,7 @@ function openFiche(ref) {
     overlay.addEventListener('click', ev => { if (ev.target === overlay) closeFiche(); });
     document.body.appendChild(overlay);
   }
-  overlay.innerHTML = `<div class="sheet tall fiche-sheet" role="dialog" aria-modal="true" aria-labelledby="fiche-title"><span class="sheet-grip" aria-hidden="true"></span>${ficheHtml(e)}</div>`;
+  overlay.innerHTML = `<div class="sheet tall fiche-sheet" role="dialog" aria-modal="true" aria-labelledby="fiche-title"><button type="button" class="sheet-close fiche-close" aria-label="Fermer" onclick="closeFiche()">${CLOSE_SVG}</button>${ficheHtml(e)}</div>`;
   overlay.classList.add('open');
 }
 

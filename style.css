@@ -773,10 +773,10 @@ body[data-tab="programme"][data-pview="choose"] header h1 { display: none; }
 /* --- Feuilles du bas --- */
 .sheet-overlay { position: fixed; inset: 0; z-index: var(--z-sheet); display: none; align-items: flex-end; justify-content: center; background: var(--overlay); }
 .sheet-overlay.open { display: flex; }
-.sheet { width: 100%; max-width: 600px; max-height: 92dvh; display: flex; flex-direction: column; padding: 12px var(--gutter) calc(22px + env(safe-area-inset-bottom, 0px)); background: var(--card-bg); color: var(--text); border-radius: 32px 32px 0 0; box-shadow: var(--shadow-sheet); overflow-y: auto; animation: sheet-in 0.22s ease; }
+.sheet { width: 100%; max-width: 600px; max-height: 92dvh; display: flex; flex-direction: column; padding: 28px var(--gutter) calc(22px + env(safe-area-inset-bottom, 0px)); background: var(--card-bg); color: var(--text); border-radius: 32px 32px 0 0; box-shadow: var(--shadow-sheet); overflow-y: auto; animation: sheet-in 0.22s ease; }
 .sheet.tall { height: 92dvh; overflow: hidden; }
 @keyframes sheet-in { from { transform: translateY(30px); opacity: 0.6; } to { transform: none; opacity: 1; } }
-.sheet-grip { flex: none; align-self: center; width: 40px; height: 5px; margin-bottom: 16px; border-radius: 3px; background: var(--border); }
+/* 1.7.87 : barre grise retirée de tous les volets (aucun ne se ferme en glissant) ; marge du haut 28 px (section-gap) */
 .sheet-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .sheet-title { font-family: var(--font-display); font-weight: 700; font-size: 1.875rem; line-height: 1.05; margin-bottom: 12px; }
 .sheet-title.small { font-size: 1.375rem; text-align: center; }
@@ -1076,6 +1076,8 @@ body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 .fiche-overlay { z-index: var(--z-ask); }
 .sheet.tall.fiche-sheet { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; } /* 1.7.86 : la fiche défile au doigt (.sheet.tall la bloquait) */
 .fiche-sheet > * { flex-shrink: 0; }
+.sheet.tall.fiche-sheet { position: relative; }
+.fiche-close { position: absolute; top: 16px; right: var(--gutter); z-index: var(--z-raised); } /* 1.7.87 : croix en haut à droite, défile avec la fiche */
 .exf-hero { display: flex; justify-content: center; margin: 4px 0 12px; }
 .exf-hero .ex-icon-badge { width: 220px; height: 220px; }
 .exf-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 0 0 20px; }
