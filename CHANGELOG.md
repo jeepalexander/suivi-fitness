@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.83] - 2026-11-14
+### 🖼️ Abductions et Adductions recadrées (co-auteur : Claude)
+- Icônes **Abductions machine** et **Adductions machine** refaites : cadrage serré sur la partie basse (jambes, coussins, pieds), buste gardé jusqu'à la poitrine au lieu d'être coupé à la taille ; détourage refait (un trou dans une chaussure d'Abductions corrigé). Adductions décalée pour garder le pied gauche entier.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.7.83.
+
+---
+
 ## [1.7.82] - 2026-11-14
 ### 📱 En-tête remonté de 10 px de plus (co-auteur : Claude)
 - Application installée, écran avec caméra en haut : le nom de l'app commence **juste sous la zone de la caméra** (10 px dessous en 1.7.81). Tout le contenu remonte de 10 px.
