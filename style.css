@@ -420,7 +420,7 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 
 /* Exercices en accordéon */
 .exercise-item { margin-bottom: 4px; padding: 8px 0; background: none; border: none; border-radius: 32px; scroll-margin-top: 8px; }
-.exercise-item.open { margin: 12px 0 16px; padding: 8px 0; background: none; border-radius: 0; box-shadow: none; }
+.exercise-item.open { margin: 0 0 16px; padding: 8px 0; /* 1.8.9 : plus de marge haute, l'icône et le nom ne bougent plus à l'ouverture */ background: none; border-radius: 0; box-shadow: none; }
 .ex-header { display: flex; align-items: center; gap: 8px; }
 .ex-toggle { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; background: none; border: none; padding: 0; text-align: left; color: var(--text); font: inherit; cursor: pointer; }
 .ex-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
@@ -468,7 +468,7 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 
 /* Écrans étroits (≤ 380 px) : on libère de la place au nom de l'exercice ouvert */
 @media (max-width: 380px) {
-  .exercise-item.open .ex-toggle { gap: 8px; }
+  .exercise-item .ex-toggle { gap: 8px; } /* 1.8.9 : 8 px ouvert ET fermé, le nom ne bouge plus à l'ouverture */
   .exercise-item.open .ex-name { font-size: 1.0625rem; }
   .exercise-item.open .ex-controls { gap: 8px; }
 }

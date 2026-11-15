@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.9] - 2026-11-15
+### 🐛 Séance : l'icône et le nom ne bougent plus à l'ouverture d'un exercice (co-auteur : Claude)
+- L'exercice ouvert n'a plus de marge haute de 12 px : l'ensemble icône et texte ne descend plus.
+- Sur les écrans de 380 px ou moins, l'écart entre l'icône et le nom est de 8 px que l'exercice soit fermé ou ouvert (il passait de 12 à 8 px à l'ouverture, ce qui décalait le texte vers la gauche ; 8 px restent nécessaires pour que « Développé militaire » tienne sur une ligne).
+
+---
+
 ## [1.8.8] - 2026-11-15
 ### 🐛 1RM estimé lié à la charge max (co-auteur : Claude)
 - **Progression par exercice** : sous le graphique, « 1RM estimé » donne celui de la séance de la charge max (à charge max égale, le meilleur), et non plus celui de la dernière séance. Si ces séances n'en ont pas (séries de plus de 10 répétitions), c'est le meilleur 1RM de l'historique.
