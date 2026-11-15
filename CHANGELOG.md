@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.4] - 2026-11-15
+### 🎨 Séance (sombre) : liseré sur le haut des pastilles d'icônes (co-auteur : Claude)
+- En thème sombre, dans l'onglet Séance seulement, la pastille grise derrière chaque illustration d'exercice reçoit un liseré blanc de 1 px sur son haut (12 %), comme celui de la gélule de la série en cours (7 %), un peu plus visible.
+- Nouvelle variable `--icon-pastille-rim` (aucun effet en clair).
+
+---
+
 ## [1.8.3] - 2026-11-15
 ### 🎨 Séance : boutons − / + des séries plus contrastés (co-auteur : Claude)
 - Les boutons − / + (nombre de séries) prennent le style des champs de la 1.8.1 : blancs avec liseré et ombre légère en clair, #2A2A32 en sombre. Leur rond se détachait à peine du fond (1,1:1).
