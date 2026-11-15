@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.11] - 2026-11-15
+### 🏆 Progression par exercice : trophée de la charge max, étoile du meilleur 1RM (co-auteur : Claude)
+- **1RM estimé** : sous le graphique, c'est le meilleur 1RM de tout l'historique, indépendant de la charge max (il ne se calcule que sur des séries de 10 répétitions ou moins, donc il ne peut pas toujours venir de la séance de la charge max ; remplace la règle de la 1.8.8).
+- **Trophée** (or `--trophy`) au-dessus du point de la charge max sur la courbe, et derrière sa valeur dans la légende.
+- **Étoile** au-dessus du point du meilleur 1RM sur le pointillé, et derrière sa valeur dans la légende.
+- À égalité, la marque va sur la séance la plus récente. Exercices au poids du corps : inchangés.
+
+---
+
 ## [1.8.10] - 2026-11-15
 ### 🎨 Séance : liseré et halo sous l'en-tête fixe (co-auteur : Claude)
 - **Liseré** de 1 px sous l'en-tête de Séance : blanc à 10 % en sombre, gris à 8 % en clair.
