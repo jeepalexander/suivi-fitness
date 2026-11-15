@@ -7,6 +7,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.22] - 2026-11-15
+### 🐛 Fiche d'exercice : « Fermer » marche dès le premier appui (co-auteur : Claude)
+- Après l'appui long qui ouvre la fiche, l'app ignore le clic du relâché. Sur téléphone, ce relâché ne produit pas toujours de clic : le blocage restait armé et avalait le premier appui sur « Fermer ». Désormais seul un clic dans les 0,6 s qui suivent le relâché est ignoré, et tout nouvel appui lève le blocage.
+
+---
+
 ## [1.8.21] - 2026-11-15
 ### 🖼️ Détourage des 6 icônes de la 1.8.20 amélioré (co-auteur : Claude)
 - **Gainage latéral, Pompes lestées** : bords du tapis nets et droits (ils étaient rongés), sans fond blanc collé ; liseré du short conservé.
