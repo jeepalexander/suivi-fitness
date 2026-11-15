@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.20] - 2026-11-15
+### 🖼️ 6 nouvelles icônes d'exercices (co-auteur : Claude)
+- Gainage latéral, Écarté haltère (vue de dessus), Écarté incliné haltères (de côté, sans fond blanc entre les montants du banc), Pompes lestées, Dips triceps, Extension triceps couché.
+- Ajoutées au cache hors ligne. Il reste 8 exercices sans icône. Curl barre EZ et Mollets haltères gardent leur icône.
+
+---
+
 ## [1.8.19] - 2026-11-15
 ### 🧹 Mise à jour et fiche d'exercice simplifiées (co-auteur : Claude)
 - **Réglages · Application** : plus de bandeau « La version … est prête » ; le statut dit « Mise à jour téléchargée : version 1.8.xx », à côté du bouton jaune « Installer ».

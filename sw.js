@@ -2,7 +2,7 @@
 // APP_VERSION doit être incrémenté à chaque release (en même temps que
 // manifest.json) : le navigateur ne réinstalle le service worker que si
 // le contenu de ce fichier change.
-const APP_VERSION = '1.8.19';
+const APP_VERSION = '1.8.20';
 // 1.7.64 (co-auteur : Claude) : production (…/suivi-fitness/) et test (…/suivi-fitness/dev/) sont sur le même
 // domaine et partagent le stockage des caches : chaque version nomme ses caches d'après son dossier et ne
 // supprime que les siens (plus les anciens caches sans dossier, d'avant la 1.7.64).
@@ -92,6 +92,12 @@ const ASSETS = [
   './icons/seated_row.png',
   './icons/triceps_extension.png',
   './icons/walking_lunge.png',
+  './icons/side_plank.png',
+  './icons/dumbbell_fly.png',
+  './icons/incline_dumbbell_fly.png',
+  './icons/weighted_push_ups.png',
+  './icons/bench_dips.png',
+  './icons/skull_crusher.png',
   './icons/arnold_press.png',
   './icons/machine_shoulder_press.png',
   './icons/upright_row.png',
