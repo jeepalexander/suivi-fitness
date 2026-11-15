@@ -7,6 +7,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.100] - 2026-11-15
+### ✍️ Accueil Programmes : message manuscrit remonté (co-auteur : Claude)
+- Le message manuscrit (« Bonjour, … » ou « Bienvenue ! ») remonte de 16 px : l'écart avec « MON CARNET DE SALLE » est réduit.
+
+---
+
 ## [1.7.99] - 2026-11-15
 ### 🖼️ Revue des icônes : 4 corrections (co-auteur : Claude)
 - **Leg curl** : morceaux du banc qui flottaient sous l'icône retirés.
