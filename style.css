@@ -81,6 +81,8 @@
   --sh-red: 0 2px 2px rgba(229, 57, 43, 0.5), 0 7px 9px -3px rgba(229, 57, 43, 0.55);
   --sh-card: 0 1px 2px rgba(17, 17, 20, 0.2), 0 6px 8px -3px rgba(17, 17, 20, 0.22);
   --nav-halo-rgb: 255, 255, 255; /* 1.8.6 : halo en bas d'écran sous la barre de navigation (couleur de --bg) */
+  --hdr-rim: inset 0 -1px 0 rgba(17, 17, 20, 0.08);  /* 1.8.10 : liseré sous l'en-tête de Séance */
+  --hdr-halo: linear-gradient(to bottom, rgba(17, 17, 20, 0.14) 0%, rgba(17, 17, 20, 0.049) 45%, rgba(17, 17, 20, 0) 100%); /* 1.8.10 : ombre de 40 px sous l'en-tête de Séance */
   --sh-chip: 0 1px 2px rgba(17, 17, 20, 0.5), 0 5px 7px -2px rgba(17, 17, 20, 0.4);
   --sh-btn: var(--sh-pill);
   --sh-icon: drop-shadow(0 1px 1px rgba(17, 17, 20, 0.3)) drop-shadow(0 4px 3px rgba(17, 17, 20, 0.2));
@@ -201,6 +203,8 @@
   --sh-red: 0 2px 2px rgba(255, 77, 63, 0.35), 0 7px 10px -3px rgba(255, 77, 63, 0.45);
   --sh-card: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 1px 2px rgba(0, 0, 0, 0.6), 0 6px 10px -4px rgba(0, 0, 0, 0.6);
   --nav-halo-rgb: 14, 14, 17;    /* 1.8.6 : = --bg sombre */
+  --hdr-rim: inset 0 -1px 0 rgba(255, 255, 255, 0.10);
+  --hdr-halo: linear-gradient(to top, rgba(14, 14, 17, 0) 0%, rgba(14, 14, 17, 0.55) 60%, rgba(14, 14, 17, 0.92) 100%); /* halo de la couleur du fond, comme sous le menu */
   --sh-chip: 0 1px 2px rgba(0, 0, 0, 0.6), 0 4px 8px -2px rgba(0, 0, 0, 0.55);
   --sh-btn: var(--sh-chip);
   --sh-icon: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.7)) drop-shadow(0 4px 3px rgba(0, 0, 0, 0.5));
@@ -251,7 +255,8 @@ body { background-color: var(--bg); color: var(--text); font-size: 17px; height:
    la marge d'un écran sans encoche ; les boutons de l'en-tête gardent leurs 4 px d'avance sur le nom. */
 :root { --safe-top: env(safe-area-inset-top, 0px); }
 header { position: relative; flex: none; width: 100%; z-index: var(--z-header); max-width: 600px; margin: 0 auto; padding: max(28px, var(--safe-top)) var(--gutter) 12px; background: var(--bg); text-align: left; }
-body[data-tab="seance"] header { padding-bottom: 0; }
+body[data-tab="seance"] header { padding-bottom: 0; box-shadow: var(--hdr-rim); }
+body[data-tab="seance"] header::after { content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 40px; pointer-events: none; background: var(--hdr-halo); } /* 1.8.10 */
 .page-header { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .app-kicker { font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
 /* 1.7.66 : version de test (…/dev/) — pastille « TEST » à côté du nom, couleurs de la pastille Déload (planche 37) */

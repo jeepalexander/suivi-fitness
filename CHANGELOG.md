@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.10] - 2026-11-15
+### 🎨 Séance : liseré et halo sous l'en-tête fixe (co-auteur : Claude)
+- **Liseré** de 1 px sous l'en-tête de Séance : blanc à 10 % en sombre, gris à 8 % en clair.
+- **Halo de 40 px** sous l'en-tête : en sombre, un fondu de la couleur du fond, comme sous le menu (1.8.6) ; en clair, une ombre sombre à 14 %. Le contenu qui défile s'efface en passant sous l'en-tête ; les touchers passent au travers.
+- Variables `--hdr-rim` et `--hdr-halo`. Onglet Séance seulement.
+
+---
+
 ## [1.8.9] - 2026-11-15
 ### 🐛 Séance : l'icône et le nom ne bougent plus à l'ouverture d'un exercice (co-auteur : Claude)
 - L'exercice ouvert n'a plus de marge haute de 12 px : l'ensemble icône et texte ne descend plus.
