@@ -4862,6 +4862,17 @@ function consumeDriveForcePending() {
   try { t = Number(localStorage.getItem(DRIVE_FORCE_PENDING_KEY) || 0); localStorage.removeItem(DRIVE_FORCE_PENDING_KEY); } catch (e) { return false; }
   return t > 0 && Date.now() - t < 600000;
 }
+// 1.8.23 : onglet où l'on revient après la connexion Google (lu sans consommer les demandes en attente)
+function driveReturnTab(driveReturn) {
+  try {
+    if (getDriveToken()) {
+      const t = Number(localStorage.getItem(DRIVE_FORCE_PENDING_KEY) || 0);
+      if (t > 0 && Date.now() - t < 600000) return 'historique';
+      if (driveReturn === 'ok' && typeof PROGRAM_RESTORE_PENDING_KEY !== 'undefined' && localStorage.getItem(PROGRAM_RESTORE_PENDING_KEY) === '1') return 'programme';
+    }
+  } catch (e) { /* ignoré */ }
+  return 'reglages';
+}
 // Au démarrage ou au retour dans l'application : la sauvegarde demandée avant la reconnexion, sinon l'envoi habituel
 function driveSyncOnReturn() {
   if (getDriveToken() && consumeDriveForcePending()) { saveBackupToDriveNow(); return true; }
@@ -5100,6 +5111,9 @@ async function initApp() {
   // Google Drive : retour d'une connexion par redirection (application installée), puis statut + sauvegarde à envoyer
   cleanupLegacyDriveKeys();
   const driveReturn = handleDriveRedirectReturn();
+  // 1.8.23 (co-auteur : Claude) : l'onglet de destination s'affiche tout de suite, sans passer par Programme
+  if (driveReturn) switchTab(driveReturnTab(driveReturn));
+  document.documentElement.removeAttribute('data-drive-return');
   setTimeout(() => {
     if (isDriveWanted() && !isInstalledApp()) loadGoogleIdentity(); // 1.7.65 : seulement si le Drive sert
     initDriveTokenClient(); updateDriveUI();

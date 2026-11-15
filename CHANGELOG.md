@@ -7,6 +7,18 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.23] - 2026-11-15
+### 🐛 « Reconnecter Google Drive » : retour direct sur Réglages (co-auteur : Claude)
+- Au retour de la connexion Google, l'application rechargée affichait d'abord l'onglet Programme, puis basculait sur Réglages 0,8 s plus tard. L'onglet de destination (Réglages, ou Historique / Programme quand une sauvegarde ou une restauration était en attente) s'affiche maintenant tout de suite. La page reste masquée jusqu'au choix de l'onglet.
+### 🎨 Icônes : chaussures retouchées (co-auteur : Claude)
+- Écarté haltère : le bout de la chaussure droite, coupé net par le bord de la photo, est arrondi ; voile blanc retiré autour des languettes.
+- Écarté incliné haltères : voile blanc retiré autour des deux chaussures.
+### 🧪 Tests
+- Fiche d'exercice : appui long sans clic au relâché, puis « Fermer » au premier appui (régression 1.8.22).
+- Google Drive (application installée) : au retour de « Reconnecter », l'onglet Programme n'est jamais visible.
+
+---
+
 ## [1.8.22] - 2026-11-15
 ### 🐛 Fiche d'exercice : « Fermer » marche dès le premier appui (co-auteur : Claude)
 - Après l'appui long qui ouvre la fiche, l'app ignore le clic du relâché. Sur téléphone, ce relâché ne produit pas toujours de clic : le blocage restait armé et avalait le premier appui sur « Fermer ». Désormais seul un clic dans les 0,6 s qui suivent le relâché est ignoré, et tout nouvel appui lève le blocage.

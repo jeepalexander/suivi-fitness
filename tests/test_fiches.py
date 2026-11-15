@@ -92,6 +92,18 @@ with Srv() as url, sync_playwright() as p:
     touch('touchEnd', 0); pg.wait_for_timeout(400)
     ok('téléphone : la fiche défile au doigt', pg.evaluate("document.querySelector('.fiche-sheet').scrollTop") > 50, pg.evaluate("document.querySelector('.fiche-sheet').scrollTop"))
     ctx.close()
+    # 1.8.22 : sur téléphone, le relâché d'un appui long ne produit pas toujours de clic ; « Fermer » doit marcher au 1er appui
+    ctx, pg, errs = newpage(br, w=390)
+    pg.goto(url + 'index.html'); pg.wait_for_timeout(500)
+    pg.evaluate("switchTab('seance'); 0"); pg.wait_for_timeout(300)
+    pg.evaluate("""()=>{const b=document.querySelector('#exercises-list .ex-icon-badge');const r=b.getBoundingClientRect();
+      b.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,clientX:r.x+10,clientY:r.y+10}));}""")
+    pg.wait_for_timeout(700); pg.evaluate("document.dispatchEvent(new PointerEvent('pointercancel',{bubbles:true}))"); pg.wait_for_timeout(300)
+    opened = pg.evaluate(FICHE_OPEN)
+    pg.click('.fiche-close-btn'); pg.wait_for_timeout(250)
+    ok('appui long sans clic au relâché : « Fermer » ferme la fiche au 1er appui', opened and not pg.evaluate(FICHE_OPEN))
+    ok('aucune erreur JavaScript (appui long sans clic)', not errs, errs)
+    ctx.close()
     br.close()
 print(f"\n {sum(res)} / {len(res)} contrôles OK")
 sys.exit(0 if all(res) else 1)
