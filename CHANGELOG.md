@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.6] - 2026-11-15
+### 🎨 Halo en bas d'écran sous la barre de navigation (co-auteur : Claude)
+- **Annulé** : le liseré à 12 % de la barre de navigation (1.8.5) ; elle reprend l'ombre `--sh-card` (liseré à 7 % en sombre).
+- **Nouveau** : un halo en dégradé de 150 px en bas de l'écran, sous la barre, dans la couleur du fond (blanc en clair, #0E0E11 en sombre) : le contenu qui défile s'efface avant de passer derrière le menu. Il laisse passer les touchers (`pointer-events: none`) et reste sous les volets.
+- Variable `--nav-halo-rgb` (remplace `--sh-nav`).
+
+---
+
 ## [1.8.5] - 2026-11-15
 ### 🎨 Barre de navigation (sombre) : liseré du haut plus visible (co-auteur : Claude)
 - En thème sombre, le liseré blanc du haut de la barre de navigation passe de 7 % à 12 %, comme les pastilles d'icônes de Séance (1.8.4).

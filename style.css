@@ -80,7 +80,7 @@
   --sh-pill: 0 2px 2px rgba(17, 17, 20, 0.45), 0 8px 10px -3px rgba(17, 17, 20, 0.35);
   --sh-red: 0 2px 2px rgba(229, 57, 43, 0.5), 0 7px 9px -3px rgba(229, 57, 43, 0.55);
   --sh-card: 0 1px 2px rgba(17, 17, 20, 0.2), 0 6px 8px -3px rgba(17, 17, 20, 0.22);
-  --sh-nav: var(--sh-card);   /* 1.8.5 : barre de navigation (identique à sh-card en clair) */
+  --nav-halo-rgb: 255, 255, 255; /* 1.8.6 : halo en bas d'écran sous la barre de navigation (couleur de --bg) */
   --sh-chip: 0 1px 2px rgba(17, 17, 20, 0.5), 0 5px 7px -2px rgba(17, 17, 20, 0.4);
   --sh-btn: var(--sh-pill);
   --sh-icon: drop-shadow(0 1px 1px rgba(17, 17, 20, 0.3)) drop-shadow(0 4px 3px rgba(17, 17, 20, 0.2));
@@ -200,7 +200,7 @@
   --sh-pill: 0 1px 2px rgba(0, 0, 0, 0.7), 0 8px 14px -4px rgba(0, 0, 0, 0.7);
   --sh-red: 0 2px 2px rgba(255, 77, 63, 0.35), 0 7px 10px -3px rgba(255, 77, 63, 0.45);
   --sh-card: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 1px 2px rgba(0, 0, 0, 0.6), 0 6px 10px -4px rgba(0, 0, 0, 0.6);
-  --sh-nav: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 1px 2px rgba(0, 0, 0, 0.6), 0 6px 10px -4px rgba(0, 0, 0, 0.6); /* 1.8.5 : liseré du haut à 12 % (7 % dans sh-card) */
+  --nav-halo-rgb: 14, 14, 17;    /* 1.8.6 : = --bg sombre */
   --sh-chip: 0 1px 2px rgba(0, 0, 0, 0.6), 0 4px 8px -2px rgba(0, 0, 0, 0.55);
   --sh-btn: var(--sh-chip);
   --sh-icon: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.7)) drop-shadow(0 4px 3px rgba(0, 0, 0, 0.5));
@@ -291,7 +291,9 @@ body[data-tab="seance"] .seance-sticky { display: block; }
 /* ============================================
    4. NAVIGATION : pastille flottante, l'onglet actif porte son libellé
    ============================================ */
-nav { position: fixed; left: 30px; right: 30px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); max-width: 508px; height: 64px; margin: 0 auto; padding: 0 8px; display: flex; align-items: center; justify-content: space-between; gap: 0; background: var(--surface); border: none; border-radius: 999px; box-shadow: var(--sh-nav); z-index: var(--z-header); }
+nav { position: fixed; left: 30px; right: 30px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); max-width: 508px; height: 64px; margin: 0 auto; padding: 0 8px; display: flex; align-items: center; justify-content: space-between; gap: 0; background: var(--surface); border: none; border-radius: 999px; box-shadow: var(--sh-card); z-index: var(--z-header); }
+/* 1.8.6 : halo en dégradé en bas de l'écran, sous la barre : le contenu s'efface avant de passer derrière elle */
+body::after { content: ''; position: fixed; left: 0; right: 0; bottom: 0; height: calc(150px + env(safe-area-inset-bottom, 0px)); pointer-events: none; z-index: calc(var(--z-header) - 1); background: linear-gradient(to bottom, rgba(var(--nav-halo-rgb), 0) 0%, rgba(var(--nav-halo-rgb), 0.55) 40%, rgba(var(--nav-halo-rgb), 0.92) 100%); }
 nav button { position: relative; flex: none; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px; height: 48px; min-width: 48px; padding: 0; background: none; border: none; border-radius: 999px; color: var(--text-muted); font-size: 0; font-weight: 500; cursor: pointer; transition: background var(--t-fast) ease, color var(--t-fast) ease; }
 nav button.active { background: var(--primary-strong); color: var(--on-strong); font-size: 0.9375rem; font-weight: 600; padding: 0 20px 0 16px; box-shadow: var(--sh-chip); }
 nav button svg { width: 24px; height: 24px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
