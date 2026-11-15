@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.99] - 2026-11-15
+### 🖼️ Revue des icônes : 4 corrections (co-auteur : Claude)
+- **Leg curl** : morceaux du banc qui flottaient sous l'icône retirés.
+- **Rowing unilatéral** : ombre grise sous le banc retirée.
+- **Rowing barre** : tête entière (le zoom la coupait au front), image coupée aux chevilles.
+- **Pull-over poulie** : câble remis (il avait disparu au détourage), en jaune avec liseré noir comme Tirage bras tendus.
+
+---
+
 ## [1.7.98] - 2026-11-15
 ### 🖼️ Icône du Tirage menton corrigée (co-auteur : Claude)
 - **Tirage menton** : le coude du bras gauche était coupé par le détourage ; image détourée à nouveau, bras entier, même cadrage.
