@@ -7,6 +7,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.12] - 2026-11-15
+### 🎖️ Charge max : un badge à la place du trophée (co-auteur : Claude)
+- Sur le graphique par exercice et dans sa légende, la charge max est marquée d'un badge (médaille à ruban), pour ne pas la confondre avec les trophées des records. L'étoile du meilleur 1RM ne change pas.
+
+---
+
 ## [1.8.11] - 2026-11-15
 ### 🏆 Progression par exercice : trophée de la charge max, étoile du meilleur 1RM (co-auteur : Claude)
 - **1RM estimé** : sous le graphique, c'est le meilleur 1RM de tout l'historique, indépendant de la charge max (il ne se calcule que sur des séries de 10 répétitions ou moins, donc il ne peut pas toujours venir de la séance de la charge max ; remplace la règle de la 1.8.8).

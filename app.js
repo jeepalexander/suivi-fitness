@@ -75,8 +75,9 @@ const CHART_COLORS = { primary: '#111114', success: '#0B7A43', volume: '#C2570C'
 
 // 1.8.0 : petite plume (pictogramme du déload) sous les points des séances de déload, dans les graphiques
 const DELOAD_PATHS = ['M20.2 12.2a6 6 0 0 0-8.5-8.5L5 10.5V19h8.5z', 'M16 8L2 22', 'M17.5 15H9'];
-// 1.8.11 : trophée au-dessus du point de la charge max, étoile au-dessus du meilleur 1RM estimé
-const TROPHY_PATHS = ['M8 4h8v5a4 4 0 0 1-8 0z', 'M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M9 20h6'];
+// 1.8.11 : badge (1.8.12, à la place du trophée réservé aux records) au-dessus du point de la charge max, étoile au-dessus du meilleur 1RM estimé
+const BADGE_PATHS = ['M18 8a6 6 0 1 1-12 0a6 6 0 1 1 12 0z', 'M8.5 12.9L7 22l5-3 5 3-1.5-9.1'];
+const BADGE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="' + BADGE_PATHS[1] + '"/></svg>';
 const STAR_PATH = 'M12 3.5l2.6 5.3 5.9.9-4.25 4.15 1 5.85L12 16.9l-5.25 2.8 1-5.85L3.5 9.7l5.9-.9z';
 const STAR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + STAR_PATH + '"/></svg>';
 function recordMarksPlugin(maxIdx, rmIdx, color) {
@@ -95,7 +96,7 @@ function recordMarksPlugin(maxIdx, rmIdx, color) {
       const draw = (p, fn) => { if (!p) return; c.save(); c.translate(p.x, p.y); c.scale(k, k); fn(); c.restore(); };
       c.save();
       c.strokeStyle = color; c.fillStyle = color; c.lineWidth = 2.2 / k; c.lineCap = 'round'; c.lineJoin = 'round';
-      draw(at(0, maxIdx), () => TROPHY_PATHS.forEach(d => c.stroke(new Path2D(d))));
+      draw(at(0, maxIdx), () => { c.beginPath(); c.arc(12, 8, 6, 0, 2 * Math.PI); c.stroke(); c.stroke(new Path2D(BADGE_PATHS[1])); });
       draw(at(1, rmIdx), () => c.fill(new Path2D(STAR_PATH)));
       c.restore();
     }
@@ -2981,7 +2982,7 @@ function renderExerciseChart() {
       // Le 1RM ne se calcule que sur des séries de 10 rép. ou moins : il ne peut pas toujours venir de la charge max.
       document.getElementById('exercise-legend-max-label').textContent = 'Charge max';
       document.getElementById('exercise-legend-rm-label').textContent = '1RM estimé';
-      document.getElementById('exercise-legend-max').innerHTML = escapeHtml(formatKgHalf(recMaxW)) + '<span class="ex-legend-mark">' + TROPHY_SVG + '</span>';
+      document.getElementById('exercise-legend-max').innerHTML = escapeHtml(formatKgHalf(recMaxW)) + '<span class="ex-legend-mark">' + BADGE_SVG + '</span>';
       document.getElementById('exercise-legend-rm').innerHTML = escapeHtml(formatKgHalf(recRm)) + '<span class="ex-legend-mark star">' + STAR_SVG + '</span>';
     } else if (hasReps) {
       document.getElementById('exercise-legend-max-label').textContent = 'Meilleure série';
