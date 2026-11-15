@@ -2946,7 +2946,7 @@ function renderExerciseChart() {
       const lastRm = [...rmData].reverse().find(v => v !== null);
       document.getElementById('exercise-legend-max-label').textContent = 'Charge max';
       document.getElementById('exercise-legend-rm-label').textContent = '1RM estimé';
-      document.getElementById('exercise-legend-max').textContent = formatKgHalf(chartData[chartData.length - 1]);
+      document.getElementById('exercise-legend-max').textContent = formatKgHalf(Math.max(...chartData)); // 1.8.7 : charge max de tout l'historique (était la dernière séance)
       document.getElementById('exercise-legend-rm').textContent = formatKgHalf(lastRm);
     } else if (hasReps) {
       document.getElementById('exercise-legend-max-label').textContent = 'Meilleure série';

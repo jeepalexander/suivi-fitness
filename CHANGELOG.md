@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.7] - 2026-11-15
+### 🐛 Charge max de tout l'historique, ombre de la série en cours (co-auteur : Claude)
+- **Progression par exercice** : sous le graphique, « Charge max » donne la meilleure charge de tout l'historique, et non plus celle de la dernière séance.
+- **Séance (clair)** : la gélule de la série en cours retrouve son ombre (`--set-row-current-shadow` = `--sh-card`), retirée par erreur en 1.8.1.
+
+---
+
 ## [1.8.6] - 2026-11-15
 ### 🎨 Halo en bas d'écran sous la barre de navigation (co-auteur : Claude)
 - **Annulé** : le liseré à 12 % de la barre de navigation (1.8.5) ; elle reprend l'ombre `--sh-card` (liseré à 7 % en sombre).

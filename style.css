@@ -29,7 +29,7 @@
   --set-field: #FFFFFF;                                                  /* champs relevés, blancs */
   --set-field-ring: 0 0 0 1px #E1E1E6, 0 1px 3px rgba(17, 17, 20, 0.10); /* liseré + ombre légère */
   --set-row-current: var(--fill);                                        /* série en cours sur fond gris */
-  --set-row-current-shadow: none;
+  --set-row-current-shadow: var(--sh-card);                             /* 1.8.7 : ombre de la gélule en cours rétablie en clair */
   --set-todo: #7C7C85;                                                   /* chiffres des séries à venir : 4,1:1 */
   --border: #D9D9DE;
 
