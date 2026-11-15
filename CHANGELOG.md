@@ -7,6 +7,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.15] - 2026-11-15
+### 🎨 Légende du graphique par exercice sur une ligne (co-auteur : Claude)
+- Espacements réduits pour garder « Charge max » et « 1RM estimé » sur la même ligne, dès 360 px : écart entre les deux 16 → 12 px, entre trait, libellé et valeur 8 → 4 px, trait 24 → 16 px (tirets 3 / 3), médaille et étoile 18 → 16 px.
+
+---
+
 ## [1.8.14] - 2026-11-15
 ### ⭐ Meilleur 1RM : étoile à facettes (co-auteur : Claude)
 - L'étoile du meilleur 1RM estimé (graphique par exercice et légende) prend du relief : bordure dorée foncée, facettes claires et foncées, assortie à la médaille de la charge max (variante B).
