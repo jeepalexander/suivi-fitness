@@ -5008,7 +5008,7 @@ function renderUpdateStatus() {
   const versionEl = document.getElementById('update-version');
   if (versionEl) versionEl.textContent = runningVersion ? `Version ${runningVersion}` : 'Version …';
   const banner = document.getElementById('update-banner');
-  if (banner) banner.hidden = !ready;
+  if (banner) banner.hidden = true; // 1.8.19 : plus de bandeau « La version … est prête » ; le statut porte la version
   // 1.8.17 : quand une version est prête, « Vérifier » devient « Installer » (jaune) et relance l'app
   const checkBtn = document.querySelector('.update-check');
   if (checkBtn) {
@@ -5019,7 +5019,7 @@ function renderUpdateStatus() {
   const bannerText = document.getElementById('update-banner-text');
   if (bannerText && ready) bannerText.textContent = `La version ${activeVersion} est prête. Touche « Installer » pour l'utiliser.`;
   const statusEl = document.getElementById('update-status');
-  if (statusEl && ready) statusEl.textContent = 'Mise à jour téléchargée.';
+  if (statusEl && ready) statusEl.textContent = `Mise à jour téléchargée : version ${activeVersion}`; // 1.8.19
   const nav = document.getElementById('nav-historique');
   if (nav) {
     nav.classList.toggle('has-update', ready);

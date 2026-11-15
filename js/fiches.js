@@ -198,7 +198,8 @@ function ficheHtml(e) {
     if (fiche.e && fiche.e.length) html += `<h3 class="exf-h">À éviter</h3><ul class="exf-list avoid">${fiche.e.map(t => `<li>${escapeHtml(t)}</li>`).join('')}</ul>`;
     if (fiche.m) html += `<h3 class="exf-h">Muscles</h3><p class="sheet-text">${escapeHtml(fiche.m)}</p>`;
   }
-  html += `<button type="button" class="btn btn-secondary" onclick="closeFiche()">Fermer</button>`;
+  // 1.8.19 : « Fermer » fixe en bas, en noir (couleurs inversées), sur un halo comme sous le menu
+  html += `<div class="fiche-foot"><button type="button" class="btn fiche-close-btn" onclick="closeFiche()">Fermer</button></div>`;
   return html;
 }
 
@@ -213,7 +214,8 @@ function openFiche(ref) {
     overlay.addEventListener('click', ev => { if (ev.target === overlay) closeFiche(); });
     document.body.appendChild(overlay);
   }
-  overlay.innerHTML = `<div class="sheet tall fiche-sheet" role="dialog" aria-modal="true" aria-labelledby="fiche-title"><button type="button" class="sheet-close fiche-close" aria-label="Fermer" onclick="closeFiche()">${CLOSE_SVG}</button>${ficheHtml(e)}</div>`;
+  // 1.8.19 : pleine page, sans croix (« Fermer » fixe en bas)
+  overlay.innerHTML = `<div class="sheet tall fiche-sheet" role="dialog" aria-modal="true" aria-labelledby="fiche-title">${ficheHtml(e)}</div>`;
   overlay.classList.add('open');
 }
 

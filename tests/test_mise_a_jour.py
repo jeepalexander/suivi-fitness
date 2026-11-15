@@ -69,10 +69,11 @@ try:
 
         pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(200)
         pg.click('.update-check')
-        ok = wait_for(pg, "document.getElementById('update-banner').hidden === false", 20000)
-        check('nouvelle version installée : avis « prête » affiché', ok)
-        txt = pg.inner_text('#update-banner-text')
-        check('l\'avis cite la nouvelle version (9.9.9)', '9.9.9' in txt, txt)
+        # 1.8.19 : plus de bandeau ; le statut dit « Mise à jour téléchargée : version 9.9.9 »
+        ok = wait_for(pg, "document.getElementById('update-status').textContent.startsWith('Mise à jour téléchargée')", 20000)
+        check('nouvelle version installée : statut « Mise à jour téléchargée »', ok and pg.evaluate("document.getElementById('update-banner').hidden") is True)
+        txt = pg.inner_text('#update-status')
+        check('le statut cite la nouvelle version (9.9.9)', txt.strip() == 'Mise à jour téléchargée : version 9.9.9', txt)
         check('pastille sur l\'icône Historique + libellé d\'accessibilité', pg.evaluate("document.getElementById('nav-historique').classList.contains('has-update')") and 'mise à jour' in pg.evaluate("document.getElementById('nav-historique').getAttribute('aria-label')"))
         check('la page affiche toujours la version exécutée (pas 9.9.9)', pg.inner_text('#update-version') == f'Version {version}', pg.inner_text('#update-version'))
         check('AUCUN rechargement automatique (témoin conservé)', pg.evaluate("window.__temoin") == 12345)

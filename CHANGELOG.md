@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.19] - 2026-11-15
+### 🧹 Mise à jour et fiche d'exercice simplifiées (co-auteur : Claude)
+- **Réglages · Application** : plus de bandeau « La version … est prête » ; le statut dit « Mise à jour téléchargée : version 1.8.xx », à côté du bouton jaune « Installer ».
+- **Fiche d'exercice** (pleine page) : la croix est retirée ; « Fermer » reste fixe en bas de l'écran, en couleurs inversées (bouton noir en clair, blanc cassé en sombre), sur un halo de la couleur du fond comme sous le menu. Fond de la fiche = fond de page.
+
+---
+
 ## [1.8.18] - 2026-11-15
 ### 🔥 Séance : phrase d'échauffement dans le premier exercice de force (co-auteur : Claude)
 - La phrase « Ajoute 2 séries légères au premier exercice de force pour t'échauffer » n'est plus au-dessus de la liste : elle apparaît à l'ouverture du premier exercice de force, entre sa ligne (icône, nom) et les intitulés Série / Kg / Réps. Toujours cachée si la séance n'a que du cardio.
