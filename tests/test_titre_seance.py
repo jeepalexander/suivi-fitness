@@ -49,7 +49,7 @@ with Srv() as base, sync_playwright() as p:
         # séance libre : icône 1× + nom, rien d'autre
         pg.evaluate("""(()=>{const p=JSON.parse(JSON.stringify(state.programs[0]));p.id='lib1';p.kind='libre';p.name='Dorsaux';p.sessions=[Object.assign(p.sessions[0],{key:'',name:'Dorsaux'})];state.programs.push(p);activateProgram('lib1');})()"""); pg.wait_for_timeout(300)
         pg.evaluate("switchTab('seance')"); pg.wait_for_timeout(300)
-        check(tag + 'séance libre (1.7.42) : échauffement avant son 1er exercice de force', pg.evaluate("document.getElementById('warmup-note').nextElementSibling.dataset.ex") == pg.evaluate("[...document.querySelectorAll('#exercises-list .exercise-item')].map(e=>e.dataset.ex).find(n=>!exInfo(n).cardio)") and pg.is_visible('#warmup-note'))
+        check(tag + 'séance libre (1.8.18) : échauffement dans son 1er exercice de force', pg.evaluate("(document.getElementById('warmup-note').closest('.exercise-item')||{dataset:{}}).dataset.ex") == pg.evaluate("[...document.querySelectorAll('#exercises-list .exercise-item')].map(e=>e.dataset.ex).find(n=>!exInfo(n).cardio)") and not pg.evaluate("document.getElementById('warmup-note').hidden"))
         check(tag + 'séance libre (1.7.42) : titre et icône à la même hauteur que pour un programme', pg.evaluate(f"({RECT})('#page-title')")['t'] == t_prog['t'] and pg.evaluate(f"({RECT})('#seance-prog-ico')")['t'] == ico_prog['t'] and pg.evaluate(f"({RECT})('#seance-prog-ico')")['b'] == ico_prog['b'], f"{t_prog} {ico_prog}")
         col = pg.evaluate("getComputedStyle(document.getElementById('seance-prog-ico')).color")
         check(tag + "séance libre (1.7.43) : « 1× » brun en clair, doré en sombre", col == ('rgb(168, 118, 31)' if scheme == 'dark' else 'rgb(74, 56, 24)'), col)

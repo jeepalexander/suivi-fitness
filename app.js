@@ -1929,11 +1929,13 @@ function initWorkoutForm(customSession = null) {
     container.appendChild(div);
   });
 
-  // 1.7.42 (co-auteur : Claude) : phrase d'échauffement juste avant le premier exercice de force
+  // 1.7.42 (co-auteur : Claude) : phrase d'échauffement du premier exercice de force (dans son corps depuis 1.8.18)
   // (cardio éventuel au-dessus), cachée si la séance n'a que du cardio
   if (warm) {
     const firstStrength = [...container.querySelectorAll('.exercise-item')].find(el => !exInfo(el.dataset.ex).cardio);
-    if (firstStrength) container.insertBefore(warm, firstStrength);
+    // 1.8.18 : dans le premier exercice de force, entre sa ligne (icône, nom) et les intitulés Série / Kg / Réps :
+    // elle n'apparaît qu'à son ouverture
+    if (firstStrength) { const body = firstStrength.querySelector('.ex-body'); body.insertBefore(warm, body.firstChild); }
     warm.hidden = !firstStrength;
   }
 

@@ -7,6 +7,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.18] - 2026-11-15
+### 🔥 Séance : phrase d'échauffement dans le premier exercice de force (co-auteur : Claude)
+- La phrase « Ajoute 2 séries légères au premier exercice de force pour t'échauffer » n'est plus au-dessus de la liste : elle apparaît à l'ouverture du premier exercice de force, entre sa ligne (icône, nom) et les intitulés Série / Kg / Réps. Toujours cachée si la séance n'a que du cardio.
+
+---
+
 ## [1.8.17] - 2026-11-15
 ### ⬆️ Bouton « Installer » et fiche d'exercice en pleine page (co-auteur : Claude)
 - **Réglages · Application** : quand une nouvelle version est prête, « Vérifier » devient « Installer », en jaune (`--update-bg` #F5C518, texte `--update-ink`, identiques dans les deux thèmes). Il enregistre la saisie en cours puis relance l'app. Le bouton « Relancer maintenant » du bandeau, en double, est masqué ; le bandeau dit « Touche « Installer » pour l'utiliser ».

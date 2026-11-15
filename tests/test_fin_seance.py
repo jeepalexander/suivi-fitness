@@ -25,10 +25,12 @@ with Srv() as url, sync_playwright() as p:
         ok(tag + "en-tête sans « Séance du jour » ni nom du programme", not pg.is_visible('#seance-overline')
            and 'Séance du jour' not in pg.inner_text('#seance-sticky'), pg.inner_text('#seance-sticky'))
         first = pg.evaluate("workoutDef.exercises[0].name")
-        warm_vis = pg.is_visible('#warmup-note')
-        place = pg.evaluate("""(()=>{const n=document.getElementById('warmup-note');const nx=n.nextElementSibling;return [n.parentElement.id, nx&&nx.dataset.ex]})()""")
+        # 1.8.18 : la phrase est dans le corps du premier exercice de force, avant les intitulés ; visible à son ouverture
         first_force = pg.evaluate("[...document.querySelectorAll('#exercises-list .exercise-item')].map(e=>e.dataset.ex).find(n=>!exInfo(n).cardio)")
-        ok(tag + "échauffement (1.7.42) : visible, juste avant le premier exercice de force", warm_vis and place == ['exercises-list', first_force], f'{place} {first_force}')
+        place = pg.evaluate("""(()=>{const n=document.getElementById('warmup-note');const it=n.closest('.exercise-item');const nx=n.nextElementSibling;return [n.parentElement.className, it&&it.dataset.ex, nx&&nx.className]})()""")
+        pg.evaluate("(n=>{const it=[...document.querySelectorAll('#exercises-list .exercise-item')].find(e=>e.dataset.ex===n); if(!it.classList.contains('open')) it.querySelector('.ex-toggle').click();})", first_force); pg.wait_for_timeout(300)
+        warm_vis = pg.is_visible('#warmup-note')
+        ok(tag + "échauffement (1.8.18) : dans le 1er exercice de force, avant Série / Kg / Réps, visible à son ouverture", warm_vis and place[0] == 'ex-body' and place[1] == first_force and 'sets-head' in (place[2] or ''), f'{place} {first_force}')
         pg.evaluate("document.getElementById('warmup-note').hidden=false")
         ok(tag + "échauffement (1.7.41) : (i), texte, picto poids après « force », flamme orange après « t'échauffer », plus d'emoji",
            pg.inner_text('#warmup-note').strip() == "Ajoute 2 séries légères au premier exercice de force  pour t'échauffer"
