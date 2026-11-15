@@ -76,8 +76,13 @@ const CHART_COLORS = { primary: '#111114', success: '#0B7A43', volume: '#C2570C'
 // 1.8.0 : petite plume (pictogramme du déload) sous les points des séances de déload, dans les graphiques
 const DELOAD_PATHS = ['M20.2 12.2a6 6 0 0 0-8.5-8.5L5 10.5V19h8.5z', 'M16 8L2 22', 'M17.5 15H9'];
 // 1.8.11 : badge (1.8.12, à la place du trophée réservé aux records) au-dessus du point de la charge max, étoile au-dessus du meilleur 1RM estimé
-const BADGE_PATHS = ['M18 8a6 6 0 1 1-12 0a6 6 0 1 1 12 0z', 'M8.5 12.9L7 22l5-3 5 3-1.5-9.1'];
-const BADGE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="' + BADGE_PATHS[1] + '"/></svg>';
+// 1.8.13 : médaille dorée « 1 » à rubans (dessin maison), en couleurs
+const MEDAL_RIBBON = '#E0582C', MEDAL_RIBBON_DARK = '#B8401C', MEDAL_RIM = '#C99300', MEDAL_INK = '#7A5600';
+const BADGE_SVG = '<svg class="medal" viewBox="0 0 24 24" aria-hidden="true">'
+  + '<path d="M7.2 12.5 5 21.5l3.2-1.6 1.8 2.6 2-8.3z" fill="' + MEDAL_RIBBON + '"/>'
+  + '<path d="M16.8 12.5 19 21.5l-3.2-1.6-1.8 2.6-2-8.3z" fill="' + MEDAL_RIBBON_DARK + '"/>'
+  + '<circle cx="12" cy="9" r="7.5" fill="' + MEDAL_RIM + '"/><circle cx="12" cy="9" r="5.8" fill="var(--trophy)"/>'
+  + '<path d="M10.6 7.2 12.6 5.8V12.4" fill="none" stroke="' + MEDAL_INK + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const STAR_PATH = 'M12 3.5l2.6 5.3 5.9.9-4.25 4.15 1 5.85L12 16.9l-5.25 2.8 1-5.85L3.5 9.7l5.9-.9z';
 const STAR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + STAR_PATH + '"/></svg>';
 function recordMarksPlugin(maxIdx, rmIdx, color) {
@@ -86,7 +91,7 @@ function recordMarksPlugin(maxIdx, rmIdx, color) {
     afterDatasetsDraw(chart) {
       if (typeof Path2D === 'undefined') return;
       const { ctx: c, chartArea } = chart;
-      const S = 18, k = S / 24, gap = 6;
+      const S = 20, k = S / 24, gap = 5;
       const at = (ds, i) => {
         const meta = chart.getDatasetMeta(ds);
         const pt = meta && meta.data ? meta.data[i] : null;
@@ -96,7 +101,14 @@ function recordMarksPlugin(maxIdx, rmIdx, color) {
       const draw = (p, fn) => { if (!p) return; c.save(); c.translate(p.x, p.y); c.scale(k, k); fn(); c.restore(); };
       c.save();
       c.strokeStyle = color; c.fillStyle = color; c.lineWidth = 2.2 / k; c.lineCap = 'round'; c.lineJoin = 'round';
-      draw(at(0, maxIdx), () => { c.beginPath(); c.arc(12, 8, 6, 0, 2 * Math.PI); c.stroke(); c.stroke(new Path2D(BADGE_PATHS[1])); });
+      draw(at(0, maxIdx), () => {
+        c.fillStyle = MEDAL_RIBBON; c.fill(new Path2D('M7.2 12.5 5 21.5l3.2-1.6 1.8 2.6 2-8.3z'));
+        c.fillStyle = MEDAL_RIBBON_DARK; c.fill(new Path2D('M16.8 12.5 19 21.5l-3.2-1.6-1.8 2.6-2-8.3z'));
+        c.fillStyle = MEDAL_RIM; c.beginPath(); c.arc(12, 9, 7.5, 0, 2 * Math.PI); c.fill();
+        c.fillStyle = color; c.beginPath(); c.arc(12, 9, 5.8, 0, 2 * Math.PI); c.fill();
+        c.strokeStyle = MEDAL_INK; c.lineWidth = 1.8; c.stroke(new Path2D('M10.6 7.2 12.6 5.8V12.4'));
+        c.fillStyle = color; c.strokeStyle = color; c.lineWidth = 2.2 / k;
+      });
       draw(at(1, rmIdx), () => c.fill(new Path2D(STAR_PATH)));
       c.restore();
     }

@@ -7,6 +7,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.13] - 2026-11-15
+### 🥇 Charge max : médaille dorée « 1 » à rubans (co-auteur : Claude)
+- Le badge de la charge max (graphique par exercice et légende) devient une médaille en couleurs : disque doré bordé, « 1 » au centre, deux rubans orange. Dessin maison, 20 px sur la courbe, 18 px dans la légende. L'étoile du meilleur 1RM ne change pas.
+
+---
+
 ## [1.8.12] - 2026-11-15
 ### 🎖️ Charge max : un badge à la place du trophée (co-auteur : Claude)
 - Sur le graphique par exercice et dans sa légende, la charge max est marquée d'un badge (médaille à ruban), pour ne pas la confondre avec les trophées des records. L'étoile du meilleur 1RM ne change pas.
