@@ -7,6 +7,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.24] - 2026-11-15
+### 🎨 Halo sous la barre de navigation plus court et plus dense (co-auteur : Claude)
+- Variante C : 110 px au lieu de 150 (plus la zone sûre), dégradé de la couleur du fond de 0 à 50 % au quart de la hauteur, 88 % à mi-hauteur, puis opaque tout en bas. Le contenu s'efface plus près du menu, et plus nettement.
+
+---
+
 ## [1.8.23] - 2026-11-15
 ### 🐛 « Reconnecter Google Drive » : retour direct sur Réglages (co-auteur : Claude)
 - Au retour de la connexion Google, l'application rechargée affichait d'abord l'onglet Programme, puis basculait sur Réglages 0,8 s plus tard. L'onglet de destination (Réglages, ou Historique / Programme quand une sauvegarde ou une restauration était en attente) s'affiche maintenant tout de suite. La page reste masquée jusqu'au choix de l'onglet.
