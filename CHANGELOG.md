@@ -7,6 +7,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.8] - 2026-11-15
+### 🐛 1RM estimé lié à la charge max (co-auteur : Claude)
+- **Progression par exercice** : sous le graphique, « 1RM estimé » donne celui de la séance de la charge max (à charge max égale, le meilleur), et non plus celui de la dernière séance. Si ces séances n'en ont pas (séries de plus de 10 répétitions), c'est le meilleur 1RM de l'historique.
+
+---
+
 ## [1.8.7] - 2026-11-15
 ### 🐛 Charge max de tout l'historique, ombre de la série en cours (co-auteur : Claude)
 - **Progression par exercice** : sous le graphique, « Charge max » donne la meilleure charge de tout l'historique, et non plus celle de la dernière séance.

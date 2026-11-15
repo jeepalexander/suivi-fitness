@@ -2943,10 +2943,15 @@ function renderExerciseChart() {
     legend.hidden = !(hasRm || hasReps);
     legend.classList.toggle('reps', hasReps);
     if (hasRm) {
-      const lastRm = [...rmData].reverse().find(v => v !== null);
+      // 1.8.8 : 1RM estimé de la séance de la charge max (à charge max égale, le meilleur 1RM) ;
+      // si ces séances n'en ont pas (séries de plus de 10 rép.), meilleur 1RM de l'historique
+      const maxW = Math.max(...chartData);
+      const rmAtMax = rmData.filter((v, i) => v !== null && chartData[i] === maxW);
+      const rmAll = rmData.filter(v => v !== null);
+      const lastRm = rmAtMax.length ? Math.max(...rmAtMax) : Math.max(...rmAll);
       document.getElementById('exercise-legend-max-label').textContent = 'Charge max';
       document.getElementById('exercise-legend-rm-label').textContent = '1RM estimé';
-      document.getElementById('exercise-legend-max').textContent = formatKgHalf(Math.max(...chartData)); // 1.8.7 : charge max de tout l'historique (était la dernière séance)
+      document.getElementById('exercise-legend-max').textContent = formatKgHalf(maxW); // 1.8.7 : charge max de tout l'historique (était la dernière séance)
       document.getElementById('exercise-legend-rm').textContent = formatKgHalf(lastRm);
     } else if (hasReps) {
       document.getElementById('exercise-legend-max-label').textContent = 'Meilleure série';
