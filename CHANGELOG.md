@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.21] - 2026-11-15
+### 🖼️ Détourage des 6 icônes de la 1.8.20 amélioré (co-auteur : Claude)
+- **Gainage latéral, Pompes lestées** : bords du tapis nets et droits (ils étaient rongés), sans fond blanc collé ; liseré du short conservé.
+- **Dips triceps** : fond blanc retiré entre les pieds du banc.
+- **Les 6 icônes** : petits trous bouchés (baskets, banc, barre), avec les couleurs d'origine.
+
+---
+
 ## [1.8.20] - 2026-11-15
 ### 🖼️ 6 nouvelles icônes d'exercices (co-auteur : Claude)
 - Gainage latéral, Écarté haltère (vue de dessus), Écarté incliné haltères (de côté, sans fond blanc entre les montants du banc), Pompes lestées, Dips triceps, Extension triceps couché.
