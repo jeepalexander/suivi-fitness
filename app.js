@@ -83,8 +83,14 @@ const BADGE_SVG = '<svg class="medal" viewBox="0 0 24 24" aria-hidden="true">'
   + '<path d="M16.8 12.5 19 21.5l-3.2-1.6-1.8 2.6-2-8.3z" fill="' + MEDAL_RIBBON_DARK + '"/>'
   + '<circle cx="12" cy="9" r="7.5" fill="' + MEDAL_RIM + '"/><circle cx="12" cy="9" r="5.8" fill="var(--trophy)"/>'
   + '<path d="M10.6 7.2 12.6 5.8V12.4" fill="none" stroke="' + MEDAL_INK + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-const STAR_PATH = 'M12 3.5l2.6 5.3 5.9.9-4.25 4.15 1 5.85L12 16.9l-5.25 2.8 1-5.85L3.5 9.7l5.9-.9z';
-const STAR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + STAR_PATH + '"/></svg>';
+// 1.8.14 : étoile à facettes (bordée, deux tons dorés)
+const STAR_PATH = 'M12.00 3.00 L14.35 9.26 L21.04 9.56 L15.80 13.74 L17.58 20.19 L12.00 16.50 L6.42 20.19 L8.20 13.74 L2.96 9.56 L9.65 9.26Z';
+const STAR_FACETS_LIGHT = ['M12.00 12.50 L9.65 9.26 L12.00 3.00Z', 'M12.00 12.50 L14.35 9.26 L21.04 9.56Z', 'M12.00 12.50 L15.80 13.74 L17.58 20.19Z', 'M12.00 12.50 L12.00 16.50 L6.42 20.19Z', 'M12.00 12.50 L8.20 13.74 L2.96 9.56Z'];
+const STAR_FACETS_DARK = ['M12.00 12.50 L12.00 3.00 L14.35 9.26Z', 'M12.00 12.50 L21.04 9.56 L15.80 13.74Z', 'M12.00 12.50 L17.58 20.19 L12.00 16.50Z', 'M12.00 12.50 L6.42 20.19 L8.20 13.74Z', 'M12.00 12.50 L2.96 9.56 L9.65 9.26Z'];
+const STAR_LIGHT = '#FFE08A', STAR_DARK = '#D9A21B', STAR_RIM = '#B88600';
+const STAR_SVG = '<svg class="star3d" viewBox="0 0 24 24" aria-hidden="true"><path d="' + STAR_PATH + '" fill="' + STAR_RIM + '" stroke="' + STAR_RIM + '" stroke-width="1.6" stroke-linejoin="round"/>'
+  + STAR_FACETS_LIGHT.map(p => '<path d="' + p + '" fill="' + STAR_LIGHT + '"/>').join('')
+  + STAR_FACETS_DARK.map(p => '<path d="' + p + '" fill="' + STAR_DARK + '"/>').join('') + '</svg>';
 function recordMarksPlugin(maxIdx, rmIdx, color) {
   return {
     id: 'recordMarks',
@@ -109,7 +115,12 @@ function recordMarksPlugin(maxIdx, rmIdx, color) {
         c.strokeStyle = MEDAL_INK; c.lineWidth = 1.8; c.stroke(new Path2D('M10.6 7.2 12.6 5.8V12.4'));
         c.fillStyle = color; c.strokeStyle = color; c.lineWidth = 2.2 / k;
       });
-      draw(at(1, rmIdx), () => c.fill(new Path2D(STAR_PATH)));
+      draw(at(1, rmIdx), () => {
+        const st = new Path2D(STAR_PATH);
+        c.fillStyle = STAR_RIM; c.strokeStyle = STAR_RIM; c.lineWidth = 1.6; c.lineJoin = 'round'; c.fill(st); c.stroke(st);
+        c.fillStyle = STAR_LIGHT; STAR_FACETS_LIGHT.forEach(p => c.fill(new Path2D(p)));
+        c.fillStyle = STAR_DARK; STAR_FACETS_DARK.forEach(p => c.fill(new Path2D(p)));
+      });
       c.restore();
     }
   };
