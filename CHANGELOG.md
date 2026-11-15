@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.5] - 2026-11-15
+### 🎨 Barre de navigation (sombre) : liseré du haut plus visible (co-auteur : Claude)
+- En thème sombre, le liseré blanc du haut de la barre de navigation passe de 7 % à 12 %, comme les pastilles d'icônes de Séance (1.8.4).
+- Nouvelle ombre `--sh-nav` (identique à `--sh-card` en clair) ; les cartes gardent leur liseré à 7 %.
+
+---
+
 ## [1.8.4] - 2026-11-15
 ### 🎨 Séance (sombre) : liseré sur le haut des pastilles d'icônes (co-auteur : Claude)
 - En thème sombre, dans l'onglet Séance seulement, la pastille grise derrière chaque illustration d'exercice reçoit un liseré blanc de 1 px sur son haut (12 %), comme celui de la gélule de la série en cours (7 %), un peu plus visible.
