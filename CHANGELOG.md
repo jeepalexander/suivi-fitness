@@ -7,6 +7,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.16] - 2026-11-15
+### 🪶 Plume du déload plus lisible dans les graphiques (co-auteur : Claude)
+- Même dessin, en version petite taille : 14 px au lieu de 12, trait de 1,3 px au lieu de 2,2. Le trait intérieur ne se bouche plus.
+
+---
+
 ## [1.8.15] - 2026-11-15
 ### 🎨 Légende du graphique par exercice sur une ligne (co-auteur : Claude)
 - Espacements réduits pour garder « Charge max » et « 1RM estimé » sur la même ligne, dès 360 px : écart entre les deux 16 → 12 px, entre trait, libellé et valeur 8 → 4 px, trait 24 → 16 px (tirets 3 / 3), médaille et étoile 18 → 16 px.

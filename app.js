@@ -134,10 +134,10 @@ function deloadMarksPlugin(flags, color) {
       const meta = chart.getDatasetMeta(0);
       if (!meta || !meta.data) return;
       const { ctx: c, chartArea } = chart;
-      const S = 12, k = S / 24, gap = 6;
+      const S = 14, k = S / 24, gap = 6; // 1.8.16 : 12 → 14 px
       const paths = DELOAD_PATHS.map(d => new Path2D(d));
       c.save();
-      c.strokeStyle = color; c.lineWidth = 2.2 / k; c.lineCap = 'round'; c.lineJoin = 'round';
+      c.strokeStyle = color; c.lineWidth = 1.3 / k; c.lineCap = 'round'; c.lineJoin = 'round'; // 1.8.16 : trait 2,2 → 1,3 px, le trait intérieur se distingue
       meta.data.forEach((pt, i) => {
         if (!flags[i] || !pt || pt.skip || !isFinite(pt.x) || !isFinite(pt.y)) return;
         // à l'aplomb du point, en bas de la zone du graphique (ne chevauche pas la courbe) ;
