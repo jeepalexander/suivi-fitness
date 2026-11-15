@@ -1726,7 +1726,7 @@ function renderSeanceHead(def, customSession) {
   if (deloadSubEl) {
     if (isDeloadActive()) {
       // 1.7.96 : bouton pleine largeur, ouvre l'explication avec « Reporter »
-      deloadSubEl.innerHTML = DELOAD_SVG + '<span class="deload-btn-label">Déload −20 %</span><span class="deload-btn-chevron">' + CHEVRON_SVG + '</span>';
+      deloadSubEl.innerHTML = DELOAD_SVG + '<span class="deload-btn-label">Déload −20 %</span><span class="deload-btn-chevron">' + INFO_SVG + '</span>'; // 1.8.2 : (i) au lieu du chevron (INFO_SVG : js/programmes.js)
       deloadSubEl.disabled = !!customSession;
       deloadSubEl.style.display = 'flex';
     } else {

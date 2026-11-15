@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.2] - 2026-11-15
+### 🪶 Bouton Déload et icône de la Presse à cuisses (co-auteur : Claude)
+- **Bouton Déload (Séance)** : l'icône (i) remplace la flèche à droite, comme l'astuce d'échauffement ; elle ouvre toujours l'explication.
+- **Presse à cuisses** : retour à l'icône d'origine (sportive et machine entières), avec les points gris du contour retirés. La photo de la 1.7.97, coupée à droite, donnait un effet carré.
+
+---
+
 ## [1.8.1] - 2026-11-15
 ### 🎨 Séance : champs de saisie plus contrastés (co-auteur : Claude)
 - Variante G de la planche « contrastes », en clair comme en sombre.
