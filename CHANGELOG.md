@@ -7,6 +7,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.3] - 2026-11-15
+### 🎨 Séance : boutons − / + des séries plus contrastés (co-auteur : Claude)
+- Les boutons − / + (nombre de séries) prennent le style des champs de la 1.8.1 : blancs avec liseré et ombre légère en clair, #2A2A32 en sombre. Leur rond se détachait à peine du fond (1,1:1).
+
+---
+
 ## [1.8.2] - 2026-11-15
 ### 🪶 Bouton Déload et icône de la Presse à cuisses (co-auteur : Claude)
 - **Bouton Déload (Séance)** : l'icône (i) remplace la flèche à droite, comme l'astuce d'échauffement ; elle ouvre toujours l'explication.

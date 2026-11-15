@@ -431,7 +431,7 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 
 /* Boutons d'ajout / suppression de séries */
 .ex-controls { display: flex; align-items: center; gap: 8px; }
-.btn-set-count { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; padding: 0; background: var(--fill); border: none; border-radius: 50%; color: var(--text); cursor: pointer; }
+.btn-set-count { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; padding: 0; background: var(--set-field); box-shadow: var(--set-field-ring); /* 1.8.3 : comme les champs des séries */ border: none; border-radius: 50%; color: var(--text); cursor: pointer; }
 .exercise-item.open .btn-set-count { width: 40px; height: 40px; }
 .btn-set-count svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .btn-set-count:active { opacity: 0.7; }
