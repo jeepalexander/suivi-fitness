@@ -7,6 +7,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.7.98] - 2026-11-15
+### 🖼️ Icône du Tirage menton corrigée (co-auteur : Claude)
+- **Tirage menton** : le coude du bras gauche était coupé par le détourage ; image détourée à nouveau, bras entier, même cadrage.
+
+---
+
 ## [1.7.97] - 2026-11-14
 ### 🖼️ 5 nouvelles icônes d'exercices, Presse à cuisses refaite (co-auteur : Claude)
 - **Nouvelles icônes** : Développé rotatif haltères, Développé épaules machine, Tirage menton (kettlebell), Curl barre EZ, Ab wheel.
