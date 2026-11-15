@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.17] - 2026-11-15
+### ⬆️ Bouton « Installer » et fiche d'exercice en pleine page (co-auteur : Claude)
+- **Réglages · Application** : quand une nouvelle version est prête, « Vérifier » devient « Installer », en jaune (`--update-bg` #F5C518, texte `--update-ink`, identiques dans les deux thèmes). Il enregistre la saisie en cours puis relance l'app. Le bouton « Relancer maintenant » du bandeau, en double, est masqué ; le bandeau dit « Touche « Installer » pour l'utiliser ».
+- **Fiche d'exercice** (appui long sur une image) : en pleine page, sans coins arrondis, contenu centré sur 600 px au plus ; le haut et la croix tiennent compte de l'encoche du téléphone.
+
+---
+
 ## [1.8.16] - 2026-11-15
 ### 🪶 Plume du déload plus lisible dans les graphiques (co-auteur : Claude)
 - Même dessin, en version petite taille : 14 px au lieu de 12, trait de 1,3 px au lieu de 2,2. Le trait intérieur ne se bouche plus.

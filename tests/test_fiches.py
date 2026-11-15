@@ -61,8 +61,10 @@ with Srv() as url, sync_playwright() as p:
             long_press(pg, '#sheet-overlay .ex-icon-badge')
             ok(tag + 'Ajouter un exercice : fiche au-dessus du volet', pg.evaluate(FICHE_OPEN) and pg.evaluate("document.getElementById('sheet-overlay').classList.contains('open')"))
             ok(tag + 'Ajouter un exercice : l\'appui long ne coche pas l\'exercice', pg.evaluate("addSheet ? addSheet.selected.size : -1") == sel_before)
-            pg.mouse.click(5, 5); pg.wait_for_timeout(200)
-            ok(tag + 'toucher à côté : la fiche se ferme, le volet reste', not pg.evaluate(FICHE_OPEN) and pg.evaluate("document.getElementById('sheet-overlay').classList.contains('open')"))
+            # 1.8.17 : pleine page, plus de « à côté » ; la croix ferme la fiche et laisse le volet
+            ok(tag + 'fiche en pleine page', pg.evaluate("(()=>{const r=document.querySelector('.fiche-sheet').getBoundingClientRect();return r.top<=1 && Math.abs(r.height-innerHeight)<=1})()"))
+            pg.click('.fiche-close'); pg.wait_for_timeout(200)
+            ok(tag + 'croix : la fiche se ferme, le volet reste', not pg.evaluate(FICHE_OPEN) and pg.evaluate("document.getElementById('sheet-overlay').classList.contains('open')"))
             ok(tag + 'aucune erreur JavaScript', not errs, errs)
             ctx.close()
     # Exercice sans image : pictogramme générique, fiche quand même

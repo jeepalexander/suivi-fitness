@@ -5007,8 +5007,15 @@ function renderUpdateStatus() {
   if (versionEl) versionEl.textContent = runningVersion ? `Version ${runningVersion}` : 'Version …';
   const banner = document.getElementById('update-banner');
   if (banner) banner.hidden = !ready;
+  // 1.8.17 : quand une version est prête, « Vérifier » devient « Installer » (jaune) et relance l'app
+  const checkBtn = document.querySelector('.update-check');
+  if (checkBtn) {
+    checkBtn.classList.toggle('install', ready);
+    checkBtn.textContent = ready ? 'Installer' : 'Vérifier';
+    checkBtn.onclick = ready ? applyUpdate : checkForUpdate;
+  }
   const bannerText = document.getElementById('update-banner-text');
-  if (bannerText && ready) bannerText.textContent = `La version ${activeVersion} est prête. Relancez l'application pour l'utiliser.`;
+  if (bannerText && ready) bannerText.textContent = `La version ${activeVersion} est prête. Touche « Installer » pour l'utiliser.`;
   const statusEl = document.getElementById('update-status');
   if (statusEl && ready) statusEl.textContent = 'Mise à jour téléchargée.';
   const nav = document.getElementById('nav-historique');

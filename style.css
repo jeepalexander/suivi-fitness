@@ -80,6 +80,8 @@
   --sh-pill: 0 2px 2px rgba(17, 17, 20, 0.45), 0 8px 10px -3px rgba(17, 17, 20, 0.35);
   --sh-red: 0 2px 2px rgba(229, 57, 43, 0.5), 0 7px 9px -3px rgba(229, 57, 43, 0.55);
   --sh-card: 0 1px 2px rgba(17, 17, 20, 0.2), 0 6px 8px -3px rgba(17, 17, 20, 0.22);
+  --update-bg: #F5C518;        /* 1.8.17 : bouton « Installer » (jaune, identique dans les deux thèmes) */
+  --update-ink: #3A2E0A;
   --nav-halo-rgb: 255, 255, 255; /* 1.8.6 : halo en bas d'écran sous la barre de navigation (couleur de --bg) */
   --hdr-rim: inset 0 -1px 0 rgba(17, 17, 20, 0.08);  /* 1.8.10 : liseré sous l'en-tête de Séance */
   --hdr-halo: linear-gradient(to bottom, rgba(17, 17, 20, 0.14) 0%, rgba(17, 17, 20, 0.049) 45%, rgba(17, 17, 20, 0) 100%); /* 1.8.10 : ombre de 40 px sous l'en-tête de Séance */
@@ -599,6 +601,8 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 .update-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .update-version { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; }
 .update-check { width: auto; flex: none; height: 48px; margin: 0; padding: 0 24px; border-radius: 999px; }
+.update-check.install { background: var(--update-bg); color: var(--update-ink); font-weight: 700; box-shadow: var(--sh-chip); } /* 1.8.17 : « Installer » en jaune quand une version est prête */
+.update-banner .update-apply { display: none; } /* 1.8.17 : le bouton « Installer » du haut remplace « Relancer maintenant » */
 .update-banner { margin-top: 16px; padding: 16px 16px; border-radius: var(--radius-field); background: var(--warn-tint); border: 1px solid var(--warn-border); color: var(--warn); font-size: 1rem; line-height: 1.35; font-weight: 500; }
 .update-banner[hidden] { display: none; }
 .update-apply { height: 52px; margin-top: 12px; padding: 0 8px; }
@@ -1112,6 +1116,10 @@ body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 .fiche-sheet > * { flex-shrink: 0; }
 .sheet.tall.fiche-sheet { position: relative; }
 .fiche-close { position: absolute; top: 16px; right: var(--gutter); z-index: var(--z-raised); } /* 1.7.87 : croix en haut à droite, défile avec la fiche */
+/* 1.8.17 : fiche en pleine page (plus de coins arrondis ni de voile visible), sous l'encoche du téléphone */
+.sheet.tall.fiche-sheet { height: 100dvh; max-height: 100dvh; max-width: none; border-radius: 0; box-shadow: none; padding-top: max(28px, var(--safe-top)); }
+.fiche-sheet > *:not(.fiche-close) { width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; }
+.fiche-close { top: max(16px, var(--safe-top)); }
 .exf-hero { display: flex; justify-content: center; margin: 4px 0 12px; }
 .exf-hero .ex-icon-badge { width: 220px; height: 220px; }
 .exf-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 0 0 20px; }
