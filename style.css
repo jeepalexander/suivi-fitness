@@ -24,6 +24,12 @@
   --fill: #F3F3F5;             /* champs, pastilles, pistes */
   --icon-pastille: #E4E4E9;    /* pastille ronde derrière les icônes d'exercice */
   --surface: #FFFFFF;          /* navigation, chrono prêt, ligne active */
+  /* 1.8.1 : champs de saisie des séries (variante G de la planche contrastes) */
+  --set-field: #FFFFFF;                                                  /* champs relevés, blancs */
+  --set-field-ring: 0 0 0 1px #E1E1E6, 0 1px 3px rgba(17, 17, 20, 0.10); /* liseré + ombre légère */
+  --set-row-current: var(--fill);                                        /* série en cours sur fond gris */
+  --set-row-current-shadow: none;
+  --set-todo: #7C7C85;                                                   /* chiffres des séries à venir : 4,1:1 */
   --border: #D9D9DE;
 
   /* Texte */
@@ -156,6 +162,11 @@
   --fill: #1A1A1F;
   --icon-pastille: #2C2C33;
   --surface: #17171C;
+  --set-field: #2A2A32;                 /* 1.8.1 : champs plus clairs que le fond */
+  --set-field-ring: none;
+  --set-row-current: #1D1D23;
+  --set-row-current-shadow: var(--sh-card);
+  --set-todo: #8C8C96;                  /* 4,3:1 sur --set-field */
   --border: #2A2A31;
 
   --text: #F2F2F4;
@@ -430,20 +441,20 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 .sets-head span:nth-child(2), .sets-head span:nth-child(3) { text-align: center; }
 .sets-grid { display: flex; flex-direction: column; gap: 4px; }
 .set-row { display: grid; grid-template-columns: 30px minmax(0, 1fr) minmax(0, 1fr) 52px; gap: 12px; align-items: center; padding: 8px 8px 8px 4px; border-radius: 999px; }
-.set-row.current { background: var(--surface); box-shadow: var(--sh-card); }
+.set-row.current { background: var(--set-row-current); box-shadow: var(--set-row-current-shadow); } /* 1.8.1 */
 
-.set-label { font-family: var(--font-display); font-size: 0.9375rem; font-weight: 700; text-align: center; color: var(--todo); }
+.set-label { font-family: var(--font-display); font-size: 0.9375rem; font-weight: 700; text-align: center; color: var(--set-todo); } /* 1.8.1 : était --todo */
 .set-row.current .set-label { color: var(--text); }
 .set-row.done .set-label { color: var(--text-muted); }
 
-.set-input { -webkit-appearance: none; appearance: none; width: 100%; height: 52px; padding: 0 4px; background: var(--fill); border: none; border-radius: var(--radius-field); color: var(--todo); font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; text-align: center; transition: border-color var(--t-normal) ease, background var(--t-normal) ease; -moz-appearance: textfield; }
+.set-input { -webkit-appearance: none; appearance: none; width: 100%; height: 52px; padding: 0 4px; background: var(--set-field); border: none; box-shadow: var(--set-field-ring); border-radius: var(--radius-field); color: var(--set-todo); font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; text-align: center; transition: border-color var(--t-normal) ease, background var(--t-normal) ease; -moz-appearance: textfield; }
 .set-input::-webkit-outer-spin-button, .set-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .set-input:focus { outline: none; color: var(--text); box-shadow: inset 0 0 0 2px var(--primary); }
 .set-input.active-input { color: var(--text); }
 .set-row.current .set-input { color: var(--text); }
-.set-row.done .set-input { background: transparent; color: var(--text-muted); }
+.set-row.done .set-input { background: transparent; box-shadow: none; color: var(--text-muted); }
 
-.btn-check-set { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; padding: 0; background: var(--fill); border: none; border-radius: var(--radius-field); color: var(--text-muted); cursor: pointer; transition: background var(--t-normal) ease, border-color var(--t-normal) ease, color var(--t-normal) ease; }
+.btn-check-set { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; padding: 0; background: var(--set-field); box-shadow: var(--set-field-ring); border: none; border-radius: var(--radius-field); color: var(--text-muted); cursor: pointer; transition: background var(--t-normal) ease, border-color var(--t-normal) ease, color var(--t-normal) ease; }
 .btn-check-set svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .set-row.current .btn-check-set { background: var(--surface); color: var(--text); box-shadow: inset 0 0 0 2px var(--text); }
 .set-row.done .btn-check-set { background: var(--success); color: var(--on-success); box-shadow: none; }

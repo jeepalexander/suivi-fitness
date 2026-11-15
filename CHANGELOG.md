@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.1] - 2026-11-15
+### 🎨 Séance : champs de saisie plus contrastés (co-auteur : Claude)
+- Variante G de la planche « contrastes », en clair comme en sombre.
+- **Clair** : champs et coches blancs avec liseré et ombre légère ; la série en cours passe sur fond gris.
+- **Sombre** : champs plus clairs que le fond (#2A2A32), série en cours sur #1D1D23.
+- **Chiffres des séries à venir** plus lisibles : contraste 4,1:1 en clair et 4,3:1 en sombre (2,1:1 et 2,6:1 avant).
+- Nouvelles variables : `--set-field`, `--set-field-ring`, `--set-row-current`, `--set-row-current-shadow`, `--set-todo`.
+
+---
+
 ## [1.8.0] - 2026-11-15
 ### 🪶 Déload visible dans l'historique et les graphiques (co-auteur : Claude)
 - **Historique** : l'étiquette « Déload » affiche bien sa plume (le code de l'icône s'affichait en texte à la place).
