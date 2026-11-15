@@ -979,7 +979,7 @@ body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 /* ============================================
    Accueil Programmes : message manuscrit (1.7.24)
    ============================================ */
-.prog-greet { max-width: 94%; margin: -8px 0 0; /* 1.7.100 : remontée de 16 px vers le nom de l’app */ font-family: var(--font-hand); font-weight: 600; line-height: 1.05; color: var(--text); transform: rotate(-2deg); transform-origin: left top; }
+.prog-greet { max-width: 94%; margin: -8px 0 0; /* 1.8.0 : remontée de 16 px vers le nom de l’app */ font-family: var(--font-hand); font-weight: 600; line-height: 1.05; color: var(--text); transform: rotate(-2deg); transform-origin: left top; }
 .prog-greet-hello, .prog-greet-line { font-family: inherit; } /* « * » impose la police du texte à chaque élément */
 .prog-greet-hello { display: block; font-size: 2.625rem; }
 .prog-greet-line { display: block; margin-top: 2px; font-size: 1.75rem; }

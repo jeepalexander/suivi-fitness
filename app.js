@@ -71,7 +71,36 @@ const EXERCISE_FILTERS = ['Tous', 'Polyarticulaires', 'Cardio', 'Pectoraux', 'Do
 
 // Couleurs des graphiques : valeurs de repli (thème clair). Elles sont relues depuis
 // les variables --chart-* de style.css à chaque changement de thème (voir readChartColors).
-const CHART_COLORS = { primary: '#111114', success: '#0B7A43', volume: '#C2570C', tick: '#6B6B73', grid: '#EEEEF1', band: 'rgba(246, 213, 139, 0.45)' };
+const CHART_COLORS = { primary: '#111114', success: '#0B7A43', volume: '#C2570C', tick: '#6B6B73', grid: '#EEEEF1', band: 'rgba(246, 213, 139, 0.45)', warn: '#92400E' };
+
+// 1.8.0 : petite plume (pictogramme du déload) sous les points des séances de déload, dans les graphiques
+const DELOAD_PATHS = ['M20.2 12.2a6 6 0 0 0-8.5-8.5L5 10.5V19h8.5z', 'M16 8L2 22', 'M17.5 15H9'];
+function deloadMarksPlugin(flags, color) {
+  return {
+    id: 'deloadMarks',
+    afterDatasetsDraw(chart) {
+      if (!flags || !flags.some(Boolean) || typeof Path2D === 'undefined') return;
+      const meta = chart.getDatasetMeta(0);
+      if (!meta || !meta.data) return;
+      const { ctx: c, chartArea } = chart;
+      const S = 12, k = S / 24, gap = 6;
+      const paths = DELOAD_PATHS.map(d => new Path2D(d));
+      c.save();
+      c.strokeStyle = color; c.lineWidth = 2.2 / k; c.lineCap = 'round'; c.lineJoin = 'round';
+      meta.data.forEach((pt, i) => {
+        if (!flags[i] || !pt || pt.skip || !isFinite(pt.x) || !isFinite(pt.y)) return;
+        // à l'aplomb du point, en bas de la zone du graphique (ne chevauche pas la courbe) ;
+        // au-dessus du point seulement si celui-ci est tout en bas
+        let y = chartArea.bottom - S - 4;
+        if (pt.y > y - gap) y = pt.y - gap - S;
+        c.save(); c.translate(pt.x - S / 2, y); c.scale(k, k);
+        paths.forEach(p => c.stroke(p));
+        c.restore();
+      });
+      c.restore();
+    }
+  };
+}
 
 if (typeof Chart !== 'undefined') {
   Chart.defaults.font.family = "'Figtree', system-ui, sans-serif";
@@ -212,6 +241,7 @@ function readChartColors() {
   CHART_COLORS.tick = read('--chart-tick', CHART_COLORS.tick);
   CHART_COLORS.grid = read('--chart-grid', CHART_COLORS.grid);
   CHART_COLORS.band = read('--chart-band', CHART_COLORS.band);
+  CHART_COLORS.warn = read('--warn', CHART_COLORS.warn);
   if (typeof Chart !== 'undefined') Chart.defaults.color = CHART_COLORS.tick;
 }
 
@@ -2251,7 +2281,7 @@ function renderHistory() {
       row.innerHTML = `
         ${sessionPillHtml(h)}
         <span class="history-main">
-          <span class="history-date">${formatHistoryDate(h.date)}${h.isDeload ? ' <span class="deload-tag">${DELOAD_SVG}Déload</span>' : ''}</span>
+          <span class="history-date">${formatHistoryDate(h.date)}${h.isDeload ? ` <span class="deload-tag">${DELOAD_SVG}Déload</span>` : ''}</span>
           <span class="history-duration">${escapeHtml(sub)}</span>
         </span>
         <span class="history-tonnage">${historyTonnes(h.tonnage)} T</span>
@@ -2652,6 +2682,7 @@ function renderTonnageChart() {
 
   let labels = [];
   let data = [];
+  let deloadFlags = []; // 1.8.0 : séances de déload (plume sous le point)
   const hist = statsHistory();
   if (currentVolumeFilter === 'type' && !statsLetters().includes(currentSessionTypeFilter)) { currentVolumeFilter = 'all'; updateSessionTypeButton(); }
   const keyOf = e => e.sessionKey || e.type;
@@ -2696,6 +2727,7 @@ function renderTonnageChart() {
     } else {
       labels = typedHistory.map(e => `${e.type} (${formatDate(e.date)})`);
       data = typedHistory.map(e => parseFloat(e.tonnage) || 0);
+      deloadFlags = typedHistory.map(e => !!e.isDeload);
     }
   } else {
     // --- VUE PAR SÉANCE (toutes les séances) ---
@@ -2703,6 +2735,7 @@ function renderTonnageChart() {
 
     labels = sortedHistory.map(e => `${e.type} (${formatDate(e.date)})`);
     data = sortedHistory.map(e => parseFloat(e.tonnage) || 0);
+    deloadFlags = sortedHistory.map(e => !!e.isDeload);
   }
 
   // Courbe blanche sur le bloc héros indigo
@@ -2721,6 +2754,7 @@ function renderTonnageChart() {
     sessions.forEach(e => {
       const d = byDay[e.date] || (byDay[e.date] = { tonnage: 0, types: [] });
       d.tonnage += parseFloat(e.tonnage) || 0; d.types.push(e.type);
+      if (e.isDeload) d.deload = true;
     });
     const keys = Object.keys(byDay).sort();
     if (keys.length > 0) {
@@ -2730,12 +2764,13 @@ function renderTonnageChart() {
       const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
       const start = toUtc(keys[0]);
       const end = Math.max(today, toUtc(keys[keys.length - 1]));
-      labels = []; data = []; dayDetails = [];
+      labels = []; data = []; dayDetails = []; deloadFlags = [];
       for (let t = start; t <= end; t += 86400000) {
         const k = iso(t);
         labels.push(k);
         data.push(byDay[k] ? byDay[k].tonnage : null);
         dayDetails.push(byDay[k] || null);
+        deloadFlags.push(!!(byDay[k] && byDay[k].deload));
       }
     }
   }
@@ -2783,7 +2818,8 @@ function renderTonnageChart() {
           : { ticks: { color: onHero, font: { size: 10 }, maxTicksLimit: 6, maxRotation: 0, minRotation: 0, autoSkip: true }, grid: { display: false }, border: { display: false } },
         y: { ticks: { color: onHero, maxTicksLimit: 5, display: !dayMode }, grid: { color: 'rgba(255, 255, 255, 0.15)' }, border: { display: false } }
       }
-    }
+    },
+    plugins: [deloadMarksPlugin(deloadFlags, '#fff')]
   });
   renderFixedYAxis(dayMode ? tonnageChart : null);
   // vue par jour : on arrive sur les séances les plus récentes, on remonte le temps en défilant vers la gauche
@@ -2841,6 +2877,7 @@ function renderExerciseChart() {
   const isBw = exInfo(selectedEx).mode === 'bw';
   const repsMode = isBw && currentExMetricMode !== 'volume';
   const lestData = [];
+  const exDeload = []; // 1.8.0 : séances de déload (plume sous le point)
   const maxBtn = document.getElementById('btn-mode-max');
   if (maxBtn) maxBtn.textContent = isBw ? 'Répétitions' : 'Charge max';
 
@@ -2856,6 +2893,7 @@ function renderExerciseChart() {
       if (exData && wasPerformed) {
         labels.push(`${h.type} (${formatDate(h.date)})`);
         dates.push(h.date);
+        exDeload.push(!!h.isDeload);
         if (currentExMetricMode === 'volume') {
           chartData.push(exData.totalVolume || 0);
         } else if (repsMode) {
@@ -2961,7 +2999,7 @@ function renderExerciseChart() {
         y: { beginAtZero: repsMode, ticks: { color: CHART_COLORS.tick, maxTicksLimit: 5, precision: repsMode ? 0 : undefined }, grid: { color: CHART_COLORS.grid }, border: { display: false } }
       }
     },
-    plugins: [bandPlugin]
+    plugins: [bandPlugin, deloadMarksPlugin(exDeload, CHART_COLORS.warn)]
   });
 }
 
@@ -3011,7 +3049,7 @@ function renderCardioChart() {
   statsHistory().forEach(h => {
     const ex = (h.exercises || []).find(e => sameExercise(e.name, name));
     const set = ex && Array.isArray(ex.sets) ? ex.sets.find(isPerformedCardioSet) : null;
-    if (set && h.date) points.push({ date: h.date, v: cardioMetric(name, set) });
+    if (set && h.date) points.push({ date: h.date, v: cardioMetric(name, set), deload: !!h.isDeload });
   });
   points.sort((a, b) => new Date(a.date) - new Date(b.date));
   const empty = document.getElementById('cardio-empty');
@@ -3044,7 +3082,8 @@ function renderCardioChart() {
         x: { ticks: { color: CHART_COLORS.tick, maxTicksLimit: 6, maxRotation: 0, minRotation: 0, autoSkip: true }, grid: { display: false } },
         y: { ticks: { color: CHART_COLORS.tick, maxTicksLimit: 5, callback: v => unit.fmt(v) }, grid: { color: CHART_COLORS.grid }, border: { display: false } }
       }
-    }
+    },
+    plugins: [deloadMarksPlugin(points.map(p => p.deload), CHART_COLORS.warn)]
   });
 }
 

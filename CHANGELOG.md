@@ -7,9 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
-## [1.7.100] - 2026-11-15
-### ✍️ Accueil Programmes : message manuscrit remonté (co-auteur : Claude)
-- Le message manuscrit (« Bonjour, … » ou « Bienvenue ! ») remonte de 16 px : l'écart avec « MON CARNET DE SALLE » est réduit.
+## [1.8.0] - 2026-11-15
+### 🪶 Déload visible dans l'historique et les graphiques (co-auteur : Claude)
+- **Historique** : l'étiquette « Déload » affiche bien sa plume (le code de l'icône s'affichait en texte à la place).
+- **Graphiques** : une petite plume marque les séances de déload, à l'aplomb de leur point, en bas du graphique (volume par séance, par type et par jour ; progression par exercice ; suivi cardio). Blanche sur le bloc de volume, ambre ailleurs. Pas de plume dans la vue par mois, qui cumule plusieurs séances.
+
+### ✍️ Accueil Programmes : message manuscrit remonté
+- Le message manuscrit (« Bonjour, … » ou « Bienvenue ! ») remonte de 16 px : l'écart avec « MON CARNET DE SALLE » est réduit (publié d'abord en 1.7.100).
 
 ---
 
