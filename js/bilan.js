@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Jean-Philippe Alexander. Mon Carnet de Salle.
+// SPDX-License-Identifier: PolyForm-Strict-1.0.0 (voir LICENSE et NOTICE)
 // ============================================================
 // BILAN DU MOIS (1.7.50)
 // Le 1er du mois, un post-it sur l'écran Programmes annonce le bilan du mois précédent

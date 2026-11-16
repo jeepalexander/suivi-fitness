@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Jean-Philippe Alexander. Mon Carnet de Salle.
+// SPDX-License-Identifier: PolyForm-Strict-1.0.0 (voir LICENSE et NOTICE)
 // Catalogue des exercices (v1.2 du 10 novembre 2026, co-auteur : Claude) : 86 exercices, identifiant stable,
 // groupe, mode de saisie et réglages par défaut issus de la littérature (voir CATALOGUE_EXERCICES.md du projet).
 //   mode : weight (kg × réps) · bw (poids du corps + lest × réps) · reps (réps seules) · time (durée)

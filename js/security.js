@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Jean-Philippe Alexander. Mon Carnet de Salle.
+// SPDX-License-Identifier: PolyForm-Strict-1.0.0 (voir LICENSE et NOTICE)
 // Durcissement sécurité - Suivi Fitness
 // Assainit toute sauvegarde JSON importée avant traitement par app.js :
 // les caractères < et > sont retirés de toutes les chaînes afin d'empêcher
