@@ -7,6 +7,18 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.27] - 2026-11-16
+### 📷 Scanner un QR code aussi sur iPhone (co-auteur : Claude)
+- « Recevoir un programme › Scanner un QR code » n'est plus réservé à Chrome pour Android : sans le lecteur de Chrome (`BarcodeDetector`, absent de Safari et de tous les navigateurs sur iPhone), l'app lit le QR code avec **jsQR 1.4.0** (licence Apache 2.0), rangé dans l'app (`js/jsqr.min.js`, 130 Ko, 46 Ko compressé) et chargé seulement à l'ouverture du scanner. Mis en cache par le service worker : marche hors connexion.
+- Le bouton n'est plus caché que s'il n'y a pas de caméra. Android garde le lecteur de Chrome.
+- La caméra est demandée tout de suite, le lecteur chargé en parallèle (geste de l'usager encore frais sur iPhone).
+- Message de caméra indisponible : « réglages du navigateur » au lieu de « réglages de Chrome ».
+### 🧪 Tests
+- Nouveau `test_scanner_jsqr.py` (12 contrôles) : une caméra simulée filme un vrai QR code, lu par jsQR.
+- `test_partage.py` : le scanner est caché sans caméra (et non plus sans lecteur de Chrome).
+
+---
+
 ## [1.8.26] - 2026-11-16
 ### 🛡️ Données protégées contre l'effacement automatique (co-auteur : Claude)
 - Au lancement, l'app demande à Chrome un stockage « persistant » (`navigator.storage.persist()`, nouvelle fonction `requestPersistentStorage` dans `app.js`) : Chrome ne videra plus de lui-même les données du site (programmes, historique, pesées, réglages) quand le téléphone manque de place. Seul l'usager peut encore les effacer.

@@ -64,6 +64,7 @@ Un test seul : `python3 tests/test_validation.py` ou `python3 tests/run_tests.py
 | `test_bilan.py` | 2 × 20 | Bilan du mois (1.7.50) : post-it carré entre l'accueil et « Actif » du 1er au 10, pop-up centré (lignes, un seul bouton OK), archivage qui retire le post-it même après rechargement, mois cliquables et « Tous les bilans » dans Progression, Échap ; clair et sombre |
 | `test_partage.py` | 56 | Partage d'un programme (1.7.52) : bouton en bas de l'éditeur, volet lien / QR code, aller-retour du code, codes refusés, ouverture par le lien (« Programme reçu », ajout « Reçu » en mémoire, nom « (2) »), menu + (coller, lien illisible), scanner simulé et arrêt de la caméra, séance libre ; clair et sombre |
 | `test_stockage_persistant.py` | 9 | Stockage persistant demandé à Chrome au lancement (1.8.26) : une seule demande si besoin, aucune si déjà accordé, refus et navigateur sans l'API sans erreur, rien d'affiché dans les Réglages |
+| `test_scanner_jsqr.py` | 12 | Scanner de QR code sans le lecteur de Chrome (iPhone, Safari, 1.8.27) : caméra simulée filmant un vrai QR code, lu par jsQR ; jsQR chargé à l'ouverture du scanner seulement et mis en cache hors connexion ; QR étranger, caméra arrêtée, caméra refusée |
 
 ## Quand les lancer
 Automatiquement : GitHub les exécute à chaque envoi de code et à chaque demande de fusion (`.github/workflows/tests.yml`, onglet **Actions** du dépôt) ; un échec apparaît en rouge sur le commit.
