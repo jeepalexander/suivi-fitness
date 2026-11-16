@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.26] - 2026-11-16
+### 🛡️ Données protégées contre l'effacement automatique (co-auteur : Claude)
+- Au lancement, l'app demande à Chrome un stockage « persistant » (`navigator.storage.persist()`, nouvelle fonction `requestPersistentStorage` dans `app.js`) : Chrome ne videra plus de lui-même les données du site (programmes, historique, pesées, réglages) quand le téléphone manque de place. Seul l'usager peut encore les effacer.
+- Invisible : rien n'est affiché (l'état dans les Réglages a été proposé puis écarté). Pas de nouvelle demande si c'est déjà accordé ; un refus de Chrome ou un navigateur sans l'API ne change rien au fonctionnement.
+### 🧪 Tests
+- Nouveau `test_stockage_persistant.py` (9 contrôles), dans le groupe `reglages`.
+
+---
+
 ## [1.8.25] - 2026-11-16
 ### 🔍 Référencement : fin des pages « en double » signalées par Search Console (co-auteur : Claude)
 - La version de test (`dev/`) n'est plus indexée : à l'assemblage du site, chacune de ses pages reçoit `<meta name="robots" content="noindex, nofollow">` (le fichier de validation Google n'est pas touché). Prend effet à la prochaine mise en production, car la publication utilise `tools/assembler_site.py` de `main`.

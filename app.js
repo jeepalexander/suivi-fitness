@@ -5102,8 +5102,20 @@ function initUpdateIndicator() {
 // ============================================================
 // 17. DÉMARRAGE
 // ============================================================
+// 1.8.26 (co-auteur : Claude) : demande à Chrome un stockage « persistant », pour qu'il ne vide pas de lui-même
+// les données du site (programmes, historique…) quand le téléphone manque de place. Invisible : rien n'est affiché,
+// Chrome accepte ou refuse seul ; sans l'API (vieux navigateur) ou déjà accordé, rien ne se passe.
+function requestPersistentStorage() {
+  try {
+    const st = navigator.storage;
+    if (!st || typeof st.persist !== 'function' || typeof st.persisted !== 'function') return Promise.resolve(null);
+    return st.persisted().then((done) => done || st.persist()).catch(() => null);
+  } catch (e) { return Promise.resolve(null); }
+}
+
 async function initApp() {
   if (!document.body.dataset.tab) document.body.dataset.tab = 'programme';
+  requestPersistentStorage();
   initTheme();
   applyWallpaper();
   markTestVersion();
