@@ -27,6 +27,20 @@ def main(prod, test, site):
     with open(man, 'w', encoding='utf-8') as f:
         json.dump(m, f, ensure_ascii=False, indent=2)
         f.write('\n')
+    # 1.8.25 : la version de test n'est pas indexée par les moteurs de recherche (sinon Google la voit
+    # comme un doublon de la production : « Page en double sans URL canonique sélectionnée »).
+    noindex = '<meta name="robots" content="noindex, nofollow">'
+    for root, _, files in os.walk(os.path.join(site, 'dev')):
+        for name in files:
+            if not name.endswith('.html'):
+                continue
+            path = os.path.join(root, name)
+            with open(path, encoding='utf-8') as f:
+                html = f.read()
+            if 'name="robots"' in html or '<head>' not in html:
+                continue
+            with open(path, 'w', encoding='utf-8') as f:
+                f.write(html.replace('<head>', '<head>\n  ' + noindex, 1))
     open(os.path.join(site, '.nojekyll'), 'w').close()
     print('site assemblé :', site)
 

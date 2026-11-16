@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.25] - 2026-11-16
+### 🔍 Référencement : fin des pages « en double » signalées par Search Console (co-auteur : Claude)
+- La version de test (`dev/`) n'est plus indexée : à l'assemblage du site, chacune de ses pages reçoit `<meta name="robots" content="noindex, nofollow">` (le fichier de validation Google n'est pas touché). Prend effet à la prochaine mise en production, car la publication utilise `tools/assembler_site.py` de `main`.
+- `presentation.html` désigne la page racine `https://jeepalexander.github.io/` comme page de référence (`<link rel="canonical">`) : c'est la page d'accueil déclarée à Google, dont elle est la copie.
+### 🧪 Tests
+- `test_prod_test.py` : pages de `dev/` en « noindex », aucune en production, balise canonique de la présentation.
+
+---
+
 ## [1.8.24] - 2026-11-15
 ### 🎨 Halo sous la barre de navigation plus court et plus dense (co-auteur : Claude)
 - Variante C : 110 px au lieu de 150 (plus la zone sûre), dégradé de la couleur du fond de 0 à 50 % au quart de la hauteur, 88 % à mi-hauteur, puis opaque tout en bas. Le contenu s'efface plus près du menu, et plus nettement.
