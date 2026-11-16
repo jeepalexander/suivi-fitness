@@ -2,7 +2,7 @@
 
 **Application PWA de suivi d'entraînement en salle de sport** (dépôt `suivi-fitness`)
 
-[![Version](https://img.shields.io/badge/version-1.8.30-blue)](https://github.com/jeepalexander/suivi-fitness)
+[![Version](https://img.shields.io/badge/version-1.8.31-blue)](https://github.com/jeepalexander/suivi-fitness)
 [![Licence](https://img.shields.io/badge/licence-PolyForm%20Strict%201.0.0-lightgrey)](LICENSE)
 
 ---
@@ -93,6 +93,7 @@ Le détail est dans [CHANGELOG.md](CHANGELOG.md).
 - Fond d’écran : 17 images (Course, Barre, Haltères, Kettlebell, Râtelier, Squat, Poigne, Disques, Cuivre, Géométrie, Salle blanche, Traction, Cordes, Fente, Rack, Silhouette, Escaliers) ou aucun, propre à l’appareil.
 - Sauvegarde Google Drive (connexion, état, déconnexion).
 - Inviter quelqu’un : QR code vers l’application et son adresse.
+- Soutenir l’app : lien « Offrir un café » vers Buy Me a Coffee (simple lien, aucun script tiers).
 - Application : version, mises à jour, liens vers les règles de confidentialité et les conditions d’utilisation.
 
 ---

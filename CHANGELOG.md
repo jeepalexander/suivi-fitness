@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.31] - 2026-11-16
+### ☕ Réglages : « Soutenir l'app » et conditions d'utilisation (co-auteur : Claude)
+- **Nouvelle carte « Soutenir l'app »** dans les Réglages, entre « Inviter quelqu'un » et « Application » (planche Réglages de la maquette) : « Mon Carnet de Salle est gratuit, sans publicité, et ne collecte aucune donnée. Si elle t'aide à progresser, tu peux m'offrir un café : c'est ce qui la fait vivre. » Bouton secondaire « Offrir un café » avec une icône de tasse, qui ouvre https://buymeacoffee.com/jeepalexander dans le navigateur. Simple lien : aucun script ni widget tiers, rien n'est envoyé à Buy Me a Coffee avant le clic.
+- **Conditions d'utilisation** (`conditions.html`, mise à jour du 16 novembre 2026) : nouvel article « Propriété » (code public pour la transparence, licence PolyForm Strict 1.0.0, nom, icône et illustrations non réutilisables) ; le soutien est mentionné comme facultatif et sans contrepartie ; résumé anglais complété.
+### 🧪 Tests
+- Nouveau `test_soutien.py` (groupe `reglages`) : place de la carte, lien, même allure que « Afficher le QR code », icône centrée, aucun débordement ni script tiers, en clair et en sombre, à 390 et 360 px ; article « Propriété » des conditions. `test_invitation.py` accepte la nouvelle carte entre « Inviter quelqu'un » et « Application ».
+
+---
+
 ## [1.8.30] - 2026-11-16
 ### ⚖️ Licence PolyForm Strict 1.0.0 (co-auteur : Claude)
 - **`LICENSE`** : texte officiel de la PolyForm Strict 1.0.0, avec la mention « Required Notice » (copyright Jean-Philippe Alexander). Le fichier précédent était titré « Elastic License 2.0 » mais contenait en réalité le texte de la licence MIT, qui autorise copie, modification et redistribution.

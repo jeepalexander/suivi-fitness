@@ -31,7 +31,7 @@ with Srv() as base, sync_playwright() as p:
         # Réglages
         pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(200)
         titles = pg.evaluate("[...document.querySelectorAll('#tab-reglages .card-title')].map(e=>e.textContent)")
-        check(f"[{th}] carte « Inviter quelqu'un » entre Google Drive et Application", titles.index("Inviter quelqu'un") == titles.index('Sauvegarde Google Drive') + 1 and titles.index('Application') == titles.index("Inviter quelqu'un") + 1, titles)
+        check(f"[{th}] carte « Inviter quelqu'un » entre Google Drive et Application", titles.index("Inviter quelqu'un") == titles.index('Sauvegarde Google Drive') + 1 and titles.index('Application') in (titles.index("Inviter quelqu'un") + 1, titles.index("Inviter quelqu'un") + 2), titles)  # 1.8.31 : « Soutenir l'app » peut s'intercaler
         pg.click('#invite-btn'); pg.wait_for_timeout(400)
         url = pg.evaluate("appShareUrl()")
         check(f"[{th}] la fenêtre s'ouvre : QR code, adresse visible, un seul bouton « Fermer » (1.7.37 : plus de partage)",

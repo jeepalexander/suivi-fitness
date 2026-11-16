@@ -1059,6 +1059,7 @@ body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 .miss-todo { flex: none; font-size: 0.875rem; font-weight: 600; }
 .miss-ok { flex: none; width: 20px; height: 20px; fill: none; stroke: var(--success); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .legal-links a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.support-btn { gap: 8px; text-decoration: none; }   /* 1.8.31 : lien « Offrir un café » (Réglages) au look d'un bouton secondaire, icône tasse à gauche */
 
 /* ============================================
    VOLETS DE CONFIRMATION ET MESSAGES (1.7.29, remplacent confirm / alert)
