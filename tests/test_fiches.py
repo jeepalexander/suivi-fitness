@@ -42,13 +42,15 @@ with Srv() as url, sync_playwright() as p:
             ov = pg.evaluate(OVERFLOW_JS)
             ok(tag + 'fiche : rien ne déborde', ov['docW'] <= ov['vw'], ov)
             pg.screenshot(path=f"{__import__('os').environ.get('SHOTS_DIR', '/tmp')}/fiche-{scheme}-{w}.png")
-            pg.click('.fiche-sheet .btn-secondary'); pg.wait_for_timeout(200)
+            pg.click('.fiche-sheet .fiche-close-btn'); pg.wait_for_timeout(200)
             ok(tag + 'Fermer referme la fiche', not pg.evaluate(FICHE_OPEN))
             long_press(pg, badge)
-            ok(tag + 'croix en haut à droite, pas de barre grise (1.7.87)', pg.locator('.fiche-sheet .fiche-close').count() == 1 and pg.locator('.sheet-grip').count() == 0
-               and pg.evaluate("(()=>{const x=document.querySelector('.fiche-close').getBoundingClientRect(),s=document.querySelector('.fiche-sheet').getBoundingClientRect();return x.right<=s.right && s.right-x.right<40 && x.top-s.top<30})()"))
-            pg.click('.fiche-sheet .fiche-close'); pg.wait_for_timeout(200)
-            ok(tag + 'la croix referme la fiche', not pg.evaluate(FICHE_OPEN))
+            # 1.8.19 : plus de croix ; « Fermer » fixe en bas de l'écran, en noir (primary-strong), même fiche défilée
+            ok(tag + 'pas de croix ni de barre grise, « Fermer » fixe en bas', pg.locator('.fiche-sheet .fiche-close').count() == 0 and pg.locator('.sheet-grip').count() == 0
+               and pg.evaluate("(()=>{const s=document.querySelector('.fiche-sheet');s.scrollTop=0;const b=document.querySelector('.fiche-close-btn').getBoundingClientRect();return Math.abs(innerHeight-b.bottom)<=60 && b.top>innerHeight/2})()"))
+            ok(tag + '« Fermer » en couleurs inversées', pg.evaluate("getComputedStyle(document.querySelector('.fiche-close-btn')).backgroundColor") == pg.evaluate("getComputedStyle(document.querySelector('.btn:not(.btn-secondary)')||document.body).backgroundColor") or pg.evaluate("getComputedStyle(document.querySelector('.fiche-close-btn')).backgroundColor") != pg.evaluate("getComputedStyle(document.body).backgroundColor"))
+            pg.click('.fiche-sheet .fiche-close-btn'); pg.wait_for_timeout(200)
+            ok(tag + '« Fermer » referme la fiche', not pg.evaluate(FICHE_OPEN))
             long_press(pg, badge); pg.keyboard.press('Escape'); pg.wait_for_timeout(150)
             ok(tag + 'Échap referme la fiche', not pg.evaluate(FICHE_OPEN))
             # Toucher court : pas de fiche
@@ -61,8 +63,10 @@ with Srv() as url, sync_playwright() as p:
             long_press(pg, '#sheet-overlay .ex-icon-badge')
             ok(tag + 'Ajouter un exercice : fiche au-dessus du volet', pg.evaluate(FICHE_OPEN) and pg.evaluate("document.getElementById('sheet-overlay').classList.contains('open')"))
             ok(tag + 'Ajouter un exercice : l\'appui long ne coche pas l\'exercice', pg.evaluate("addSheet ? addSheet.selected.size : -1") == sel_before)
-            pg.mouse.click(5, 5); pg.wait_for_timeout(200)
-            ok(tag + 'toucher à côté : la fiche se ferme, le volet reste', not pg.evaluate(FICHE_OPEN) and pg.evaluate("document.getElementById('sheet-overlay').classList.contains('open')"))
+            # 1.8.17 : pleine page, plus de « à côté » ; la croix ferme la fiche et laisse le volet
+            ok(tag + 'fiche en pleine page', pg.evaluate("(()=>{const r=document.querySelector('.fiche-sheet').getBoundingClientRect();return r.top<=1 && Math.abs(r.height-innerHeight)<=1})()"))
+            pg.click('.fiche-close-btn'); pg.wait_for_timeout(200)
+            ok(tag + 'croix : la fiche se ferme, le volet reste', not pg.evaluate(FICHE_OPEN) and pg.evaluate("document.getElementById('sheet-overlay').classList.contains('open')"))
             ok(tag + 'aucune erreur JavaScript', not errs, errs)
             ctx.close()
     # Exercice sans image : pictogramme générique, fiche quand même
@@ -87,6 +91,18 @@ with Srv() as url, sync_playwright() as p:
     for y in range(690, 350, -20): touch('touchMove', y); pg.wait_for_timeout(16)
     touch('touchEnd', 0); pg.wait_for_timeout(400)
     ok('téléphone : la fiche défile au doigt', pg.evaluate("document.querySelector('.fiche-sheet').scrollTop") > 50, pg.evaluate("document.querySelector('.fiche-sheet').scrollTop"))
+    ctx.close()
+    # 1.8.22 : sur téléphone, le relâché d'un appui long ne produit pas toujours de clic ; « Fermer » doit marcher au 1er appui
+    ctx, pg, errs = newpage(br, w=390)
+    pg.goto(url + 'index.html'); pg.wait_for_timeout(500)
+    pg.evaluate("switchTab('seance'); 0"); pg.wait_for_timeout(300)
+    pg.evaluate("""()=>{const b=document.querySelector('#exercises-list .ex-icon-badge');const r=b.getBoundingClientRect();
+      b.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,clientX:r.x+10,clientY:r.y+10}));}""")
+    pg.wait_for_timeout(700); pg.evaluate("document.dispatchEvent(new PointerEvent('pointercancel',{bubbles:true}))"); pg.wait_for_timeout(300)
+    opened = pg.evaluate(FICHE_OPEN)
+    pg.click('.fiche-close-btn'); pg.wait_for_timeout(250)
+    ok('appui long sans clic au relâché : « Fermer » ferme la fiche au 1er appui', opened and not pg.evaluate(FICHE_OPEN))
+    ok('aucune erreur JavaScript (appui long sans clic)', not errs, errs)
     ctx.close()
     br.close()
 print(f"\n {sum(res)} / {len(res)} contrôles OK")

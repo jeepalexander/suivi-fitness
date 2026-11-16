@@ -7,6 +7,219 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.24] - 2026-11-15
+### 🎨 Halo sous la barre de navigation plus court et plus dense (co-auteur : Claude)
+- Variante C : 110 px au lieu de 150 (plus la zone sûre), dégradé de la couleur du fond de 0 à 50 % au quart de la hauteur, 88 % à mi-hauteur, puis opaque tout en bas. Le contenu s'efface plus près du menu, et plus nettement.
+
+---
+
+## [1.8.23] - 2026-11-15
+### 🐛 « Reconnecter Google Drive » : retour direct sur Réglages (co-auteur : Claude)
+- Au retour de la connexion Google, l'application rechargée affichait d'abord l'onglet Programme, puis basculait sur Réglages 0,8 s plus tard. L'onglet de destination (Réglages, ou Historique / Programme quand une sauvegarde ou une restauration était en attente) s'affiche maintenant tout de suite. La page reste masquée jusqu'au choix de l'onglet.
+### 🎨 Icônes : chaussures retouchées (co-auteur : Claude)
+- Écarté haltère : le bout de la chaussure droite, coupé net par le bord de la photo, est arrondi ; voile blanc retiré autour des languettes.
+- Écarté incliné haltères : voile blanc retiré autour des deux chaussures.
+### 🧪 Tests
+- Fiche d'exercice : appui long sans clic au relâché, puis « Fermer » au premier appui (régression 1.8.22).
+- Google Drive (application installée) : au retour de « Reconnecter », l'onglet Programme n'est jamais visible.
+
+---
+
+## [1.8.22] - 2026-11-15
+### 🐛 Fiche d'exercice : « Fermer » marche dès le premier appui (co-auteur : Claude)
+- Après l'appui long qui ouvre la fiche, l'app ignore le clic du relâché. Sur téléphone, ce relâché ne produit pas toujours de clic : le blocage restait armé et avalait le premier appui sur « Fermer ». Désormais seul un clic dans les 0,6 s qui suivent le relâché est ignoré, et tout nouvel appui lève le blocage.
+
+---
+
+## [1.8.21] - 2026-11-15
+### 🖼️ Détourage des 6 icônes de la 1.8.20 amélioré (co-auteur : Claude)
+- **Gainage latéral, Pompes lestées** : bords du tapis nets et droits (ils étaient rongés), sans fond blanc collé ; liseré du short conservé.
+- **Dips triceps** : fond blanc retiré entre les pieds du banc.
+- **Les 6 icônes** : petits trous bouchés (baskets, banc, barre), avec les couleurs d'origine.
+
+---
+
+## [1.8.20] - 2026-11-15
+### 🖼️ 6 nouvelles icônes d'exercices (co-auteur : Claude)
+- Gainage latéral, Écarté haltère (vue de dessus), Écarté incliné haltères (de côté, sans fond blanc entre les montants du banc), Pompes lestées, Dips triceps, Extension triceps couché.
+- Ajoutées au cache hors ligne. Il reste 8 exercices sans icône. Curl barre EZ et Mollets haltères gardent leur icône.
+
+---
+
+## [1.8.19] - 2026-11-15
+### 🧹 Mise à jour et fiche d'exercice simplifiées (co-auteur : Claude)
+- **Réglages · Application** : plus de bandeau « La version … est prête » ; le statut dit « Mise à jour téléchargée : version 1.8.xx », à côté du bouton jaune « Installer ».
+- **Fiche d'exercice** (pleine page) : la croix est retirée ; « Fermer » reste fixe en bas de l'écran, en couleurs inversées (bouton noir en clair, blanc cassé en sombre), sur un halo de la couleur du fond comme sous le menu. Fond de la fiche = fond de page.
+
+---
+
+## [1.8.18] - 2026-11-15
+### 🔥 Séance : phrase d'échauffement dans le premier exercice de force (co-auteur : Claude)
+- La phrase « Ajoute 2 séries légères au premier exercice de force pour t'échauffer » n'est plus au-dessus de la liste : elle apparaît à l'ouverture du premier exercice de force, entre sa ligne (icône, nom) et les intitulés Série / Kg / Réps. Toujours cachée si la séance n'a que du cardio.
+
+---
+
+## [1.8.17] - 2026-11-15
+### ⬆️ Bouton « Installer » et fiche d'exercice en pleine page (co-auteur : Claude)
+- **Réglages · Application** : quand une nouvelle version est prête, « Vérifier » devient « Installer », en jaune (`--update-bg` #F5C518, texte `--update-ink`, identiques dans les deux thèmes). Il enregistre la saisie en cours puis relance l'app. Le bouton « Relancer maintenant » du bandeau, en double, est masqué ; le bandeau dit « Touche « Installer » pour l'utiliser ».
+- **Fiche d'exercice** (appui long sur une image) : en pleine page, sans coins arrondis, contenu centré sur 600 px au plus ; le haut et la croix tiennent compte de l'encoche du téléphone.
+
+---
+
+## [1.8.16] - 2026-11-15
+### 🪶 Plume du déload plus lisible dans les graphiques (co-auteur : Claude)
+- Même dessin, en version petite taille : 14 px au lieu de 12, trait de 1,3 px au lieu de 2,2. Le trait intérieur ne se bouche plus.
+
+---
+
+## [1.8.15] - 2026-11-15
+### 🎨 Légende du graphique par exercice sur une ligne (co-auteur : Claude)
+- Espacements réduits pour garder « Charge max » et « 1RM estimé » sur la même ligne, dès 360 px : écart entre les deux 16 → 12 px, entre trait, libellé et valeur 8 → 4 px, trait 24 → 16 px (tirets 3 / 3), médaille et étoile 18 → 16 px.
+
+---
+
+## [1.8.14] - 2026-11-15
+### ⭐ Meilleur 1RM : étoile à facettes (co-auteur : Claude)
+- L'étoile du meilleur 1RM estimé (graphique par exercice et légende) prend du relief : bordure dorée foncée, facettes claires et foncées, assortie à la médaille de la charge max (variante B).
+
+---
+
+## [1.8.13] - 2026-11-15
+### 🥇 Charge max : médaille dorée « 1 » à rubans (co-auteur : Claude)
+- Le badge de la charge max (graphique par exercice et légende) devient une médaille en couleurs : disque doré bordé, « 1 » au centre, deux rubans orange. Dessin maison, 20 px sur la courbe, 18 px dans la légende. L'étoile du meilleur 1RM ne change pas.
+
+---
+
+## [1.8.12] - 2026-11-15
+### 🎖️ Charge max : un badge à la place du trophée (co-auteur : Claude)
+- Sur le graphique par exercice et dans sa légende, la charge max est marquée d'un badge (médaille à ruban), pour ne pas la confondre avec les trophées des records. L'étoile du meilleur 1RM ne change pas.
+
+---
+
+## [1.8.11] - 2026-11-15
+### 🏆 Progression par exercice : trophée de la charge max, étoile du meilleur 1RM (co-auteur : Claude)
+- **1RM estimé** : sous le graphique, c'est le meilleur 1RM de tout l'historique, indépendant de la charge max (il ne se calcule que sur des séries de 10 répétitions ou moins, donc il ne peut pas toujours venir de la séance de la charge max ; remplace la règle de la 1.8.8).
+- **Trophée** (or `--trophy`) au-dessus du point de la charge max sur la courbe, et derrière sa valeur dans la légende.
+- **Étoile** au-dessus du point du meilleur 1RM sur le pointillé, et derrière sa valeur dans la légende.
+- À égalité, la marque va sur la séance la plus récente. Exercices au poids du corps : inchangés.
+
+---
+
+## [1.8.10] - 2026-11-15
+### 🎨 Séance : liseré et halo sous l'en-tête fixe (co-auteur : Claude)
+- **Liseré** de 1 px sous l'en-tête de Séance : blanc à 10 % en sombre, gris à 8 % en clair.
+- **Halo de 40 px** sous l'en-tête : en sombre, un fondu de la couleur du fond, comme sous le menu (1.8.6) ; en clair, une ombre sombre à 14 %. Le contenu qui défile s'efface en passant sous l'en-tête ; les touchers passent au travers.
+- Variables `--hdr-rim` et `--hdr-halo`. Onglet Séance seulement.
+
+---
+
+## [1.8.9] - 2026-11-15
+### 🐛 Séance : l'icône et le nom ne bougent plus à l'ouverture d'un exercice (co-auteur : Claude)
+- L'exercice ouvert n'a plus de marge haute de 12 px : l'ensemble icône et texte ne descend plus.
+- Sur les écrans de 380 px ou moins, l'écart entre l'icône et le nom est de 8 px que l'exercice soit fermé ou ouvert (il passait de 12 à 8 px à l'ouverture, ce qui décalait le texte vers la gauche ; 8 px restent nécessaires pour que « Développé militaire » tienne sur une ligne).
+
+---
+
+## [1.8.8] - 2026-11-15
+### 🐛 1RM estimé lié à la charge max (co-auteur : Claude)
+- **Progression par exercice** : sous le graphique, « 1RM estimé » donne celui de la séance de la charge max (à charge max égale, le meilleur), et non plus celui de la dernière séance. Si ces séances n'en ont pas (séries de plus de 10 répétitions), c'est le meilleur 1RM de l'historique.
+
+---
+
+## [1.8.7] - 2026-11-15
+### 🐛 Charge max de tout l'historique, ombre de la série en cours (co-auteur : Claude)
+- **Progression par exercice** : sous le graphique, « Charge max » donne la meilleure charge de tout l'historique, et non plus celle de la dernière séance.
+- **Séance (clair)** : la gélule de la série en cours retrouve son ombre (`--set-row-current-shadow` = `--sh-card`), retirée par erreur en 1.8.1.
+
+---
+
+## [1.8.6] - 2026-11-15
+### 🎨 Halo en bas d'écran sous la barre de navigation (co-auteur : Claude)
+- **Annulé** : le liseré à 12 % de la barre de navigation (1.8.5) ; elle reprend l'ombre `--sh-card` (liseré à 7 % en sombre).
+- **Nouveau** : un halo en dégradé de 150 px en bas de l'écran, sous la barre, dans la couleur du fond (blanc en clair, #0E0E11 en sombre) : le contenu qui défile s'efface avant de passer derrière le menu. Il laisse passer les touchers (`pointer-events: none`) et reste sous les volets.
+- Variable `--nav-halo-rgb` (remplace `--sh-nav`).
+
+---
+
+## [1.8.5] - 2026-11-15
+### 🎨 Barre de navigation (sombre) : liseré du haut plus visible (co-auteur : Claude)
+- En thème sombre, le liseré blanc du haut de la barre de navigation passe de 7 % à 12 %, comme les pastilles d'icônes de Séance (1.8.4).
+- Nouvelle ombre `--sh-nav` (identique à `--sh-card` en clair) ; les cartes gardent leur liseré à 7 %.
+
+---
+
+## [1.8.4] - 2026-11-15
+### 🎨 Séance (sombre) : liseré sur le haut des pastilles d'icônes (co-auteur : Claude)
+- En thème sombre, dans l'onglet Séance seulement, la pastille grise derrière chaque illustration d'exercice reçoit un liseré blanc de 1 px sur son haut (12 %), comme celui de la gélule de la série en cours (7 %), un peu plus visible.
+- Nouvelle variable `--icon-pastille-rim` (aucun effet en clair).
+
+---
+
+## [1.8.3] - 2026-11-15
+### 🎨 Séance : boutons − / + des séries plus contrastés (co-auteur : Claude)
+- Les boutons − / + (nombre de séries) prennent le style des champs de la 1.8.1 : blancs avec liseré et ombre légère en clair, #2A2A32 en sombre. Leur rond se détachait à peine du fond (1,1:1).
+
+---
+
+## [1.8.2] - 2026-11-15
+### 🪶 Bouton Déload et icône de la Presse à cuisses (co-auteur : Claude)
+- **Bouton Déload (Séance)** : l'icône (i) remplace la flèche à droite, comme l'astuce d'échauffement ; elle ouvre toujours l'explication.
+- **Presse à cuisses** : retour à l'icône d'origine (sportive et machine entières), avec les points gris du contour retirés. La photo de la 1.7.97, coupée à droite, donnait un effet carré.
+
+---
+
+## [1.8.1] - 2026-11-15
+### 🎨 Séance : champs de saisie plus contrastés (co-auteur : Claude)
+- Variante G de la planche « contrastes », en clair comme en sombre.
+- **Clair** : champs et coches blancs avec liseré et ombre légère ; la série en cours passe sur fond gris.
+- **Sombre** : champs plus clairs que le fond (#2A2A32), série en cours sur #1D1D23.
+- **Chiffres des séries à venir** plus lisibles : contraste 4,1:1 en clair et 4,3:1 en sombre (2,1:1 et 2,6:1 avant).
+- Nouvelles variables : `--set-field`, `--set-field-ring`, `--set-row-current`, `--set-row-current-shadow`, `--set-todo`.
+
+---
+
+## [1.8.0] - 2026-11-15
+### 🪶 Déload visible dans l'historique et les graphiques (co-auteur : Claude)
+- **Historique** : l'étiquette « Déload » affiche bien sa plume (le code de l'icône s'affichait en texte à la place).
+- **Graphiques** : une petite plume marque les séances de déload, à l'aplomb de leur point, en bas du graphique (volume par séance, par type et par jour ; progression par exercice ; suivi cardio). Blanche sur le bloc de volume, ambre ailleurs. Pas de plume dans la vue par mois, qui cumule plusieurs séances.
+
+### ✍️ Accueil Programmes : message manuscrit remonté
+- Le message manuscrit (« Bonjour, … » ou « Bienvenue ! ») remonte de 16 px : l'écart avec « MON CARNET DE SALLE » est réduit (publié d'abord en 1.7.100).
+
+---
+
+## [1.7.99] - 2026-11-15
+### 🖼️ Revue des icônes : 4 corrections (co-auteur : Claude)
+- **Leg curl** : morceaux du banc qui flottaient sous l'icône retirés.
+- **Rowing unilatéral** : ombre grise sous le banc retirée.
+- **Rowing barre** : tête entière (le zoom la coupait au front), image coupée aux chevilles.
+- **Pull-over poulie** : câble remis (il avait disparu au détourage), en jaune avec liseré noir comme Tirage bras tendus.
+
+---
+
+## [1.7.98] - 2026-11-15
+### 🖼️ Icône du Tirage menton corrigée (co-auteur : Claude)
+- **Tirage menton** : le coude du bras gauche était coupé par le détourage ; image détourée à nouveau, bras entier, même cadrage.
+
+---
+
+## [1.7.97] - 2026-11-14
+### 🖼️ 5 nouvelles icônes d'exercices, Presse à cuisses refaite (co-auteur : Claude)
+- **Nouvelles icônes** : Développé rotatif haltères, Développé épaules machine, Tirage menton (kettlebell), Curl barre EZ, Ab wheel.
+- **Presse à cuisses** : nouvelle image, zoom sur la personne, pieds en entier, sans les résidus de fond de l'ancienne.
+- Les 5 nouvelles icônes sont ajoutées au cache hors ligne. Il reste 14 exercices sans icône.
+
+---
+
+## [1.7.96] - 2026-11-14
+### 🪶 Déload : plume, bouton et explication ; flamme plus grande (co-auteur : Claude)
+- **Icône du déload** : une plume (semaine légère) remplace l'éclair, sur la tuile, dans la Séance et dans l'Historique.
+- **Séance** : le déload devient un bouton pleine largeur de 36 px, « Déload −20 % › ». Il ouvre une fenêtre ⓘ qui l'explique (semaine de décharge, toutes les 12 séances, récupération) avec « Suivre le conseil de déload » (en noir) et « Reporter » (en gris). Fermer la fenêtre ne reporte rien. Le lien « Reporter à la prochaine séance » sous le bouton est retiré.
+- **Échauffement** : flamme agrandie de 18 à 24 px.
+- `askSheet` accepte `cancelValue` pour distinguer le second bouton d'une simple fermeture.
+
+---
+
 ## [1.7.95] - 2026-11-14
 ### 🖼️ Fond Suspension recadré (co-auteur : Claude)
 - **Suspension** : image calée sur son bord droit (au lieu de 85 %), la sportive est entière à l'écran, autant que la photo le permet.

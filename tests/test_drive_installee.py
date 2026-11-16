@@ -175,6 +175,17 @@ with Srv() as base, sync_playwright() as p:
           not log['auth'] and pg.evaluate("window.__reqs.length") == 1 and not any('reconnexion' in d for d in saved) and len(sent(log, 'POST', '/upload/drive/v3/files')) == 1)
     ctx.close()
 
+    # 1.8.23 : retour de « Reconnecter » : Réglages s'affiche directement, l'onglet Programme n'est jamais visible
+    OBS = """window.__seen=[];const __t=()=>{const c=document.querySelector('.container.active');
+      if(c&&getComputedStyle(c).visibility!=='hidden')window.__seen.push(c.id);
+      if(!window.__stop)requestAnimationFrame(__t);};requestAnimationFrame(__t);"""
+    ctx, pg, log = run(br, base, seeds=[EXPIRED, "localStorage.setItem('h49_drive_oauth_state','S1');", OBS], installed=True,
+                       goto='index.html#access_token=tokR&expires_in=3599&token_type=Bearer&state=S1')
+    pg.wait_for_timeout(1500)
+    seen = pg.evaluate("window.__stop=1, [...new Set(window.__seen)]")
+    check("retour de « Reconnecter » : Réglages directement, sans passer par Programme", seen == ['tab-reglages'], seen)
+    ctx.close()
+
     # jamais connecté à Drive : aucune redirection, aucune mention
     ctx, pg, log = run(br, base, installed=True)
     pg.wait_for_timeout(1200)

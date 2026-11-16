@@ -23,7 +23,14 @@
   --card-bg: #FFFFFF;
   --fill: #F3F3F5;             /* champs, pastilles, pistes */
   --icon-pastille: #E4E4E9;    /* pastille ronde derrière les icônes d'exercice */
+  --icon-pastille-rim: none;   /* 1.8.4 : liseré du haut des pastilles de Séance (sombre seulement) */
   --surface: #FFFFFF;          /* navigation, chrono prêt, ligne active */
+  /* 1.8.1 : champs de saisie des séries (variante G de la planche contrastes) */
+  --set-field: #FFFFFF;                                                  /* champs relevés, blancs */
+  --set-field-ring: 0 0 0 1px #E1E1E6, 0 1px 3px rgba(17, 17, 20, 0.10); /* liseré + ombre légère */
+  --set-row-current: var(--fill);                                        /* série en cours sur fond gris */
+  --set-row-current-shadow: var(--sh-card);                             /* 1.8.7 : ombre de la gélule en cours rétablie en clair */
+  --set-todo: #7C7C85;                                                   /* chiffres des séries à venir : 4,1:1 */
   --border: #D9D9DE;
 
   /* Texte */
@@ -73,6 +80,11 @@
   --sh-pill: 0 2px 2px rgba(17, 17, 20, 0.45), 0 8px 10px -3px rgba(17, 17, 20, 0.35);
   --sh-red: 0 2px 2px rgba(229, 57, 43, 0.5), 0 7px 9px -3px rgba(229, 57, 43, 0.55);
   --sh-card: 0 1px 2px rgba(17, 17, 20, 0.2), 0 6px 8px -3px rgba(17, 17, 20, 0.22);
+  --update-bg: #F5C518;        /* 1.8.17 : bouton « Installer » (jaune, identique dans les deux thèmes) */
+  --update-ink: #3A2E0A;
+  --nav-halo-rgb: 255, 255, 255; /* 1.8.6 : halo en bas d'écran sous la barre de navigation (couleur de --bg) */
+  --hdr-rim: inset 0 -1px 0 rgba(17, 17, 20, 0.08);  /* 1.8.10 : liseré sous l'en-tête de Séance */
+  --hdr-halo: linear-gradient(to bottom, rgba(17, 17, 20, 0.14) 0%, rgba(17, 17, 20, 0.049) 45%, rgba(17, 17, 20, 0) 100%); /* 1.8.10 : ombre de 40 px sous l'en-tête de Séance */
   --sh-chip: 0 1px 2px rgba(17, 17, 20, 0.5), 0 5px 7px -2px rgba(17, 17, 20, 0.4);
   --sh-btn: var(--sh-pill);
   --sh-icon: drop-shadow(0 1px 1px rgba(17, 17, 20, 0.3)) drop-shadow(0 4px 3px rgba(17, 17, 20, 0.2));
@@ -155,7 +167,13 @@
   --card-bg: #17171C;
   --fill: #1A1A1F;
   --icon-pastille: #2C2C33;
+  --icon-pastille-rim: inset 0 1px 0 rgba(255, 255, 255, 0.12); /* 1.8.4 : liseré du haut, comme la gélule de la série en cours (7 %), un peu plus visible */
   --surface: #17171C;
+  --set-field: #2A2A32;                 /* 1.8.1 : champs plus clairs que le fond */
+  --set-field-ring: none;
+  --set-row-current: #1D1D23;
+  --set-row-current-shadow: var(--sh-card);
+  --set-todo: #8C8C96;                  /* 4,3:1 sur --set-field */
   --border: #2A2A31;
 
   --text: #F2F2F4;
@@ -186,6 +204,9 @@
   --sh-pill: 0 1px 2px rgba(0, 0, 0, 0.7), 0 8px 14px -4px rgba(0, 0, 0, 0.7);
   --sh-red: 0 2px 2px rgba(255, 77, 63, 0.35), 0 7px 10px -3px rgba(255, 77, 63, 0.45);
   --sh-card: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 1px 2px rgba(0, 0, 0, 0.6), 0 6px 10px -4px rgba(0, 0, 0, 0.6);
+  --nav-halo-rgb: 14, 14, 17;    /* 1.8.6 : = --bg sombre */
+  --hdr-rim: inset 0 -1px 0 rgba(255, 255, 255, 0.10);
+  --hdr-halo: linear-gradient(to top, rgba(14, 14, 17, 0) 0%, rgba(14, 14, 17, 0.55) 60%, rgba(14, 14, 17, 0.92) 100%); /* halo de la couleur du fond, comme sous le menu */
   --sh-chip: 0 1px 2px rgba(0, 0, 0, 0.6), 0 4px 8px -2px rgba(0, 0, 0, 0.55);
   --sh-btn: var(--sh-chip);
   --sh-icon: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.7)) drop-shadow(0 4px 3px rgba(0, 0, 0, 0.5));
@@ -236,7 +257,8 @@ body { background-color: var(--bg); color: var(--text); font-size: 17px; height:
    la marge d'un écran sans encoche ; les boutons de l'en-tête gardent leurs 4 px d'avance sur le nom. */
 :root { --safe-top: env(safe-area-inset-top, 0px); }
 header { position: relative; flex: none; width: 100%; z-index: var(--z-header); max-width: 600px; margin: 0 auto; padding: max(28px, var(--safe-top)) var(--gutter) 12px; background: var(--bg); text-align: left; }
-body[data-tab="seance"] header { padding-bottom: 0; }
+body[data-tab="seance"] header { padding-bottom: 0; box-shadow: var(--hdr-rim); }
+body[data-tab="seance"] header::after { content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 40px; pointer-events: none; background: var(--hdr-halo); } /* 1.8.10 */
 .page-header { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .app-kicker { font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
 /* 1.7.66 : version de test (…/dev/) — pastille « TEST » à côté du nom, couleurs de la pastille Déload (planche 37) */
@@ -277,6 +299,9 @@ body[data-tab="seance"] .seance-sticky { display: block; }
    4. NAVIGATION : pastille flottante, l'onglet actif porte son libellé
    ============================================ */
 nav { position: fixed; left: 30px; right: 30px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); max-width: 508px; height: 64px; margin: 0 auto; padding: 0 8px; display: flex; align-items: center; justify-content: space-between; gap: 0; background: var(--surface); border: none; border-radius: 999px; box-shadow: var(--sh-card); z-index: var(--z-header); }
+/* 1.8.6 : halo en dégradé en bas de l'écran, sous la barre : le contenu s'efface avant de passer derrière elle */
+html[data-drive-return] .container, html[data-drive-return] nav { visibility: hidden; } /* 1.8.23 : retour de connexion Google */
+body::after { content: ''; position: fixed; left: 0; right: 0; bottom: 0; height: calc(110px + env(safe-area-inset-bottom, 0px)); pointer-events: none; z-index: calc(var(--z-header) - 1); background: linear-gradient(to bottom, rgba(var(--nav-halo-rgb), 0) 0%, rgba(var(--nav-halo-rgb), 0.5) 25%, rgba(var(--nav-halo-rgb), 0.88) 55%, rgba(var(--nav-halo-rgb), 1) 100%); } /* 1.8.24 : variante C, plus court et plus dense */
 nav button { position: relative; flex: none; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px; height: 48px; min-width: 48px; padding: 0; background: none; border: none; border-radius: 999px; color: var(--text-muted); font-size: 0; font-weight: 500; cursor: pointer; transition: background var(--t-fast) ease, color var(--t-fast) ease; }
 nav button.active { background: var(--primary-strong); color: var(--on-strong); font-size: 0.9375rem; font-weight: 600; padding: 0 20px 0 16px; box-shadow: var(--sh-chip); }
 nav button svg { width: 24px; height: 24px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
@@ -334,14 +359,20 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 .warmup-note[hidden] { display: none; }
 .submit-hint { text-align: center; color: var(--text-muted); font-size: 0.875rem; margin: 16px 0 -2px; }
 .analysis-note { margin-top: 12px; font-size: 0.8125rem; line-height: 1.35; color: var(--text-muted); }
-.ex-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 12px; font-size: 0.8125rem; color: var(--text-muted); }   /* 1.7.34 : légende charge max / 1RM estimé */
+.ex-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; /* 1.8.15 : 16 → 12 px, charge max et 1RM sur une ligne */ margin-top: 12px; font-size: 0.8125rem; color: var(--text-muted); }   /* 1.7.34 : légende charge max / 1RM estimé */
 .ex-legend[hidden] { display: none; }
-.ex-legend span { display: flex; align-items: center; gap: 8px; }
+.ex-legend span { display: flex; align-items: center; gap: 4px; } /* 1.8.15 : 8 → 4 px */
 .ex-legend b { color: var(--text); font-weight: 600; }
-.ex-legend svg { flex: none; width: 24px; height: 4px; }
+.ex-legend svg { flex: none; width: 16px; height: 4px; } /* 1.8.15 : trait de 24 → 16 px */
 .ex-legend line { stroke: var(--chart-primary); stroke-width: 2.5; }
-.ex-legend line.dash { stroke-width: 2; stroke-dasharray: 5 5; }
+.ex-legend line.dash { stroke-width: 2; stroke-dasharray: 3 3; } /* 1.8.15 : tirets plus courts sur 16 px */
 .ex-legend.reps .rm-line { display: none; }   /* 1.7.35 : poids du corps, « Record » sans trait */
+/* 1.8.11 : médaille (charge max, 1.8.13) et étoile (meilleur 1RM) derrière les valeurs, comme sur la courbe */
+.ex-legend b { display: inline-flex; align-items: center; gap: 2px; }
+.ex-legend .ex-legend-mark { display: inline-flex; color: var(--trophy); }
+.ex-legend .ex-legend-mark svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ex-legend .ex-legend-mark.star svg { width: 16px; height: 16px; stroke: none; } /* 1.8.14 : étoile à facettes, couleurs dans le dessin */
+.ex-legend .ex-legend-mark svg.medal { width: 16px; height: 16px; stroke: none; } /* 1.8.13 : médaille en couleurs */
 .analysis-empty-hint { margin-top: 8px; font-size: 0.9375rem; }
 .analysis-none { font-size: 0.9375rem; color: var(--text-muted); }
 .analysis-empty { text-align: center; color: var(--text-muted); }
@@ -399,11 +430,11 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 #workout-duration-display { cursor: pointer; }
 .progress-track { height: 8px; background: var(--fill); border-radius: 999px; overflow: hidden; }
 .progress-fill { height: 100%; width: 0; border-radius: 999px; background: var(--indigo); transition: width var(--t-normal) ease; }
-#tab-seance .warmup-note { margin-bottom: 16px; }
+#tab-seance .warmup-note { margin: 4px 0 12px; } /* 1.8.18 : dans l'exercice ouvert, au-dessus des intitulés */
 
 /* Exercices en accordéon */
 .exercise-item { margin-bottom: 4px; padding: 8px 0; background: none; border: none; border-radius: 32px; scroll-margin-top: 8px; }
-.exercise-item.open { margin: 12px 0 16px; padding: 8px 0; background: none; border-radius: 0; box-shadow: none; }
+.exercise-item.open { margin: 0 0 16px; padding: 8px 0; /* 1.8.9 : plus de marge haute, l'icône et le nom ne bougent plus à l'ouverture */ background: none; border-radius: 0; box-shadow: none; }
 .ex-header { display: flex; align-items: center; gap: 8px; }
 .ex-toggle { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; background: none; border: none; padding: 0; text-align: left; color: var(--text); font: inherit; cursor: pointer; }
 .ex-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
@@ -415,12 +446,13 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 .ex-chevron svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .exercise-item.open .ex-chevron { display: none; }
 .exercise-item .ex-icon-badge { width: 66.55px; height: 66.55px; flex-shrink: 0; } /* +15 % (1.7.14), +10 % (1.7.72), +10 % (1.7.77) */
+.exercise-item .ex-icon-badge::before { box-shadow: var(--icon-pastille-rim); } /* 1.8.4 : onglet Séance seulement */
 .ex-body { margin-top: 12px; }
 .ex-body[hidden], .ex-controls[hidden] { display: none; }
 
 /* Boutons d'ajout / suppression de séries */
 .ex-controls { display: flex; align-items: center; gap: 8px; }
-.btn-set-count { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; padding: 0; background: var(--fill); border: none; border-radius: 50%; color: var(--text); cursor: pointer; }
+.btn-set-count { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; padding: 0; background: var(--set-field); box-shadow: var(--set-field-ring); /* 1.8.3 : comme les champs des séries */ border: none; border-radius: 50%; color: var(--text); cursor: pointer; }
 .exercise-item.open .btn-set-count { width: 40px; height: 40px; }
 .btn-set-count svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .btn-set-count:active { opacity: 0.7; }
@@ -430,27 +462,27 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 .sets-head span:nth-child(2), .sets-head span:nth-child(3) { text-align: center; }
 .sets-grid { display: flex; flex-direction: column; gap: 4px; }
 .set-row { display: grid; grid-template-columns: 30px minmax(0, 1fr) minmax(0, 1fr) 52px; gap: 12px; align-items: center; padding: 8px 8px 8px 4px; border-radius: 999px; }
-.set-row.current { background: var(--surface); box-shadow: var(--sh-card); }
+.set-row.current { background: var(--set-row-current); box-shadow: var(--set-row-current-shadow); } /* 1.8.1 */
 
-.set-label { font-family: var(--font-display); font-size: 0.9375rem; font-weight: 700; text-align: center; color: var(--todo); }
+.set-label { font-family: var(--font-display); font-size: 0.9375rem; font-weight: 700; text-align: center; color: var(--set-todo); } /* 1.8.1 : était --todo */
 .set-row.current .set-label { color: var(--text); }
 .set-row.done .set-label { color: var(--text-muted); }
 
-.set-input { -webkit-appearance: none; appearance: none; width: 100%; height: 52px; padding: 0 4px; background: var(--fill); border: none; border-radius: var(--radius-field); color: var(--todo); font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; text-align: center; transition: border-color var(--t-normal) ease, background var(--t-normal) ease; -moz-appearance: textfield; }
+.set-input { -webkit-appearance: none; appearance: none; width: 100%; height: 52px; padding: 0 4px; background: var(--set-field); border: none; box-shadow: var(--set-field-ring); border-radius: var(--radius-field); color: var(--set-todo); font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; text-align: center; transition: border-color var(--t-normal) ease, background var(--t-normal) ease; -moz-appearance: textfield; }
 .set-input::-webkit-outer-spin-button, .set-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .set-input:focus { outline: none; color: var(--text); box-shadow: inset 0 0 0 2px var(--primary); }
 .set-input.active-input { color: var(--text); }
 .set-row.current .set-input { color: var(--text); }
-.set-row.done .set-input { background: transparent; color: var(--text-muted); }
+.set-row.done .set-input { background: transparent; box-shadow: none; color: var(--text-muted); }
 
-.btn-check-set { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; padding: 0; background: var(--fill); border: none; border-radius: var(--radius-field); color: var(--text-muted); cursor: pointer; transition: background var(--t-normal) ease, border-color var(--t-normal) ease, color var(--t-normal) ease; }
+.btn-check-set { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; padding: 0; background: var(--set-field); box-shadow: var(--set-field-ring); border: none; border-radius: var(--radius-field); color: var(--text-muted); cursor: pointer; transition: background var(--t-normal) ease, border-color var(--t-normal) ease, color var(--t-normal) ease; }
 .btn-check-set svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .set-row.current .btn-check-set { background: var(--surface); color: var(--text); box-shadow: inset 0 0 0 2px var(--text); }
 .set-row.done .btn-check-set { background: var(--success); color: var(--on-success); box-shadow: none; }
 
 /* Écrans étroits (≤ 380 px) : on libère de la place au nom de l'exercice ouvert */
 @media (max-width: 380px) {
-  .exercise-item.open .ex-toggle { gap: 8px; }
+  .exercise-item .ex-toggle { gap: 8px; } /* 1.8.9 : 8 px ouvert ET fermé, le nom ne bouge plus à l'ouverture */
   .exercise-item.open .ex-name { font-size: 1.0625rem; }
   .exercise-item.open .ex-controls { gap: 8px; }
 }
@@ -570,6 +602,8 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 .update-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .update-version { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; }
 .update-check { width: auto; flex: none; height: 48px; margin: 0; padding: 0 24px; border-radius: 999px; }
+.update-check.install { background: var(--update-bg); color: var(--update-ink); font-weight: 700; box-shadow: var(--sh-chip); } /* 1.8.17 : « Installer » en jaune quand une version est prête */
+.update-banner .update-apply { display: none; } /* 1.8.17 : le bouton « Installer » du haut remplace « Relancer maintenant » */
 .update-banner { margin-top: 16px; padding: 16px 16px; border-radius: var(--radius-field); background: var(--warn-tint); border: 1px solid var(--warn-border); color: var(--warn); font-size: 1rem; line-height: 1.35; font-weight: 500; }
 .update-banner[hidden] { display: none; }
 .update-apply { height: 52px; margin-top: 12px; padding: 0 8px; }
@@ -824,6 +858,12 @@ body[data-tab="programme"][data-pview="choose"] header h1 { display: none; }
 /* --- Séance : saisies à un seul champ, déload reporté, rien d'actif --- */
 .set-row.single, .sets-head.single { grid-template-columns: 30px minmax(0, 1fr) 52px; }
 .lest-input::placeholder { color: var(--todo); }
+.deload-btn { align-self: stretch; width: 100%; min-height: 36px; margin: 0 0 12px; padding: 4px 12px 4px 16px; font-family: inherit; font-size: 0.9375rem; text-align: left; cursor: pointer; } /* 1.7.96 */
+.deload-btn .deload-btn-label { flex: 1; }
+.deload-btn .deload-btn-chevron { display: flex; }
+.deload-btn .deload-btn-chevron svg { width: 20px; height: 20px; } /* 1.8.2 : (i) à la place du chevron */
+.deload-btn:disabled { cursor: default; }
+.deload-btn:disabled .deload-btn-chevron { display: none; }
 .deload-actions { margin: -4px 0 12px; font-size: 0.875rem; color: var(--warn); }
 .deload-actions[hidden] { display: none; }
 .deload-link { color: var(--warn); font-size: 0.875rem; }
@@ -973,7 +1013,7 @@ body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 /* ============================================
    Accueil Programmes : message manuscrit (1.7.24)
    ============================================ */
-.prog-greet { max-width: 94%; margin: 8px 0 0; font-family: var(--font-hand); font-weight: 600; line-height: 1.05; color: var(--text); transform: rotate(-2deg); transform-origin: left top; }
+.prog-greet { max-width: 94%; margin: -8px 0 0; /* 1.8.0 : remontée de 16 px vers le nom de l’app */ font-family: var(--font-hand); font-weight: 600; line-height: 1.05; color: var(--text); transform: rotate(-2deg); transform-origin: left top; }
 .prog-greet-hello, .prog-greet-line { font-family: inherit; } /* « * » impose la police du texte à chaque élément */
 .prog-greet-hello { display: block; font-size: 2.625rem; }
 .prog-greet-line { display: block; margin-top: 2px; font-size: 1.75rem; }
@@ -982,7 +1022,7 @@ body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
    SÉANCE : ÉCHAUFFEMENT ET FENÊTRE DE FIN DE SÉANCE (1.7.27)
    ============================================ */
 .warmup-info { flex: none; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; } /* 1.7.40 : (i) en tête */
-.warmup-flame { display: inline-block; vertical-align: -3px; width: 18px; height: 18px; fill: var(--flame); } /* 1.7.40 : après « t'échauffer » */
+.warmup-flame { display: inline-block; vertical-align: -6px; width: 24px; height: 24px; fill: var(--flame); } /* 1.7.40 : après « t'échauffer » */
 .warmup-weight { display: inline-block; vertical-align: -3px; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
 .finish-overlay { position: fixed; inset: 0; z-index: var(--z-finish); display: flex; align-items: center; justify-content: center; padding: 0 20px; background: var(--overlay); }
@@ -1077,6 +1117,15 @@ body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 .fiche-sheet > * { flex-shrink: 0; }
 .sheet.tall.fiche-sheet { position: relative; }
 .fiche-close { position: absolute; top: 16px; right: var(--gutter); z-index: var(--z-raised); } /* 1.7.87 : croix en haut à droite, défile avec la fiche */
+/* 1.8.17 : fiche en pleine page (plus de coins arrondis ni de voile visible), sous l'encoche du téléphone */
+.sheet.tall.fiche-sheet { height: 100dvh; max-height: 100dvh; max-width: none; border-radius: 0; box-shadow: none; padding-top: max(28px, var(--safe-top)); }
+.fiche-sheet > *:not(.fiche-close) { width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; }
+.fiche-close { display: none; } /* 1.8.19 : plus de croix en pleine page */
+/* 1.8.19 : « Fermer » fixe en bas, noir (primary-strong), sur un halo de la couleur du fond comme sous le menu */
+.fiche-sheet { padding-bottom: 0; }
+.sheet.tall.fiche-sheet { background: var(--bg); } /* pleine page : couleur de la page, assortie au halo */
+.fiche-foot { position: sticky; bottom: 0; margin-top: auto; padding: 36px 0 calc(16px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(to bottom, rgba(var(--nav-halo-rgb), 0) 0%, rgba(var(--nav-halo-rgb), 0.85) 40%, rgba(var(--nav-halo-rgb), 0.97) 100%); z-index: var(--z-raised); }
+.fiche-close-btn { margin: 0; }
 .exf-hero { display: flex; justify-content: center; margin: 4px 0 12px; }
 .exf-hero .ex-icon-badge { width: 220px; height: 220px; }
 .exf-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 0 0 20px; }

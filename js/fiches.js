@@ -198,7 +198,8 @@ function ficheHtml(e) {
     if (fiche.e && fiche.e.length) html += `<h3 class="exf-h">À éviter</h3><ul class="exf-list avoid">${fiche.e.map(t => `<li>${escapeHtml(t)}</li>`).join('')}</ul>`;
     if (fiche.m) html += `<h3 class="exf-h">Muscles</h3><p class="sheet-text">${escapeHtml(fiche.m)}</p>`;
   }
-  html += `<button type="button" class="btn btn-secondary" onclick="closeFiche()">Fermer</button>`;
+  // 1.8.19 : « Fermer » fixe en bas, en noir (couleurs inversées), sur un halo comme sous le menu
+  html += `<div class="fiche-foot"><button type="button" class="btn fiche-close-btn" onclick="closeFiche()">Fermer</button></div>`;
   return html;
 }
 
@@ -213,7 +214,8 @@ function openFiche(ref) {
     overlay.addEventListener('click', ev => { if (ev.target === overlay) closeFiche(); });
     document.body.appendChild(overlay);
   }
-  overlay.innerHTML = `<div class="sheet tall fiche-sheet" role="dialog" aria-modal="true" aria-labelledby="fiche-title"><button type="button" class="sheet-close fiche-close" aria-label="Fermer" onclick="closeFiche()">${CLOSE_SVG}</button>${ficheHtml(e)}</div>`;
+  // 1.8.19 : pleine page, sans croix (« Fermer » fixe en bas)
+  overlay.innerHTML = `<div class="sheet tall fiche-sheet" role="dialog" aria-modal="true" aria-labelledby="fiche-title">${ficheHtml(e)}</div>`;
   overlay.classList.add('open');
 }
 
@@ -230,9 +232,12 @@ document.addEventListener('keydown', ev => {
 // Le toucher simple garde son effet habituel ; après un appui long, le clic qui suit est ignoré.
 (function bindFicheLongPress() {
   const LONG_MS = 500, MOVE_PX = 10;
-  let timer = null, startX = 0, startY = 0, fired = false;
+  let timer = null, startX = 0, startY = 0, fired = false, firedUp = 0;
   const cancel = () => { clearTimeout(timer); timer = null; };
   document.addEventListener('pointerdown', ev => {
+    // 1.8.22 : un nouvel appui annule le blocage du clic (sur téléphone, le relâché d'un appui long ne produit
+    // pas toujours de clic : le blocage restait armé et avalait le premier appui sur « Fermer »)
+    if (fired && Date.now() - firedUp > 50) fired = false;
     const badge = ev.target.closest && ev.target.closest('.ex-icon-badge');
     if (!badge || badge.closest('.fiche-sheet')) return;
     const src = badge.querySelector('[data-ex]');
@@ -246,7 +251,8 @@ document.addEventListener('keydown', ev => {
     }, LONG_MS);
   }, true);
   document.addEventListener('pointermove', ev => { if (timer && Math.hypot(ev.clientX - startX, ev.clientY - startY) > MOVE_PX) cancel(); }, true);
-  ['pointerup', 'pointercancel', 'scroll'].forEach(t => document.addEventListener(t, cancel, true));
-  document.addEventListener('click', ev => { if (fired) { fired = false; ev.stopPropagation(); ev.preventDefault(); } }, true);
+  ['pointerup', 'pointercancel', 'scroll'].forEach(t => document.addEventListener(t, ev => { if (fired && t !== 'scroll') firedUp = Date.now(); cancel(); }, true));
+  // seul le clic qui suit immédiatement le relâché de l'appui long est ignoré
+  document.addEventListener('click', ev => { if (fired) { const recent = Date.now() - firedUp < 600; fired = false; if (recent) { ev.stopPropagation(); ev.preventDefault(); } } }, true);
   document.addEventListener('contextmenu', ev => { if (ev.target.closest && ev.target.closest('.ex-icon-badge')) ev.preventDefault(); }, true);
 })();

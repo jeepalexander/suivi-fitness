@@ -71,7 +71,87 @@ const EXERCISE_FILTERS = ['Tous', 'Polyarticulaires', 'Cardio', 'Pectoraux', 'Do
 
 // Couleurs des graphiques : valeurs de repli (thème clair). Elles sont relues depuis
 // les variables --chart-* de style.css à chaque changement de thème (voir readChartColors).
-const CHART_COLORS = { primary: '#111114', success: '#0B7A43', volume: '#C2570C', tick: '#6B6B73', grid: '#EEEEF1', band: 'rgba(246, 213, 139, 0.45)' };
+const CHART_COLORS = { primary: '#111114', success: '#0B7A43', volume: '#C2570C', tick: '#6B6B73', grid: '#EEEEF1', band: 'rgba(246, 213, 139, 0.45)', warn: '#92400E', trophy: '#E0A800' };
+
+// 1.8.0 : petite plume (pictogramme du déload) sous les points des séances de déload, dans les graphiques
+const DELOAD_PATHS = ['M20.2 12.2a6 6 0 0 0-8.5-8.5L5 10.5V19h8.5z', 'M16 8L2 22', 'M17.5 15H9'];
+// 1.8.11 : badge (1.8.12, à la place du trophée réservé aux records) au-dessus du point de la charge max, étoile au-dessus du meilleur 1RM estimé
+// 1.8.13 : médaille dorée « 1 » à rubans (dessin maison), en couleurs
+const MEDAL_RIBBON = '#E0582C', MEDAL_RIBBON_DARK = '#B8401C', MEDAL_RIM = '#C99300', MEDAL_INK = '#7A5600';
+const BADGE_SVG = '<svg class="medal" viewBox="0 0 24 24" aria-hidden="true">'
+  + '<path d="M7.2 12.5 5 21.5l3.2-1.6 1.8 2.6 2-8.3z" fill="' + MEDAL_RIBBON + '"/>'
+  + '<path d="M16.8 12.5 19 21.5l-3.2-1.6-1.8 2.6-2-8.3z" fill="' + MEDAL_RIBBON_DARK + '"/>'
+  + '<circle cx="12" cy="9" r="7.5" fill="' + MEDAL_RIM + '"/><circle cx="12" cy="9" r="5.8" fill="var(--trophy)"/>'
+  + '<path d="M10.6 7.2 12.6 5.8V12.4" fill="none" stroke="' + MEDAL_INK + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+// 1.8.14 : étoile à facettes (bordée, deux tons dorés)
+const STAR_PATH = 'M12.00 3.00 L14.35 9.26 L21.04 9.56 L15.80 13.74 L17.58 20.19 L12.00 16.50 L6.42 20.19 L8.20 13.74 L2.96 9.56 L9.65 9.26Z';
+const STAR_FACETS_LIGHT = ['M12.00 12.50 L9.65 9.26 L12.00 3.00Z', 'M12.00 12.50 L14.35 9.26 L21.04 9.56Z', 'M12.00 12.50 L15.80 13.74 L17.58 20.19Z', 'M12.00 12.50 L12.00 16.50 L6.42 20.19Z', 'M12.00 12.50 L8.20 13.74 L2.96 9.56Z'];
+const STAR_FACETS_DARK = ['M12.00 12.50 L12.00 3.00 L14.35 9.26Z', 'M12.00 12.50 L21.04 9.56 L15.80 13.74Z', 'M12.00 12.50 L17.58 20.19 L12.00 16.50Z', 'M12.00 12.50 L6.42 20.19 L8.20 13.74Z', 'M12.00 12.50 L2.96 9.56 L9.65 9.26Z'];
+const STAR_LIGHT = '#FFE08A', STAR_DARK = '#D9A21B', STAR_RIM = '#B88600';
+const STAR_SVG = '<svg class="star3d" viewBox="0 0 24 24" aria-hidden="true"><path d="' + STAR_PATH + '" fill="' + STAR_RIM + '" stroke="' + STAR_RIM + '" stroke-width="1.6" stroke-linejoin="round"/>'
+  + STAR_FACETS_LIGHT.map(p => '<path d="' + p + '" fill="' + STAR_LIGHT + '"/>').join('')
+  + STAR_FACETS_DARK.map(p => '<path d="' + p + '" fill="' + STAR_DARK + '"/>').join('') + '</svg>';
+function recordMarksPlugin(maxIdx, rmIdx, color) {
+  return {
+    id: 'recordMarks',
+    afterDatasetsDraw(chart) {
+      if (typeof Path2D === 'undefined') return;
+      const { ctx: c, chartArea } = chart;
+      const S = 20, k = S / 24, gap = 5;
+      const at = (ds, i) => {
+        const meta = chart.getDatasetMeta(ds);
+        const pt = meta && meta.data ? meta.data[i] : null;
+        if (i < 0 || !pt || pt.skip || !isFinite(pt.x) || !isFinite(pt.y)) return null;
+        return { x: pt.x - S / 2, y: Math.max(pt.y - gap - S, chartArea.top - S) };
+      };
+      const draw = (p, fn) => { if (!p) return; c.save(); c.translate(p.x, p.y); c.scale(k, k); fn(); c.restore(); };
+      c.save();
+      c.strokeStyle = color; c.fillStyle = color; c.lineWidth = 2.2 / k; c.lineCap = 'round'; c.lineJoin = 'round';
+      draw(at(0, maxIdx), () => {
+        c.fillStyle = MEDAL_RIBBON; c.fill(new Path2D('M7.2 12.5 5 21.5l3.2-1.6 1.8 2.6 2-8.3z'));
+        c.fillStyle = MEDAL_RIBBON_DARK; c.fill(new Path2D('M16.8 12.5 19 21.5l-3.2-1.6-1.8 2.6-2-8.3z'));
+        c.fillStyle = MEDAL_RIM; c.beginPath(); c.arc(12, 9, 7.5, 0, 2 * Math.PI); c.fill();
+        c.fillStyle = color; c.beginPath(); c.arc(12, 9, 5.8, 0, 2 * Math.PI); c.fill();
+        c.strokeStyle = MEDAL_INK; c.lineWidth = 1.8; c.stroke(new Path2D('M10.6 7.2 12.6 5.8V12.4'));
+        c.fillStyle = color; c.strokeStyle = color; c.lineWidth = 2.2 / k;
+      });
+      draw(at(1, rmIdx), () => {
+        const st = new Path2D(STAR_PATH);
+        c.fillStyle = STAR_RIM; c.strokeStyle = STAR_RIM; c.lineWidth = 1.6; c.lineJoin = 'round'; c.fill(st); c.stroke(st);
+        c.fillStyle = STAR_LIGHT; STAR_FACETS_LIGHT.forEach(p => c.fill(new Path2D(p)));
+        c.fillStyle = STAR_DARK; STAR_FACETS_DARK.forEach(p => c.fill(new Path2D(p)));
+      });
+      c.restore();
+    }
+  };
+}
+
+function deloadMarksPlugin(flags, color) {
+  return {
+    id: 'deloadMarks',
+    afterDatasetsDraw(chart) {
+      if (!flags || !flags.some(Boolean) || typeof Path2D === 'undefined') return;
+      const meta = chart.getDatasetMeta(0);
+      if (!meta || !meta.data) return;
+      const { ctx: c, chartArea } = chart;
+      const S = 14, k = S / 24, gap = 6; // 1.8.16 : 12 → 14 px
+      const paths = DELOAD_PATHS.map(d => new Path2D(d));
+      c.save();
+      c.strokeStyle = color; c.lineWidth = 1.3 / k; c.lineCap = 'round'; c.lineJoin = 'round'; // 1.8.16 : trait 2,2 → 1,3 px, le trait intérieur se distingue
+      meta.data.forEach((pt, i) => {
+        if (!flags[i] || !pt || pt.skip || !isFinite(pt.x) || !isFinite(pt.y)) return;
+        // à l'aplomb du point, en bas de la zone du graphique (ne chevauche pas la courbe) ;
+        // au-dessus du point seulement si celui-ci est tout en bas
+        let y = chartArea.bottom - S - 4;
+        if (pt.y > y - gap) y = pt.y - gap - S;
+        c.save(); c.translate(pt.x - S / 2, y); c.scale(k, k);
+        paths.forEach(p => c.stroke(p));
+        c.restore();
+      });
+      c.restore();
+    }
+  };
+}
 
 if (typeof Chart !== 'undefined') {
   Chart.defaults.font.family = "'Figtree', system-ui, sans-serif";
@@ -89,6 +169,8 @@ const CHECK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l
 const MINUS_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"/></svg>';
 const PLUS_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>';
 const CHEVRON_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+// 1.7.96 : plume (semaine légère) à la place de l'éclair, partout où le déload apparaît
+const DELOAD_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 12.2a6 6 0 0 0-8.5-8.5L5 10.5V19h8.5z"/><path d="M16 8L2 22"/><path d="M17.5 15H9"/></svg>';
 
 const HISTORY_MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const HISTORY_DAYS = ['Dim.','Lun.','Mar.','Mer.','Jeu.','Ven.','Sam.'];
@@ -210,6 +292,8 @@ function readChartColors() {
   CHART_COLORS.tick = read('--chart-tick', CHART_COLORS.tick);
   CHART_COLORS.grid = read('--chart-grid', CHART_COLORS.grid);
   CHART_COLORS.band = read('--chart-band', CHART_COLORS.band);
+  CHART_COLORS.warn = read('--warn', CHART_COLORS.warn);
+  CHART_COLORS.trophy = read('--trophy', CHART_COLORS.trophy);
   if (typeof Chart !== 'undefined') Chart.defaults.color = CHART_COLORS.tick;
 }
 
@@ -801,6 +885,13 @@ function checkDeloadStatus() {
 function isDeloadPostponed() {
   return !!(state && state.deload && state.deload.postponedAt !== null && state.deload.postponedAt !== undefined
     && state.deload.postponedAt === state.history.length);
+}
+async function openDeloadInfo() { // 1.7.96
+  if (!isDeloadActive() || editingOriginalId !== null) return;
+  const choix = await askSheet({ tone: 'info', title: 'Déload −20 %',
+    text: 'Le déload (appelé semaine de décharge) est automatiquement proposé toutes les 12 séances. Il permet aux muscles de récupérer. Si tu te sens vraiment bien, tu peux le reporter à la prochaine séance.',
+    ok: 'Suivre le conseil de déload', cancel: 'Reporter', cancelValue: 'reporter' });
+  if (choix === 'reporter') postponeDeload(); // « Suivre le conseil » ou fermer : le déload reste
 }
 function postponeDeload() {
   if (!state || !checkDeloadStatus() || editingOriginalId !== null) return;
@@ -1684,11 +1775,12 @@ function renderSeanceHead(def, customSession) {
 
   const deloadSubEl = document.getElementById('deload-subtitle');
   const actionsEl = document.getElementById('deload-actions');
-  const BOLT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>';
   if (deloadSubEl) {
     if (isDeloadActive()) {
-      deloadSubEl.innerHTML = BOLT + 'Déload actif · −20 % sur les charges';
-      deloadSubEl.style.display = 'inline-flex';
+      // 1.7.96 : bouton pleine largeur, ouvre l'explication avec « Reporter »
+      deloadSubEl.innerHTML = DELOAD_SVG + '<span class="deload-btn-label">Déload −20 %</span><span class="deload-btn-chevron">' + INFO_SVG + '</span>'; // 1.8.2 : (i) au lieu du chevron (INFO_SVG : js/programmes.js)
+      deloadSubEl.disabled = !!customSession;
+      deloadSubEl.style.display = 'flex';
     } else {
       deloadSubEl.innerHTML = '';
       deloadSubEl.style.display = 'none';
@@ -1696,7 +1788,6 @@ function renderSeanceHead(def, customSession) {
   }
   if (actionsEl) {
     if (customSession) actionsEl.innerHTML = '';
-    else if (isDeloadActive()) actionsEl.innerHTML = '<button type="button" class="link-btn deload-link" onclick="postponeDeload()">Reporter à la prochaine séance</button>';
     else if (isDeloadPostponed()) actionsEl.innerHTML = '<span class="deload-postponed">Déload reporté à la prochaine séance</span> <button type="button" class="link-btn deload-link" onclick="cancelDeloadPostpone()">Annuler</button>';
     else actionsEl.innerHTML = '';
     actionsEl.hidden = !actionsEl.innerHTML;
@@ -1838,11 +1929,13 @@ function initWorkoutForm(customSession = null) {
     container.appendChild(div);
   });
 
-  // 1.7.42 (co-auteur : Claude) : phrase d'échauffement juste avant le premier exercice de force
+  // 1.7.42 (co-auteur : Claude) : phrase d'échauffement du premier exercice de force (dans son corps depuis 1.8.18)
   // (cardio éventuel au-dessus), cachée si la séance n'a que du cardio
   if (warm) {
     const firstStrength = [...container.querySelectorAll('.exercise-item')].find(el => !exInfo(el.dataset.ex).cardio);
-    if (firstStrength) container.insertBefore(warm, firstStrength);
+    // 1.8.18 : dans le premier exercice de force, entre sa ligne (icône, nom) et les intitulés Série / Kg / Réps :
+    // elle n'apparaît qu'à son ouverture
+    if (firstStrength) { const body = firstStrength.querySelector('.ex-body'); body.insertBefore(warm, body.firstChild); }
     warm.hidden = !firstStrength;
   }
 
@@ -2242,7 +2335,7 @@ function renderHistory() {
       row.innerHTML = `
         ${sessionPillHtml(h)}
         <span class="history-main">
-          <span class="history-date">${formatHistoryDate(h.date)}${h.isDeload ? ' <span class="deload-tag"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>Déload</span>' : ''}</span>
+          <span class="history-date">${formatHistoryDate(h.date)}${h.isDeload ? ` <span class="deload-tag">${DELOAD_SVG}Déload</span>` : ''}</span>
           <span class="history-duration">${escapeHtml(sub)}</span>
         </span>
         <span class="history-tonnage">${historyTonnes(h.tonnage)} T</span>
@@ -2643,6 +2736,7 @@ function renderTonnageChart() {
 
   let labels = [];
   let data = [];
+  let deloadFlags = []; // 1.8.0 : séances de déload (plume sous le point)
   const hist = statsHistory();
   if (currentVolumeFilter === 'type' && !statsLetters().includes(currentSessionTypeFilter)) { currentVolumeFilter = 'all'; updateSessionTypeButton(); }
   const keyOf = e => e.sessionKey || e.type;
@@ -2687,6 +2781,7 @@ function renderTonnageChart() {
     } else {
       labels = typedHistory.map(e => `${e.type} (${formatDate(e.date)})`);
       data = typedHistory.map(e => parseFloat(e.tonnage) || 0);
+      deloadFlags = typedHistory.map(e => !!e.isDeload);
     }
   } else {
     // --- VUE PAR SÉANCE (toutes les séances) ---
@@ -2694,6 +2789,7 @@ function renderTonnageChart() {
 
     labels = sortedHistory.map(e => `${e.type} (${formatDate(e.date)})`);
     data = sortedHistory.map(e => parseFloat(e.tonnage) || 0);
+    deloadFlags = sortedHistory.map(e => !!e.isDeload);
   }
 
   // Courbe blanche sur le bloc héros indigo
@@ -2712,6 +2808,7 @@ function renderTonnageChart() {
     sessions.forEach(e => {
       const d = byDay[e.date] || (byDay[e.date] = { tonnage: 0, types: [] });
       d.tonnage += parseFloat(e.tonnage) || 0; d.types.push(e.type);
+      if (e.isDeload) d.deload = true;
     });
     const keys = Object.keys(byDay).sort();
     if (keys.length > 0) {
@@ -2721,12 +2818,13 @@ function renderTonnageChart() {
       const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
       const start = toUtc(keys[0]);
       const end = Math.max(today, toUtc(keys[keys.length - 1]));
-      labels = []; data = []; dayDetails = [];
+      labels = []; data = []; dayDetails = []; deloadFlags = [];
       for (let t = start; t <= end; t += 86400000) {
         const k = iso(t);
         labels.push(k);
         data.push(byDay[k] ? byDay[k].tonnage : null);
         dayDetails.push(byDay[k] || null);
+        deloadFlags.push(!!(byDay[k] && byDay[k].deload));
       }
     }
   }
@@ -2774,7 +2872,8 @@ function renderTonnageChart() {
           : { ticks: { color: onHero, font: { size: 10 }, maxTicksLimit: 6, maxRotation: 0, minRotation: 0, autoSkip: true }, grid: { display: false }, border: { display: false } },
         y: { ticks: { color: onHero, maxTicksLimit: 5, display: !dayMode }, grid: { color: 'rgba(255, 255, 255, 0.15)' }, border: { display: false } }
       }
-    }
+    },
+    plugins: [deloadMarksPlugin(deloadFlags, '#fff')]
   });
   renderFixedYAxis(dayMode ? tonnageChart : null);
   // vue par jour : on arrive sur les séances les plus récentes, on remonte le temps en défilant vers la gauche
@@ -2832,6 +2931,7 @@ function renderExerciseChart() {
   const isBw = exInfo(selectedEx).mode === 'bw';
   const repsMode = isBw && currentExMetricMode !== 'volume';
   const lestData = [];
+  const exDeload = []; // 1.8.0 : séances de déload (plume sous le point)
   const maxBtn = document.getElementById('btn-mode-max');
   if (maxBtn) maxBtn.textContent = isBw ? 'Répétitions' : 'Charge max';
 
@@ -2847,6 +2947,7 @@ function renderExerciseChart() {
       if (exData && wasPerformed) {
         labels.push(`${h.type} (${formatDate(h.date)})`);
         dates.push(h.date);
+        exDeload.push(!!h.isDeload);
         if (currentExMetricMode === 'volume') {
           chartData.push(exData.totalVolume || 0);
         } else if (repsMode) {
@@ -2888,6 +2989,12 @@ function renderExerciseChart() {
   };
 
   const hasRm = showRm && rmData.some(v => v !== null);
+  // 1.8.11 : records de l'exercice (charge max et meilleur 1RM estimé de tout l'historique), dernier en date si égalité
+  const recMaxW = chartData.length ? Math.max(...chartData) : null;
+  const recMaxIdx = hasRm ? chartData.lastIndexOf(recMaxW) : -1;
+  const recRmAll = rmData.filter(v => v !== null);
+  const recRm = recRmAll.length ? Math.max(...recRmAll) : null;
+  const recRmIdx = hasRm ? rmData.lastIndexOf(recRm) : -1;
   const hasReps = repsMode && chartData.length > 0;
   const legend = document.getElementById('exercise-legend');
   const rmNote = document.getElementById('exercise-rm-note');
@@ -2896,11 +3003,12 @@ function renderExerciseChart() {
     legend.hidden = !(hasRm || hasReps);
     legend.classList.toggle('reps', hasReps);
     if (hasRm) {
-      const lastRm = [...rmData].reverse().find(v => v !== null);
+      // 1.8.11 : deux records indépendants : charge max (trophée) et meilleur 1RM estimé (étoile).
+      // Le 1RM ne se calcule que sur des séries de 10 rép. ou moins : il ne peut pas toujours venir de la charge max.
       document.getElementById('exercise-legend-max-label').textContent = 'Charge max';
       document.getElementById('exercise-legend-rm-label').textContent = '1RM estimé';
-      document.getElementById('exercise-legend-max').textContent = formatKgHalf(chartData[chartData.length - 1]);
-      document.getElementById('exercise-legend-rm').textContent = formatKgHalf(lastRm);
+      document.getElementById('exercise-legend-max').innerHTML = escapeHtml(formatKgHalf(recMaxW)) + '<span class="ex-legend-mark">' + BADGE_SVG + '</span>';
+      document.getElementById('exercise-legend-rm').innerHTML = escapeHtml(formatKgHalf(recRm)) + '<span class="ex-legend-mark star">' + STAR_SVG + '</span>';
     } else if (hasReps) {
       document.getElementById('exercise-legend-max-label').textContent = 'Meilleure série';
       document.getElementById('exercise-legend-rm-label').textContent = 'Record';
@@ -2942,6 +3050,7 @@ function renderExerciseChart() {
     },
     options: {
       responsive: true,
+      layout: { padding: { top: hasRm ? 24 : 0 } }, // 1.8.11 : place pour le trophée et l'étoile
       plugins: {
         legend: { display: false },
         // Poids du corps : « 12 rép. », et le lest quand il y en a un (« 12 rép. · PDC +5 kg »)
@@ -2952,7 +3061,7 @@ function renderExerciseChart() {
         y: { beginAtZero: repsMode, ticks: { color: CHART_COLORS.tick, maxTicksLimit: 5, precision: repsMode ? 0 : undefined }, grid: { color: CHART_COLORS.grid }, border: { display: false } }
       }
     },
-    plugins: [bandPlugin]
+    plugins: [bandPlugin, deloadMarksPlugin(exDeload, CHART_COLORS.warn), recordMarksPlugin(recMaxIdx, recRmIdx, CHART_COLORS.trophy)]
   });
 }
 
@@ -3002,7 +3111,7 @@ function renderCardioChart() {
   statsHistory().forEach(h => {
     const ex = (h.exercises || []).find(e => sameExercise(e.name, name));
     const set = ex && Array.isArray(ex.sets) ? ex.sets.find(isPerformedCardioSet) : null;
-    if (set && h.date) points.push({ date: h.date, v: cardioMetric(name, set) });
+    if (set && h.date) points.push({ date: h.date, v: cardioMetric(name, set), deload: !!h.isDeload });
   });
   points.sort((a, b) => new Date(a.date) - new Date(b.date));
   const empty = document.getElementById('cardio-empty');
@@ -3035,7 +3144,8 @@ function renderCardioChart() {
         x: { ticks: { color: CHART_COLORS.tick, maxTicksLimit: 6, maxRotation: 0, minRotation: 0, autoSkip: true }, grid: { display: false } },
         y: { ticks: { color: CHART_COLORS.tick, maxTicksLimit: 5, callback: v => unit.fmt(v) }, grid: { color: CHART_COLORS.grid }, border: { display: false } }
       }
-    }
+    },
+    plugins: [deloadMarksPlugin(points.map(p => p.deload), CHART_COLORS.warn)]
   });
 }
 
@@ -4752,6 +4862,17 @@ function consumeDriveForcePending() {
   try { t = Number(localStorage.getItem(DRIVE_FORCE_PENDING_KEY) || 0); localStorage.removeItem(DRIVE_FORCE_PENDING_KEY); } catch (e) { return false; }
   return t > 0 && Date.now() - t < 600000;
 }
+// 1.8.23 : onglet où l'on revient après la connexion Google (lu sans consommer les demandes en attente)
+function driveReturnTab(driveReturn) {
+  try {
+    if (getDriveToken()) {
+      const t = Number(localStorage.getItem(DRIVE_FORCE_PENDING_KEY) || 0);
+      if (t > 0 && Date.now() - t < 600000) return 'historique';
+      if (driveReturn === 'ok' && typeof PROGRAM_RESTORE_PENDING_KEY !== 'undefined' && localStorage.getItem(PROGRAM_RESTORE_PENDING_KEY) === '1') return 'programme';
+    }
+  } catch (e) { /* ignoré */ }
+  return 'reglages';
+}
 // Au démarrage ou au retour dans l'application : la sauvegarde demandée avant la reconnexion, sinon l'envoi habituel
 function driveSyncOnReturn() {
   if (getDriveToken() && consumeDriveForcePending()) { saveBackupToDriveNow(); return true; }
@@ -4898,11 +5019,18 @@ function renderUpdateStatus() {
   const versionEl = document.getElementById('update-version');
   if (versionEl) versionEl.textContent = runningVersion ? `Version ${runningVersion}` : 'Version …';
   const banner = document.getElementById('update-banner');
-  if (banner) banner.hidden = !ready;
+  if (banner) banner.hidden = true; // 1.8.19 : plus de bandeau « La version … est prête » ; le statut porte la version
+  // 1.8.17 : quand une version est prête, « Vérifier » devient « Installer » (jaune) et relance l'app
+  const checkBtn = document.querySelector('.update-check');
+  if (checkBtn) {
+    checkBtn.classList.toggle('install', ready);
+    checkBtn.textContent = ready ? 'Installer' : 'Vérifier';
+    checkBtn.onclick = ready ? applyUpdate : checkForUpdate;
+  }
   const bannerText = document.getElementById('update-banner-text');
-  if (bannerText && ready) bannerText.textContent = `La version ${activeVersion} est prête. Relancez l'application pour l'utiliser.`;
+  if (bannerText && ready) bannerText.textContent = `La version ${activeVersion} est prête. Touche « Installer » pour l'utiliser.`;
   const statusEl = document.getElementById('update-status');
-  if (statusEl && ready) statusEl.textContent = 'Mise à jour téléchargée.';
+  if (statusEl && ready) statusEl.textContent = `Mise à jour téléchargée : version ${activeVersion}`; // 1.8.19
   const nav = document.getElementById('nav-historique');
   if (nav) {
     nav.classList.toggle('has-update', ready);
@@ -4983,6 +5111,9 @@ async function initApp() {
   // Google Drive : retour d'une connexion par redirection (application installée), puis statut + sauvegarde à envoyer
   cleanupLegacyDriveKeys();
   const driveReturn = handleDriveRedirectReturn();
+  // 1.8.23 (co-auteur : Claude) : l'onglet de destination s'affiche tout de suite, sans passer par Programme
+  if (driveReturn) switchTab(driveReturnTab(driveReturn));
+  document.documentElement.removeAttribute('data-drive-return');
   setTimeout(() => {
     if (isDriveWanted() && !isInstalledApp()) loadGoogleIdentity(); // 1.7.65 : seulement si le Drive sert
     initDriveTokenClient(); updateDriveUI();
