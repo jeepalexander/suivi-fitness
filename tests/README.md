@@ -67,6 +67,7 @@ Un test seul : `python3 tests/test_validation.py` ou `python3 tests/run_tests.py
 | `test_scanner_jsqr.py` | 12 | Scanner de QR code sans le lecteur de Chrome (iPhone, Safari, 1.8.27) : caméra simulée filmant un vrai QR code, lu par jsQR ; jsQR chargé à l'ouverture du scanner seulement et mis en cache hors connexion ; QR étranger, caméra arrêtée, caméra refusée |
 | `test_recu_seance.py` | 8 | Programme ou séance libre reçu sur un téléphone sans programme actif (1.8.28) : devient actif et l'onglet Séance le charge (titre, exercices) ; reçu à côté d'un programme actif : reste « Reçu » en mémoire |
 | `test_fond_defaut.py` | 17 | Fond « Râtelier » par défaut pour un nouvel usager, usagers existants inchangés, « Aucun » retenu (1.8.29) ; premier lancement : texte en bas sans défilement, couleur du titre, icône + dans le texte, plus de flèche |
+| `test_soutien.py` | 35 | Réglages › « Soutenir l'app » : place, lien Buy Me a Coffee, allure du bouton, sans script tiers ni débordement (clair, sombre, 390 et 360 px) ; conditions : article « Propriété » (1.8.31) |
 
 ## Quand les lancer
 Automatiquement : GitHub les exécute à chaque envoi de code et à chaque demande de fusion (`.github/workflows/tests.yml`, onglet **Actions** du dépôt) ; un échec apparaît en rouge sur le commit.
