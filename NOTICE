@@ -1,0 +1,25 @@
+Mon Carnet de Salle (dépôt suivi-fitness)
+Copyright (c) 2026 Jean-Philippe Alexander
+https://github.com/jeepalexander/suivi-fitness
+
+Le code de l'application est publié sous la licence PolyForm Strict 1.0.0
+(fichier LICENSE, https://polyformproject.org/licenses/strict/1.0.0).
+
+En résumé (seul le texte du fichier LICENSE fait foi) :
+- autorisé : lire le code, l'étudier, l'utiliser à titre personnel et non commercial ;
+- interdit : le redistribuer, le modifier, en faire une version dérivée ou l'utiliser
+  à des fins commerciales sans l'accord écrit de l'auteur.
+
+Le nom « Mon Carnet de Salle », l'icône de l'application et les illustrations
+des exercices ne sont concédés sous aucune licence.
+
+Pour toute autre utilisation, contacter l'auteur via le dépôt GitHub.
+
+------------------------------------------------------------------------
+Composants tiers inclus, qui restent sous leur propre licence
+------------------------------------------------------------------------
+
+- Chart.js (js/chart.umd.min.js) : licence MIT, https://www.chartjs.org
+- qrcode-generator 2.0.4 (js/qrcode.js), Copyright (c) 2009 Kazuhiko Arase : licence MIT
+- jsQR 1.4.0 (js/jsqr.min.js), https://github.com/cozmo/jsQR : licence Apache 2.0
+- Polices Caveat, Figtree et Saira Semi Condensed (dossier fonts/) : licence SIL Open Font License 1.1

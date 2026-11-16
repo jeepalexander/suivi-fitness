@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Jean-Philippe Alexander. Mon Carnet de Salle.
+// SPDX-License-Identifier: PolyForm-Strict-1.0.0 (voir LICENSE et NOTICE)
 // ============================================================
 // PARTAGER ET RECEVOIR UN PROGRAMME (1.7.52)
 // Le programme (nom, type, séances, exercices et nombre de séries) tient dans un lien :

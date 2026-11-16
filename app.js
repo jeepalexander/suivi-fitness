@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Jean-Philippe Alexander. Mon Carnet de Salle.
+// SPDX-License-Identifier: PolyForm-Strict-1.0.0 (voir LICENSE et NOTICE)
 // Suivi Fitness : logique de l'application (JavaScript natif, aucune dépendance sauf Chart.js local).
 // Toutes les fonctions et variables sont globales : les boutons de index.html les appellent par leur nom (onclick).
 // L'ordre des sections ci-dessous n'a pas d'importance pour les fonctions, mais les constantes (1) et les

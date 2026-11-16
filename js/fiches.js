@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Jean-Philippe Alexander. Mon Carnet de Salle.
+// SPDX-License-Identifier: PolyForm-Strict-1.0.0 (voir LICENSE et NOTICE)
 // Fiches d'exercice (1.7.84, co-auteur : Claude) : comment bien faire chaque exercice du catalogue.
 // Ouvertes par un appui long sur n'importe quelle image d'exercice. Clé = id du catalogue (js/catalogue.js).
 //   f : « Bien faire » (étapes, dans l'ordre du mouvement) · e : « À éviter » · m : muscles travaillés

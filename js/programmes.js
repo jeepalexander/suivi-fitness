@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Jean-Philippe Alexander. Mon Carnet de Salle.
+// SPDX-License-Identifier: PolyForm-Strict-1.0.0 (voir LICENSE et NOTICE)
 // Suivi Fitness : onglet Programme (programmes sur mesure et séances libres, écrans 1 à 21 de la maquette).
 // Co-auteur : Claude. Chargé après app.js : utilise ses fonctions et son état global (state, saveState, switchTab…).
 //

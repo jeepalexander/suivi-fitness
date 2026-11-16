@@ -2,8 +2,8 @@
 
 **Application PWA de suivi d'entraînement en salle de sport** (dépôt `suivi-fitness`)
 
-[![Version](https://img.shields.io/badge/version-1.7.67-blue)](https://github.com/jeepalexander/suivi-fitness)
-[![License](https://img.shields.io/badge/license-MIT-green)]
+[![Version](https://img.shields.io/badge/version-1.8.30-blue)](https://github.com/jeepalexander/suivi-fitness)
+[![Licence](https://img.shields.io/badge/licence-PolyForm%20Strict%201.0.0-lightgrey)](LICENSE)
 
 ---
 
@@ -43,7 +43,7 @@ Le détail est dans [CHANGELOG.md](CHANGELOG.md).
 
 1. **En ligne** : ouvrir [l’application](https://jeepalexander.github.io/suivi-fitness) dans un navigateur mobile (production, branche `main`). La version de test (branche `dev`) est à [/suivi-fitness/dev/](https://jeepalexander.github.io/suivi-fitness/dev/).
 2. **Installation PWA** : ajouter l’application à l’écran d’accueil depuis le navigateur.
-3. **En local** : cloner le dépôt puis ouvrir `index.html` dans un navigateur.
+3. **En local** (usage personnel, voir la licence) : cloner le dépôt puis ouvrir `index.html` dans un navigateur.
 
 ---
 
@@ -110,6 +110,7 @@ suivi-fitness/
 ├── presentation.html, confidentialite.html, conditions.html   # Pages publiques (Google : page d'accueil, confidentialité, conditions)
 ├── wallpapers/         # Fonds d’écran (images + vignettes)
 ├── CHANGELOG.md        # Historique des versions
+├── LICENSE, NOTICE     # Licence (PolyForm Strict 1.0.0) et composants tiers
 ├── tests/              # Tests automatiques (voir tests/README.md)
 ├── js/                 # catalogue.js (exercices), programmes.js (onglet Programmes), Chart.js, qrcode.js et security.js
 ├── css/                # Styles complémentaires (polices)
@@ -127,6 +128,19 @@ suivi-fitness/
 - `APP_VERSION` dans `sw.js`.
 
 Le changement du Service Worker permet au navigateur de mettre à jour le cache et donc l’application sur les appareils déjà installés. Tenir aussi `CHANGELOG.md` et ce fichier à jour, et lancer les tests des groupes concernés (`python3 tests/run_tests.py seance`, voir `tests/README.md`) avant chaque déploiement sur `dev`.
+
+---
+
+## ⚖️ Licence
+
+Copyright (c) 2026 Jean-Philippe Alexander. Code publié sous la licence **[PolyForm Strict 1.0.0](LICENSE)**.
+
+- ✅ **Autorisé** : utiliser l'application, lire le code, l'étudier, le tester à titre personnel et non commercial. Le code est public pour que chacun puisse vérifier ce que fait l'application de ses données.
+- ❌ **Interdit** : redistribuer le code, le modifier, en publier une version dérivée ou l'utiliser à des fins commerciales sans accord écrit.
+- Le nom « Mon Carnet de Salle », l'icône et les illustrations des exercices ne sont concédés sous aucune licence.
+- Les composants tiers (Chart.js, qrcode-generator, jsQR, polices) restent sous leur propre licence : voir [NOTICE](NOTICE).
+
+Seul le texte du fichier [LICENSE](LICENSE) fait foi. Pour toute autre utilisation, contacter l'auteur via le dépôt.
 
 ---
 

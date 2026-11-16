@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.30] - 2026-11-16
+### ⚖️ Licence PolyForm Strict 1.0.0 (co-auteur : Claude)
+- **`LICENSE`** : texte officiel de la PolyForm Strict 1.0.0, avec la mention « Required Notice » (copyright Jean-Philippe Alexander). Le fichier précédent était titré « Elastic License 2.0 » mais contenait en réalité le texte de la licence MIT, qui autorise copie, modification et redistribution.
+- **`NOTICE`** (nouveau) : résumé de ce qui est autorisé (lire, étudier, usage personnel non commercial) et interdit (redistribuer, modifier, usage commercial) ; nom, icône et illustrations hors licence ; liste des composants tiers et de leur licence (Chart.js et qrcode-generator : MIT, jsQR : Apache 2.0, polices : SIL OFL 1.1).
+- **En-têtes de copyright** (`SPDX-License-Identifier: PolyForm-Strict-1.0.0`) en tête de `index.html`, `app.js`, `sw.js`, `style.css`, `css/fonts.css`, des modules de `js/` écrits pour l'app et des pages publiques (présentation, confidentialité, conditions). Les bibliothèques tierces gardent leur en-tête.
+- **README** : badge de licence (MIT → PolyForm Strict), badge de version à jour, section « Licence ».
+- Aucun changement visible dans l'application.
+
+---
+
 ## [1.8.29] - 2026-11-16
 ### 🖼️ Fond d'écran par défaut et premier lancement plus lisible (co-auteur : Claude)
 - **Fond « Râtelier » par défaut** pour un nouvel usager (premier lancement : ni données ni fond enregistrés). Les usagers existants gardent leur fond, blanc compris.
