@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.32] - 2026-11-16
+### ⚖️ Fonds d'écran hors licence de l'app (co-auteur : Claude)
+- **`NOTICE`** : nouvelle section « Fonds d'écran » : les images de `wallpapers/` viennent de Pixabay, d'Unsplash, de Magnific (ex-Freepik) ou de générations IA ; elles restent sous la licence de leur source, ne sont pas couvertes par PolyForm Strict et ne peuvent pas être extraites pour être redistribuées.
+- **Conditions d'utilisation** (article « Propriété » et résumé anglais) et **README** (section Licence) : même précision.
+- Aucun changement visible dans l'application.
+
+---
+
 ## [1.8.31] - 2026-11-16
 ### ☕ Réglages : « Soutenir l'app » et conditions d'utilisation (co-auteur : Claude)
 - **Nouvelle carte « Soutenir l'app »** dans les Réglages, entre « Inviter quelqu'un » et « Application » (planche Réglages de la maquette) : « Mon Carnet de Salle est gratuit, sans publicité, et ne collecte aucune donnée. Si elle t'aide à progresser, tu peux m'offrir un café : c'est ce qui la fait vivre. » Bouton secondaire « Offrir un café » avec une icône de tasse, qui ouvre https://buymeacoffee.com/jeepalexander dans le navigateur. Simple lien : aucun script ni widget tiers, rien n'est envoyé à Buy Me a Coffee avant le clic.

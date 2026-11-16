@@ -2,7 +2,7 @@
 
 **Application PWA de suivi d'entraînement en salle de sport** (dépôt `suivi-fitness`)
 
-[![Version](https://img.shields.io/badge/version-1.8.31-blue)](https://github.com/jeepalexander/suivi-fitness)
+[![Version](https://img.shields.io/badge/version-1.8.32-blue)](https://github.com/jeepalexander/suivi-fitness)
 [![Licence](https://img.shields.io/badge/licence-PolyForm%20Strict%201.0.0-lightgrey)](LICENSE)
 
 ---
@@ -140,6 +140,7 @@ Copyright (c) 2026 Jean-Philippe Alexander. Code publié sous la licence **[Poly
 - ❌ **Interdit** : redistribuer le code, le modifier, en publier une version dérivée ou l'utiliser à des fins commerciales sans accord écrit.
 - Le nom « Mon Carnet de Salle », l'icône et les illustrations des exercices ne sont concédés sous aucune licence.
 - Les composants tiers (Chart.js, qrcode-generator, jsQR, polices) restent sous leur propre licence : voir [NOTICE](NOTICE).
+- Les fonds d'écran (`wallpapers/`) viennent de Pixabay, Unsplash, Magnific ou de générations IA : ils restent sous la licence de leur source et ne sont pas couverts par celle de l'application.
 
 Seul le texte du fichier [LICENSE](LICENSE) fait foi. Pour toute autre utilisation, contacter l'auteur via le dépôt.
 
