@@ -146,7 +146,11 @@ function addReceivedProgram() {
     nextKey: p.kind === 'libre' ? '' : 'A', sessions: p.sessions
   });
   normalizePrograms();
+  // 1.8.28 : reçu sur un téléphone sans programme actif, il devient actif : l'onglet Séance doit le charger
+  // (il restait sur « Aucune séance prévue »), comme quand on active un programme.
+  if (!active) syncNextType();
   saveState();
+  if (!active) initWorkoutForm();
   if (typeof backupToDrive === 'function') backupToDrive({ autoReconnect: false });
   closeSheet();
   switchTab('programme');
@@ -167,7 +171,9 @@ window.addEventListener('hashchange', () => { if (state) receiveProgramFromLocat
 function receiveProgramButtonHtml() {
   return `<button type="button" class="choose-recv" onclick="openReceiveProgram()">${QR_SVG}Recevoir un programme</button>`;
 }
-function canScanQr() { return 'BarcodeDetector' in window && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia); }
+// 1.8.27 (co-auteur : Claude) : le scanner marche aussi sans le lecteur de Chrome (iPhone, Safari…) grâce à jsQR,
+// rangé dans l'app (js/jsqr.min.js) et chargé seulement à l'ouverture du scanner. Il suffit d'une caméra.
+function canScanQr() { return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia); }
 
 function openReceiveProgram() {
   const scan = canScanQr();
@@ -184,8 +190,47 @@ function receiveFromField() {
   receiveProgramCode(code);
 }
 
-// ---------- Scanner de QR code (caméra arrière, lecteur intégré à Chrome) ----------
-let qrStream = null, qrTimer = null;
+// ---------- Scanner de QR code (caméra arrière : lecteur intégré à Chrome, sinon jsQR) ----------
+let qrStream = null, qrTimer = null, jsQrPromise = null;
+
+function loadJsQr() {
+  if (typeof window.jsQR === 'function') return Promise.resolve(true);
+  if (jsQrPromise) return jsQrPromise;
+  jsQrPromise = new Promise((resolve) => {
+    const s = document.createElement('script');
+    s.src = 'js/jsqr.min.js'; s.async = true;
+    s.onload = () => resolve(typeof window.jsQR === 'function');
+    s.onerror = () => { jsQrPromise = null; resolve(false); };
+    document.head.appendChild(s);
+  });
+  return jsQrPromise;
+}
+
+// Renvoie une fonction video -> Promise<[textes lus]> : le lecteur de Chrome s'il lit les QR codes, sinon jsQR
+async function makeQrReader() {
+  if ('BarcodeDetector' in window) {
+    try {
+      const formats = BarcodeDetector.getSupportedFormats ? await BarcodeDetector.getSupportedFormats() : ['qr_code'];
+      if (formats.includes('qr_code')) {
+        const detector = new BarcodeDetector({ formats: ['qr_code'] });
+        return (video) => detector.detect(video).then(found => found.map(b => b.rawValue));
+      }
+    } catch (e) { /* lecteur de Chrome indisponible : jsQR */ }
+  }
+  if (!(await loadJsQr())) return null;
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  return async (video) => {
+    const vw = video.videoWidth, vh = video.videoHeight;
+    if (!vw || !vh) return [];
+    const k = Math.min(1, 640 / Math.max(vw, vh)); // image réduite : lecture rapide sur téléphone
+    canvas.width = Math.round(vw * k); canvas.height = Math.round(vh * k);
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const r = window.jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
+    return r && r.data ? [r.data] : [];
+  };
+}
 
 function stopQrScanner() {
   if (qrTimer) { clearTimeout(qrTimer); qrTimer = null; }
@@ -197,14 +242,17 @@ async function openQrScanner() {
     <div class="qr-cam"><video id="qr-video" playsinline muted></video><span class="qr-frame" aria-hidden="true"></span></div>
     <p class="sheet-text center" id="qr-msg">Vise le QR code du programme.</p>
     <button type="button" class="btn btn-secondary" onclick="closeSheet()">Annuler</button>`, { onClose: stopQrScanner });
-  let detector;
+  let read;
   try {
-    detector = new BarcodeDetector({ formats: ['qr_code'] });
-    qrStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+    // caméra demandée tout de suite (geste de l'usager encore frais, utile sur iPhone), lecteur chargé en parallèle
+    const cam = navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+    const [stream, reader] = await Promise.all([cam, makeQrReader()]);
+    qrStream = stream; read = reader;
+    if (!read) throw new Error('lecteur de QR code indisponible');
   } catch (e) {
     stopQrScanner();
     const msg = document.getElementById('qr-msg');
-    if (msg) msg.textContent = "La caméra n'est pas disponible. Autorise-la dans les réglages de Chrome, ou colle le lien.";
+    if (msg) msg.textContent = "La caméra n'est pas disponible. Autorise-la dans les réglages du navigateur, ou colle le lien.";
     return;
   }
   const video = document.getElementById('qr-video');
@@ -214,8 +262,8 @@ async function openQrScanner() {
   const tick = async () => {
     if (!qrStream) return;
     try {
-      const found = await detector.detect(video);
-      const code = found.map(b => shareCodeFrom(b.rawValue)).find(Boolean);
+      const found = await read(video);
+      const code = found.map(t => shareCodeFrom(t)).find(Boolean);
       if (code) { stopQrScanner(); receiveProgramCode(code); return; }
       if (found.length) { const msg = document.getElementById('qr-msg'); if (msg) msg.textContent = "Ce QR code n'est pas un programme."; }
     } catch (e) { /* image pas encore prête */ }

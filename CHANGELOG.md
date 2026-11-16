@@ -7,6 +7,46 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.29] - 2026-11-16
+### 🖼️ Fond d'écran par défaut et premier lancement plus lisible (co-auteur : Claude)
+- **Fond « Râtelier » par défaut** pour un nouvel usager (premier lancement : ni données ni fond enregistrés). Les usagers existants gardent leur fond, blanc compris.
+- **« Aucun » est retenu** : le choix est enregistré (`h49_wallpaper = 'none'`) au lieu d'effacer la préférence.
+- **Écran de premier lancement** : le texte (« Tu n'as pour l'instant rien de prévu… », « Clique sur le bouton + … », « Restaurer ») passe en bas, au-dessus du menu, sans défilement ; la phrase d'aide et « Restaurer » prennent la couleur du titre (noir en clair, blanc en sombre). Le « + » du texte devient la petite icône du bouton + ; la flèche manuscrite est retirée. « un » et « ! » ne sont plus séparés en fin de ligne.
+### 🧪 Tests
+- Nouveau `test_fond_defaut.py` (17 contrôles, groupe `reglages`) ; `test_fond_ecran.py` (« Aucun » retenu) et `test_accueil.py` (plus de flèche) adaptés.
+
+---
+
+## [1.8.28] - 2026-11-16
+### 🐛 Programme reçu : l'onglet Séance le charge tout de suite (co-auteur : Claude)
+- Sur un téléphone sans programme actif (premier usage, constaté sur iPhone), un programme ou une séance libre reçu par lien ou QR code devenait bien actif, mais l'onglet Séance restait sur « Aucune séance prévue » jusqu'au redémarrage de l'app. `addReceivedProgram` (`js/partage.js`) recharge maintenant la séance, comme l'activation d'un programme (`syncNextType`, `initWorkoutForm`).
+- Reçu à côté d'un programme actif : inchangé (« Reçu » en mémoire, la séance en cours ne bouge pas).
+### 🧪 Tests
+- Nouveau `test_recu_seance.py` (8 contrôles, groupe `programmes`) ; échoue sans la correction.
+
+---
+
+## [1.8.27] - 2026-11-16
+### 📷 Scanner un QR code aussi sur iPhone (co-auteur : Claude)
+- « Recevoir un programme › Scanner un QR code » n'est plus réservé à Chrome pour Android : sans le lecteur de Chrome (`BarcodeDetector`, absent de Safari et de tous les navigateurs sur iPhone), l'app lit le QR code avec **jsQR 1.4.0** (licence Apache 2.0), rangé dans l'app (`js/jsqr.min.js`, 130 Ko, 46 Ko compressé) et chargé seulement à l'ouverture du scanner. Mis en cache par le service worker : marche hors connexion.
+- Le bouton n'est plus caché que s'il n'y a pas de caméra. Android garde le lecteur de Chrome.
+- La caméra est demandée tout de suite, le lecteur chargé en parallèle (geste de l'usager encore frais sur iPhone).
+- Message de caméra indisponible : « réglages du navigateur » au lieu de « réglages de Chrome ».
+### 🧪 Tests
+- Nouveau `test_scanner_jsqr.py` (12 contrôles) : une caméra simulée filme un vrai QR code, lu par jsQR.
+- `test_partage.py` : le scanner est caché sans caméra (et non plus sans lecteur de Chrome).
+
+---
+
+## [1.8.26] - 2026-11-16
+### 🛡️ Données protégées contre l'effacement automatique (co-auteur : Claude)
+- Au lancement, l'app demande à Chrome un stockage « persistant » (`navigator.storage.persist()`, nouvelle fonction `requestPersistentStorage` dans `app.js`) : Chrome ne videra plus de lui-même les données du site (programmes, historique, pesées, réglages) quand le téléphone manque de place. Seul l'usager peut encore les effacer.
+- Invisible : rien n'est affiché (l'état dans les Réglages a été proposé puis écarté). Pas de nouvelle demande si c'est déjà accordé ; un refus de Chrome ou un navigateur sans l'API ne change rien au fonctionnement.
+### 🧪 Tests
+- Nouveau `test_stockage_persistant.py` (9 contrôles), dans le groupe `reglages`.
+
+---
+
 ## [1.8.25] - 2026-11-16
 ### 🔍 Référencement : fin des pages « en double » signalées par Search Console (co-auteur : Claude)
 - La version de test (`dev/`) n'est plus indexée : à l'assemblage du site, chacune de ses pages reçoit `<meta name="robots" content="noindex, nofollow">` (le fichier de validation Google n'est pas touché). Prend effet à la prochaine mise en production, car la publication utilise `tools/assembler_site.py` de `main`.

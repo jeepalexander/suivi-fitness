@@ -58,17 +58,20 @@ def run(br, base, scheme):
     # Menu + : Recevoir un programme (coller le lien)
     pg.evaluate("openProgramChooser()"); pg.wait_for_timeout(300)
     check(pg.locator('.choose-recv').count() == 1, 'Recevoir absent du menu +')
+    # 1.8.27 : le scanner n'est caché que sans caméra (avec ou sans lecteur de Chrome)
+    pg.evaluate("window.__md = navigator.mediaDevices; Object.defineProperty(navigator, 'mediaDevices', { value: undefined, configurable: true })")
     pg.locator('.choose-recv').scroll_into_view_if_needed(); pg.click('.choose-recv'); pg.wait_for_timeout(300)
     check(pg.locator('#recv-url').count() == 1, 'champ du lien absent')
-    check(pg.locator('.sheet').get_by_text('Scanner un QR code').count() == 0, 'scanner proposé sans lecteur')
+    check(pg.locator('.sheet').get_by_text('Scanner un QR code').count() == 0, 'scanner proposé sans caméra')
     pg.fill('#recv-url', 'bonjour'); pg.click('.sheet .btn >> nth=0'); pg.wait_for_timeout(300)
     check(any('Lien illisible' in d for d in dialogs), dialogs)
     pg.fill('#recv-url', 'Regarde mon programme : ' + url); pg.click('.sheet .btn >> nth=0'); pg.wait_for_timeout(500)
     check(pg.locator('.sheet .sheet-title').inner_text() == 'Programme reçu', 'collage refusé')
     pg.evaluate("closeSheet()")
+    pg.evaluate("Object.defineProperty(navigator, 'mediaDevices', { value: window.__md, configurable: true })")
     # Scanner : lecteur de Chrome simulé (caméra et BarcodeDetector)
     pg.evaluate("""(u) => { window.__stopped = 0;
-      window.BarcodeDetector = class { constructor() {} async detect() { return window.__seen ? [{ rawValue: u }] : []; } };
+      window.BarcodeDetector = class { static async getSupportedFormats() { return ['qr_code']; } constructor() {} async detect() { return window.__seen ? [{ rawValue: u }] : []; } };
       navigator.mediaDevices.getUserMedia = async () => { const c = document.createElement('canvas'); c.width = 64; c.height = 64; c.getContext('2d').fillRect(0,0,64,64);
         const s = c.captureStream(5); s.getTracks().forEach(t => { const o = t.stop.bind(t); t.stop = () => { window.__stopped++; o(); }; }); return s; }; }""", url)
     pg.evaluate("openReceiveProgram()"); pg.wait_for_timeout(200)

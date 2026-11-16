@@ -366,6 +366,17 @@ function getWallpaper() {
   return WALLPAPERS.some(w => w.id === v && w.id !== 'none') ? v : 'none';
 }
 
+// 1.8.29 (co-auteur : Claude) : fond « Râtelier » par défaut pour un NOUVEL usager (premier lancement : ni données
+// ni fond enregistrés). Les usagers existants gardent leur fond, blanc compris.
+const DEFAULT_WALLPAPER = 'ratelier';
+function initDefaultWallpaper() {
+  try {
+    if (localStorage.getItem('h49_state') === null && localStorage.getItem(WALLPAPER_KEY) === null) {
+      localStorage.setItem(WALLPAPER_KEY, DEFAULT_WALLPAPER);
+    }
+  } catch (e) { /* stockage indisponible : fond blanc */ }
+}
+
 function wallpaperThumb(id) { return 'wallpapers/' + id + '-mini.jpg'; }
 
 function applyWallpaper() {
@@ -390,8 +401,8 @@ function applyWallpaper() {
 function setWallpaper(id) {
   if (!WALLPAPERS.some(w => w.id === id)) return;
   try {
-    if (id === 'none') localStorage.removeItem(WALLPAPER_KEY);
-    else localStorage.setItem(WALLPAPER_KEY, id);
+    // 1.8.29 : « Aucun » est retenu (avant, la clé était effacée et « Aucun » ne se distinguait pas de « jamais choisi »)
+    localStorage.setItem(WALLPAPER_KEY, id);
   } catch (e) {}
   applyWallpaper();
 }
@@ -5102,8 +5113,21 @@ function initUpdateIndicator() {
 // ============================================================
 // 17. DÉMARRAGE
 // ============================================================
+// 1.8.26 (co-auteur : Claude) : demande à Chrome un stockage « persistant », pour qu'il ne vide pas de lui-même
+// les données du site (programmes, historique…) quand le téléphone manque de place. Invisible : rien n'est affiché,
+// Chrome accepte ou refuse seul ; sans l'API (vieux navigateur) ou déjà accordé, rien ne se passe.
+function requestPersistentStorage() {
+  try {
+    const st = navigator.storage;
+    if (!st || typeof st.persist !== 'function' || typeof st.persisted !== 'function') return Promise.resolve(null);
+    return st.persisted().then((done) => done || st.persist()).catch(() => null);
+  } catch (e) { return Promise.resolve(null); }
+}
+
 async function initApp() {
   if (!document.body.dataset.tab) document.body.dataset.tab = 'programme';
+  requestPersistentStorage();
+  initDefaultWallpaper();
   initTheme();
   applyWallpaper();
   markTestVersion();
