@@ -17,6 +17,16 @@ ok('site assemblé : production à la racine, test dans dev/, sans les tests',
    os.path.exists(os.path.join(site, 'index.html')) and os.path.exists(os.path.join(site, 'dev', 'index.html'))
    and not os.path.exists(os.path.join(site, 'tests')) and not os.path.exists(os.path.join(site, 'dev', 'tests'))
    and os.path.exists(os.path.join(site, '.nojekyll')))
+def _read(*p):
+    with open(os.path.join(site, *p), encoding='utf-8') as f:
+        return f.read()
+dev_pages = [n for n in os.listdir(os.path.join(site, 'dev')) if n.endswith('.html') and '<head>' in _read('dev', n)]  # hors fichier de validation Google
+ok('test : toutes les pages de dev/ portent « noindex » (1.8.25)',
+   dev_pages and all('<meta name="robots" content="noindex, nofollow">' in _read('dev', n) for n in dev_pages), dev_pages)
+ok('production : aucune page en « noindex »',
+   not any('name="robots"' in _read(n) for n in os.listdir(site) if n.endswith('.html')))
+ok('présentation : la page racine est désignée comme référence (canonique, 1.8.25)',
+   '<link rel="canonical" href="https://jeepalexander.github.io/">' in _read('presentation.html'))
 port = _free_port()
 srv = subprocess.Popen([sys.executable, '-m', 'http.server', str(port), '--bind', '127.0.0.1'], cwd=site,
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
