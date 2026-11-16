@@ -65,6 +65,7 @@ Un test seul : `python3 tests/test_validation.py` ou `python3 tests/run_tests.py
 | `test_partage.py` | 56 | Partage d'un programme (1.7.52) : bouton en bas de l'éditeur, volet lien / QR code, aller-retour du code, codes refusés, ouverture par le lien (« Programme reçu », ajout « Reçu » en mémoire, nom « (2) »), menu + (coller, lien illisible), scanner simulé et arrêt de la caméra, séance libre ; clair et sombre |
 | `test_stockage_persistant.py` | 9 | Stockage persistant demandé à Chrome au lancement (1.8.26) : une seule demande si besoin, aucune si déjà accordé, refus et navigateur sans l'API sans erreur, rien d'affiché dans les Réglages |
 | `test_scanner_jsqr.py` | 12 | Scanner de QR code sans le lecteur de Chrome (iPhone, Safari, 1.8.27) : caméra simulée filmant un vrai QR code, lu par jsQR ; jsQR chargé à l'ouverture du scanner seulement et mis en cache hors connexion ; QR étranger, caméra arrêtée, caméra refusée |
+| `test_recu_seance.py` | 8 | Programme ou séance libre reçu sur un téléphone sans programme actif (1.8.28) : devient actif et l'onglet Séance le charge (titre, exercices) ; reçu à côté d'un programme actif : reste « Reçu » en mémoire |
 
 ## Quand les lancer
 Automatiquement : GitHub les exécute à chaque envoi de code et à chaque demande de fusion (`.github/workflows/tests.yml`, onglet **Actions** du dépôt) ; un échec apparaît en rouge sur le commit.

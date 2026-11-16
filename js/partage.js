@@ -146,7 +146,11 @@ function addReceivedProgram() {
     nextKey: p.kind === 'libre' ? '' : 'A', sessions: p.sessions
   });
   normalizePrograms();
+  // 1.8.28 : reçu sur un téléphone sans programme actif, il devient actif : l'onglet Séance doit le charger
+  // (il restait sur « Aucune séance prévue »), comme quand on active un programme.
+  if (!active) syncNextType();
   saveState();
+  if (!active) initWorkoutForm();
   if (typeof backupToDrive === 'function') backupToDrive({ autoReconnect: false });
   closeSheet();
   switchTab('programme');

@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.28] - 2026-11-16
+### 🐛 Programme reçu : l'onglet Séance le charge tout de suite (co-auteur : Claude)
+- Sur un téléphone sans programme actif (premier usage, constaté sur iPhone), un programme ou une séance libre reçu par lien ou QR code devenait bien actif, mais l'onglet Séance restait sur « Aucune séance prévue » jusqu'au redémarrage de l'app. `addReceivedProgram` (`js/partage.js`) recharge maintenant la séance, comme l'activation d'un programme (`syncNextType`, `initWorkoutForm`).
+- Reçu à côté d'un programme actif : inchangé (« Reçu » en mémoire, la séance en cours ne bouge pas).
+### 🧪 Tests
+- Nouveau `test_recu_seance.py` (8 contrôles, groupe `programmes`) ; échoue sans la correction.
+
+---
+
 ## [1.8.27] - 2026-11-16
 ### 📷 Scanner un QR code aussi sur iPhone (co-auteur : Claude)
 - « Recevoir un programme › Scanner un QR code » n'est plus réservé à Chrome pour Android : sans le lecteur de Chrome (`BarcodeDetector`, absent de Safari et de tous les navigateurs sur iPhone), l'app lit le QR code avec **jsQR 1.4.0** (licence Apache 2.0), rangé dans l'app (`js/jsqr.min.js`, 130 Ko, 46 Ko compressé) et chargé seulement à l'ouverture du scanner. Mis en cache par le service worker : marche hors connexion.
