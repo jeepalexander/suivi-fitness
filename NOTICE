@@ -23,3 +23,14 @@ Composants tiers inclus, qui restent sous leur propre licence
 - qrcode-generator 2.0.4 (js/qrcode.js), Copyright (c) 2009 Kazuhiko Arase : licence MIT
 - jsQR 1.4.0 (js/jsqr.min.js), https://github.com/cozmo/jsQR : licence Apache 2.0
 - Polices Caveat, Figtree et Saira Semi Condensed (dossier fonts/) : licence SIL Open Font License 1.1
+
+------------------------------------------------------------------------
+Fonds d'écran (dossier wallpapers/)
+------------------------------------------------------------------------
+
+Les images de fond d'écran ne sont pas couvertes par la licence de l'application.
+Elles proviennent de Pixabay (licence Pixabay), d'Unsplash (licence Unsplash),
+de Magnific (ex-Freepik, licence Magnific) ou ont été générées par intelligence
+artificielle. Chacune reste soumise à la licence de sa source. Elles ne peuvent
+pas être extraites de l'application pour être redistribuées, notamment comme
+fonds d'écran.
