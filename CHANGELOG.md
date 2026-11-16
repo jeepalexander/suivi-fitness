@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.29] - 2026-11-16
+### 🖼️ Fond d'écran par défaut et premier lancement plus lisible (co-auteur : Claude)
+- **Fond « Râtelier » par défaut** pour un nouvel usager (premier lancement : ni données ni fond enregistrés). Les usagers existants gardent leur fond, blanc compris.
+- **« Aucun » est retenu** : le choix est enregistré (`h49_wallpaper = 'none'`) au lieu d'effacer la préférence.
+- **Écran de premier lancement** : le texte (« Tu n'as pour l'instant rien de prévu… », « Clique sur le bouton + … », « Restaurer ») passe en bas, au-dessus du menu, sans défilement ; la phrase d'aide et « Restaurer » prennent la couleur du titre (noir en clair, blanc en sombre). Le « + » du texte devient la petite icône du bouton + ; la flèche manuscrite est retirée. « un » et « ! » ne sont plus séparés en fin de ligne.
+### 🧪 Tests
+- Nouveau `test_fond_defaut.py` (17 contrôles, groupe `reglages`) ; `test_fond_ecran.py` (« Aucun » retenu) et `test_accueil.py` (plus de flèche) adaptés.
+
+---
+
 ## [1.8.28] - 2026-11-16
 ### 🐛 Programme reçu : l'onglet Séance le charge tout de suite (co-auteur : Claude)
 - Sur un téléphone sans programme actif (premier usage, constaté sur iPhone), un programme ou une séance libre reçu par lien ou QR code devenait bien actif, mais l'onglet Séance restait sur « Aucune séance prévue » jusqu'au redémarrage de l'app. `addReceivedProgram` (`js/partage.js`) recharge maintenant la séance, comme l'activation d'un programme (`syncNextType`, `initWorkoutForm`).

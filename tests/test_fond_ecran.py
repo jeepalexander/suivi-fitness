@@ -86,9 +86,9 @@ def main():
         pg.evaluate("setThemePreference('light')")
 
         pg.evaluate("switchTab('fond')"); pg.click('.wallpaper-opt[data-wallpaper="none"]'); pg.wait_for_timeout(200)
-        check("« Aucun » : retour au fond blanc, préférence effacée",
+        check("« Aucun » : retour au fond blanc, choix retenu (1.8.29)",
               pg.evaluate("document.documentElement.getAttribute('data-wallpaper')") is None
-              and pg.evaluate("localStorage.getItem('h49_wallpaper')") is None
+              and pg.evaluate("localStorage.getItem('h49_wallpaper')") == 'none'
               and pg.evaluate("getComputedStyle(document.getElementById('app-wallpaper')).display") == 'none')
 
         pg.evaluate("localStorage.setItem('h49_wallpaper','inconnu')"); pg.reload(); pg.wait_for_timeout(300)
