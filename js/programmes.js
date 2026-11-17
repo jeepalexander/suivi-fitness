@@ -154,11 +154,13 @@ function programGreetingHtml(active) {
 
 function emptyProgramsHtml() {
   // 1.7.78–1.7.80 : premier lancement (aucun programme, aucune séance) : « Bienvenue ! » à la place de « Bonjour, ».
-  // 1.8.29 : plus de flèche manuscrite ; le texte (en bas) montre l'icône du bouton +
+  // 1.8.29 : le texte (en bas) montre l'icône du bouton + ; 1.8.30 : petite flèche manuscrite au-dessus du texte,
+  // vers le bouton + (environ 3 cm)
   const hist = (state && Array.isArray(state.history)) ? state.history : [];
   const welcome = hist.length ? '' : `<p class="prog-greet prog-greet-welcome"><span class="prog-greet-hello">Bienvenue !</span></p>`;
   return `
     <div class="prog-empty">${welcome}
+      <svg class="prog-empty-arrow" viewBox="0 0 200 230" aria-hidden="true"><path d="M8 214 C 78 208, 146 168, 154 20"/><path d="M141 36 L 154 18 L 165 37"/></svg>
       <p class="prog-empty-title">Tu n'as pour l'instant rien de prévu au programme.</p>
       <p class="prog-empty-sub">Clique sur le bouton <span class="prog-empty-plus" role="img" aria-label="+"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span> pour en créer un&nbsp;!</p>
       <p class="prog-empty-restore">Tu as déjà un programme sauvegardé ? <button type="button" class="link-btn" onclick="openProgramRestore()">Restaurer</button></p>
