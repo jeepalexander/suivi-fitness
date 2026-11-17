@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.35] - 2026-11-17
+### ☕ Bouton « Offrir un café » aux couleurs de Buy Me a Coffee, avec fumée animée (co-auteur : Claude)
+- Réglages › Soutenir l'app : le bouton passe en **jaune Buy Me a Coffee** (#FFDD00, texte #0D0C22, gras), avec la **tasse officielle** à gauche de « Offrir un café ». Même forme et même taille que les autres boutons.
+- **Fumée animée** au-dessus de la tasse, comme sur le bouton officiel : 3 petits « S » gris flous qui montent et s'effacent, décalés de 0,7 s (boucle de 2,1 s), en CSS seul. Gris plus clair en thème sombre. Retirée si le téléphone demande de réduire les animations.
+- Tasse hébergée dans l'app (`icons/bmc-tasse.png`, détourée depuis le logo officiel fourni), mise en cache hors connexion : **aucune connexion à Buy Me a Coffee avant l'appui**, aucun script tiers.
+- `test_soutien.py` mis à jour (couleurs, tasse chargée, fumée et décalages, aucune requête vers Buy Me a Coffee, mode « réduire les animations »).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.8.35.
+
+---
+
 ## [1.8.34] - 2026-11-17
 ### 🔍 Interface agrandie de 10 %, sans réglage du navigateur (co-auteur : Claude)
 - Toute l'application est affichée à **110 %**, comme avec le zoom 110 % de Chrome ou Firefox : textes, boutons, icônes, tuiles, graphiques. Il n'y a plus besoin de régler le navigateur (le remettre à 100 %, sinon l'app serait à 121 %).

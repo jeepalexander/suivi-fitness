@@ -1069,6 +1069,25 @@ body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 .miss-ok { flex: none; width: 20px; height: 20px; fill: none; stroke: var(--success); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .legal-links a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 .support-btn { gap: 8px; text-decoration: none; }   /* 1.8.31 : lien « Offrir un café » (Réglages) au look d'un bouton secondaire, icône tasse à gauche */
+/* 1.8.35 : bouton aux couleurs de Buy Me a Coffee (jaune, texte presque noir), tasse officielle (icons/bmc-tasse.png, hébergée dans l'app :
+   aucune connexion à Buy Me a Coffee avant l'appui) ; même forme et même taille que les autres boutons. */
+.support-btn { background: #FFDD00; color: #0D0C22; font-weight: 700; }
+.bmc-cup { position: relative; display: inline-flex; flex: none; }
+.bmc-cup img { display: block; width: 18px; height: 26px; }
+/* Fumée : 3 petits « S » gris flous qui montent au-dessus de la tasse en s'effaçant, décalés de 0,7 s (boucle de 2,1 s).
+   Fixes/absents si le téléphone demande de réduire les animations. */
+.bmc-steam { position: absolute; left: 3px; bottom: 26px; width: 16px; height: 46px; pointer-events: none; }
+.bmc-steam svg { position: absolute; left: 0; bottom: 0; width: 12px; height: 18px; opacity: 0; filter: blur(1.1px); color: #8f8f96; animation: bmc-steam 2.1s ease-out infinite; }
+[data-theme="dark"] .bmc-steam svg { color: #c9c9cf; }
+.bmc-steam svg:nth-child(2) { left: 4px; animation-delay: .7s; }
+.bmc-steam svg:nth-child(3) { left: 1px; animation-delay: 1.4s; }
+@keyframes bmc-steam {
+  0%   { transform: translate(0, 6px) scale(.55); opacity: 0; }
+  25%  { opacity: .75; }
+  60%  { transform: translate(3px, -14px) scale(.9); opacity: .5; }
+  100% { transform: translate(-2px, -30px) scale(1.05); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .bmc-steam { display: none; } }
 
 /* ============================================
    VOLETS DE CONFIRMATION ET MESSAGES (1.7.29, remplacent confirm / alert)
