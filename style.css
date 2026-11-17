@@ -238,8 +238,16 @@
 /* Le document ne défile pas : c'est #app-scroll qui défile. La barre d'adresse du navigateur reste donc fixe
    et la navigation du bas ne bouge plus (Android Chrome faisait « sauter » les éléments fixes en la repliant).
    overscroll-behavior-y empêche aussi le « tirer pour rafraîchir » (il rechargeait l'application en pleine saisie). */
+/* 1.8.34 : toute l'interface est agrandie (comme le zoom 110 % du navigateur), sans réglage à faire :
+   110 % dès 412 px de large ; en dessous, juste assez pour garder 375 px utiles (la barre du bas y tient tout juste),
+   jamais moins de 100 %. Avec ce zoom, les tailles liées à l'écran (dvh, vw, zones de la caméra et de la barre du bas) sont agrandies aussi :
+   on les divise par --ui-zoom pour qu'elles gardent leur taille réelle (--app-h = hauteur réelle de l'écran).
+   Navigateur sans « zoom » CSS : --ui-zoom reste 1, rien ne change. */
+:root { --ui-zoom: 1; } /* valeur posée par le script de index.html selon la largeur de l'écran */
+:root { --app-h: calc(100dvh / var(--ui-zoom)); --safe-bottom: calc(env(safe-area-inset-bottom, 0px) / var(--ui-zoom)); }
+html { zoom: var(--ui-zoom); }
 html, body { height: 100%; overflow: hidden; overscroll-behavior-y: none; }
-body { background-color: var(--bg); color: var(--text); font-size: 17px; height: 100vh; height: 100dvh; display: flex; flex-direction: column; }
+body { background-color: var(--bg); color: var(--text); font-size: 17px; height: calc(100vh / var(--ui-zoom)); height: var(--app-h); display: flex; flex-direction: column; }
 #app-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; padding-bottom: 112px; }
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -257,7 +265,7 @@ body { background-color: var(--bg); color: var(--text); font-size: 17px; height:
    (plus de bande noire à hauteur de la caméra) ; --safe-top = hauteur de la zone de la caméra.
    1.7.82 : le nom de l'app commence juste sous cette zone (1.7.81 : 10 px dessous), jamais plus haut que 28 px,
    la marge d'un écran sans encoche ; les boutons de l'en-tête gardent leurs 4 px d'avance sur le nom. */
-:root { --safe-top: env(safe-area-inset-top, 0px); }
+:root { --safe-top: calc(env(safe-area-inset-top, 0px) / var(--ui-zoom)); } /* 1.8.34 : taille réelle malgré le zoom */
 header { position: relative; flex: none; width: 100%; z-index: var(--z-header); max-width: 600px; margin: 0 auto; padding: max(28px, var(--safe-top)) var(--gutter) 12px; background: var(--bg); text-align: left; }
 body[data-tab="seance"] header { padding-bottom: 0; box-shadow: var(--hdr-rim); }
 body[data-tab="seance"] header::after { content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 40px; pointer-events: none; background: var(--hdr-halo); } /* 1.8.10 */
@@ -300,10 +308,10 @@ body[data-tab="seance"] .seance-sticky { display: block; }
 /* ============================================
    4. NAVIGATION : pastille flottante, l'onglet actif porte son libellé
    ============================================ */
-nav { position: fixed; left: 30px; right: 30px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); max-width: 508px; height: 64px; margin: 0 auto; padding: 0 8px; display: flex; align-items: center; justify-content: space-between; gap: 0; background: var(--surface); border: none; border-radius: 999px; box-shadow: var(--sh-card); z-index: var(--z-header); }
+nav { position: fixed; left: 30px; right: 30px; bottom: calc(16px + var(--safe-bottom)); max-width: 508px; height: 64px; margin: 0 auto; padding: 0 8px; display: flex; align-items: center; justify-content: space-between; gap: 0; background: var(--surface); border: none; border-radius: 999px; box-shadow: var(--sh-card); z-index: var(--z-header); }
 /* 1.8.6 : halo en dégradé en bas de l'écran, sous la barre : le contenu s'efface avant de passer derrière elle */
 html[data-drive-return] .container, html[data-drive-return] nav { visibility: hidden; } /* 1.8.23 : retour de connexion Google */
-body::after { content: ''; position: fixed; left: 0; right: 0; bottom: 0; height: calc(110px + env(safe-area-inset-bottom, 0px)); pointer-events: none; z-index: calc(var(--z-header) - 1); background: linear-gradient(to bottom, rgba(var(--nav-halo-rgb), 0) 0%, rgba(var(--nav-halo-rgb), 0.5) 25%, rgba(var(--nav-halo-rgb), 0.88) 55%, rgba(var(--nav-halo-rgb), 1) 100%); } /* 1.8.24 : variante C, plus court et plus dense */
+body::after { content: ''; position: fixed; left: 0; right: 0; bottom: 0; height: calc(110px + var(--safe-bottom)); pointer-events: none; z-index: calc(var(--z-header) - 1); background: linear-gradient(to bottom, rgba(var(--nav-halo-rgb), 0) 0%, rgba(var(--nav-halo-rgb), 0.5) 25%, rgba(var(--nav-halo-rgb), 0.88) 55%, rgba(var(--nav-halo-rgb), 1) 100%); } /* 1.8.24 : variante C, plus court et plus dense */
 nav button { position: relative; flex: none; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px; height: 48px; min-width: 48px; padding: 0; background: none; border: none; border-radius: 999px; color: var(--text-muted); font-size: 0; font-weight: 500; cursor: pointer; transition: background var(--t-fast) ease, color var(--t-fast) ease; }
 nav button.active { background: var(--primary-strong); color: var(--on-strong); font-size: 0.9375rem; font-weight: 600; padding: 0 20px 0 16px; box-shadow: var(--sh-chip); }
 nav button svg { width: 24px; height: 24px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
@@ -628,7 +636,7 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 .cardio-pace b { color: var(--text); font-family: var(--font-display); font-variant-numeric: tabular-nums; font-size: 0.9375rem; }
 
 /* Message d'information non bloquant (showToast) */
-.toast { position: fixed; left: 16px; right: 16px; bottom: calc(110px + env(safe-area-inset-bottom, 0px)); max-width: 420px; margin: 0 auto; padding: 16px 20px; border-radius: 22px; background: var(--text); color: var(--bg); font-size: 0.9375rem; line-height: 1.45; box-shadow: var(--sh-toast); z-index: var(--z-toast); opacity: 0; transform: translateY(12px); pointer-events: none; transition: opacity var(--t-normal) ease, transform var(--t-normal) ease; }
+.toast { position: fixed; left: 16px; right: 16px; bottom: calc(110px + var(--safe-bottom)); max-width: 420px; margin: 0 auto; padding: 16px 20px; border-radius: 22px; background: var(--text); color: var(--bg); font-size: 0.9375rem; line-height: 1.45; box-shadow: var(--sh-toast); z-index: var(--z-toast); opacity: 0; transform: translateY(12px); pointer-events: none; transition: opacity var(--t-normal) ease, transform var(--t-normal) ease; }
 .toast.show { opacity: 1; transform: none; pointer-events: auto; }
 .toast strong { display: block; margin-bottom: 4px; font-size: 1rem; }
 
@@ -737,7 +745,7 @@ body[data-tab="programme"][data-pview="choose"] header h1 { display: none; }
 .prog-hint-ico svg { display: inline-block; width: 16px; height: 16px; margin-right: 4px; vertical-align: -3px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 
 /* Écran 1 : rien de prévu */
-.prog-empty { position: relative; min-height: calc(100dvh - 180px); padding-top: 90px; display: flex; flex-direction: column; justify-content: flex-end; } /* 1.8.29 : texte en bas, loin de l'image */
+.prog-empty { position: relative; min-height: calc(var(--app-h) - 180px); padding-top: 90px; display: flex; flex-direction: column; justify-content: flex-end; } /* 1.8.29 : texte en bas, loin de l'image */
 .prog-empty .prog-greet-welcome { position: absolute; top: 0; left: 0; margin-top: 8px; } /* 1.7.78 : premier lancement */
 .prog-empty-plus { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; margin: -4px 2px 0; vertical-align: middle; border-radius: 999px; background: var(--primary-strong); color: var(--on-strong); box-shadow: var(--sh-btn); } /* 1.8.29 : même icône que le bouton + */
 .prog-empty-plus svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; }
@@ -808,8 +816,8 @@ body[data-tab="programme"][data-pview="choose"] header h1 { display: none; }
 /* --- Feuilles du bas --- */
 .sheet-overlay { position: fixed; inset: 0; z-index: var(--z-sheet); display: none; align-items: flex-end; justify-content: center; background: var(--overlay); }
 .sheet-overlay.open { display: flex; }
-.sheet { width: 100%; max-width: 600px; max-height: 92dvh; display: flex; flex-direction: column; padding: 28px var(--gutter) calc(22px + env(safe-area-inset-bottom, 0px)); background: var(--card-bg); color: var(--text); border-radius: 32px 32px 0 0; box-shadow: var(--shadow-sheet); overflow-y: auto; animation: sheet-in 0.22s ease; }
-.sheet.tall { height: 92dvh; overflow: hidden; }
+.sheet { width: 100%; max-width: 600px; max-height: calc(92 * var(--app-h) / 100); display: flex; flex-direction: column; padding: 28px var(--gutter) calc(22px + var(--safe-bottom)); background: var(--card-bg); color: var(--text); border-radius: 32px 32px 0 0; box-shadow: var(--shadow-sheet); overflow-y: auto; animation: sheet-in 0.22s ease; }
+.sheet.tall { height: calc(92 * var(--app-h) / 100); overflow: hidden; }
 @keyframes sheet-in { from { transform: translateY(30px); opacity: 0.6; } to { transform: none; opacity: 1; } }
 /* 1.7.87 : barre grise retirée de tous les volets (aucun ne se ferme en glissant) ; marge du haut 28 px (section-gap) */
 .sheet-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
@@ -1008,7 +1016,7 @@ body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 /* ============================================
    Réglages › Inviter quelqu'un (1.7.21) : QR code vers l'application
    ============================================ */
-.invite-qr { width: 220px; max-width: 70vw; margin: 0 auto 12px; padding: 16px; box-sizing: border-box; border-radius: 22px; background: var(--qr-bg); box-shadow: var(--sh-card); }
+.invite-qr { width: 220px; max-width: calc(70vw / var(--ui-zoom)); margin: 0 auto 12px; padding: 16px; box-sizing: border-box; border-radius: 22px; background: var(--qr-bg); box-shadow: var(--sh-card); }
 .invite-qr svg { display: block; width: 100%; height: auto; }
 .invite-link { margin: 0; font-size: 0.8125rem; line-height: 1.45; color: var(--text-muted); text-align: center; overflow-wrap: anywhere; }
 .invite-link + .btn-secondary { margin-top: 12px; }   /* 1.7.37 : seul bouton sous l’adresse, 12 px d’écart comme sur la maquette (1.7.70 : une seule marge) */
@@ -1030,7 +1038,7 @@ body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 .warmup-weight { display: inline-block; vertical-align: -3px; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
 .finish-overlay { position: fixed; inset: 0; z-index: var(--z-finish); display: flex; align-items: center; justify-content: center; padding: 0 20px; background: var(--overlay); }
-.finish-sheet { width: 100%; max-width: 380px; max-height: 92dvh; overflow-y: auto; box-sizing: border-box; padding: 28px 20px 24px; border-radius: 32px; background: var(--card-bg); color: var(--text); box-shadow: var(--shadow-sheet); text-align: center; animation: sheet-in 0.22s ease; }
+.finish-sheet { width: 100%; max-width: 380px; max-height: calc(92 * var(--app-h) / 100); overflow-y: auto; box-sizing: border-box; padding: 28px 20px 24px; border-radius: 32px; background: var(--card-bg); color: var(--text); box-shadow: var(--shadow-sheet); text-align: center; animation: sheet-in 0.22s ease; }
 .finish-bravo { margin: 0; font-family: var(--font-hand); font-weight: 600; font-size: 2.625rem; line-height: 1.05; transform: rotate(-2deg); }
 .finish-title { margin: 12px 0 0; display: flex; align-items: center; justify-content: center; gap: 12px; font-family: var(--font-display); font-weight: 700; font-size: 2rem; line-height: 1.05; }
 .finish-title span { font-family: inherit; }
@@ -1123,13 +1131,13 @@ body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 .sheet.tall.fiche-sheet { position: relative; }
 .fiche-close { position: absolute; top: 16px; right: var(--gutter); z-index: var(--z-raised); } /* 1.7.87 : croix en haut à droite, défile avec la fiche */
 /* 1.8.17 : fiche en pleine page (plus de coins arrondis ni de voile visible), sous l'encoche du téléphone */
-.sheet.tall.fiche-sheet { height: 100dvh; max-height: 100dvh; max-width: none; border-radius: 0; box-shadow: none; padding-top: max(28px, var(--safe-top)); }
+.sheet.tall.fiche-sheet { height: var(--app-h); max-height: var(--app-h); max-width: none; border-radius: 0; box-shadow: none; padding-top: max(28px, var(--safe-top)); }
 .fiche-sheet > *:not(.fiche-close) { width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; }
 .fiche-close { display: none; } /* 1.8.19 : plus de croix en pleine page */
 /* 1.8.19 : « Fermer » fixe en bas, noir (primary-strong), sur un halo de la couleur du fond comme sous le menu */
 .fiche-sheet { padding-bottom: 0; }
 .sheet.tall.fiche-sheet { background: var(--bg); } /* pleine page : couleur de la page, assortie au halo */
-.fiche-foot { position: sticky; bottom: 0; margin-top: auto; padding: 36px 0 calc(16px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(to bottom, rgba(var(--nav-halo-rgb), 0) 0%, rgba(var(--nav-halo-rgb), 0.85) 40%, rgba(var(--nav-halo-rgb), 0.97) 100%); z-index: var(--z-raised); }
+.fiche-foot { position: sticky; bottom: 0; margin-top: auto; padding: 36px 0 calc(16px + var(--safe-bottom)); background: linear-gradient(to bottom, rgba(var(--nav-halo-rgb), 0) 0%, rgba(var(--nav-halo-rgb), 0.85) 40%, rgba(var(--nav-halo-rgb), 0.97) 100%); z-index: var(--z-raised); }
 .fiche-close-btn { margin: 0; }
 .exf-hero { display: flex; justify-content: center; margin: 4px 0 12px; }
 .exf-hero .ex-icon-badge { width: 220px; height: 220px; }

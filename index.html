@@ -16,6 +16,22 @@
   <meta name="theme-color" content="#FFFFFF">
   <meta name="apple-mobile-web-app-title" content="Mon Carnet">
 
+  <!-- 1.8.34 : agrandissement de l'interface (110 % dès 412 px de large, 375 px utiles minimum), avant le premier affichage
+       et à chaque changement de taille (rotation). window.__uiZoom : valeur imposée par les tests. -->
+  <script>
+    (function () {
+      function uiZoom() {
+        try {
+          if (!(window.CSS && CSS.supports && CSS.supports('zoom', '1.1'))) return;
+          var z = typeof window.__uiZoom === 'number' ? window.__uiZoom : Math.min(1.1, Math.max(1, window.innerWidth / 374.5));
+          z = Math.floor(z * 100) / 100;
+          document.documentElement.style.setProperty('--ui-zoom', String(z));
+        } catch (e) {}
+      }
+      uiZoom();
+      window.addEventListener('resize', uiZoom);
+    })();
+  </script>
   <!-- Thème : résolu avant le premier affichage pour éviter tout flash (clair par défaut) -->
   <script>
     (function () {

@@ -7,6 +7,18 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.34] - 2026-11-17
+### 🔍 Interface agrandie de 10 %, sans réglage du navigateur (co-auteur : Claude)
+- Toute l'application est affichée à **110 %**, comme avec le zoom 110 % de Chrome ou Firefox : textes, boutons, icônes, tuiles, graphiques. Il n'y a plus besoin de régler le navigateur (le remettre à 100 %, sinon l'app serait à 121 %).
+- **Écrans plus étroits que 412 px** : agrandissement réduit juste ce qu'il faut pour que la barre du bas tienne (390 px : 104 %, 384 px : 102 %, 360 px : 100 %). Recalculé à la rotation.
+- La page garde exactement la hauteur de l'écran (rien coupé en bas) ; zone de la caméra, barre système et fenêtres en hauteur gardent leur taille réelle.
+- **Graphiques** : dessinés à la résolution agrandie (nets) ; l'appui sur un point affiche bien la valeur de ce point (sans correction, l'agrandissement décalait la lecture jusqu'à environ 30 px vers la droite).
+- Navigateur sans zoom CSS : rien ne change.
+- `test_agrandissement.py` (groupe `style`, 56 contrôles) ; les autres tests mesurent la mise en page à 100 % (`newpage(..., zoom=1)`).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.8.34.
+
+---
+
 ## [1.8.33] - 2026-11-17
 ### ✏️ Premier lancement : petite flèche vers le bouton + (co-auteur : Claude)
 - Une petite flèche manuscrite (environ 3 cm, simple courbe sans boucle) part du dessus du paragraphe « Tu n'as pour l'instant rien de prévu… » et monte vers le bouton + de l'en-tête.
