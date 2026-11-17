@@ -375,6 +375,7 @@ const WALLPAPERS = [
   { id: 'poigne', name: 'Poigne', pos: 'center 40%' },
   { id: 'disques', name: 'Disques', pos: 'center 50%' },
   { id: 'rack', name: 'Rack', pos: 'center 50%' },
+  { id: 'slamball', name: 'Slam ball', pos: 'center 45%' }, // 1.8.38 : Eduardo Cano (Unsplash)
   // Graphiques et couleurs vives
   { id: 'geometrie', name: 'Géométrie', pos: 'center 50%' },
   { id: 'silhouette', name: 'Silhouette', pos: 'center 40%' },

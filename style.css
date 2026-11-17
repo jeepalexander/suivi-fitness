@@ -960,6 +960,7 @@ body:not([data-tab="programme"]) #app-wallpaper::after, body[data-pview="editor"
 :root[data-wallpaper="cordes"] #app-wallpaper { background-image: url('wallpapers/cordes.jpg'); background-position: center 50%; }
 :root[data-wallpaper="fente"] #app-wallpaper { background-image: url('wallpapers/fente.jpg'); background-position: 45% center; }
 :root[data-wallpaper="rack"] #app-wallpaper { background-image: url('wallpapers/rack.jpg'); background-position: center 50%; }
+:root[data-wallpaper="slamball"] #app-wallpaper { background-image: url('wallpapers/slamball.jpg'); background-position: center 45%; } /* 1.8.38 */
 :root[data-wallpaper="silhouette"] #app-wallpaper { background-image: url('wallpapers/silhouette.jpg'); background-position: center 40%; }
 :root[data-wallpaper="escaliers"] #app-wallpaper { background-image: url('wallpapers/escaliers.jpg'); background-position: 45% center; }
 :root[data-wallpaper="frontsquat"] #app-wallpaper { background-image: url('wallpapers/frontsquat.jpg'); background-position: 75% center; }   /* 1.7.94 */

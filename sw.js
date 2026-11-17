@@ -4,7 +4,7 @@
 // APP_VERSION doit être incrémenté à chaque release (en même temps que
 // manifest.json) : le navigateur ne réinstalle le service worker que si
 // le contenu de ce fichier change.
-const APP_VERSION = '1.8.37';
+const APP_VERSION = '1.8.38';
 // 1.7.64 (co-auteur : Claude) : production (…/suivi-fitness/) et test (…/suivi-fitness/dev/) sont sur le même
 // domaine et partagent le stockage des caches : chaque version nomme ses caches d'après son dossier et ne
 // supprime que les siens (plus les anciens caches sans dossier, d'avant la 1.7.64).
@@ -63,6 +63,8 @@ const ASSETS = [
   './wallpapers/fente-mini.jpg',
   './wallpapers/rack.jpg',
   './wallpapers/rack-mini.jpg',
+  './wallpapers/slamball.jpg',
+  './wallpapers/slamball-mini.jpg',
   './wallpapers/silhouette.jpg',
   './wallpapers/silhouette-mini.jpg',
   './wallpapers/escaliers.jpg',

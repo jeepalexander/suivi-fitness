@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.38] - 2026-11-17
+### 🖼️ Nouveau fond d'écran « Slam ball » (co-auteur : Claude)
+- **Ajouté** dans Réglages › Fond d'écran, rangé avec les gros plans sombres après *Rack* : *Slam ball* (slam ball rouge de 5 kg et barre sur tapis noir, vue de dessus). Photo d'Eduardo Cano (Unsplash), fournie par l'auteur de l'app.
+- Image 1000 × 1333 (100 Ko) et vignette, cadrées au centre ; ajoutées au cache hors connexion.
+- Crédits : `NOTICE` et `README.md` (Barre et Slam ball : Eduardo Cano).
+- `test_fond_ecran.py` : 21 choix (20 images + Aucun), 20 vignettes.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.8.38.
+
+---
+
 ## [1.8.37] - 2026-11-17
 ### 🖼️ Crédits des fonds d'écran, image par image (co-auteur : Claude)
 - `NOTICE` et `README.md` : auteurs Unsplash ajoutés — Barre : Eduardo Cano ; Poigne : Farkas Mario ; Râtelier : Ambitious Studio, Rick Barrett ; Squat : Tyler Raye. Pexels (1.8.36) : Kettlebell, Rack, Disques, Fente, Haltères.

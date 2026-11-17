@@ -36,7 +36,7 @@ def main():
         miss = pg.evaluate("""(()=>{const css=[...document.styleSheets].flatMap(s=>{try{return [...s.cssRules].map(r=>r.cssText)}catch(e){return []}}).join(' ');
           const idx=document.documentElement.outerHTML;return WALLPAPERS.filter(w=>w.id!=='none').filter(w=>!css.includes('data-wallpaper="'+w.id+'"')||!new RegExp('[(|]'+w.id+'[|)]').test(idx)).map(w=>w.id)})()""")
         check("1.7.94 : chaque fond a sa règle CSS et son entrée dans le script de démarrage", not miss, miss)
-        check("20 choix (19 images rangées par style + Aucun), « Aucun » coché (1.7.94)", len(opts) == 20 and [o[0] for o in opts] == ['course', 'frontsquat', 'salle', 'halteres', 'barre', 'kettlebell', 'cuivre', 'ratelier', 'suspension', 'wod', 'cordes', 'fente', 'squat', 'poigne', 'disques', 'rack', 'geometrie', 'silhouette', 'escaliers', 'none']
+        check("21 choix (20 images rangées par style + Aucun), « Aucun » coché (1.7.94, Slam ball en 1.8.38)", len(opts) == 21 and [o[0] for o in opts] == ['course', 'frontsquat', 'salle', 'halteres', 'barre', 'kettlebell', 'cuivre', 'ratelier', 'suspension', 'wod', 'cordes', 'fente', 'squat', 'poigne', 'disques', 'rack', 'slamball', 'geometrie', 'silhouette', 'escaliers', 'none']
               and opts[-1][1] == 'true' and sum(o[1] == 'true' for o in opts) == 1, opts)
         # 1.7.55 : 17 vignettes (19 depuis la 1.7.94) en chargement différé ; on fait défiler la rangée jusqu'au bout pour toutes les charger
         pg.evaluate("document.getElementById('wallpaper-grid').scrollTo(0, 0)"); pg.wait_for_timeout(200)
@@ -44,7 +44,7 @@ def main():
             pg.evaluate("document.getElementById('wallpaper-grid').scrollBy(200, 0)"); pg.wait_for_timeout(120)
         pg.wait_for_timeout(500)
         thumbs = pg.evaluate("[...document.querySelectorAll('#wallpaper-grid img')].map(i=>[i.getAttribute('src'),i.complete&&i.naturalWidth>0])")
-        check("les 19 vignettes se chargent", len(thumbs) == 19 and all(ok for _, ok in thumbs), thumbs)
+        check("les 20 vignettes se chargent", len(thumbs) == 20 and all(ok for _, ok in thumbs), thumbs)
         pg.evaluate("document.getElementById('wallpaper-grid').scrollTo(0, 0)")
         if shots: pg.screenshot(path=str(SHOTS / 'fond_grille_aucun.png'))
 
