@@ -737,10 +737,11 @@ body[data-tab="programme"][data-pview="choose"] header h1 { display: none; }
 .prog-hint-ico svg { display: inline-block; width: 16px; height: 16px; margin-right: 4px; vertical-align: -3px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 
 /* Écran 1 : rien de prévu */
-.prog-empty { position: relative; min-height: calc(100dvh - 180px); padding-top: 250px; display: flex; flex-direction: column; justify-content: flex-end; } /* 1.8.29 : texte en bas, loin de l'image */
+.prog-empty { position: relative; min-height: calc(100dvh - 180px); padding-top: 90px; display: flex; flex-direction: column; justify-content: flex-end; } /* 1.8.29 : texte en bas, loin de l'image */
 .prog-empty .prog-greet-welcome { position: absolute; top: 0; left: 0; margin-top: 8px; } /* 1.7.78 : premier lancement */
 .prog-empty-plus { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; margin: -4px 2px 0; vertical-align: middle; border-radius: 999px; background: var(--primary-strong); color: var(--on-strong); box-shadow: var(--sh-btn); } /* 1.8.29 : même icône que le bouton + */
 .prog-empty-plus svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; }
+.prog-empty-arrow { display: block; align-self: flex-end; width: 130px; height: 150px; margin: 0 4px 12px 0; fill: none; stroke: var(--text); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; } /* 1.8.30 : petite flèche vers le bouton + */
 .prog-empty-title { font-family: var(--font-display); font-weight: 700; font-size: 1.75rem; line-height: 1.05; }
 .prog-empty-sub { margin-top: 12px; font-size: 1.0625rem; line-height: 1.45; color: var(--text); } /* 1.8.29 : noir en clair, blanc en sombre */
 .prog-empty-restore { margin-top: 48px; font-size: 0.9375rem; color: var(--text); text-align: center; }

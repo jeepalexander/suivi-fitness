@@ -71,7 +71,7 @@ with Srv() as url, sync_playwright() as p:
         pg.goto(url + 'index.html'); pg.wait_for_timeout(500)
         r = pg.evaluate("""(()=>{const g=document.querySelector('.prog-greet-welcome'),t=document.querySelector('.prog-empty-title');
           if(!g) return null; const gr=g.getBoundingClientRect(),tr=t.getBoundingClientRect();
-          return {txt:g.innerText.replace(/\\s+/g,' '), libre:!document.querySelector('.prog-empty-arrow') /* 1.8.29 : plus de flèche */, auDessus:gr.bottom<tr.top}})()""")
+          return {txt:g.innerText.replace(/\\s+/g,' '), libre:gr.bottom<=document.querySelector('.prog-empty-arrow').getBoundingClientRect().top /* 1.8.30 : petite flèche au-dessus du texte */, auDessus:gr.bottom<tr.top}})()""")
         check(f"[{w}px] premier lancement : « Bienvenue ! » seul (pas de Bonjour), sans chevaucher la flèche ni le texte", r and r['txt'].strip() == 'Bienvenue !' and r['libre'] and r['auDessus'], r)
         pg.evaluate("state.history=[{id:1,date:'2026-10-01',type:'A',exercises:[],tonnage:0}]; renderProgramOverview(); 0"); pg.wait_for_timeout(200)
         check(f"[{w}px] plus de programme mais un historique : pas de « Bienvenue »", pg.locator('.prog-greet-welcome').count() == 0)

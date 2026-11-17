@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.33] - 2026-11-17
+### ✏️ Premier lancement : petite flèche vers le bouton + (co-auteur : Claude)
+- Une petite flèche manuscrite (environ 3 cm, simple courbe sans boucle) part du dessus du paragraphe « Tu n'as pour l'instant rien de prévu… » et monte vers le bouton + de l'en-tête.
+- L'espace réservé en haut de l'écran pour l'ancienne grande flèche est réduit (250 → 90 px) : tout tient sans défiler dès 360 × 667.
+### 🧪 Tests
+- `test_fond_defaut.py` (19 contrôles) : taille et place de la flèche ; `test_accueil.py` : « Bienvenue ! » au-dessus de la flèche.
+
+---
+
 ## [1.8.32] - 2026-11-16
 ### ⚖️ Fonds d'écran hors licence de l'app (co-auteur : Claude)
 - **`NOTICE`** : nouvelle section « Fonds d'écran » : les images de `wallpapers/` viennent de Pixabay, d'Unsplash, de Magnific (ex-Freepik) ou de générations IA ; elles restent sous la licence de leur source, ne sont pas couvertes par PolyForm Strict et ne peuvent pas être extraites pour être redistribuées.
