@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.36] - 2026-11-17
+### ⚙️ Réglages accessibles depuis la Progression (co-auteur : Claude)
+- **Progression** : la roue dentée Réglages s'affiche en haut à droite, comme sur l'Historique (même bouton, même place). Validé sur la planche 25 de la maquette.
+- Ouverts depuis la Progression, les Réglages (et le Fond d'écran) gardent l'icône **Progression** allumée dans la barre du bas, et « Retour » ramène à la Progression. Depuis l'Historique, rien ne change.
+- **Crédits** : `NOTICE` et `README.md` citent Pexels (licence Pexels) pour les fonds Kettlebell, Rack, Disques, Fente et Haltères.
+- `test_reglages.py` : parcours depuis la Progression (roue visible, icône allumée, Fond d'écran, Retour).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.8.36.
+
+---
+
 ## [1.8.35] - 2026-11-17
 ### ☕ Bouton « Offrir un café » aux couleurs de Buy Me a Coffee, avec fumée animée (co-auteur : Claude)
 - Réglages › Soutenir l'app : le bouton passe en **jaune Buy Me a Coffee** (#FFDD00, texte #0D0C22, gras), avec la **tasse officielle** à gauche de « Offrir un café ». Même forme et même taille que les autres boutons.

@@ -3772,14 +3772,20 @@ if (typeof ResizeObserver !== 'undefined') {
   if (s0) stickyObserver.observe(s0);
 }
 
+// 1.8.36 : Réglages s'ouvre depuis l'Historique ou la Progression (roue dentée en haut à droite) ;
+// on retient l'onglet d'origine pour l'icône allumée dans la barre du bas et pour « Retour ».
+let settingsFrom = 'historique';
+
 function switchTab(tabName) {
+  const prevTab = document.body.dataset.tab;
+  if (tabName === 'reglages' && (prevTab === 'historique' || prevTab === 'progression')) settingsFrom = prevTab;
   if (tabName === 'reglages') loadGoogleIdentity(); // 1.7.65 : préchargé avant un appui sur « Se connecter »
   document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
 
   const targetContainer = document.getElementById(`tab-${tabName}`);
-  // « Réglages » est une page secondaire de l'Historique : c'est l'icône Historique qui reste allumée
-  const targetNav = document.getElementById(`nav-${(tabName === 'reglages' || tabName === 'fond') ? 'historique' : tabName}`);
+  // « Réglages » est une page secondaire de l'onglet d'où on l'a ouverte (Historique ou Progression) : son icône reste allumée
+  const targetNav = document.getElementById(`nav-${(tabName === 'reglages' || tabName === 'fond') ? settingsFrom : tabName}`);
   if(targetContainer) targetContainer.classList.add('active');
   const scroller = document.getElementById('app-scroll');
   if (scroller) scroller.scrollTop = 0;
@@ -3796,9 +3802,12 @@ function switchTab(tabName) {
 
   document.body.dataset.tab = tabName;
   const settingsBtn = document.getElementById('settings-btn');
-  if (settingsBtn) settingsBtn.style.display = tabName === 'historique' ? 'flex' : 'none';
+  if (settingsBtn) settingsBtn.style.display = (tabName === 'historique' || tabName === 'progression') ? 'flex' : 'none';
   const settingsBack = document.getElementById('settings-back');
-  if (settingsBack) settingsBack.style.display = tabName === 'reglages' ? 'flex' : 'none';
+  if (settingsBack) {
+    settingsBack.style.display = tabName === 'reglages' ? 'flex' : 'none';
+    settingsBack.setAttribute('aria-label', settingsFrom === 'progression' ? 'Retour à la progression' : "Retour à l'historique");
+  }
   updateStickyOffsets();
   const pageTitle = document.getElementById('page-title');
   if (pageTitle) pageTitle.innerText = PAGE_TITLES[tabName] || '';
