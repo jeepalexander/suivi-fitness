@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.37] - 2026-11-17
+### 🖼️ Crédits des fonds d'écran, image par image (co-auteur : Claude)
+- `NOTICE` et `README.md` : auteurs Unsplash ajoutés — Barre : Eduardo Cano ; Poigne : Farkas Mario ; Râtelier : Ambitious Studio, Rick Barrett ; Squat : Tyler Raye. Pexels (1.8.36) : Kettlebell, Rack, Disques, Fente, Haltères.
+- Aucun changement dans l'application elle-même.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.8.37.
+
+---
+
 ## [1.8.36] - 2026-11-17
 ### ⚙️ Réglages accessibles depuis la Progression (co-auteur : Claude)
 - **Progression** : la roue dentée Réglages s'affiche en haut à droite, comme sur l'Historique (même bouton, même place). Validé sur la planche 25 de la maquette.
