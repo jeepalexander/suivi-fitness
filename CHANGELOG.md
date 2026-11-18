@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.39] - 2026-11-18
+### 🎨 Icônes d'exercices : 5 nouvelles, 3 remplacées (co-auteur : Claude)
+- Nouvelles : Développé décliné, Écarté poulie, Curl incliné, Rotation russe, Tapis de course (photos fournies, détourées). Les chaussures blanches sur fond blanc ont été redessinées au contour, l'ombre au sol retirée ; pour l'écarté poulie, seules les têtes de poulie sont gardées (montants retirés).
+- Remplacées : Relevés de jambes suspendu (l'ancienne image était incohérente), Curl biceps, Rowing barre.
+- Il reste 3 exercices sans icône : Curl poulie, Extension triceps haltère, Crunch à la poulie.
+
+---
+
 ## [1.8.38] - 2026-11-17
 ### 🖼️ Nouveau fond d'écran « Slam ball » (co-auteur : Claude)
 - **Ajouté** dans Réglages › Fond d'écran, rangé avec les gros plans sombres après *Rack* : *Slam ball* (slam ball rouge de 5 kg et barre sur tapis noir, vue de dessus). Photo d'Eduardo Cano (Unsplash), fournie par l'auteur de l'app.
