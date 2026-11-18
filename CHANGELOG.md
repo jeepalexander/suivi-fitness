@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.42] - 2026-11-18
+### 🎨 Icônes d'exercices : détourage refait sur tout le catalogue (co-auteur : Claude)
+- 65 icônes : l'athlète est détourée à nouveau depuis la photo d'origine par un modèle (cheveux, peau et baskets blanches nets, sans liseré clair ni reste de fond) ; cadrage et matériel inchangés.
+- Gardées telles quelles, le nouveau détourage n'étant pas meilleur : icônes à câble ou élastique recolorié (Tractions assistées, Rowing poulie basse, Pull-over poulie, Tirage bras tendus, Tirage facial), Dips, Presse à cuisses, Extension triceps, Développé militaire.
+- Écarté poulie : sangles des poignées en jaune à liseré noir, comme les câbles.
+
+---
+
 ## [1.8.41] - 2026-11-18
 ### 🎨 Icônes d'exercices : câbles plus visibles, détourage affiné (co-auteur : Claude)
 - Écarté poulie : câbles redessinés deux fois plus épais (jaune à liseré noir, bouts arrondis), lisibles en clair comme en sombre ; les têtes de poulie, coupées par le cadre de la photo, sont retirées et l'icône montre l'athlète entière jusqu'aux cuisses.
