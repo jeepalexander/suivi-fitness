@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.44] - 2026-11-18
+### 🎨 Les 3 dernières icônes d'exercices : tout le catalogue est illustré (co-auteur : Claude)
+- Extension triceps haltère : serrée sur le geste, assise du banc visible.
+- Crunch à la poulie : zoomée sur l'athlète à genoux et le tapis, câble en jaune à liseré noir.
+- Curl poulie : athlète entière, tapis et poulie basse, câble en jaune à liseré noir ; colonne de la machine retirée.
+- Les 85 exercices du catalogue ont désormais leur illustration.
+
+---
+
 ## [1.8.43] - 2026-11-18
 ### 🎨 Icônes : derniers restes de fond blanc retirés (co-auteur : Claude)
 - Shrugs barre : fond blanc derrière la queue de cheval et entre le bras et le short retiré (liseré du short gardé).
