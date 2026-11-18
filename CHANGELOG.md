@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.41] - 2026-11-18
+### 🎨 Icônes d'exercices : câbles plus visibles, détourage affiné (co-auteur : Claude)
+- Écarté poulie : câbles redessinés deux fois plus épais (jaune à liseré noir, bouts arrondis), lisibles en clair comme en sombre ; les têtes de poulie, coupées par le cadre de la photo, sont retirées et l'icône montre l'athlète entière jusqu'aux cuisses.
+- Curl incliné : morceaux de mur clair retirés (entre la taille et le dossier, derrière les cheveux).
+- Tapis de course : le plateau reste visible sous les baskets au lieu d'être coupé par la pastille.
+
+---
+
 ## [1.8.40] - 2026-11-18
 ### 🎨 Icônes d'exercices : nouveaux cadrages et détourage refait (co-auteur : Claude)
 - Cadrages choisis sur la planche interactive : « Débordant » (serré, coupé net par le bas de la pastille, la tête et les bras peuvent dépasser en haut) pour Développé décliné, Écarté poulie, Curl incliné, Rotation russe, Tapis de course, Curl biceps et Rowing barre (ces deux derniers plus zoomés) ; « Serré » pour Relevés de jambes suspendu (barre raccourcie à droite, baskets entières).
