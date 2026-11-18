@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.40] - 2026-11-18
+### 🎨 Icônes d'exercices : nouveaux cadrages et détourage refait (co-auteur : Claude)
+- Cadrages choisis sur la planche interactive : « Débordant » (serré, coupé net par le bas de la pastille, la tête et les bras peuvent dépasser en haut) pour Développé décliné, Écarté poulie, Curl incliné, Rotation russe, Tapis de course, Curl biceps et Rowing barre (ces deux derniers plus zoomés) ; « Serré » pour Relevés de jambes suspendu (barre raccourcie à droite, baskets entières).
+- Rien d'essentiel n'est coupé par la pastille : baskets, cheveux et disques de barre peuvent déborder.
+- Détourage refait : l'athlète est détourée par un modèle (cheveux, peau et baskets blanches nets, plus de taches de fond), le matériel sombre (banc, tapis, barre, tapis de course) par la couleur du fond.
+- Écarté poulie : câbles des poulies en jaune à liseré noir, lisibles sur fond sombre.
+
+---
+
 ## [1.8.39] - 2026-11-18
 ### 🎨 Icônes d'exercices : 5 nouvelles, 3 remplacées (co-auteur : Claude)
 - Nouvelles : Développé décliné, Écarté poulie, Curl incliné, Rotation russe, Tapis de course (photos fournies, détourées). Les chaussures blanches sur fond blanc ont été redessinées au contour, l'ombre au sol retirée ; pour l'écarté poulie, seules les têtes de poulie sont gardées (montants retirés).
