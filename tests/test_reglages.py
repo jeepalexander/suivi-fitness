@@ -18,9 +18,10 @@ with Srv() as base, sync_playwright() as p:
     ctx, pg, errs = newpage(br, 390, 844, pref='light')
     pg.goto(base + 'index.html'); pg.wait_for_timeout(800)
 
-    for t in ('programme', 'seance'):
-        pg.evaluate("t=>switchTab(t)", t); pg.wait_for_timeout(200)
-        check(f'bouton Réglages absent sur « {t} »', not pg.evaluate(vis, 'settings-btn'))
+    pg.evaluate("switchTab('programme')"); pg.wait_for_timeout(200)
+    check('bouton Réglages absent sur « programme »', not pg.evaluate(vis, 'settings-btn'))
+    pg.evaluate("switchTab('seance')"); pg.wait_for_timeout(200)
+    check('1.8.49 : bouton Réglages présent sur « seance »', pg.evaluate(vis, 'settings-btn'))
 
     # 1.8.36 : roue dentée aussi sur Progression ; Réglages garde l'icône Progression allumée et « Retour » y ramène
     pg.evaluate("switchTab('progression')"); pg.wait_for_timeout(400)
@@ -41,7 +42,7 @@ with Srv() as base, sync_playwright() as p:
           not pg.evaluate(in_tab, ['theme-choice', 'historique']) and not pg.evaluate(in_tab, ['update-card', 'historique']))
     check('la carte Sauvegarder / Restaurer reste dans l\'Historique', pg.evaluate(in_tab, ['import-file', 'historique']))
     box = pg.evaluate("(()=>{const r=document.getElementById('settings-btn').getBoundingClientRect();return [r.right,r.top,r.width,r.height]})()")
-    check('bouton en haut à droite (≥ 44 px, collé au bord droit)', box[0] > 390 - 40 and box[1] < 60 and box[2] >= 44 and box[3] >= 44, str(box))
+    check('1.8.49 : bouton de 36 px en haut à droite, collé au bord droit', box[0] + box[2] > 390 - 30 and box[1] < 30 and box[2] == 36 and box[3] == 36, str(box))
 
     pg.click('#settings-btn'); pg.wait_for_timeout(300)
     check('titre de la page : Réglages', pg.inner_text('#page-title') == 'Réglages', pg.inner_text('#page-title'))

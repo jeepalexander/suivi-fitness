@@ -280,6 +280,9 @@ header h1 { font-family: var(--font-display); font-size: 2.625rem; font-weight: 
 .hdr-btn svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .hdr-btn-text { width: auto; padding: 0 20px 0 12px; font-size: 0.9375rem; font-weight: 600; }
 .hdr-btn.has-update::after { content: ''; position: absolute; top: 8px; right: 8px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--surface); }
+#settings-btn { width: 36px; height: 36px; top: max(18px, calc(var(--safe-top) - 10px)); } /* 1.8.49 : bouton Réglages de 36 px partout (Séance, Progression, Historique), à la hauteur de « MON CARNET DE SALLE » */
+#settings-btn svg { width: 20px; height: 20px; }
+#settings-btn.has-update::after { top: 4px; right: 4px; }
 
 /* Chrono de repos : prêt (blanc) · en cours (vert) · terminé (rouge) */
 .timer-btn { position: relative; flex: none; z-index: var(--z-raised); /* 1.7.48 : dans la ligne séries / durée, plus en haut à droite */ display: none; align-items: center; gap: 8px; height: 44px; padding: 0 16px 0 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--card-bg); color: var(--indigo); box-shadow: var(--sh-card); font-family: var(--font-display); font-size: 1rem; font-weight: 700; cursor: pointer; overflow: hidden; isolation: isolate; transition: background var(--t-normal) ease, color var(--t-normal) ease; --progress: 0%; font-variant-numeric: tabular-nums; }

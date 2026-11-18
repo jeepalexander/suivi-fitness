@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.49] - 2026-11-18
+### ⚙️ Réglages accessibles depuis l'onglet Séance ; bouton Réglages de 36 px (co-auteur : Claude)
+- La roue crantée des Réglages apparaît aussi en haut à droite de l'onglet Séance ; « Retour » ramène à la séance.
+- Le bouton Réglages passe à 36 px partout (Séance, Progression, Historique), à la hauteur de « MON CARNET DE SALLE », pour ne pas toucher le nom du programme à 360 px ; pastille de mise à jour recalée.
+- `test_reglages.py` mis à jour.
+
+---
+
 ## [1.8.48] - 2026-11-18
 ### 📈 Progression : une séance libre choisie filtre aussi les graphiques par exercice et cardio (co-auteur : Claude)
 - Quand une séance libre est choisie dans « Voir les statistiques de », « Progression par exercice » ne propose que ses exercices et ses courbes ne gardent que ses passages ; « Suivi cardio » de même. Sans aucune donnée, la liste montre ses exercices et la courbe reste vide ; carte cachée pour une séance libre de cardio seul ou sans cardio (`statsFocusLetter`, `statsFocusHistory`).

@@ -3834,7 +3834,7 @@ let settingsFrom = 'historique';
 
 function switchTab(tabName) {
   const prevTab = document.body.dataset.tab;
-  if (tabName === 'reglages' && (prevTab === 'historique' || prevTab === 'progression')) settingsFrom = prevTab;
+  if (tabName === 'reglages' && (prevTab === 'historique' || prevTab === 'progression' || prevTab === 'seance')) settingsFrom = prevTab; // 1.8.49 : Séance aussi
   if (tabName === 'reglages') loadGoogleIdentity(); // 1.7.65 : préchargé avant un appui sur « Se connecter »
   document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
@@ -3858,11 +3858,11 @@ function switchTab(tabName) {
 
   document.body.dataset.tab = tabName;
   const settingsBtn = document.getElementById('settings-btn');
-  if (settingsBtn) settingsBtn.style.display = (tabName === 'historique' || tabName === 'progression') ? 'flex' : 'none';
+  if (settingsBtn) settingsBtn.style.display = (tabName === 'historique' || tabName === 'progression' || tabName === 'seance') ? 'flex' : 'none'; // 1.8.49
   const settingsBack = document.getElementById('settings-back');
   if (settingsBack) {
     settingsBack.style.display = tabName === 'reglages' ? 'flex' : 'none';
-    settingsBack.setAttribute('aria-label', settingsFrom === 'progression' ? 'Retour à la progression' : "Retour à l'historique");
+    settingsBack.setAttribute('aria-label', settingsFrom === 'progression' ? 'Retour à la progression' : settingsFrom === 'seance' ? 'Retour à la séance' : "Retour à l'historique");
   }
   updateStickyOffsets();
   const pageTitle = document.getElementById('page-title');
