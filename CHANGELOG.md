@@ -7,6 +7,112 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.45] - 2026-11-18
+### 🎨 Extension triceps haltère : genou entier (co-auteur : Claude)
+- Cadrage élargi à droite : le genou n'est plus coupé, l'assise du banc reste visible.
+
+---
+
+## [1.8.44] - 2026-11-18
+### 🎨 Les 3 dernières icônes d'exercices : tout le catalogue est illustré (co-auteur : Claude)
+- Extension triceps haltère : serrée sur le geste, assise du banc visible.
+- Crunch à la poulie : zoomée sur l'athlète à genoux et le tapis, câble en jaune à liseré noir.
+- Curl poulie : athlète entière, tapis et poulie basse, câble en jaune à liseré noir ; colonne de la machine retirée.
+- Les 85 exercices du catalogue ont désormais leur illustration.
+
+---
+
+## [1.8.43] - 2026-11-18
+### 🎨 Icônes : derniers restes de fond blanc retirés (co-auteur : Claude)
+- Shrugs barre : fond blanc derrière la queue de cheval et entre le bras et le short retiré (liseré du short gardé).
+- Développé couché : fond blanc dans les cheveux qui pendent du banc retiré.
+- Fente bulgare : fond blanc entre la queue de cheval et le dos retiré.
+
+---
+
+## [1.8.42] - 2026-11-18
+### 🎨 Icônes d'exercices : détourage refait sur tout le catalogue (co-auteur : Claude)
+- 65 icônes : l'athlète est détourée à nouveau depuis la photo d'origine par un modèle (cheveux, peau et baskets blanches nets, sans liseré clair ni reste de fond) ; cadrage et matériel inchangés.
+- Gardées telles quelles, le nouveau détourage n'étant pas meilleur : icônes à câble ou élastique recolorié (Tractions assistées, Rowing poulie basse, Pull-over poulie, Tirage bras tendus, Tirage facial), Dips, Presse à cuisses, Extension triceps, Développé militaire.
+- Écarté poulie : sangles des poignées en jaune à liseré noir, comme les câbles.
+
+---
+
+## [1.8.41] - 2026-11-18
+### 🎨 Icônes d'exercices : câbles plus visibles, détourage affiné (co-auteur : Claude)
+- Écarté poulie : câbles redessinés deux fois plus épais (jaune à liseré noir, bouts arrondis), lisibles en clair comme en sombre ; les têtes de poulie, coupées par le cadre de la photo, sont retirées et l'icône montre l'athlète entière jusqu'aux cuisses.
+- Curl incliné : morceaux de mur clair retirés (entre la taille et le dossier, derrière les cheveux).
+- Tapis de course : le plateau reste visible sous les baskets au lieu d'être coupé par la pastille.
+
+---
+
+## [1.8.40] - 2026-11-18
+### 🎨 Icônes d'exercices : nouveaux cadrages et détourage refait (co-auteur : Claude)
+- Cadrages choisis sur la planche interactive : « Débordant » (serré, coupé net par le bas de la pastille, la tête et les bras peuvent dépasser en haut) pour Développé décliné, Écarté poulie, Curl incliné, Rotation russe, Tapis de course, Curl biceps et Rowing barre (ces deux derniers plus zoomés) ; « Serré » pour Relevés de jambes suspendu (barre raccourcie à droite, baskets entières).
+- Rien d'essentiel n'est coupé par la pastille : baskets, cheveux et disques de barre peuvent déborder.
+- Détourage refait : l'athlète est détourée par un modèle (cheveux, peau et baskets blanches nets, plus de taches de fond), le matériel sombre (banc, tapis, barre, tapis de course) par la couleur du fond.
+- Écarté poulie : câbles des poulies en jaune à liseré noir, lisibles sur fond sombre.
+
+---
+
+## [1.8.39] - 2026-11-18
+### 🎨 Icônes d'exercices : 5 nouvelles, 3 remplacées (co-auteur : Claude)
+- Nouvelles : Développé décliné, Écarté poulie, Curl incliné, Rotation russe, Tapis de course (photos fournies, détourées). Les chaussures blanches sur fond blanc ont été redessinées au contour, l'ombre au sol retirée ; pour l'écarté poulie, seules les têtes de poulie sont gardées (montants retirés).
+- Remplacées : Relevés de jambes suspendu (l'ancienne image était incohérente), Curl biceps, Rowing barre.
+- Il reste 3 exercices sans icône : Curl poulie, Extension triceps haltère, Crunch à la poulie.
+
+---
+
+## [1.8.38] - 2026-11-17
+### 🖼️ Nouveau fond d'écran « Slam ball » (co-auteur : Claude)
+- **Ajouté** dans Réglages › Fond d'écran, rangé avec les gros plans sombres après *Rack* : *Slam ball* (slam ball rouge de 5 kg et barre sur tapis noir, vue de dessus). Photo d'Eduardo Cano (Unsplash), fournie par l'auteur de l'app.
+- Image 1000 × 1333 (100 Ko) et vignette, cadrées au centre ; ajoutées au cache hors connexion.
+- Crédits : `NOTICE` et `README.md` (Barre et Slam ball : Eduardo Cano).
+- `test_fond_ecran.py` : 21 choix (20 images + Aucun), 20 vignettes.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.8.38.
+
+---
+
+## [1.8.37] - 2026-11-17
+### 🖼️ Crédits des fonds d'écran, image par image (co-auteur : Claude)
+- `NOTICE` et `README.md` : auteurs Unsplash ajoutés — Barre : Eduardo Cano ; Poigne : Farkas Mario ; Râtelier : Ambitious Studio, Rick Barrett ; Squat : Tyler Raye. Pexels (1.8.36) : Kettlebell, Rack, Disques, Fente, Haltères.
+- Aucun changement dans l'application elle-même.
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.8.37.
+
+---
+
+## [1.8.36] - 2026-11-17
+### ⚙️ Réglages accessibles depuis la Progression (co-auteur : Claude)
+- **Progression** : la roue dentée Réglages s'affiche en haut à droite, comme sur l'Historique (même bouton, même place). Validé sur la planche 25 de la maquette.
+- Ouverts depuis la Progression, les Réglages (et le Fond d'écran) gardent l'icône **Progression** allumée dans la barre du bas, et « Retour » ramène à la Progression. Depuis l'Historique, rien ne change.
+- **Crédits** : `NOTICE` et `README.md` citent Pexels (licence Pexels) pour les fonds Kettlebell, Rack, Disques, Fente et Haltères.
+- `test_reglages.py` : parcours depuis la Progression (roue visible, icône allumée, Fond d'écran, Retour).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.8.36.
+
+---
+
+## [1.8.35] - 2026-11-17
+### ☕ Bouton « Offrir un café » aux couleurs de Buy Me a Coffee, avec fumée animée (co-auteur : Claude)
+- Réglages › Soutenir l'app : le bouton passe en **jaune Buy Me a Coffee** (#FFDD00, texte #0D0C22, gras), avec la **tasse officielle** à gauche de « Offrir un café ». Même forme et même taille que les autres boutons.
+- **Fumée animée** au-dessus de la tasse, comme sur le bouton officiel : 3 petits « S » gris flous qui montent et s'effacent, décalés de 0,7 s (boucle de 2,1 s), en CSS seul. Gris plus clair en thème sombre. Retirée si le téléphone demande de réduire les animations.
+- Tasse hébergée dans l'app (`icons/bmc-tasse.png`, détourée depuis le logo officiel fourni), mise en cache hors connexion : **aucune connexion à Buy Me a Coffee avant l'appui**, aucun script tiers.
+- `test_soutien.py` mis à jour (couleurs, tasse chargée, fumée et décalages, aucune requête vers Buy Me a Coffee, mode « réduire les animations »).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.8.35.
+
+---
+
+## [1.8.34] - 2026-11-17
+### 🔍 Interface agrandie de 10 %, sans réglage du navigateur (co-auteur : Claude)
+- Toute l'application est affichée à **110 %**, comme avec le zoom 110 % de Chrome ou Firefox : textes, boutons, icônes, tuiles, graphiques. Il n'y a plus besoin de régler le navigateur (le remettre à 100 %, sinon l'app serait à 121 %).
+- **Écrans plus étroits que 412 px** : agrandissement réduit juste ce qu'il faut pour que la barre du bas tienne (390 px : 104 %, 384 px : 102 %, 360 px : 100 %). Recalculé à la rotation.
+- La page garde exactement la hauteur de l'écran (rien coupé en bas) ; zone de la caméra, barre système et fenêtres en hauteur gardent leur taille réelle.
+- **Graphiques** : dessinés à la résolution agrandie (nets) ; l'appui sur un point affiche bien la valeur de ce point (sans correction, l'agrandissement décalait la lecture jusqu'à environ 30 px vers la droite).
+- Navigateur sans zoom CSS : rien ne change.
+- `test_agrandissement.py` (groupe `style`, 56 contrôles) ; les autres tests mesurent la mise en page à 100 % (`newpage(..., zoom=1)`).
+- `manifest.json` et `APP_VERSION` (`sw.js`) alignés sur 1.8.34.
+
+---
+
 ## [1.8.33] - 2026-11-17
 ### ✏️ Premier lancement : petite flèche vers le bouton + (co-auteur : Claude)
 - Une petite flèche manuscrite (environ 3 cm, simple courbe sans boucle) part du dessus du paragraphe « Tu n'as pour l'instant rien de prévu… » et monte vers le bouton + de l'en-tête.

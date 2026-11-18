@@ -29,7 +29,7 @@ class Srv:
         self.p.terminate()
 
 
-def newpage(br, w=390, h=844, scheme='light', sw='block', pref=None, seed=True, native_dialogs=True):
+def newpage(br, w=390, h=844, scheme='light', sw='block', pref=None, seed=True, native_dialogs=True, zoom=1):
     """Page neuve avec les données du jeu d'essai (tests/fixture_data.json) dans localStorage ; pref = thème forcé ('light' / 'dark' / 'auto')."""
     ctx = br.new_context(viewport={'width': w, 'height': h}, device_scale_factor=2, service_workers=sw, color_scheme=scheme)
     # Le script Google Identity (sauvegarde Drive) n'est jamais chargé pour de vrai dans les tests.
@@ -38,7 +38,9 @@ def newpage(br, w=390, h=844, scheme='light', sw='block', pref=None, seed=True, 
     errs = []
     pg.on('pageerror', lambda e: errs.append(str(e)))
     pg.on('console', lambda m: errs.append(m.text) if m.type == 'error' else None)
-    init = ''
+    # 1.8.34 : l'interface est agrandie selon la largeur de l'écran ; les tests historiques mesurent la mise en page
+    # à 100 % (zoom=1). zoom=None : agrandissement réel de l'app (test_agrandissement.py).
+    init = '' if zoom is None else 'window.__uiZoom=%s;' % zoom
     if seed:
         init += "if(!localStorage.getItem('h49_state'))localStorage.setItem('h49_state', %s);" % json.dumps(json.dumps(DATA))
     if pref:

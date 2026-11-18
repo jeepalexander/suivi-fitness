@@ -158,6 +158,26 @@ function deloadMarksPlugin(flags, color) {
 if (typeof Chart !== 'undefined') {
   Chart.defaults.font.family = "'Figtree', system-ui, sans-serif";
   Chart.defaults.font.size = 13; // 12 par défaut, +1 comme le reste de l'interface
+  // 1.8.34 : l'interface est agrandie par un zoom CSS (--ui-zoom) : les graphiques sont dessinés d'autant plus finement,
+  // sinon ils seraient agrandis comme une image (légèrement flous).
+  try {
+    const z = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ui-zoom')) || 1;
+    Chart.defaults.devicePixelRatio = (window.devicePixelRatio || 1) * z;
+  } catch (e) {}
+  // 1.8.34 : avec ce zoom, Chart.js lit la position d'un appui en pixels agrandis : on la ramène à l'échelle du graphique
+  // (écart mesuré sur le canevas lui-même), sinon la valeur affichée est celle d'un point voisin.
+  Chart.register({
+    id: 'uiZoomEvents',
+    beforeEvent(chart, args) {
+      const e = args.event, c = chart.canvas;
+      if (!e || e.x == null || !c || !chart.width) return;
+      const k = c.getBoundingClientRect().width / chart.width;
+      if (!(k > 0) || Math.abs(k - 1) < 0.001) return;
+      e.x /= k; e.y /= k;
+      const a = chart.chartArea;
+      if (a) args.inChartArea = e.x >= a.left && e.x <= a.right && e.y >= a.top && e.y <= a.bottom;
+    }
+  });
   Chart.defaults.color = CHART_COLORS.tick;
 }
 
@@ -355,6 +375,7 @@ const WALLPAPERS = [
   { id: 'poigne', name: 'Poigne', pos: 'center 40%' },
   { id: 'disques', name: 'Disques', pos: 'center 50%' },
   { id: 'rack', name: 'Rack', pos: 'center 50%' },
+  { id: 'slamball', name: 'Slam ball', pos: 'center 45%' }, // 1.8.38 : Eduardo Cano (Unsplash)
   // Graphiques et couleurs vives
   { id: 'geometrie', name: 'Géométrie', pos: 'center 50%' },
   { id: 'silhouette', name: 'Silhouette', pos: 'center 40%' },
@@ -3752,14 +3773,20 @@ if (typeof ResizeObserver !== 'undefined') {
   if (s0) stickyObserver.observe(s0);
 }
 
+// 1.8.36 : Réglages s'ouvre depuis l'Historique ou la Progression (roue dentée en haut à droite) ;
+// on retient l'onglet d'origine pour l'icône allumée dans la barre du bas et pour « Retour ».
+let settingsFrom = 'historique';
+
 function switchTab(tabName) {
+  const prevTab = document.body.dataset.tab;
+  if (tabName === 'reglages' && (prevTab === 'historique' || prevTab === 'progression')) settingsFrom = prevTab;
   if (tabName === 'reglages') loadGoogleIdentity(); // 1.7.65 : préchargé avant un appui sur « Se connecter »
   document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
 
   const targetContainer = document.getElementById(`tab-${tabName}`);
-  // « Réglages » est une page secondaire de l'Historique : c'est l'icône Historique qui reste allumée
-  const targetNav = document.getElementById(`nav-${(tabName === 'reglages' || tabName === 'fond') ? 'historique' : tabName}`);
+  // « Réglages » est une page secondaire de l'onglet d'où on l'a ouverte (Historique ou Progression) : son icône reste allumée
+  const targetNav = document.getElementById(`nav-${(tabName === 'reglages' || tabName === 'fond') ? settingsFrom : tabName}`);
   if(targetContainer) targetContainer.classList.add('active');
   const scroller = document.getElementById('app-scroll');
   if (scroller) scroller.scrollTop = 0;
@@ -3776,9 +3803,12 @@ function switchTab(tabName) {
 
   document.body.dataset.tab = tabName;
   const settingsBtn = document.getElementById('settings-btn');
-  if (settingsBtn) settingsBtn.style.display = tabName === 'historique' ? 'flex' : 'none';
+  if (settingsBtn) settingsBtn.style.display = (tabName === 'historique' || tabName === 'progression') ? 'flex' : 'none';
   const settingsBack = document.getElementById('settings-back');
-  if (settingsBack) settingsBack.style.display = tabName === 'reglages' ? 'flex' : 'none';
+  if (settingsBack) {
+    settingsBack.style.display = tabName === 'reglages' ? 'flex' : 'none';
+    settingsBack.setAttribute('aria-label', settingsFrom === 'progression' ? 'Retour à la progression' : "Retour à l'historique");
+  }
   updateStickyOffsets();
   const pageTitle = document.getElementById('page-title');
   if (pageTitle) pageTitle.innerText = PAGE_TITLES[tabName] || '';

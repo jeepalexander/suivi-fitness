@@ -16,6 +16,22 @@
   <meta name="theme-color" content="#FFFFFF">
   <meta name="apple-mobile-web-app-title" content="Mon Carnet">
 
+  <!-- 1.8.34 : agrandissement de l'interface (110 % dès 412 px de large, 375 px utiles minimum), avant le premier affichage
+       et à chaque changement de taille (rotation). window.__uiZoom : valeur imposée par les tests. -->
+  <script>
+    (function () {
+      function uiZoom() {
+        try {
+          if (!(window.CSS && CSS.supports && CSS.supports('zoom', '1.1'))) return;
+          var z = typeof window.__uiZoom === 'number' ? window.__uiZoom : Math.min(1.1, Math.max(1, window.innerWidth / 374.5));
+          z = Math.floor(z * 100) / 100;
+          document.documentElement.style.setProperty('--ui-zoom', String(z));
+        } catch (e) {}
+      }
+      uiZoom();
+      window.addEventListener('resize', uiZoom);
+    })();
+  </script>
   <!-- Thème : résolu avant le premier affichage pour éviter tout flash (clair par défaut) -->
   <script>
     (function () {
@@ -28,7 +44,7 @@
         var w = localStorage.getItem('h49_wallpaper');
         // 1.8.23 : retour de la connexion Google (« Reconnecter ») : la page reste masquée jusqu'au choix de l'onglet (sinon Programme s'affichait d'abord)
         if (/(^#|&)(access_token|error)=/.test(location.hash) && /state=/.test(location.hash)) document.documentElement.setAttribute('data-drive-return', '');
-        if (/^(course|barre|halteres|kettlebell|ratelier|squat|poigne|disques|cuivre|geometrie|salle|cordes|fente|rack|silhouette|escaliers|frontsquat|suspension|wod)$/.test(w || '')) document.documentElement.setAttribute('data-wallpaper', w);
+        if (/^(course|barre|halteres|kettlebell|ratelier|squat|poigne|disques|cuivre|geometrie|salle|cordes|fente|rack|silhouette|escaliers|frontsquat|suspension|wod|slamball)$/.test(w || '')) document.documentElement.setAttribute('data-wallpaper', w);
       } catch (e) {}
     })();
   </script>
@@ -97,7 +113,7 @@
     <button id="settings-btn" class="hdr-btn" type="button" onclick="switchTab('reglages')" aria-label="Réglages">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
     </button>
-    <button id="settings-back" class="hdr-btn hdr-btn-text" type="button" onclick="switchTab('historique')" aria-label="Retour à l'historique">
+    <button id="settings-back" class="hdr-btn hdr-btn-text" type="button" onclick="switchTab(settingsFrom)" aria-label="Retour à l'historique">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
       <span>Retour</span>
     </button>
@@ -230,7 +246,7 @@
     <div class="card support-card">
       <div class="card-title">Soutenir l'app</div>
       <p class="theme-hint">Mon Carnet de Salle est gratuit, sans publicité, et ne collecte aucune donnée. Si elle t'aide à progresser, tu peux m'offrir un café : c'est ce qui la fait vivre.</p>
-      <a id="support-btn" class="btn btn-secondary support-btn" href="https://buymeacoffee.com/jeepalexander" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9zM17 10h1.5a2.5 2.5 0 0 1 0 5H17M8 3.5v2.5M12 3.5v2.5"/></svg>Offrir un café</a>
+      <a id="support-btn" class="btn btn-secondary support-btn" href="https://buymeacoffee.com/jeepalexander" target="_blank" rel="noopener"><span class="bmc-cup"><img src="icons/bmc-tasse.png" alt="" width="18" height="26"><span class="bmc-steam" aria-hidden="true"><svg viewBox="0 0 12 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M8 2C4 2 3 5 6 7.5S9 13 4 16"/></svg><svg viewBox="0 0 12 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M8 2C4 2 3 5 6 7.5S9 13 4 16"/></svg><svg viewBox="0 0 12 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M8 2C4 2 3 5 6 7.5S9 13 4 16"/></svg></span></span>Offrir un café</a>
     </div>
     <div class="card update-card" id="update-card">
       <div class="card-title">Application</div>

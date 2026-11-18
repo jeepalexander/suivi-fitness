@@ -18,9 +18,22 @@ with Srv() as base, sync_playwright() as p:
     ctx, pg, errs = newpage(br, 390, 844, pref='light')
     pg.goto(base + 'index.html'); pg.wait_for_timeout(800)
 
-    for t in ('programme', 'seance', 'progression'):
+    for t in ('programme', 'seance'):
         pg.evaluate("t=>switchTab(t)", t); pg.wait_for_timeout(200)
         check(f'bouton Réglages absent sur « {t} »', not pg.evaluate(vis, 'settings-btn'))
+
+    # 1.8.36 : roue dentée aussi sur Progression ; Réglages garde l'icône Progression allumée et « Retour » y ramène
+    pg.evaluate("switchTab('progression')"); pg.wait_for_timeout(400)
+    check('bouton Réglages visible sur Progression', pg.evaluate(vis, 'settings-btn'))
+    pg.click('#settings-btn'); pg.wait_for_timeout(300)
+    check('depuis Progression : page Réglages, icône Progression allumée',
+          pg.inner_text('#page-title') == 'Réglages' and pg.evaluate("document.getElementById('nav-progression').classList.contains('active') && !document.getElementById('nav-historique').classList.contains('active')"))
+    check('depuis Progression : « Retour » annoncé vers la progression', pg.evaluate("document.getElementById('settings-back').getAttribute('aria-label')") == 'Retour à la progression')
+    pg.evaluate("switchTab('fond')"); pg.wait_for_timeout(250)
+    check('Fond d\'écran (depuis Progression) : icône Progression toujours allumée', pg.evaluate("document.getElementById('nav-progression').classList.contains('active')"))
+    pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(250)
+    pg.click('#settings-back'); pg.wait_for_timeout(400)
+    check('Retour ramène à la Progression', pg.inner_text('#page-title') == 'Progression', pg.inner_text('#page-title'))
 
     pg.evaluate("switchTab('historique')"); pg.wait_for_timeout(300)
     check('bouton Réglages visible sur Historique', pg.evaluate(vis, 'settings-btn'))

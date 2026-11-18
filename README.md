@@ -140,7 +140,7 @@ Copyright (c) 2026 Jean-Philippe Alexander. Code publié sous la licence **[Poly
 - ❌ **Interdit** : redistribuer le code, le modifier, en publier une version dérivée ou l'utiliser à des fins commerciales sans accord écrit.
 - Le nom « Mon Carnet de Salle », l'icône et les illustrations des exercices ne sont concédés sous aucune licence.
 - Les composants tiers (Chart.js, qrcode-generator, jsQR, polices) restent sous leur propre licence : voir [NOTICE](NOTICE).
-- Les fonds d'écran (`wallpapers/`) viennent de Pixabay, Unsplash, Magnific ou de générations IA : ils restent sous la licence de leur source et ne sont pas couverts par celle de l'application.
+- Les fonds d'écran (`wallpapers/`) viennent de Pexels (Kettlebell, Rack, Disques, Fente, Haltères), Unsplash (Barre et Slam ball : Eduardo Cano ; Poigne : Farkas Mario ; Râtelier : Ambitious Studio, Rick Barrett ; Squat : Tyler Raye), Pixabay, Magnific ou de générations IA (détail dans `NOTICE`) : ils restent sous la licence de leur source et ne sont pas couverts par celle de l'application.
 
 Seul le texte du fichier [LICENSE](LICENSE) fait foi. Pour toute autre utilisation, contacter l'auteur via le dépôt.
 
