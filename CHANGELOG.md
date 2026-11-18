@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.46] - 2026-11-18
+### 📈 Progression : la séance choisie filtre aussi les graphiques par exercice et cardio (co-auteur : Claude)
+- Quand une séance est choisie dans la tuile de progression (« Séance A »), « Progression par exercice » ne propose que les exercices de cette séance et ses courbes ne gardent que les passages de cette séance ; « Suivi cardio » de même.
+- La carte « Progression par exercice » disparaît pour une séance de cardio seul, « Suivi cardio » pour une séance sans cardio. Retour à « Séances » ou « Mois » : tout revient.
+- Nouveau test `test_progression_seance.py` (groupe progression).
+
+---
+
 ## [1.8.45] - 2026-11-18
 ### 🎨 Extension triceps haltère : genou entier (co-auteur : Claude)
 - Cadrage élargi à droite : le genou n'est plus coupé, l'assise du banc reste visible.

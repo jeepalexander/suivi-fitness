@@ -902,7 +902,7 @@ body[data-seance="empty"] .seance-sticky { display: none; }
 .progress-row.named { grid-template-columns: 32px minmax(0, 1fr) minmax(60px, 30%) auto; }
 .progress-name { font-size: 1rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .progress-row .mem-ico { background: var(--primary-strong); color: var(--on-strong); }
-#cardio-card[hidden] { display: none; }
+#cardio-card[hidden], #exercise-card[hidden] { display: none; } /* 1.8.46 : #exercise-card caché pour une séance de cardio seul */
 #cardio-filter[hidden] { display: none; }
 
 /* --- Historique : filtres par programme, origine dans la fenêtre de détail --- */
