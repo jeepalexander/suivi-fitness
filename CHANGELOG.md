@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.47] - 2026-11-18
+### 📈 Progression : le filtre « A / B / C » ne propose que les séances déjà faites (co-auteur : Claude)
+- Une séance programmée mais jamais faite (aucune saisie) n'est plus proposée par le bouton « A / B / C » de la tuile de progression (`statsFilterLetters`).
+- `test_progression_seance.py` : séances D et E avec un historique, séance F jamais faite (10 contrôles).
+
+---
+
 ## [1.8.46] - 2026-11-18
 ### 📈 Progression : la séance choisie filtre aussi les graphiques par exercice et cardio (co-auteur : Claude)
 - Quand une séance est choisie dans la tuile de progression (« Séance A »), « Progression par exercice » ne propose que les exercices de cette séance et ses courbes ne gardent que les passages de cette séance ; « Suivi cardio » de même.

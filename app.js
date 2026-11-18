@@ -2591,6 +2591,12 @@ function statsLetters(scope = currentStatsScope()) {
   return SESSION_KEYS.filter(k => keys.has(k));
 }
 
+// 1.8.46 : le filtre « A / B / C » de la tuile ne propose que les séances déjà faites au moins une fois
+function statsFilterLetters(scope = currentStatsScope()) {
+  const done = new Set(statsHistory(scope).map(h => h.sessionKey || h.type));
+  return statsLetters(scope).filter(k => done.has(k));
+}
+
 function statsScopeStatusText(scope) {
   if (scope === 'all') return 'Programmes et séances libres';
   const p = getProgram(scope);
@@ -2647,7 +2653,7 @@ function setStatsScope(id) {
 
 // 1.8.46 : séance choisie dans la tuile de progression (filtre « A / B / C ») → ses exercices seulement
 function statsSessionFilterLetter() {
-  return currentVolumeFilter === 'type' && statsLetters().includes(currentSessionTypeFilter) ? currentSessionTypeFilter : null;
+  return currentVolumeFilter === 'type' && statsFilterLetters().includes(currentSessionTypeFilter) ? currentSessionTypeFilter : null;
 }
 function statsSessionExerciseNames(letter, scope = currentStatsScope()) {
   const names = [];
@@ -2716,7 +2722,7 @@ function highlightVolumeButton(btn) {
 function updateSessionTypeButton() {
   const typeBtn = document.getElementById('btn-vol-type');
   if (!typeBtn) return;
-  const letters = statsLetters();
+  const letters = statsFilterLetters();
   typeBtn.innerText = currentVolumeFilter === 'type' ? `Séance ${currentSessionTypeFilter}` : (letters.length > 3 ? `${letters[0]} / … / ${letters[letters.length - 1]}` : letters.join(' / ') || 'A / B / C');
 }
 
@@ -2754,7 +2760,7 @@ function setVolumeFilter(filter, btn) {
 // Chaque appui fait défiler les séances : A, puis B, puis C, puis A...
 // (le premier appui, depuis un autre filtre, démarre toujours sur A)
 function cycleSessionTypeFilter(btn) {
-  const letters = statsLetters();
+  const letters = statsFilterLetters();
   if (!letters.length) return;
   if (currentVolumeFilter === 'type' && letters.includes(currentSessionTypeFilter)) {
     const idx = letters.indexOf(currentSessionTypeFilter);
@@ -2804,7 +2810,7 @@ function renderTonnageChart() {
   let data = [];
   let deloadFlags = []; // 1.8.0 : séances de déload (plume sous le point)
   const hist = statsHistory();
-  if (currentVolumeFilter === 'type' && !statsLetters().includes(currentSessionTypeFilter)) { currentVolumeFilter = 'all'; updateSessionTypeButton(); }
+  if (currentVolumeFilter === 'type' && !statsFilterLetters().includes(currentSessionTypeFilter)) { currentVolumeFilter = 'all'; updateSessionTypeButton(); }
   const keyOf = e => e.sessionKey || e.type;
 
   if (hist.length === 0) {

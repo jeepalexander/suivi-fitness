@@ -28,12 +28,18 @@ with Srv() as url, sync_playwright() as p:
     pg.evaluate("""()=>{const p=getActiveProgram();const id=n=>CATALOGUE.find(e=>e.name===n).id;
       p.sessions.push({key:'D',name:'Cardio',exercises:[{exId:id('Rameur'),sets:1}]});
       p.sessions.push({key:'E',name:'Bras',exercises:[{exId:id('Curl biceps'),sets:3},{exId:id('Dips'),sets:3}]});
+      p.sessions.push({key:'F',name:'Jamais faite',exercises:[{exId:id('Curl biceps'),sets:3}]});
+      const base={programId:p.id,programName:p.name,kind:'program',isDeload:false,duration:1800};
+      state.history.push(Object.assign({id:'hD',date:'2026-11-10',type:'D',sessionKey:'D',sessionName:'Cardio',tonnage:0,
+        exercises:[{name:'Rameur',exId:id('Rameur'),cardio:true,sets:[{weight:0,reps:0,seconds:480,meters:2000}]}]},base));
+      state.history.push(Object.assign({id:'hE',date:'2026-11-12',type:'E',sessionKey:'E',sessionName:'Bras',tonnage:600,
+        exercises:[{name:'Curl biceps',exId:id('Curl biceps'),sets:[{weight:20,reps:10},{weight:20,reps:10},{weight:20,reps:10}],maxWeight:20,totalVolume:600}]},base));
       }""")
     pg.evaluate("switchTab('progression')"); pg.wait_for_timeout(700)
     i = pg.evaluate(INFO)
     ok('sans filtre : tous les exercices, cardio affiché', len(i['ex']) > 8 and not i['exHidden'] and not i['cardioHidden'], i)
     seen = {}
-    for _ in range(5):
+    for _ in range(6):
         pg.click('#btn-vol-type'); pg.wait_for_timeout(300)
         i = pg.evaluate(INFO); seen[i['letter']] = i
     a = seen.get('A', {})
@@ -46,8 +52,8 @@ with Srv() as url, sync_playwright() as p:
     ok('séance D (cardio seul) : « Progression par exercice » cachée, cardio affiché', d and d['exHidden'] and not d['cardioHidden'], d)
     e = seen.get('E', {})
     ok('séance E (sans cardio) : « Suivi cardio » caché, exercices Curl biceps et Dips', e and e['cardioHidden'] and e['ex'][:2] == ['Curl biceps', 'Dips'] and not e['exHidden'], e)
-    pts = pg.evaluate("exerciseChart ? exerciseChart.data.labels : null")
-    ok('séance E sans historique : la courbe du Curl biceps ne reprend pas ses passages des autres séances', not pts or pts == ["Aucune donnée"], pts)
+    ok('séance E : la courbe du Curl biceps ne garde que son passage en séance E', e and len(e['labels']) == 1 and e['labels'][0].startswith('E'), e.get('labels'))
+    ok('séance F jamais faite : absente du filtre « A / B / C »', 'F' not in seen and pg.evaluate("statsFilterLetters()") == ['A','B','C','D','E'], (list(seen), pg.evaluate("statsFilterLetters()")))
     # retour à « Séances » (tous) : tout revient
     pg.click('.hero-card .filter-group .filter-btn'); pg.wait_for_timeout(300)
     i = pg.evaluate(INFO)
