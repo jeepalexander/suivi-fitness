@@ -7,6 +7,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.45] - 2026-11-18
+### 🎨 Extension triceps haltère : genou entier (co-auteur : Claude)
+- Cadrage élargi à droite : le genou n'est plus coupé, l'assise du banc reste visible.
+
+---
+
 ## [1.8.44] - 2026-11-18
 ### 🎨 Les 3 dernières icônes d'exercices : tout le catalogue est illustré (co-auteur : Claude)
 - Extension triceps haltère : serrée sur le geste, assise du banc visible.
