@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.43] - 2026-11-18
+### 🎨 Icônes : derniers restes de fond blanc retirés (co-auteur : Claude)
+- Shrugs barre : fond blanc derrière la queue de cheval et entre le bras et le short retiré (liseré du short gardé).
+- Développé couché : fond blanc dans les cheveux qui pendent du banc retiré.
+- Fente bulgare : fond blanc entre la queue de cheval et le dos retiré.
+
+---
+
 ## [1.8.42] - 2026-11-18
 ### 🎨 Icônes d'exercices : détourage refait sur tout le catalogue (co-auteur : Claude)
 - 65 icônes : l'athlète est détourée à nouveau depuis la photo d'origine par un modèle (cheveux, peau et baskets blanches nets, sans liseré clair ni reste de fond) ; cadrage et matériel inchangés.
