@@ -58,6 +58,22 @@ with Srv() as url, sync_playwright() as p:
     pg.click('.hero-card .filter-group .filter-btn'); pg.wait_for_timeout(300)
     i = pg.evaluate(INFO)
     ok('retour au filtre « Séances » : liste complète et deux cartes affichées', i['letter'] is None and len(i['ex']) > 8 and not i['exHidden'] and not i['cardioHidden'], i)
+    # 1.8.48 : séance libre choisie dans « Voir les statistiques de », sans aucune donnée
+    pg.evaluate("""()=>{const id=n=>CATALOGUE.find(e=>e.name===n).id;
+      state.programs.push({id:'lt',name:'Libre test',kind:'libre',status:'new',createdAt:new Date().toISOString(),
+        sessions:[{key:'',name:'Libre test',exercises:[{exId:id('Curl biceps'),sets:3},{exId:id('Dips'),sets:3}]}]});
+      state.programs.push({id:'lc',name:'Libre cardio',kind:'libre',status:'new',createdAt:new Date().toISOString(),
+        sessions:[{key:'',name:'Libre cardio',exercises:[{exId:id('Rameur'),sets:1}]}]});}""")
+    pg.evaluate("setStatsScope('lt')"); pg.wait_for_timeout(400)
+    i = pg.evaluate(INFO)
+    ok('séance libre sans donnée : ses exercices seulement, courbe vide, « Suivi cardio » caché',
+       i['ex'] == ['Curl biceps', 'Dips'] and not i['exHidden'] and i['labels'] == ['Aucune donnée'] and i['cardioHidden'], i)
+    pg.evaluate("setStatsScope('lc')"); pg.wait_for_timeout(400)
+    i = pg.evaluate(INFO)
+    ok('séance libre de cardio seul : « Progression par exercice » cachée, cardio = Rameur', i['exHidden'] and i['cardio'] == ['Rameur'] and not i['cardioHidden'], i)
+    pg.evaluate("setStatsScope('all')"); pg.wait_for_timeout(400)
+    i = pg.evaluate(INFO)
+    ok('« Tous les programmes » : tout revient', len(i['ex']) > 8 and not i['exHidden'] and not i['cardioHidden'], i)
     ok('aucune erreur JS', not errs, errs)
     ctx.close()
 

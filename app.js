@@ -2658,10 +2658,23 @@ function statsSessionFilterLetter() {
 function statsSessionExerciseNames(letter, scope = currentStatsScope()) {
   const names = [];
   const add = n => { n = canonicalExerciseName(n); if (!names.includes(n)) names.push(n); };
+  const any = letter === '*'; // '*' : toute la séance libre choisie
   const progs = scope === 'all' ? getPrograms() : [getProgram(scope)].filter(Boolean);
-  progs.forEach(p => p.sessions.forEach(s => { if (s.key === letter) (s.exercises || []).forEach(e => add(exInfo(e.exId).name)); }));
-  statsHistory(scope).forEach(h => { if ((h.sessionKey || h.type) === letter) (h.exercises || []).forEach(ex => add(ex.name)); });
+  progs.forEach(p => p.sessions.forEach(s => { if (any || s.key === letter) (s.exercises || []).forEach(e => add(exInfo(e.exId).name)); }));
+  statsHistory(scope).forEach(h => { if (any || (h.sessionKey || h.type) === letter) (h.exercises || []).forEach(ex => add(ex.name)); });
   return names;
+}
+// 1.8.48 : séance libre choisie dans « Voir les statistiques de » → ses exercices et ses passages seulement,
+// comme une séance choisie dans la tuile ('*' = toute la séance libre)
+function statsFocusLetter() {
+  const l = statsSessionFilterLetter();
+  if (l) return l;
+  return statsScopeIsLibre() ? '*' : null;
+}
+function statsFocusHistory() {
+  const l = statsFocusLetter();
+  if (!l) return null;
+  return statsHistory().filter(h => l === '*' || (h.sessionKey || h.type) === l);
 }
 // Après un changement de séance filtrée : listes et graphiques par exercice et cardio suivent
 function refreshSessionFilteredCharts() {
@@ -2683,7 +2696,7 @@ function populateExerciseSelect() {
     const m = exMode(n);
     if ((m === 'weight' || m === 'bw') && !names.includes(n)) names.push(n);
   };
-  const letter = statsSessionFilterLetter();
+  const letter = statsFocusLetter();
   const card = document.getElementById('exercise-card');
   if (letter) {
     statsSessionExerciseNames(letter).forEach(add);
@@ -3008,8 +3021,7 @@ function renderExerciseChart() {
   if (maxBtn) maxBtn.textContent = isBw ? 'Répétitions' : 'Charge max';
 
   // 1.8.46 : séance choisie dans la tuile → seulement ses passages (programme affiché, même lettre)
-  const exLetter = statsSessionFilterLetter();
-  const exHist = exLetter ? statsHistory().filter(h => (h.sessionKey || h.type) === exLetter) : state.history;
+  const exHist = statsFocusHistory() || state.history; // 1.8.48 : séance libre choisie aussi
   exHist.forEach(h => {
     if (h.exercises) {
       const exData = mergeExercises(h.exercises).find(e => isSelected(e.name));
@@ -3159,8 +3171,8 @@ function addWeight() {
 function statsCardioNames(scope = currentStatsScope()) {
   const names = [];
   const add = n => { n = canonicalExerciseName(n); const e = exInfo(n); if (e.cardio && cardioUnit(n) && !names.includes(n)) names.push(n); };
-  const letter = statsSessionFilterLetter();
-  if (letter) { statsSessionExerciseNames(letter, scope).forEach(add); return names; } // 1.8.46
+  const letter = statsFocusLetter();
+  if (letter) { statsSessionExerciseNames(letter, scope).forEach(add); return names; } // 1.8.46–1.8.48
   const progs = scope === 'all' ? getPrograms() : [getProgram(scope)].filter(Boolean);
   progs.forEach(p => p.sessions.forEach(s => (s.exercises || []).forEach(e => add(exInfo(e.exId).name))));
   statsHistory(scope).forEach(h => (h.exercises || []).forEach(ex => add(ex.name)));
@@ -3185,8 +3197,7 @@ function renderCardioChart() {
   const name = select && select.value ? select.value : names[0];
   const unit = cardioUnit(name);
   const points = [];
-  const cLetter = statsSessionFilterLetter(); // 1.8.46 : séance choisie → ses passages seulement
-  statsHistory().filter(h => !cLetter || (h.sessionKey || h.type) === cLetter).forEach(h => {
+  (statsFocusHistory() || statsHistory()).forEach(h => { // 1.8.46–1.8.48 : séance choisie → ses passages seulement
     const ex = (h.exercises || []).find(e => sameExercise(e.name, name));
     const set = ex && Array.isArray(ex.sets) ? ex.sets.find(isPerformedCardioSet) : null;
     if (set && h.date) points.push({ date: h.date, v: cardioMetric(name, set), deload: !!h.isDeload });

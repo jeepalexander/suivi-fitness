@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.48] - 2026-11-18
+### 📈 Progression : une séance libre choisie filtre aussi les graphiques par exercice et cardio (co-auteur : Claude)
+- Quand une séance libre est choisie dans « Voir les statistiques de », « Progression par exercice » ne propose que ses exercices et ses courbes ne gardent que ses passages ; « Suivi cardio » de même. Sans aucune donnée, la liste montre ses exercices et la courbe reste vide ; carte cachée pour une séance libre de cardio seul ou sans cardio (`statsFocusLetter`, `statsFocusHistory`).
+- `test_progression_seance.py` : 13 contrôles.
+
+---
+
 ## [1.8.47] - 2026-11-18
 ### 📈 Progression : le filtre « A / B / C » ne propose que les séances déjà faites (co-auteur : Claude)
 - Une séance programmée mais jamais faite (aucune saisie) n'est plus proposée par le bouton « A / B / C » de la tuile de progression (`statsFilterLetters`).
