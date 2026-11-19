@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.52] - 2026-11-19
+### 🌓 Couleurs inversées sur le fond : plus lisible en sombre (co-auteur : Claude)
+- En sombre, le menu du bas, la série en cours de saisie, les boutons − / + des séries, le cadre d'allure cardio et les pastilles des illustrations d'exercice deviennent gris clair (#E4E4E9) ; en clair, gris anthracite (#2E2E35). Tous ont le même gris ; les champs de la série en cours se détachent un peu du cadre.
+- Inchangés : les séries à venir, les séries faites, l'en-tête de Séance, la fiche d'exercice et les voiles du fond d'écran (inverser les voiles rendait les textes illisibles, variante écartée).
+- Nouveaux jetons `--inv-*` dans `style.css` ; nouveau test `test_couleurs_inversees.py` (14 contrôles).
+- Tests remis à jour : `test_plein_ecran.py` (bouton Réglages de 36 px, 1.8.49) et `test_fenetres.py` (clignotement de 1,3 s avant la suppression, 1.8.51).
+
+---
+
 ## [1.8.51] - 2026-11-19
 ### 🗑️ Historique : la séance supprimée clignote avant de disparaître (co-auteur : Claude)
 - Après « Supprimer la séance », la fiche se ferme ; la ligne de l'Historique clignote 3 fois puis se replie (1,3 s en tout), et la liste se resserre (planche 28b).

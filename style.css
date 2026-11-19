@@ -26,6 +26,10 @@
   --fill: #F3F3F5;             /* champs, pastilles, pistes */
   --icon-pastille: #E4E4E9;    /* pastille ronde derrière les icônes d'exercice */
   --icon-pastille-rim: none;   /* 1.8.4 : liseré du haut des pastilles de Séance (sombre seulement) */
+  /* 1.8.52 (co-auteur : Claude) : éléments inversés sur le fond — foncés en clair, clairs en sombre :
+     menu du bas, gélules de saisie des séries, cadre d'allure cardio, pastilles d'illustration d'exercice */
+  --inv-surface: #2E2E35; --inv-row: #2E2E35; --inv-field: #41414A; --inv-text: #F2F2F4; --inv-muted: #A8A8B0; --inv-todo: #A0A0A9;
+  --inv-strong: #F2F2F4; --inv-on-strong: #111114; --inv-ring: none;
   --surface: #FFFFFF;          /* navigation, chrono prêt, ligne active */
   /* 1.8.1 : champs de saisie des séries (variante G de la planche contrastes) */
   --set-field: #FFFFFF;                                                  /* champs relevés, blancs */
@@ -170,6 +174,8 @@
   --fill: #1A1A1F;
   --icon-pastille: #2C2C33;
   --icon-pastille-rim: inset 0 1px 0 rgba(255, 255, 255, 0.12); /* 1.8.4 : liseré du haut, comme la gélule de la série en cours (7 %), un peu plus visible */
+  --inv-surface: #E4E4E9; --inv-row: #E4E4E9; --inv-field: #EDEDF1; --inv-text: #111114; --inv-muted: #55555D; --inv-todo: #66666E;
+  --inv-strong: #131316; --inv-on-strong: #FFFFFF; --inv-ring: 0 0 0 1px rgba(17, 17, 20, 0.10), 0 1px 3px rgba(17, 17, 20, 0.10);
   --surface: #17171C;
   --set-field: #2A2A32;                 /* 1.8.1 : champs plus clairs que le fond */
   --set-field-ring: none;
@@ -492,6 +498,18 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 .btn-check-set svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .set-row.current .btn-check-set { background: var(--surface); color: var(--text); box-shadow: inset 0 0 0 2px var(--text); }
 .set-row.done .btn-check-set { background: var(--success); color: var(--on-success); box-shadow: none; }
+
+/* 1.8.52 : menu, série en cours, boutons − / + et allure cardio prennent les couleurs inversées ;
+   les séries faites et l'en-tête de Séance gardent celles de la page */
+nav, .set-row.current, .btn-set-count, .cardio-pace {
+  --surface: var(--inv-surface); --set-row-current: var(--inv-row); --set-field: var(--inv-field); --fill: var(--inv-row);
+  --text: var(--inv-text); --text-muted: var(--inv-muted); --set-todo: var(--inv-todo); --primary: var(--inv-text);
+  --primary-strong: var(--inv-strong); --on-strong: var(--inv-on-strong); --set-field-ring: var(--inv-ring);
+}
+.btn-set-count { --set-field: var(--inv-surface); } /* boutons − / + : le gris du menu */
+.ex-icon-badge::before { background: var(--inv-surface); }
+.exercise-item .ex-icon-badge::before { box-shadow: none; }
+.exf-hero .ex-icon-badge::before { background: var(--icon-pastille); } /* fiche d'exercice : inchangée */
 
 /* Écrans étroits (≤ 380 px) : on libère de la place au nom de l'exercice ouvert */
 @media (max-width: 380px) {
