@@ -52,7 +52,7 @@ with Srv() as url, sync_playwright() as p:
         r = pg.evaluate(ROW)
         ok(tag + "puis ligne normale (durée, tonnage et flèche revenus, barre cachée)", 'save-mark' not in r['cls'] and r['dur'] != 'none' and r['barOp'] == '0'
            and r['tonVis'] == 'visible' and r['chevVis'] == 'visible', r)
-        ok(tag + "aucune erreur JS", not [e for e in errs if 'TUNNEL' not in e], errs)
+        ok(tag + "aucune erreur JS", not [e for e in errs if 'TUNNEL' not in e and 'Failed to load resource' not in e], errs)
         ctx.close()
 
     # 2. Pas de compte Drive : l'Historique s'ouvre sans barre

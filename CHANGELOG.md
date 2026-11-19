@@ -17,6 +17,7 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 - Réglages : la ligne Fond d'écran devient une gélule de 56 px, avec l'image en cours dans une pastille ronde de 40 px.
 - Le « + » rouge d'une gélule inversée prend le rouge lisible sur son fond (`--inv-accent`).
 - `test_couleurs_inversees.py` : 30 contrôles.
+- `test_sauvegarde_historique.py` : les réponses 401 simulées du Drive (accès expiré) ne comptent plus comme erreurs JS ; le test échouait sur GitHub depuis la 1.8.50.
 
 ---
 
