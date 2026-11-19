@@ -2181,7 +2181,7 @@ async function submitWorkout(e) {
   // 1.7.63 : après une nouvelle séance, l'envoi (et une éventuelle reconnexion à Google, qui quitte l'application)
   // attend le « OK » de la fenêtre de fin de séance, pour ne pas la faire disparaître avant qu'on l'ait lue.
   if (isEditing) backupToDrive();
-  else finishPendingBackup = true;
+  else { finishPendingBackup = true; finishSavedId = entry.id; }
 
   // Actualise la bannière de déload en temps réel
   displayDeloadNotificationIfNeeded();
@@ -2278,9 +2278,56 @@ function closeFinishDialog() {
 // (reconnexion à Google comprise si l'accès a expiré). Sans « OK » (application fermée), elle part au
 // prochain lancement ou avec la prochaine séance, comme une sauvegarde en attente.
 let finishPendingBackup = false;
+let finishSavedId = null;
+// 1.8.50 (co-auteur : Claude) : après « OK », l'Historique s'ouvre ; si un compte Drive est configuré, une fine barre
+// verte se déploie sous la nouvelle séance pendant l'envoi (reconnexion forcée si l'accès a expiré), puis
+// « Sauvegardée sur le Drive » et la ligne redevient normale (planche 27d, variante C).
 function finishDialogOk() {
   closeFinishDialog();
-  if (finishPendingBackup) { finishPendingBackup = false; backupToDrive(); }
+  const id = finishSavedId;
+  finishSavedId = null;
+  if (!finishPendingBackup) return;
+  finishPendingBackup = false;
+  switchTab('historique');
+  const scroller = document.getElementById('app-scroll');
+  if (scroller) scroller.scrollTop = 0;
+  if (!isDriveWanted() && !getDriveToken()) return; // pas de compte Drive : l'Historique s'ouvre, sans barre
+  trackHistorySave(id, () => backupToDrive({ forceReconnect: true, historyId: id }));
+}
+
+// Barre de sauvegarde sur une ligne de l'Historique : { id, status: 'saving' | 'done' | 'wait' }
+let historySaveMark = null;
+let historySaveTimer = null;
+const HIST_SAVE_MARK_KEY = 'h49_hist_save_mark'; // séance dont la sauvegarde attend le retour de Google (10 min)
+function setHistorySaveMark(id, status) {
+  clearTimeout(historySaveTimer);
+  historySaveMark = id == null ? null : { id, status };
+  const row = document.querySelector(`.history-item[data-id="${id}"]`);
+  if (row) applyHistorySaveMark(row); else if (document.body.dataset.tab === 'historique') renderHistory();
+  if (status === 'done' || status === 'wait') {
+    historySaveTimer = setTimeout(() => {
+      const prev = historySaveMark && historySaveMark.id;
+      historySaveMark = null;
+      const r = document.querySelector(`.history-item[data-id="${prev}"]`);
+      if (r) applyHistorySaveMark(r);
+    }, status === 'done' ? 1800 : 3500);
+  }
+}
+function applyHistorySaveMark(row) {
+  const on = historySaveMark && String(historySaveMark.id) === row.dataset.id ? historySaveMark.status : '';
+  row.classList.toggle('saving', on === 'saving');
+  row.classList.toggle('saved', on === 'done');
+  row.classList.toggle('save-wait', on === 'wait');
+  row.classList.toggle('save-mark', !!on);
+  const lab = row.querySelector('.history-save-label');
+  if (lab) lab.innerHTML = on === 'saving' ? 'Sauvegarde sur le Drive…' : on === 'done' ? `${CHECK_SVG}Sauvegardée sur le Drive` : on === 'wait' ? 'Sauvegarde en attente' : '';
+}
+async function trackHistorySave(id, run) {
+  setHistorySaveMark(id, 'saving');
+  let res = 'fail';
+  try { res = await run(); } catch (e) { res = 'fail'; }
+  if (res === 'redirect') return; // l'application part chez Google ; la barre reprend au retour
+  setHistorySaveMark(id, res === 'ok' ? 'done' : 'wait');
 }
 
 document.addEventListener('submit', function(e) {
@@ -2364,6 +2411,7 @@ function renderHistory() {
       const row = document.createElement('button');
       row.type = 'button';
       row.className = 'history-item';
+      row.dataset.id = String(h.id);
       row.setAttribute('aria-label', `${historySessionTitle(h)} : modifier`);
       row.onclick = () => openSessionModal(realIndex);
       row.innerHTML = `
@@ -2371,9 +2419,12 @@ function renderHistory() {
         <span class="history-main">
           <span class="history-date">${formatHistoryDate(h.date)}${h.isDeload ? ` <span class="deload-tag">${DELOAD_SVG}Déload</span>` : ''}</span>
           <span class="history-duration">${escapeHtml(sub)}</span>
+          <span class="history-save-label" aria-live="polite"></span>
         </span>
         <span class="history-tonnage">${historyTonnes(h.tonnage)} T</span>
-        <span class="history-chevron">${CHEVRON_SVG}</span>`;
+        <span class="history-chevron">${CHEVRON_SVG}</span>
+        <span class="history-save-bar" aria-hidden="true"><i></i></span>`;
+      applyHistorySaveMark(row);
       card.appendChild(row);
     });
     section.appendChild(card);
@@ -4867,15 +4918,16 @@ function driveSaveNotice(afterOk) {
 // Dernière reconnexion automatique (redirection) : au plus une toutes les 2 minutes, pour ne jamais
 // enchaîner les allers-retours chez Google si quelque chose échoue.
 const DRIVE_AUTO_RECONNECT_KEY = 'h49_drive_auto_reconnect';
-function autoReconnectDriveIfNeeded() {
-  if (!isInstalledApp() || !isDriveWanted() || getDriveToken()) return;
+function autoReconnectDriveIfNeeded(force) {
+  if (!isInstalledApp() || !isDriveWanted() || getDriveToken()) return false;
   try {
     const last = Number(localStorage.getItem(DRIVE_AUTO_RECONNECT_KEY) || 0);
-    if (Date.now() - last < 120000) return;
+    if (!force && Date.now() - last < 120000) return false;
     localStorage.setItem(DRIVE_AUTO_RECONNECT_KEY, String(Date.now()));
-  } catch (e) { return; }
+  } catch (e) { return false; }
   // petit délai : la page a fini d'afficher la confirmation de la séance avant de partir chez Google
   setTimeout(connectDriveByRedirect, DRIVE_CONNECT_DELAY_MS);
+  return true;
 }
 
 // Appelée par « Enregistrer la séance » / « Enregistrer les modifications » (geste de l'utilisateur) :
@@ -4886,19 +4938,34 @@ function autoReconnectDriveIfNeeded() {
 // réservée à l'enregistrement d'une séance. Programmes (création, modification, activation, suppression) :
 // { autoReconnect: false } — la sauvegarde reste en attente et part avec la prochaine séance enregistrée
 // (ou « Reconnecter maintenant » dans Réglages).
+// 1.8.50 : renvoie 'none' (pas de Drive), 'ok', 'redirect' (reconnexion partie chez Google) ou 'fail' ;
+// { forceReconnect } (fin de séance) passe outre le délai de 2 min entre deux reconnexions automatiques,
+// { historyId } garde la séance à marquer dans l'Historique au retour de Google.
 async function backupToDrive(opts) {
   const autoReconnect = !(opts && opts.autoReconnect === false);
+  const force = !!(opts && opts.forceReconnect);
+  const reconnect = () => {
+    if (!autoReconnect) return 'fail';
+    if (!autoReconnectDriveIfNeeded(force)) return 'fail';
+    if (opts && opts.historyId != null) { try { localStorage.setItem(HIST_SAVE_MARK_KEY, JSON.stringify({ id: opts.historyId, t: Date.now() })); } catch (e) { /* ignoré */ } }
+    return 'redirect';
+  };
   try {
-    if (!isDriveWanted() && !getDriveToken()) return; // Drive n'a jamais été connecté : rien à faire
+    if (!isDriveWanted() && !getDriveToken()) return 'none'; // Drive n'a jamais été connecté : rien à faire
     let token = getDriveToken();
     // 1.7.26 : pas de fenêtre Google non plus pour les programmes — le renouvellement passe par une fenêtre
     // qui, avec Firefox (même installé, Firefox ne se déclare pas toujours comme application), ouvre le navigateur.
     if (!token && autoReconnect && await renewDriveToken()) token = getDriveToken();
-    if (!token) { updateDriveUI(); if (autoReconnect) autoReconnectDriveIfNeeded(); return; }
-    const r = await syncDriveBackup();
-    if (r && r.reason === 'token' && autoReconnect) autoReconnectDriveIfNeeded();
+    if (!token) { updateDriveUI(); return reconnect(); }
+    let r = await syncDriveBackup();
+    if (r && r.reason === 'busy') { // un envoi est déjà en cours : on attend sa fin
+      for (let i = 0; i < 60 && driveSyncing; i++) await new Promise(res => setTimeout(res, 250));
+      r = driveNeedsBackup() ? await syncDriveBackup() : { ok: true };
+    }
     updateDriveUI();
-  } catch (e) { /* ne jamais gêner l'enregistrement */ }
+    if (r && r.reason === 'token') return reconnect();
+    return r && r.ok ? 'ok' : 'fail';
+  } catch (e) { return 'fail'; /* ne jamais gêner l'enregistrement */ }
 }
 
 
@@ -4966,14 +5033,27 @@ function driveReturnTab(driveReturn) {
     if (getDriveToken()) {
       const t = Number(localStorage.getItem(DRIVE_FORCE_PENDING_KEY) || 0);
       if (t > 0 && Date.now() - t < 600000) return 'historique';
+      if (peekHistorySaveMark()) return 'historique'; // 1.8.50 : reconnexion partie de la fin d'une séance
       if (driveReturn === 'ok' && typeof PROGRAM_RESTORE_PENDING_KEY !== 'undefined' && localStorage.getItem(PROGRAM_RESTORE_PENDING_KEY) === '1') return 'programme';
     }
   } catch (e) { /* ignoré */ }
   return 'reglages';
 }
 // Au démarrage ou au retour dans l'application : la sauvegarde demandée avant la reconnexion, sinon l'envoi habituel
+function peekHistorySaveMark() {
+  try {
+    const m = JSON.parse(localStorage.getItem(HIST_SAVE_MARK_KEY) || 'null');
+    return m && Date.now() - m.t < 600000 ? m : null;
+  } catch (e) { return null; }
+}
 function driveSyncOnReturn() {
   if (getDriveToken() && consumeDriveForcePending()) { saveBackupToDriveNow(); return true; }
+  const mark = getDriveToken() && peekHistorySaveMark(); // 1.8.50 : la séance finie avant la reconnexion part maintenant
+  if (mark) {
+    try { localStorage.removeItem(HIST_SAVE_MARK_KEY); } catch (e) { /* ignoré */ }
+    trackHistorySave(mark.id, () => backupToDrive({ autoReconnect: false }));
+    return true;
+  }
   syncDriveBackup();
   return false;
 }
