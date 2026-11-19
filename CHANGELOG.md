@@ -7,6 +7,19 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.54] - 2026-11-19
+### 🌓 Couleurs inversées : boutons, flèches retour, éditeur et fiche (co-auteur : Claude)
+- Même gris inversé que le menu (#E4E4E9 en sombre, #2E2E35 en clair), plus de noir profond ni de blanc pur :
+  - boutons de Progression, Historique et Réglages (« Sauvegarder », « Restaurer », « Connecter / Reconnecter maintenant », « Afficher le QR code », « Vérifier »…) ; le bouton principal garde son ombre et sa graisse ; « Offrir un café » et « Installer » restent jaunes ;
+  - flèches retour : « Retour » des Réglages, Créer un programme, éditeur, Fond d'écran ;
+  - gélules de l'éditeur (nom du programme, A / B / C, nom de la séance) et gélules sous le nom dans la fiche d'exercice (« Fermer » inchangé).
+- « Ajouter un exercice » (éditeur) sans fond : texte blanc sur une ombre sombre en sombre, texte foncé sur un halo clair en clair.
+- Réglages : la ligne Fond d'écran devient une gélule de 56 px, avec l'image en cours dans une pastille ronde de 40 px.
+- Le « + » rouge d'une gélule inversée prend le rouge lisible sur son fond (`--inv-accent`).
+- `test_couleurs_inversees.py` : 30 contrôles.
+
+---
+
 ## [1.8.53] - 2026-11-19
 ### 🌓 Couleurs inversées : Progression, Historique, Réglages et fiche d'exercice (co-auteur : Claude)
 - Même gris inversé que le menu (#E4E4E9 en sombre, #2E2E35 en clair) pour le choix du programme (Progression), Clair / Sombre / Auto et la ligne Fond d'écran (Réglages), les champs de ces onglets, et la pastille de l'illustration dans la fiche d'exercice. Le segment choisi s'inverse comme dans le menu.
