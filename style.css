@@ -611,6 +611,10 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 .history-item.saving .history-save-bar, .history-item.saved .history-save-bar { opacity: 1; }
 .history-item.saving .history-save-bar i { animation: historySave 2.4s cubic-bezier(.2, .7, .3, 1) forwards; }
 .history-item.saved .history-save-bar i { width: 100%; transition: width var(--t-normal) ease; }
+/* 1.8.51 : séance supprimée — 3 clignements, puis repli */
+.history-item.removing > * { animation: histBlink .3s ease-in-out 3; }
+.history-item.removing.collapsing { overflow: hidden; height: 0 !important; padding-top: 0; padding-bottom: 0; opacity: 0; transition: height .3s ease, padding .3s ease, opacity .3s ease; }
+@keyframes histBlink { 50% { opacity: .2; } }
 @keyframes historySave { from { width: 0; } to { width: 88%; } }
 @media (prefers-reduced-motion: reduce) { .history-item.saving .history-save-bar i { animation: none; width: 60%; } }
 .deload-tag { display: inline-flex; align-items: center; gap: 4px; margin-left: 4px; padding: 1px 8px 1px 8px; background: var(--warn-tint); color: var(--warn); border: 1px solid var(--warn-border); border-radius: 999px; font-size: 0.75rem; font-weight: 600; }

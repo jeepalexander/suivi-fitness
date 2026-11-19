@@ -60,12 +60,30 @@ with Srv() as base, sync_playwright() as p:
         exercises:[{name:'Presse à cuisses',sets:[{weight:300,reps:10}],maxWeight:300,totalVolume:3000}]});
         state.lastWeights['Presse à cuisses']=300; saveState(); renderHistory(); switchTab('historique'); }""")
     pg.wait_for_timeout(300)
-    pg.evaluate("openSessionModal(state.history.length-1)"); pg.click('#modal-delete-btn'); pg.wait_for_timeout(500)
+    pg.evaluate("openSessionModal(state.history.length-1)"); pg.click('#modal-delete-btn')
+    # 1.8.51 : la ligne clignote (classe .removing), se replie (.collapsing), puis disparaît
+    pg.wait_for_timeout(250)
+    r1 = pg.evaluate("(()=>{const r=document.querySelector('.history-item[data-id=\"777\"]');return r?[r.classList.contains('removing'),r.classList.contains('collapsing'),getComputedStyle(r.firstElementChild).animationName,state.history.length]:null})()")
+    check('animation : la ligne clignote, fiche fermée, séance pas encore retirée', r1 and r1[0] and not r1[1] and r1[2] == 'histBlink' and r1[3] == len(DATA['history']) + 1 and pg.evaluate("document.getElementById('session-modal').style.display") == 'none', r1)
+    check('animation : pas de trait qui barre la ligne', pg.evaluate("getComputedStyle(document.querySelector('.history-item[data-id=\"777\"]'),'::after').content") in ('none', 'normal', ''))
+    pg.wait_for_timeout(850)
+    check('animation : puis la ligne se replie', pg.evaluate("document.querySelector('.history-item[data-id=\"777\"]')?.classList.contains('collapsing')"))
+    pg.wait_for_timeout(700)
+    check('animation : ligne retirée et séance supprimée après 1,3 s', pg.evaluate("!document.querySelector('.history-item[data-id=\"777\"]') && state.history.every(h=>h.id!==777)"))
     lw = pg.evaluate("state.lastWeights['Presse à cuisses']")
     prev = [h for h in DATA['history'] if any(e['name'] == 'Presse à cuisses' and any(s['weight'] > 0 and s['reps'] > 0 for s in e['sets']) for e in h['exercises'])]
     exp = [s['weight'] for s in [e for e in prev[-1]['exercises'] if e['name'] == 'Presse à cuisses'][0]['sets'] if s['weight'] > 0 and s['reps'] > 0][-1] if prev else None
     check('dernières charges recalculées (plus les 300 kg de l\'essai)', lw != 300 and lw == exp, (lw, exp))
     check('aucune erreur JS (sans Drive)', not errs, errs)
+    ctx.close()
+
+    # mouvements réduits : suppression immédiate, sans animation
+    ctx, pg, errs = newpage(br, 390, 844, pref='light'); pg.emulate_media(reduced_motion='reduce')
+    pg.on('dialog', lambda x: x.accept())
+    pg.goto(base + 'index.html'); pg.wait_for_timeout(800)
+    pg.evaluate("state.history.push({id:778,date:'2026-11-05',type:'A',isDeload:false,tonnage:1,duration:'1 min',exercises:[]}); saveState(); renderHistory(); switchTab('historique'); openSessionModal(state.history.length-1)")
+    pg.click('#modal-delete-btn'); pg.wait_for_timeout(300)
+    check('mouvements réduits : suppression sans attendre l\'animation', pg.evaluate("state.history.every(h=>h.id!==778) && !document.querySelector('.history-item.removing')"))
     br.close()
 
 print(f"\n {sum(res)} / {len(res)} contrôles OK")
