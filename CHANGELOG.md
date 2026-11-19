@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.53] - 2026-11-19
+### 🌓 Couleurs inversées : Progression, Historique, Réglages et fiche d'exercice (co-auteur : Claude)
+- Même gris inversé que le menu (#E4E4E9 en sombre, #2E2E35 en clair) pour le choix du programme (Progression), Clair / Sombre / Auto et la ligne Fond d'écran (Réglages), les champs de ces onglets, et la pastille de l'illustration dans la fiche d'exercice. Le segment choisi s'inverse comme dans le menu.
+- Inchangés : les boutons (« Sauvegarder », « Restaurer », « Connecter Google Drive »…) et les en-têtes.
+- `test_couleurs_inversees.py` : 20 contrôles.
+
+---
+
 ## [1.8.52] - 2026-11-19
 ### 🌓 Couleurs inversées sur le fond : plus lisible en sombre (co-auteur : Claude)
 - En sombre, le menu du bas, la série en cours de saisie, les boutons − / + des séries, le cadre d'allure cardio et les pastilles des illustrations d'exercice deviennent gris clair (#E4E4E9) ; en clair, gris anthracite (#2E2E35). Tous ont le même gris ; les champs de la série en cours se détachent un peu du cadre.

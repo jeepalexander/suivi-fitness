@@ -509,7 +509,12 @@ nav, .set-row.current, .btn-set-count, .cardio-pace {
 .btn-set-count { --set-field: var(--inv-surface); } /* boutons − / + : le gris du menu */
 .ex-icon-badge::before { background: var(--inv-surface); }
 .exercise-item .ex-icon-badge::before { box-shadow: none; }
-.exf-hero .ex-icon-badge::before { background: var(--icon-pastille); } /* fiche d'exercice : inchangée */
+/* 1.8.53 : gélules de Progression, Historique et Réglages (choix du programme, Clair / Sombre / Auto, Fond d'écran,
+   champs) au gris inversé ; le segment choisi s'inverse comme dans le menu. Les boutons et l'en-tête gardent leurs couleurs. */
+:is(#tab-progression, #tab-historique, #tab-reglages) :is(.seg-group, .stats-scope, .wallpaper-row, select.filter-select, .weight-field) {
+  --fill: var(--inv-surface); --surface: var(--inv-surface); --text: var(--inv-text); --text-muted: var(--inv-muted);
+  --primary-strong: var(--inv-strong); --on-strong: var(--inv-on-strong); --primary: var(--inv-text);
+}
 
 /* Écrans étroits (≤ 380 px) : on libère de la place au nom de l'exercice ouvert */
 @media (max-width: 380px) {
