@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.55] - 2026-11-19
+### 🌓 « Déconnecter » et « Restaurer » restent gris sombre (co-auteur : Claude)
+- « Déconnecter » (Réglages › Sauvegarde Google Drive) et « Restaurer » (Historique) : anthracite (#2E2E35) en clair, gris foncé d'avant (`fill`) en sombre, au lieu du gris clair inversé.
+- `test_couleurs_inversees.py` : 32 contrôles.
+
+---
+
 ## [1.8.54] - 2026-11-19
 ### 🌓 Couleurs inversées : boutons, flèches retour, éditeur et fiche (co-auteur : Claude)
 - Même gris inversé que le menu (#E4E4E9 en sombre, #2E2E35 en clair), plus de noir profond ni de blanc pur :
