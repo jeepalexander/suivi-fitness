@@ -98,7 +98,7 @@ with Srv() as url, sync_playwright() as p:
         ok(tag + "fenêtre de fin : rien ne déborde", ov_r['docW'] <= ov_r['vw'] and not ov_r['out'], ov_r)
         if SHOTS: pg.wait_for_timeout(400); pg.screenshot(path=f'/tmp/claude-0/fin_popup_{w}.png')
         pg.click('.finish-ok'); pg.wait_for_timeout(150)
-        ok(tag + "OK : fenêtre fermée, retour à la séance suivante", not pg.evaluate("!!document.getElementById('finish-overlay')") and pg.evaluate("document.body.dataset.tab") == 'seance')
+        ok(tag + "OK : fenêtre fermée, ouverture de l'Historique (1.8.50)", not pg.evaluate("!!document.getElementById('finish-overlay')") and pg.evaluate("document.body.dataset.tab") == 'historique')
 
         # ---------- Règles de la fenêtre (données construites) ----------
         base = "{id:1,date:'2026-11-09',type:'A',kind:'program',programId:'p1',sessionKey:'A',tonnage:8400,exercises:[{name:'Développé couché',sets:[{weight:72.5,reps:5}],maxWeight:72.5},{name:'Rameur',cardio:true,sets:[{weight:0,reps:0,seconds:750,meters:3000}]}]}"

@@ -7,6 +7,46 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.50] - 2026-11-19
+### ☁️ Fin de séance : l'Historique montre la sauvegarde sur le Drive (co-auteur : Claude)
+- Après « OK » dans la fenêtre de fin de séance, l'Historique s'ouvre, la nouvelle séance en tête.
+- Si un compte Drive est configuré : une fine barre verte se déploie sous la nouvelle séance pendant l'envoi (« Sauvegarde sur le Drive… »), puis « Sauvegardée sur le Drive » ; le tonnage et la flèche n'apparaissent qu'à la fin, quand la ligne redevient normale. En cas d'échec : « Sauvegarde en attente » (planche 27d, variante C).
+- Accès Drive expiré dans l'application installée : la reconnexion est forcée (même juste après une autre) ; au retour de Google, l'app rouvre l'Historique et la barre reprend sous la séance (`h49_hist_save_mark`).
+- Sans compte Drive : l'Historique s'ouvre, sans barre.
+- `backupToDrive` renvoie maintenant 'none', 'ok', 'redirect' ou 'fail' ; nouveau test `test_sauvegarde_historique.py` (20 contrôles) ; `test_fin_seance.py` mis à jour.
+
+---
+
+## [1.8.49] - 2026-11-18
+### ⚙️ Réglages accessibles depuis l'onglet Séance ; bouton Réglages de 36 px (co-auteur : Claude)
+- La roue crantée des Réglages apparaît aussi en haut à droite de l'onglet Séance ; « Retour » ramène à la séance.
+- Le bouton Réglages passe à 36 px partout (Séance, Progression, Historique), à la hauteur de « MON CARNET DE SALLE », pour ne pas toucher le nom du programme à 360 px ; pastille de mise à jour recalée.
+- `test_reglages.py` mis à jour.
+
+---
+
+## [1.8.48] - 2026-11-18
+### 📈 Progression : une séance libre choisie filtre aussi les graphiques par exercice et cardio (co-auteur : Claude)
+- Quand une séance libre est choisie dans « Voir les statistiques de », « Progression par exercice » ne propose que ses exercices et ses courbes ne gardent que ses passages ; « Suivi cardio » de même. Sans aucune donnée, la liste montre ses exercices et la courbe reste vide ; carte cachée pour une séance libre de cardio seul ou sans cardio (`statsFocusLetter`, `statsFocusHistory`).
+- `test_progression_seance.py` : 13 contrôles.
+
+---
+
+## [1.8.47] - 2026-11-18
+### 📈 Progression : le filtre « A / B / C » ne propose que les séances déjà faites (co-auteur : Claude)
+- Une séance programmée mais jamais faite (aucune saisie) n'est plus proposée par le bouton « A / B / C » de la tuile de progression (`statsFilterLetters`).
+- `test_progression_seance.py` : séances D et E avec un historique, séance F jamais faite (10 contrôles).
+
+---
+
+## [1.8.46] - 2026-11-18
+### 📈 Progression : la séance choisie filtre aussi les graphiques par exercice et cardio (co-auteur : Claude)
+- Quand une séance est choisie dans la tuile de progression (« Séance A »), « Progression par exercice » ne propose que les exercices de cette séance et ses courbes ne gardent que les passages de cette séance ; « Suivi cardio » de même.
+- La carte « Progression par exercice » disparaît pour une séance de cardio seul, « Suivi cardio » pour une séance sans cardio. Retour à « Séances » ou « Mois » : tout revient.
+- Nouveau test `test_progression_seance.py` (groupe progression).
+
+---
+
 ## [1.8.45] - 2026-11-18
 ### 🎨 Extension triceps haltère : genou entier (co-auteur : Claude)
 - Cadrage élargi à droite : le genou n'est plus coupé, l'assise du banc reste visible.
