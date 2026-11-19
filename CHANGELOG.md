@@ -7,6 +7,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.59] - 2026-11-19
+### 🎨 Icône du Développé couché haltères refaite (co-auteur : Claude)
+- Refaite depuis la photo d'origine sur fond blanc : athlète détourée par le modèle ISNet, banc et haltères par leur couleur sombre, blanc mélangé au bord retiré ; calée sur le cadrage de l'icône précédente. Le pied gauche du banc n'a plus de trous blancs, et le disque droit de l'haltère est entier.
+
+---
+
 ## [1.8.58] - 2026-11-19
 ### 🧹 Progression : plus de liseré rouge autour du choix d'exercice (co-auteur : Claude)
 - Le menu déroulant des graphiques (Progression par exercice, Suivi cardio) n'affiche plus le contour rouge de focus quand on le touche.
