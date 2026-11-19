@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.61] - 2026-11-19
+### 🎨 Icônes : Tirage facial refait, Développé militaire arrondi en bas (co-auteur : Claude)
+- Tirage facial : refait depuis la photo d'origine ; la corde garde sa texture, le câble est redessiné en jaune à liseré noir et s'arrête au cercle (plus d'ancrage qui dépasse à droite) ; athlète recentrée.
+- Développé militaire : le bas, coupé net au ventre, suit maintenant l'arrondi de la pastille ; haltères intacts.
+
+---
+
 ## [1.8.60] - 2026-11-19
 ### 🎨 Nouvelle icône de la Presse à cuisses (co-auteur : Claude)
 - Nouvelle photo (plan large, machine à disques) détourée : athlète par le modèle ISNet, fond blanc retiré entre les barres et sous la poignée, baskets blanches protégées, blanc mélangé au bord retiré.
