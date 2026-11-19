@@ -2510,6 +2510,18 @@ function injectSessionModalHtml() {
   });
 }
 
+// 1.8.51 (co-auteur : Claude) : la ligne supprimée clignote 3 fois (0,9 s), puis se replie (0,3 s)
+function animateHistoryRemoval(id) {
+  const row = document.querySelector(`.history-item[data-id="${id}"]`);
+  if (!row || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) return Promise.resolve();
+  return new Promise(resolve => {
+    row.style.height = row.offsetHeight + 'px';
+    row.classList.add('removing');
+    setTimeout(() => row.classList.add('collapsing'), 950);
+    setTimeout(resolve, 1300);
+  });
+}
+
 // Suppression d'une séance de l'historique (essai de validation, saisie par erreur...).
 // Les dernières charges sont recalculées, la prochaine séance repart de l'historique restant, et la
 // sauvegarde Google Drive est mise à jour : la séance supprimée y est retirée (voir DRIVE_DELETED_KEY).
@@ -2521,6 +2533,9 @@ async function deleteSelectedSession() {
   const driveOn = isDriveWanted() || !!getDriveToken();
   if (!await askSheet({ tone: 'danger', danger: true, title: `Supprimer la ${historySessionTitle(session).replace(/^Séance /, 'séance ')} ?`,
     text: 'Suppression définitive.' + (driveOn ? ' Elle sera aussi retirée de la sauvegarde Google Drive.' : ''), ok: 'Supprimer la séance', cancel: 'Annuler' })) return;
+  if (state.history[idx] !== session) return;
+  closeSessionModal();
+  await animateHistoryRemoval(session.id); // 1.8.51 : clignote, puis s'en va
   if (state.history[idx] !== session) return;
 
   state.history.splice(idx, 1);

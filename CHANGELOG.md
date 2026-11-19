@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.51] - 2026-11-19
+### 🗑️ Historique : la séance supprimée clignote avant de disparaître (co-auteur : Claude)
+- Après « Supprimer la séance », la fiche se ferme ; la ligne de l'Historique clignote 3 fois puis se replie (1,3 s en tout), et la liste se resserre (planche 28b).
+- Si le téléphone demande de réduire les animations, la ligne disparaît tout de suite.
+- `animateHistoryRemoval()` ; `test_supprimer_seance.py` complété (18 contrôles).
+
+---
+
 ## [1.8.50] - 2026-11-19
 ### ☁️ Fin de séance : l'Historique montre la sauvegarde sur le Drive (co-auteur : Claude)
 - Après « OK » dans la fenêtre de fin de séance, l'Historique s'ouvre, la nouvelle séance en tête.
