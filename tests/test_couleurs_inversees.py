@@ -43,7 +43,7 @@ with Srv() as base, sync_playwright() as p:
         check(f'[{scheme}] Progression : choix du programme au gris inversé (1.8.53)', sc == INV[scheme], sc)
         bt = pg.evaluate("[...document.querySelectorAll('#tab-historique .btn:not(.btn-secondary), #tab-reglages .btn:not(.support-btn):not(.install):not(#drive-disconnect-btn)')].filter(e=>!e.classList.contains('btn-delete')).map(e=>getComputedStyle(e).backgroundColor)")
         gs = pg.evaluate("[...document.querySelectorAll('#tab-historique .btn-secondary, #drive-disconnect-btn')].map(e=>getComputedStyle(e).backgroundColor)")
-        check(f'[{scheme}] « Restaurer » (Historique) et « Déconnecter » en gris sombre (1.8.55)', len(gs) == 2 and all(x == ('rgb(26, 26, 31)' if scheme == 'dark' else INV[scheme]) for x in gs), gs)
+        check(f'[{scheme}] « Restaurer » (Historique) et « Déconnecter » gris clair en clair, anthracite en sombre (1.8.55)', len(gs) == 2 and all(x == ('rgb(46, 46, 53)' if scheme == 'dark' else 'rgb(243, 243, 245)') for x in gs), gs)
         check(f'[{scheme}] boutons de Progression, Historique et Réglages au gris inversé (1.8.54)', bt and all(x == INV[scheme] for x in bt), set(bt))
         check(f'[{scheme}] « Retour » des Réglages au gris inversé (1.8.54)', pg.evaluate("getComputedStyle(document.getElementById('settings-back')).backgroundColor") == INV[scheme])
         pg.evaluate("switchTab('programme'); startProgramEditor('program'); 0"); pg.wait_for_timeout(400)

@@ -8,8 +8,8 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 
 ## [1.8.55] - 2026-11-19
-### 🌓 « Déconnecter » et « Restaurer » restent gris sombre (co-auteur : Claude)
-- « Déconnecter » (Réglages › Sauvegarde Google Drive) et « Restaurer » (Historique) : anthracite (#2E2E35) en clair, gris foncé d'avant (`fill`) en sombre, au lieu du gris clair inversé.
+### 🌓 « Déconnecter » et « Restaurer » : gris clair en clair, anthracite en sombre (co-auteur : Claude)
+- « Déconnecter » (Réglages › Sauvegarde Google Drive) et « Restaurer » (Historique) : gris clair d'avant (`fill`) en clair, anthracite #2E2E35 en sombre.
 - `test_couleurs_inversees.py` : 32 contrôles.
 
 ---
