@@ -26,6 +26,10 @@
   --fill: #F3F3F5;             /* champs, pastilles, pistes */
   --icon-pastille: #E4E4E9;    /* pastille ronde derrière les icônes d'exercice */
   --icon-pastille-rim: none;   /* 1.8.4 : liseré du haut des pastilles de Séance (sombre seulement) */
+  /* 1.8.52 (co-auteur : Claude) : éléments inversés sur le fond — foncés en clair, clairs en sombre :
+     menu du bas, gélules de saisie des séries, cadre d'allure cardio, pastilles d'illustration d'exercice */
+  --inv-surface: #2E2E35; --inv-row: #2E2E35; --inv-field: #41414A; --inv-text: #F2F2F4; --inv-muted: #A8A8B0; --inv-todo: #A0A0A9;
+  --inv-strong: #F2F2F4; --inv-on-strong: #111114; --inv-ring: none; --inv-accent: #FF4D3F;
   --surface: #FFFFFF;          /* navigation, chrono prêt, ligne active */
   /* 1.8.1 : champs de saisie des séries (variante G de la planche contrastes) */
   --set-field: #FFFFFF;                                                  /* champs relevés, blancs */
@@ -170,6 +174,9 @@
   --fill: #1A1A1F;
   --icon-pastille: #2C2C33;
   --icon-pastille-rim: inset 0 1px 0 rgba(255, 255, 255, 0.12); /* 1.8.4 : liseré du haut, comme la gélule de la série en cours (7 %), un peu plus visible */
+  --inv-surface: #E4E4E9; --inv-row: #E4E4E9; --inv-field: #EDEDF1; --inv-text: #111114; --inv-muted: #55555D; --inv-todo: #66666E;
+  --inv-accent: #E5392B;
+  --inv-strong: #131316; --inv-on-strong: #FFFFFF; --inv-ring: 0 0 0 1px rgba(17, 17, 20, 0.10), 0 1px 3px rgba(17, 17, 20, 0.10);
   --surface: #17171C;
   --set-field: #2A2A32;                 /* 1.8.1 : champs plus clairs que le fond */
   --set-field-ring: none;
@@ -492,6 +499,38 @@ select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0
 .btn-check-set svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .set-row.current .btn-check-set { background: var(--surface); color: var(--text); box-shadow: inset 0 0 0 2px var(--text); }
 .set-row.done .btn-check-set { background: var(--success); color: var(--on-success); box-shadow: none; }
+
+/* 1.8.52 : menu, série en cours, boutons − / + et allure cardio prennent les couleurs inversées ;
+   les séries faites et l'en-tête de Séance gardent celles de la page */
+nav, .set-row.current, .btn-set-count, .cardio-pace {
+  --surface: var(--inv-surface); --set-row-current: var(--inv-row); --set-field: var(--inv-field); --fill: var(--inv-row);
+  --text: var(--inv-text); --text-muted: var(--inv-muted); --set-todo: var(--inv-todo); --primary: var(--inv-text);
+  --primary-strong: var(--inv-strong); --on-strong: var(--inv-on-strong); --set-field-ring: var(--inv-ring);
+}
+.btn-set-count { --set-field: var(--inv-surface); } /* boutons − / + : le gris du menu */
+.ex-icon-badge::before { background: var(--inv-surface); }
+.exercise-item .ex-icon-badge::before { box-shadow: none; }
+/* 1.8.53 : gélules de Progression, Historique et Réglages (choix du programme, Clair / Sombre / Auto, Fond d'écran,
+   champs) au gris inversé ; le segment choisi s'inverse comme dans le menu. Les boutons et l'en-tête gardent leurs couleurs. */
+:is(#tab-progression, #tab-historique, #tab-reglages) :is(.seg-group, .stats-scope, .wallpaper-row, select.filter-select, .weight-field) {
+  --fill: var(--inv-surface); --surface: var(--inv-surface); --text: var(--inv-text); --text-muted: var(--inv-muted);
+  --primary-strong: var(--inv-strong); --on-strong: var(--inv-on-strong); --primary: var(--inv-text);
+}
+/* 1.8.54 : boutons de ces onglets (principal et gris : Sauvegarder, Restaurer, Connecter / Reconnecter maintenant,
+   Afficher le QR code, Vérifier…) et boutons retour (Réglages, Créer un programme, éditeur, Fond d'écran) au même gris
+   inversé, plus de noir profond ni de blanc pur. Le bouton principal garde son ombre et sa graisse. */
+:is(#tab-progression, #tab-historique, #tab-reglages) .btn:not(.btn-delete):not(.support-btn):not(.install),
+#settings-back, button.ed-back { background: var(--inv-surface); color: var(--inv-text); }
+/* 1.8.54 : gélules de l'éditeur (nom du programme, A / B / C, nom de la séance, « Ajouter un exercice ») et gélules
+   sous le nom de l'exercice dans sa fiche ; « Fermer » de la fiche inchangé */
+.ed-field, .ed-seg, .exf-chip {
+  --accent: var(--inv-accent); --fill: var(--inv-surface); --surface: var(--inv-surface); --text: var(--inv-text); --text-muted: var(--inv-muted); --todo: var(--inv-muted);
+  --primary-strong: var(--inv-strong); --on-strong: var(--inv-on-strong); --primary: var(--inv-text);
+}
+
+/* 1.8.54 : « Ajouter un exercice » sans fond : en sombre, texte blanc sur une ombre sombre ; en clair, texte foncé sur un halo clair */
+button.ed-add { background: none; color: var(--text); text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8), 0 2px 10px rgba(255, 255, 255, 0.7); }
+:root[data-theme="dark"] button.ed-add { color: #FFFFFF; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 2px 10px rgba(0, 0, 0, 0.5); }
 
 /* Écrans étroits (≤ 380 px) : on libère de la place au nom de l'exercice ouvert */
 @media (max-width: 380px) {
@@ -1011,13 +1050,13 @@ body[data-tab="seance"] #seance-prog-ico.libre { width: 44px; height: 44px; } /*
 body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 
 /* Réglages › ligne « Fond d'écran » */
-.wallpaper-row { display: flex; align-items: center; gap: 16px; width: 100%; min-height: 72px; padding: 8px 16px 8px 8px; border: none; border-radius: 22px; background: var(--fill); color: var(--text); font: inherit; text-align: left; cursor: pointer; }
-.wallpaper-row-thumb { flex: none; position: relative; width: 40px; height: 56px; border-radius: 10px; overflow: hidden; background: var(--card-bg); box-shadow: var(--sh-thumb); }
+.wallpaper-row { display: flex; align-items: center; gap: 12px; width: 100%; height: 56px; padding: 0 20px 0 8px; border: none; border-radius: 999px; background: var(--fill); color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.wallpaper-row-thumb { flex: none; position: relative; width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: var(--card-bg); box-shadow: var(--sh-thumb); }
 .wallpaper-row-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .wallpaper-row-thumb img[hidden] { display: none; }
 .wallpaper-row-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .wallpaper-row-name { font-size: 1rem; font-weight: 600; }
-.wallpaper-row-sub { font-size: 0.875rem; color: var(--text-muted); }
+.wallpaper-row-sub { font-size: 0.8125rem; color: var(--text-muted); } /* 1.8.54 : gélule de 56 px, vignette ronde de 40 px */
 .wallpaper-row-chev { flex: none; width: 20px; height: 20px; fill: none; stroke: var(--text-muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
 /* Page Fond d'écran : grille de vignettes */

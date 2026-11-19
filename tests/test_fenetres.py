@@ -121,7 +121,7 @@ with Srv() as url, sync_playwright() as p:
         if SHOTS: pg.wait_for_timeout(250); pg.screenshot(path=f'/tmp/claude-0/fen_supprimer_{w}_{theme}.png')
         pg.click('#ask-cancel'); pg.wait_for_timeout(150)
         ok(tag + "« Annuler » : séance gardée", pg.evaluate("state.history.length") == h1)
-        pg.click('#modal-delete-btn'); pg.wait_for_timeout(150); pg.click('#ask-ok'); pg.wait_for_timeout(400)
+        pg.click('#modal-delete-btn'); pg.wait_for_timeout(150); pg.click('#ask-ok'); pg.wait_for_timeout(1700)  # 1.8.51 : la ligne clignote 1,3 s avant d'être retirée
         ok(tag + "« Supprimer la séance » : séance supprimée", pg.evaluate("state.history.length") == h1 - 1)
 
         # ---------- Réinitialiser les données : seulement « Annuler » ----------
