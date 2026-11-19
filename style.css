@@ -521,6 +521,9 @@ nav, .set-row.current, .btn-set-count, .cardio-pace {
    inversé, plus de noir profond ni de blanc pur. Le bouton principal garde son ombre et sa graisse. */
 :is(#tab-progression, #tab-historique, #tab-reglages) .btn:not(.btn-delete):not(.support-btn):not(.install),
 #settings-back, button.ed-back { background: var(--inv-surface); color: var(--inv-text); }
+/* 1.8.55 : « Déconnecter » (Drive) et « Restaurer » (Historique) : gris clair d'avant (`fill`) en clair, anthracite #2E2E35 en sombre */
+:root :is(#tab-reglages #drive-disconnect-btn, #tab-historique .btn.btn-secondary) { background: var(--fill); color: var(--text); }
+:root[data-theme="dark"] :is(#tab-reglages #drive-disconnect-btn, #tab-historique .btn.btn-secondary) { background: #2E2E35; color: #F2F2F4; }
 /* 1.8.54 : gélules de l'éditeur (nom du programme, A / B / C, nom de la séance, « Ajouter un exercice ») et gélules
    sous le nom de l'exercice dans sa fiche ; « Fermer » de la fiche inchangé */
 .ed-field, .ed-seg, .exf-chip {

@@ -7,6 +7,25 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.57] - 2026-11-19
+### 🎨 Icônes : liseré rouge et jaune retiré sur 7 exercices (co-auteur : Claude)
+- Développé incliné haltères, Élévations latérales, Oiseau, Rowing unilatéral, Tirage vertical, Fentes et Extension triceps : refaites depuis les photos détourées d'origine en haute définition, calées sur le cadrage exact des icônes précédentes (points communs), réduites à 512 px. Le liseré de pixels rouges et jaunes purs laissé par le détourage automatique de la 1.8.42 disparaît.
+- Seuls le voile presque transparent du fond et l'ombre au sol sous le banc du Rowing unilatéral sont retirés.
+
+---
+
+## [1.8.56] - 2026-11-19
+### 🌓 « Déconnecter » et « Restaurer » : gris clair en clair, anthracite en sombre (co-auteur : Claude)
+- « Déconnecter » (Réglages › Sauvegarde Google Drive) et « Restaurer » (Historique) : gris clair d'avant (`fill`) en clair, anthracite #2E2E35 en sombre.
+- `test_couleurs_inversees.py` : 32 contrôles.
+
+---
+
+## [1.8.55] - 2026-11-19
+- Première version de ce réglage (anthracite en clair, gris foncé en sombre), corrigée en 1.8.56.
+
+---
+
 ## [1.8.54] - 2026-11-19
 ### 🌓 Couleurs inversées : boutons, flèches retour, éditeur et fiche (co-auteur : Claude)
 - Même gris inversé que le menu (#E4E4E9 en sombre, #2E2E35 en clair), plus de noir profond ni de blanc pur :
