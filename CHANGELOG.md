@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.60] - 2026-11-19
+### 🎨 Nouvelle icône de la Presse à cuisses (co-auteur : Claude)
+- Nouvelle photo (plan large, machine à disques) détourée : athlète par le modèle ISNet, fond blanc retiré entre les barres et sous la poignée, baskets blanches protégées, blanc mélangé au bord retiré.
+- Cadrage zoomé sur l'athlète : planche entière avec les deux pieds, tête dans le cadre ; l'image déborde de la pastille comme les autres icônes, ce qui sort du cadre est coupé en arrondi (pas d'effet carré).
+
+---
+
 ## [1.8.59] - 2026-11-19
 ### 🎨 Icône du Développé couché haltères refaite (co-auteur : Claude)
 - Refaite depuis la photo d'origine sur fond blanc : athlète détourée par le modèle ISNet, banc et haltères par leur couleur sombre, blanc mélangé au bord retiré ; calée sur le cadrage de l'icône précédente. Le pied gauche du banc n'a plus de trous blancs, et le disque droit de l'haltère est entier.
