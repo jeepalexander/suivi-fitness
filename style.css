@@ -1294,3 +1294,5 @@ body[data-pview="choose"] .ed-top { margin-bottom: 8px; }
 .ed-kind .prog-ico.dark, #seance-prog-ico.dark { background: transparent; border: 2px solid currentColor; color: var(--text); }
 .stats-scope .mem-ico:not(.libre):not(.grid), .restore-item:not(.libre) .mem-ico:not(.libre):not(.grid), .mem-ico.small:not(.libre):not(.grid) { background: transparent; border: 2px solid currentColor; color: var(--text); }
 .stats-scope .mem-ico.libre, .restore-item .mem-ico.libre, .restore-item.libre .mem-ico { background: transparent; border: 2px dashed var(--sand-line); color: var(--text); }
+/* 1.8.67 : « Tous les programmes » (grille) : même contour que ⇄ ; elle était blanche sur blanc dans la gélule inversée de Progression */
+.stats-scope .mem-ico.grid, .restore-item .mem-ico.grid { background: transparent; border: 2px solid currentColor; color: var(--text); }

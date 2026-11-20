@@ -7,9 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
-## [1.8.67] - 2026-11-20
-### 🔁 « Voir les statistiques de » (co-auteur : Claude)
+## [1.8.68] - 2026-11-20
+### 🔁 « Voir les statistiques de » et « Tous les programmes » (co-auteur : Claude)
 - Dans le volet « Voir les statistiques de », ⇄ en contour à liseré plein et 1× en pointillés sable (en 1.8.66, le 1× y prenait par erreur un liseré plein).
+- « Tous les programmes » : l'icône grille, invisible (blanc sur blanc) dans la gélule de Progression quand ce filtre est choisi, prend le même contour que ⇄.
+
+---
+
+## [1.8.67] - 2026-11-20
+- Première version du correctif du volet « Voir les statistiques de », complétée en 1.8.68.
 
 ---
 
