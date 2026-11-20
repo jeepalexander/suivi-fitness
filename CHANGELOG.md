@@ -7,6 +7,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.75] - 2026-11-20
+### 🎬 Film d'accueil : pas d'haltères avant le film (co-auteur : Claude)
+- Après la flèche, le titre, le champ et la flèche restent affichés (flèche inactive, champ en lecture seule) jusqu'au lancement réel du film : le film apparaît sous le champ (0,3 s), puis le titre, le champ et la flèche s'effacent (0,3 s). Avant, ils disparaissaient tout de suite et l'on voyait les haltères de la première image du film apparaître sur la photo.
+
+---
+
 ## [1.8.74] - 2026-11-20
 ### 🎬 Film d'accueil plus net (co-auteur : Claude)
 - Film réencodé avec bien moins de compression (H.264 « high », CRF 16, préréglage lent) : 1,5 Mo au lieu de 290 Ko, à l'œil identique au film d'origine (SSIM 0,994 au lieu de 0,984 ; plus d'aplats ni de bandes dans le fond sombre). Il reste chargé une seule fois, au premier lancement, hors du cache.

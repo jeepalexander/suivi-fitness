@@ -1313,12 +1313,14 @@ body[data-pview="choose"] .ed-top { margin-bottom: 8px; }
 #app-wallpaper .intro-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 0; transition: opacity 0.3s ease; }
 #app-wallpaper .intro-video.on { opacity: 1; }
 #app-wallpaper .intro-video.out { opacity: 0; }
-body.intro .onb, body.intro #app-title, body.intro nav, body.intro #add-program-btn, body.intro #settings-btn, body.intro .prog-empty-sub, body.intro .prog-sep { visibility: hidden; }
+body.intro #app-title, body.intro nav, body.intro #add-program-btn, body.intro #settings-btn, body.intro .prog-empty-sub, body.intro .prog-sep { visibility: hidden; }
 body.intro:not(.intro-end) .prog-greet { visibility: hidden; }
 body.intro-end .prog-greet { animation: introFade 0.8s ease-out both; }
 body.intro-reveal #app-title, body.intro-reveal nav, body.intro-reveal #add-program-btn { animation: introFade 0.4s ease-out both; }
 body.intro-reveal .prog-empty-sub { animation: introRise 0.6s ease-out both; }
 @keyframes introFade { from { opacity: 0; } to { opacity: 1; } }
+body.intro .onb { animation: introOut 0.3s ease-in both; }
+@keyframes introOut { from { opacity: 1; } to { opacity: 0; visibility: hidden; } }
 @keyframes introRise { from { opacity: 0; transform: translateY(48px); } to { opacity: 1; transform: none; } }
 /* 1.8.73 : écran du prénom : « Bienvenue sur » manuscrit et MON CARNET DE SALLE en haut (le visage reste visible) ;
    champ et flèche « Continuer » sur une ligne, à la hauteur des haltères de l'image (calés sur l'image, quelle que soit la taille de l'écran) */

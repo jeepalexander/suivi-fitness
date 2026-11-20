@@ -86,7 +86,10 @@ function playIntroFilm() {
   v.muted = true; v.defaultMuted = true; v.playsInline = true;
   v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('aria-hidden', 'true');
   v.preload = 'auto'; v.src = INTRO_FILM;
-  document.body.classList.add('intro');
+  // 1.8.75 : le champ et la flèche restent jusqu'au lancement du film (sinon les haltères de la 1re image apparaissaient)
+  const go = document.getElementById('onb-continue'), inp = document.getElementById('onb-name');
+  if (go) go.disabled = true;
+  if (inp) inp.readOnly = true;
   wp.appendChild(v);
   let greeted = false, done = false, timer = null;
   // « Bonjour + prénom » dès la première seconde du film (1.8.73)
@@ -103,12 +106,15 @@ function playIntroFilm() {
     clearTimeout(timer);
     greet();
     v.classList.add('out');
-    document.body.classList.remove('intro', 'intro-end');
+    document.body.classList.remove('intro', 'intro-end', 'onboarding');
     document.body.classList.add('intro-reveal');
     setTimeout(() => v.remove(), 400);
     setTimeout(() => document.body.classList.remove('intro-reveal'), 900);
   };
-  v.addEventListener('playing', () => v.classList.add('on'));
+  v.addEventListener('playing', () => {
+    v.classList.add('on');   // le film apparaît sous le champ (0,3 s), puis le titre, le champ et la flèche s'effacent (0,3 s)
+    setTimeout(() => { if (!done) document.body.classList.add('intro'); }, 300);
+  }, { once: true });
   v.addEventListener('timeupdate', () => { if (v.currentTime >= 1) greet(); });
   v.addEventListener('ended', end);
   v.addEventListener('error', end);
