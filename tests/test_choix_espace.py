@@ -1,5 +1,5 @@
-"""Écran du bouton + (1.7.58) : moins d'espace en haut ; tout tient au-dessus du menu sans défiler,
-« Recevoir un programme » à 32 px au-dessus du menu (écart d'origine), dès 360 × 844 (les polices des serveurs de test sont un peu plus hautes)."""
+"""Écran « Ajouter » du bouton + (1.7.58, 1.8.63) : tout tient au-dessus du menu sans défiler, la dernière option à 32 px au-dessus du menu,
+« Ajouter » derrière la flèche, « Une séance » puis « Un programme », puis Restaurer, Recevoir et « Avec notre aide » (inactif), dès 360 × 844."""
 import sys
 from harness import Srv, newpage, sync_playwright
 
@@ -20,11 +20,14 @@ def main():
             pg.evaluate("openProgramChooser()"); pg.wait_for_timeout(400)
             r = pg.evaluate("""(()=>{const s=document.getElementById('app-scroll');
               return {scroll: s.scrollHeight - s.clientHeight, top: s.scrollTop,
-                gap: Math.round(document.querySelector('nav').getBoundingClientRect().top - document.querySelector('.choose-recv').getBoundingClientRect().bottom),
-                ed: getComputedStyle(document.querySelector('#tab-programme .ed-top')).marginBottom}})()""")
+                gap: Math.round(document.querySelector('nav').getBoundingClientRect().top - [...document.querySelectorAll('.choose-recv')].pop().getBoundingClientRect().bottom),
+                ed: getComputedStyle(document.querySelector('#tab-programme .ed-top')).marginBottom, head: (document.querySelector('.ed-top .choose-head')||{}).innerText,
+                cards: [...document.querySelectorAll('.choose-title')].map(e=>e.innerText), opts: [...document.querySelectorAll('.choose-options .choose-recv')].map(e=>[e.innerText.trim(), e.disabled])}})()""")
             check(f"{w}×{h} ({scheme}) : rien ne déborde, page non défilée", r['scroll'] <= 0 and r['top'] == 0, r)
-            check(f"{w}×{h} : « Recevoir un programme » à 32 px au-dessus du menu", r['gap'] == 32, r)
-            check(f"{w}×{h} : flèche retour à 4 px de « Choisis comment t'entraîner »", r['ed'] == '4px', r)
+            check(f"{w}×{h} : dernière option à 32 px au-dessus du menu", r['gap'] == 32, r)
+            check(f"{w}×{h} : « Ajouter » derrière la flèche, plus de « Choisis comment t'entraîner »", r['head'] == 'Ajouter' and r['ed'] == '8px' and pg.locator('.choose-lead').count() == 0, r)
+            check(f"{w}×{h} : « Une séance » puis « Un programme »", r['cards'] == ['Une séance', 'Un programme'], r)
+            check(f"{w}×{h} : trois options, « Avec notre aide » inactive", [o[0].split('\n')[0].split(' (')[0] for o in r['opts']] == ['Restaurer un programme sauvegardé', 'Recevoir un programme', 'Avec notre aide'] and [o[1] for o in r['opts']] == [False, False, True], r)
             check(f"{w}×{h} : aucune erreur JavaScript", not errs, errs)
             ctx.close()
         br.close()

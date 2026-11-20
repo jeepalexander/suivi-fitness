@@ -7,6 +7,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.63] - 2026-11-20
+### ➕ Écran « Ajouter » refait, accueil corrigé (co-auteur : Claude)
+- Écran du bouton + : titre « Ajouter » derrière la flèche retour, plus de « Choisis comment t'entraîner ». « Une séance » d'abord (« Tu peux suivre la même séance à chaque fois, ou créer plusieurs séances différentes à réaliser selon tes envies. »), puis « Un programme » (« Plusieurs séances spécialisées qui tournent en boucle. Lancer le programme démarre automatiquement la bonne séance. »), sans sur-titres.
+- Dessous, trois options : « Restaurer un programme sauvegardé », « Recevoir un programme », « Avec notre aide (bientôt disponible) » (inactive).
+- Cartes plus compactes (titre 28 px) pour tenir sans défiler dès 360 px ; pastilles A, B, ···, 1× et flèches toutes à 44 px ; flèche de « Un programme » aux couleurs inverses de la carte (plus de rouge).
+- Accueil : texte d'aide remonté de 40 px ; le + clignote avec un anneau rouge rond plus visible (l'ombre animée laissait un carré rouge sur Android) ; un prénom long passe sous « Bonjour ».
+- Tests mis à jour : `test_choix_espace.py`, `test_partage.py`, `test_programmes.py`, `test_fond_defaut.py`, `test_premier_lancement.py` (36 contrôles).
+
+---
+
 ## [1.8.62] - 2026-11-20
 ### 👋 Nouvel accueil au premier lancement (co-auteur : Claude)
 - Premier lancement (ni prénom, ni programme, ni séance) : « Bienvenue sur Mon Carnet de Salle » en grand sur le fond d'écran, champ « Quel est ton nom ? » et bouton « Continuer », inactif tant que le prénom est vide. Ni menu, ni nom de l'app, ni bouton + sur cet écran.

@@ -51,7 +51,7 @@ with Srv() as base, sync_playwright() as p:
           return { gap: r('nav').top - r('.prog-empty-sub').bottom, scroll: sc.scrollHeight - sc.clientHeight,
             sub: getComputedStyle(document.querySelector('.prog-empty-sub')).color, text: getComputedStyle(document.body).color,
             icon: !!document.querySelector('.prog-empty-sub .prog-empty-plus svg') }; }""")
-        check(f'{sch} {w}×{h} : texte en bas (moins de 60 px au-dessus du menu), sans défilement', 0 <= m['gap'] < 60 and m['scroll'] <= 0, m)
+        check(f'{sch} {w}×{h} : texte en bas, 40 px de marge en plus au-dessus du menu (1.8.62), sans défilement', 60 <= m['gap'] < 90 and m['scroll'] <= 0, m)
         check(f'{sch} : texte d\'aide de la couleur du texte', m['sub'] == m['text'], m)
         check(f'{sch} : icône + dans le texte', m['icon'])
         check(f'{sch} : aucune erreur', not errs, errs)

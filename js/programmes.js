@@ -180,7 +180,12 @@ function programGreeting(active, now = new Date()) {
 
 function programGreetingHtml(active) {
   const g = programGreeting(active);
-  return `<p class="prog-greet"><span class="prog-greet-hello">${g.hello},</span><span class="prog-greet-line">${escapeHtml(g.line)}</span></p>`;
+  // 1.8.62 : prénom long (plus de 16 caractères avec « Bonjour ») : le prénom passe sous « Bonjour »
+  const nom = (typeof userName === 'function') ? userName() : '';
+  const hello = nom && g.hello.length > 16
+    ? `<span class="prog-greet-hello">${escapeHtml(g.hello.slice(0, g.hello.length - nom.length - 1))}</span><span class="prog-greet-hello prog-greet-name">${escapeHtml(nom)},</span>`
+    : `<span class="prog-greet-hello">${escapeHtml(g.hello)},</span>`;
+  return `<p class="prog-greet">${hello}<span class="prog-greet-line">${escapeHtml(g.line)}</span></p>`;
 }
 
 function emptyProgramsHtml() {
@@ -346,30 +351,34 @@ function openProgramChooser() {
   setProgramView('choose');
 }
 
+// 1.8.63 (co-auteur : Claude) : « Ajouter » derrière la flèche, séance d'abord, programme ensuite, puis trois options
+const RESTORE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 8v4l3 2"/></svg>';
+const AIDE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>';
 function chooserHtml() {
   return `
-    <div class="ed-top"><button type="button" class="ed-back" aria-label="Retour" onclick="setProgramView('home')">${BACK_SVG}</button></div>
+    <div class="ed-top"><button type="button" class="ed-back" aria-label="Retour" onclick="setProgramView('home')">${BACK_SVG}</button><span class="choose-head">Ajouter</span></div>
     <div class="prog-spacer" aria-hidden="true"></div>
-    <p class="choose-lead">Choisis comment t'entraîner</p>
-    <button type="button" class="choose-card" onclick="startProgramEditor('program')">
-      <span class="choose-over">Séances qui reviennent</span>
-      <span class="choose-title">Créer un programme</span>
-      <span class="choose-text">Tes séances tournent en boucle. L'app te propose toujours la suivante.</span>
-      <span class="choose-foot">
-        <span class="choose-pills"><span class="type-pill type-pill-A small">A</span><span class="type-pill type-pill-B small">B</span><span class="type-pill choose-more small">···</span><span class="choose-swap">${SWAP_SVG}</span></span>
-        <span class="btn-start" aria-hidden="true">${ARROW_SVG}</span>
-      </span>
-    </button>
     <button type="button" class="choose-card libre" onclick="startProgramEditor('libre')">
-      <span class="choose-over">Une seule fois</span>
-      <span class="choose-title">Séance libre</span>
-      <span class="choose-text">Une séance isolée, sans récurrence. Elle rejoint l'historique, rien de plus.</span>
+      <span class="choose-title">Une séance</span>
+      <span class="choose-text">Tu peux suivre la même séance à chaque fois, ou créer plusieurs séances différentes à réaliser selon tes envies.</span>
       <span class="choose-foot">
         <span class="type-pill type-pill-libre">1×</span>
         <span class="btn-start libre" aria-hidden="true">${ARROW_SVG}</span>
       </span>
     </button>
-    ${receiveProgramButtonHtml()}`;
+    <button type="button" class="choose-card" onclick="startProgramEditor('program')">
+      <span class="choose-title">Un programme</span>
+      <span class="choose-text">Plusieurs séances spécialisées qui tournent en boucle. Lancer le programme démarre automatiquement la bonne séance.</span>
+      <span class="choose-foot">
+        <span class="choose-pills"><span class="type-pill type-pill-A small">A</span><span class="type-pill type-pill-B small">B</span><span class="type-pill choose-more small">···</span><span class="choose-swap">${SWAP_SVG}</span></span>
+        <span class="btn-start" aria-hidden="true">${ARROW_SVG}</span>
+      </span>
+    </button>
+    <div class="choose-options">
+      <button type="button" class="choose-recv" onclick="openProgramRestore()">${RESTORE_SVG}Restaurer un programme sauvegardé</button>
+      ${receiveProgramButtonHtml()}
+      <button type="button" class="choose-recv" disabled aria-disabled="true">${AIDE_SVG}Avec notre aide <span class="choose-soon">(bientôt disponible)</span></button>
+    </div>`;
 }
 
 // ============================================================
