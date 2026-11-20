@@ -62,6 +62,8 @@ function onboardingContinue(ev) {
   const el = document.getElementById('onb-name');
   if (!el || !el.value.trim()) return;
   setUserName(el.value);
+  // 1.8.65 : nouveau départ = le + clignote de nouveau (le drapeau peut rester d'un essai précédent, ou de la version de test qui partage le stockage)
+  try { localStorage.removeItem(PLUS_SEEN_KEY); } catch (e) {}
   renderProgramOverview();
 }
 

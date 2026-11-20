@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.65] - 2026-11-20
+### 🐛 Le + clignote de nouveau après l'écran du prénom (co-auteur : Claude)
+- Le drapeau « + déjà touché » (`h49_plus_seen`) restait d'un essai précédent, y compris depuis la version de test, qui partage le stockage du téléphone avec la production : après l'écran du prénom, le + ne clignotait plus. Valider son prénom efface maintenant ce drapeau.
+- `test_premier_lancement.py` : 37 contrôles.
+
+---
+
 ## [1.8.64] - 2026-11-20
 ### 🔁 Icône du programme : même langage que le 1× (co-auteur : Claude)
 - L'icône double flèche des programmes (tuile active, tuiles « En mémoire », carte « Un programme » de l'écran « Ajouter ») prend le fond de sa tuile avec un liseré plein de la couleur du texte, comme le 1× en pointillés de la séance libre : elle ne passe plus pour un bouton.
