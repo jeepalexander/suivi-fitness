@@ -1,0 +1,53 @@
+"""1.8.62 : premier lancement (prénom), accueil « Bonjour + prénom », + qui clignote jusqu'au premier appui, « C'est parti » vert,
+demi-ligne avant l'astuce, « Réactiver » pour une séance libre déjà activée, « Ton prénom » dans les Réglages."""
+import sys
+from harness import *
+
+res = []
+def check(name, ok, extra=''):
+    ok = bool(ok); res.append(ok); print(('OK   ' if ok else 'ÉCHEC'), name, str(extra)[:200])
+
+with Srv() as base, sync_playwright() as p:
+    br = p.chromium.launch()
+    for scheme in ('light', 'dark'):
+        ctx, pg, errs = newpage(br, 390, 844, pref=scheme, seed=False)
+        pg.goto(base + 'index.html'); pg.wait_for_timeout(900)
+        vis = lambda s: pg.evaluate(f"(()=>{{const e=document.querySelector('{s}');return !!e && getComputedStyle(e).display!=='none'}})()")
+        check(f'[{scheme}] écran du prénom : titre, champ, « Continuer » inactif', pg.locator('.onb-title').count() == 1 and pg.is_disabled('#onb-continue'))
+        check(f'[{scheme}] rien d\'autre : ni menu, ni nom de l\'app, ni +, ni roue', not vis('nav') and not vis('#app-title') and not vis('#add-program-btn'))
+        check(f'[{scheme}] champ au style de l\'éditeur, avec le crayon', pg.locator('.onb-field.ed-field .ed-pen svg').count() == 1)
+        pg.fill('#onb-name', '   '); check(f'[{scheme}] espaces seuls : « Continuer » reste inactif', pg.is_disabled('#onb-continue'))
+        pg.fill('#onb-name', 'Carine'); check(f'[{scheme}] prénom saisi : « Continuer » actif', not pg.is_disabled('#onb-continue'))
+        pg.press('#onb-name', 'Enter'); pg.wait_for_timeout(300)
+        check(f'[{scheme}] prénom gardé sur le téléphone, hors sauvegarde', pg.evaluate("localStorage.getItem('h49_user_name')") == 'Carine' and 'Carine' not in pg.evaluate("localStorage.getItem('h49_state')||''"))
+        g = pg.inner_text('.prog-empty .prog-greet')
+        check(f'[{scheme}] « Bonjour Carine, » (ou Bonsoir) et phrase manuscrite', ('Bonjour Carine' in g or 'Bonsoir Carine' in g) and len(g.split('\n')) >= 2, g)
+        t = pg.inner_text('.prog-empty-sub')
+        check(f'[{scheme}] texte d\'aide', t.startswith('Pour créer ta première séance') and t.replace('\xa0',' ').strip().endswith('À toi de jouer !'), t)
+        check(f'[{scheme}] menu et + visibles, le + clignote', vis('nav') and vis('#add-program-btn') and pg.evaluate("getComputedStyle(document.getElementById('add-program-btn')).animationName") == 'plusBlink')
+        pg.click('#add-program-btn', force=True); pg.wait_for_timeout(200); pg.evaluate("setProgramView('home');0"); pg.wait_for_timeout(200)
+        check(f'[{scheme}] après le premier appui, le + ne clignote plus', pg.evaluate("getComputedStyle(document.getElementById('add-program-btn')).animationName") == 'none')
+        pg.evaluate("""()=>{const t=new Date().toISOString();state.programs=[{id:'p1',name:'Force',kind:'program',status:'active',createdAt:t,activatedAt:t,nextKey:'A',sessions:[{key:'A',name:'Haut',exercises:[{exId:26,sets:3}]},{key:'B',name:'Bas',exercises:[{exId:4,sets:3}]}]}];saveState();renderProgramOverview();}"""); pg.wait_for_timeout(200)
+        b = pg.evaluate("(()=>{const b=document.querySelector('.prog-tile .btn-start');const c=getComputedStyle(b);return [b.innerText.trim(),c.backgroundColor]})()")
+        check(f'[{scheme}] « C\'est parti » en vert', b[0] == "C'est parti" and b[1] == ('rgb(11, 122, 67)' if scheme == 'light' else 'rgb(61, 214, 140)'), b)
+        sep = pg.evaluate("(()=>{const s=document.querySelector('.mem-empty + .prog-sep');if(!s)return null;const r=s.getBoundingClientRect(),h=document.querySelector('.prog-hint').getBoundingClientRect();return [Math.round(r.width/document.querySelector('.mem-empty').getBoundingClientRect().width*100), r.bottom<=h.top]})()")
+        check(f'[{scheme}] demi-ligne entre « Tes autres programmes… » et l\'astuce', sep and 45 <= sep[0] <= 55 and sep[1], sep)
+        pg.evaluate("""()=>{const t=new Date().toISOString();state.programs.push({id:'l1',name:'Bras',kind:'libre',status:'paused',createdAt:t,activatedAt:t,pausedAt:t,sessions:[{key:'',name:'Bras',exercises:[{exId:30,sets:3}]}]},{id:'l2',name:'Jambes',kind:'libre',status:'new',createdAt:t,sessions:[{key:'',name:'Jambes',exercises:[{exId:4,sets:3}]}]});saveState();renderProgramOverview();}"""); pg.wait_for_timeout(200)
+        lab = pg.evaluate("[...document.querySelectorAll('.mem-tile')].map(t=>t.querySelector('.mem-name').innerText+':'+t.querySelector('.mem-btn').innerText)")
+        check(f'[{scheme}] séance libre déjà activée : « Réactiver » ; jamais activée : « Activer »', 'Bras:Réactiver' in lab and 'Jambes:Activer' in lab, lab)
+        pg.evaluate("switchTab('reglages');0"); pg.wait_for_timeout(200)
+        check(f'[{scheme}] Réglages : « Ton prénom » prérempli, avec crayon', pg.input_value('#settings-name') == 'Carine' and pg.locator('.name-field .ed-pen svg').count() == 1)
+        pg.fill('#settings-name', 'Caro'); pg.dispatch_event('#settings-name', 'change'); pg.evaluate("switchTab('programme');0"); pg.wait_for_timeout(200)
+        check(f'[{scheme}] prénom modifié dans les Réglages : repris dans l\'accueil', 'Caro' in pg.inner_text('.prog-greet'))
+        check(f'[{scheme}] aucune erreur JS', not errs, errs)
+        ctx.close()
+    # Usager existant sans prénom : rien ne change
+    ctx, pg, errs = newpage(br, 390, 844)
+    pg.goto(base + 'index.html'); pg.wait_for_timeout(900)
+    g = pg.inner_text('.prog-greet')
+    check('usager existant sans prénom : pas d\'écran du prénom, « Bonjour, » seul', pg.locator('#onb-name').count() == 0 and (g.startswith('Bonjour,') or g.startswith('Bonsoir,')), g)
+    check('usager existant : le + ne clignote pas', pg.evaluate("getComputedStyle(document.getElementById('add-program-btn')).animationName") == 'none')
+    ctx.close()
+    br.close()
+print(f"\n {sum(res)} / {len(res)} contrôles OK")
+sys.exit(0 if all(res) else 1)

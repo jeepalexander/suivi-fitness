@@ -7,6 +7,18 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.62] - 2026-11-20
+### 👋 Nouvel accueil au premier lancement (co-auteur : Claude)
+- Premier lancement (ni prénom, ni programme, ni séance) : « Bienvenue sur Mon Carnet de Salle » en grand sur le fond d'écran, champ « Quel est ton nom ? » et bouton « Continuer », inactif tant que le prénom est vide. Ni menu, ni nom de l'app, ni bouton + sur cet écran.
+- Ensuite : « Bonjour + prénom » (ou Bonsoir) avec la phrase manuscrite, puis le texte d'aide en bas : « Pour créer ta première séance ou un programme complet… À toi de jouer ! ». Le bouton + clignote jusqu'au premier appui (`h49_plus_seen`), sans animation si le téléphone demande de réduire les animations.
+- Le prénom est gardé sur le téléphone seulement (`h49_user_name`, hors sauvegarde Drive) et se modifie dans Réglages › Ton prénom. Un usager qui a déjà des programmes ou des séances ne voit pas l'écran du prénom.
+- Accueil Programmes : demi-ligne entre « Tes autres programmes apparaîtront ici » et l'astuce ; l'astuce remonte de 24 px au-dessus du menu ; le bouton démarrer devient « C'est parti », en vert (programme et séance libre).
+- Une séance libre en mémoire déjà activée propose « Réactiver » au lieu de « Activer ».
+- Champs de saisie : même logique partout (pilule au gris inversé, sans ombre, texte à gauche, crayon) pour le prénom, la pesée et le lien d'un programme reçu.
+- Nouveau test `test_premier_lancement.py` (34 contrôles) ; tests du premier lancement, des marges et de la séance libre mis à jour.
+
+---
+
 ## [1.8.61] - 2026-11-19
 ### 🎨 Icônes : Tirage facial refait, Développé militaire arrondi en bas (co-auteur : Claude)
 - Tirage facial : refait depuis la photo d'origine ; la corde garde sa texture, le câble est redessiné en jaune à liseré noir et s'arrête au cercle (plus d'ancrage qui dépasse à droite) ; athlète recentrée.

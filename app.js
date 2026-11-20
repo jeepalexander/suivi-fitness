@@ -3902,6 +3902,7 @@ function switchTab(tabName) {
   const prevTab = document.body.dataset.tab;
   if (tabName === 'reglages' && (prevTab === 'historique' || prevTab === 'progression' || prevTab === 'seance')) settingsFrom = prevTab; // 1.8.49 : Séance aussi
   if (tabName === 'reglages') loadGoogleIdentity(); // 1.7.65 : préchargé avant un appui sur « Se connecter »
+  if (tabName === 'reglages') { const n = document.getElementById('settings-name'); if (n && typeof userName === 'function') n.value = userName(); } // 1.8.62
   document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
 

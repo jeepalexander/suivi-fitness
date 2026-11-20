@@ -181,7 +181,7 @@ function openReceiveProgram() {
   const scan = canScanQr();
   openSheet(`<h3 class="sheet-title">Recevoir un programme</h3>
     <p class="sheet-text">${scan ? "Colle le lien qu'on t'a envoyé, ou scanne son QR code." : "Colle le lien qu'on t'a envoyé."}</p>
-    <input class="recv-field" id="recv-url" type="url" inputmode="url" placeholder="Colle le lien ici" autocomplete="off" aria-label="Lien du programme">
+    <label class="ed-field recv-pen"><input id="recv-url" type="url" inputmode="url" placeholder="Colle le lien ici" autocomplete="off" aria-label="Lien du programme"><span class="ed-pen">${typeof PEN_SVG === 'string' ? PEN_SVG : ''}</span></label>
     <button type="button" class="btn" onclick="receiveFromField()">Voir le programme</button>
     ${scan ? '<button type="button" class="btn btn-secondary" onclick="openQrScanner()">Scanner un QR code</button>' : '<button type="button" class="btn btn-secondary" onclick="closeSheet()">Annuler</button>'}`);
 }
