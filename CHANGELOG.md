@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.71] - 2026-11-20
+### 🖼️ Lien « Crédits des images » dans les Réglages (co-auteur : Claude)
+- **Réglages › Application** : « Crédits des images » s'ajoute après « Règles de confidentialité · Conditions d'utilisation », même style de lien souligné ; il ouvre la page `credits.html` dans le navigateur. La ligne passe sur deux lignes à 390 et 360 px (prototype validé le 20 novembre 2026).
+- Test : `test_credits.py` vérifie le lien et son ordre.
+
+---
+
 ## [1.8.70] - 2026-11-20
 ### 🖼️ Crédits des images, 4 fonds d'écran retirés (co-auteur : Claude)
 - **Fonds d'écran retirés** (origine introuvable) : Course, Cuivre, Silhouette et Escaliers. Il en reste 16 (plus « Aucun »). Si l'un d'eux était choisi, l'app revient à « Aucun ». Fichiers, règles CSS, script de démarrage et cache du service worker mis à jour.

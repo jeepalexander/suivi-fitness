@@ -42,6 +42,11 @@ with Srv() as base, sync_playwright() as p:
     for page in ('conditions.html', 'confidentialite.html'):
         pg.goto(base + page); pg.wait_for_timeout(250)
         check(f"{page} renvoie vers credits.html", pg.evaluate("[...document.querySelectorAll('a')].some(a=>a.getAttribute('href')==='credits.html')"))
+    pg.goto(base + 'index.html'); pg.wait_for_timeout(600)
+    pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(250)
+    lk = pg.evaluate("[...document.querySelectorAll('.legal-links a')].map(a=>[a.textContent,a.getAttribute('href'),a.target])")
+    check("Réglages › Application : « Crédits des images » après Confidentialité et Conditions, nouvel onglet (1.8.71)",
+          [l[0] for l in lk] == ['Règles de confidentialité', "Conditions d'utilisation", 'Crédits des images'] and lk[2][1:] == ['credits.html', '_blank'], lk)
     txt = pg.goto(base + 'conditions.html') and pg.inner_text('body')
     check("conditions : Pexels cité, plus de Pixabay ni de Magnific", 'Pexels' in txt and 'Pixabay' not in txt and 'Magnific' not in txt)
     check("aucune erreur", not errs, errs)
