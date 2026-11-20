@@ -7,6 +7,14 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.69] - 2026-11-20
+### 1× au format de ⇄ (co-auteur : Claude)
+- Le « 1× » de la séance libre prend partout le format de l'icône double flèche : fond transparent, liseré plein de 2 px de la couleur du texte. Cela vaut pour l'Historique, l'éditeur, la Séance, la Progression, le volet « Voir les statistiques de », Restaurer, les tuiles et la carte « Une séance ».
+- Sur les supports sable (tuile active, tuile en mémoire, carte « Une séance »), il prend l'encre sable, comme ⇄ prend l'encre de sa tuile.
+- Fin du fond sable et des pointillés de la pastille 1×.
+
+---
+
 ## [1.8.68] - 2026-11-20
 ### 🔁 « Voir les statistiques de » et « Tous les programmes » (co-auteur : Claude)
 - Dans le volet « Voir les statistiques de », ⇄ en contour à liseré plein et 1× en pointillés sable (en 1.8.66, le 1× y prenait par erreur un liseré plein).

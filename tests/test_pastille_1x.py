@@ -1,4 +1,5 @@
-"""1.7.44 : chaque pastille « 1× » de séance libre est lisible (contraste texte / fond >= 4.4), en clair et en sombre."""
+"""1.7.44 : chaque pastille « 1× » de séance libre est lisible (contraste texte / fond >= 4.4), en clair et en sombre.
+1.8.69 : partout, le « 1× » a le format de ⇄ : fond transparent, liseré plein 2 px de la couleur du texte."""
 import sys
 from harness import *
 
@@ -11,7 +12,7 @@ SCAN = """(()=>{const out=[];const all=[...document.querySelectorAll('body *')].
 for(const e of all){let b=e,bg='';while(b){const c=getComputedStyle(b).backgroundColor;if(c&&c!=='rgba(0, 0, 0, 0)'&&!c.endsWith(', 0)')){bg=c;break}b=b.parentElement}
 const parse=s=>s.match(/[\\d.]+/g).slice(0,3).map(Number);const L=c=>{const[r,g,bb]=c.map(v=>{v/=255;return v<=0.03928?v/12.92:((v+0.055)/1.055)**2.4});return 0.2126*r+0.7152*g+0.0722*bb};
 const fg=parse(getComputedStyle(e).color),bk=bg?parse(bg):[0,0,0];const l1=L(fg),l2=L(bk);const cr=(Math.max(l1,l2)+0.05)/(Math.min(l1,l2)+0.05);
-out.push([e.className||e.parentElement.className, getComputedStyle(e).color, bg, Math.round(cr*10)/10])}return out})()"""
+const cs=getComputedStyle(e);out.push([e.className||e.parentElement.className, cs.color, bg, Math.round(cr*10)/10, cs.backgroundColor, cs.borderTopStyle, cs.borderTopWidth, cs.borderTopColor===cs.color])}return out})()"""
 
 with Srv() as base, sync_playwright() as p:
     br = p.chromium.launch()
@@ -25,11 +26,14 @@ with Srv() as base, sync_playwright() as p:
                  ('Choix du périmètre', "openStatsScopeSheet()"),
                  ('Restauration', "closeSheet(); restoreCandidates=[JSON.parse(JSON.stringify(getProgram('lt')))].map(p=>{p.id='zz';p.savedAt=new Date().toISOString();return p}); restoreSelected=new Set(); renderProgramRestoreList()"),
                  ('Créer (choix)', "closeSheet(); openProgramChooser()"),
+                 ('Historique', "closeSheet(); state.history.reduce((a,b)=>new Date(b.date)>new Date(a.date)?b:a).kind='libre'; switchTab('historique'); renderHistory()"),
                  ('Séance (titre)', "closeSheet(); activateProgram('lt'); switchTab('seance')")]
         for name, js in views:
             pg.evaluate(js); pg.wait_for_timeout(400)
             r = pg.evaluate(SCAN)
             check(f'[{scheme}] {name} : « 1× » lisible', r and all(x[3] >= 4.4 for x in r), str(r))
+            check(f'[{scheme}] {name} : « 1× » au format de ⇄ (transparent, liseré plein 2 px)', r and all(x[4]=='rgba(0, 0, 0, 0)' and x[5]=='solid' and x[6]=='2px' and x[7] for x in r), str([x[4:] for x in r]))
+            pg.screenshot(path=f'/tmp/1x_{scheme}_{len(res)}.png')
         check(f'[{scheme}] aucune erreur JavaScript', not errs, str(errs))
         ctx.close()
     br.close()
