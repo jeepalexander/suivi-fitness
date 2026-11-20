@@ -1288,3 +1288,11 @@ body[data-pview="choose"] .ed-top { margin-bottom: 8px; }
 .choose-card .choose-ico { width: 44px; height: 44px; background: transparent; border: 2px solid var(--pill-ink); color: var(--pill-ink); }
 .choose-card .choose-ico svg { width: 22px; height: 22px; }
 .mem-tile:not(.libre) .mem-ico { background: transparent; border: 2px solid var(--pill-ink); color: var(--pill-ink); }
+/* 1.8.66 (co-auteur : Claude) : icône de TYPE = contour sur le fond de son support (⇄ liseré plein, 1× pointillés sable),
+   partout où elle dit ce qu'est l'élément : éditeur (programme), en-tête de Séance, choix et liste de Progression, Restaurer.
+   Les pastilles de SÉANCE (A–F, 1× sable de l'Historique et de l'éditeur de séance libre) restent pleines ; les boutons aussi. */
+.ed-kind .prog-ico.dark, #seance-prog-ico.dark { background: transparent; border: 2px solid currentColor; color: var(--text); }
+.stats-scope .mem-ico:not(.libre):not(.grid), .restore-item:not(.libre) .mem-ico:not(.libre):not(.grid), .mem-ico.small:not(.libre):not(.grid) { background: transparent; border: 2px solid currentColor; color: var(--text); }
+.stats-scope .mem-ico.libre, .restore-item .mem-ico.libre, .restore-item.libre .mem-ico { background: transparent; border: 2px dashed var(--sand-line); color: var(--text); }
+/* 1.8.67 : « Tous les programmes » (grille) : même contour que ⇄ ; elle était blanche sur blanc dans la gélule inversée de Progression */
+.stats-scope .mem-ico.grid, .restore-item .mem-ico.grid { background: transparent; border: 2px solid currentColor; color: var(--text); }

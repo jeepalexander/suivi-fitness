@@ -50,6 +50,13 @@ with Srv() as base, sync_playwright() as p:
     ring = pg.evaluate("(()=>{const c=getComputedStyle(document.getElementById('add-program-btn'),'::before');return [c.animationName,c.borderRadius]})()")
     check('le + clignote avec un anneau rond (pas d\'ombre carrée)', ring == ['plusRing', '50%'], ring)
     ctx.close()
+    # 1.8.65 : un « + déjà vu » laissé par un essai précédent n'empêche pas le clignotement après l'écran du prénom
+    ctx, pg, errs = newpage(br, 390, 844, seed=False)
+    pg.add_init_script("if(!sessionStorage.getItem('pv')){localStorage.setItem('h49_plus_seen','1');sessionStorage.setItem('pv','1')}")
+    pg.goto(base + 'index.html'); pg.wait_for_timeout(800)
+    pg.fill('#onb-name', 'Carine'); pg.click('#onb-continue'); pg.wait_for_timeout(300)
+    check('ancien drapeau « + vu » : le + clignote quand même après le prénom', pg.evaluate("getComputedStyle(document.getElementById('add-program-btn')).animationName") == 'plusBlink')
+    ctx.close()
     # Usager existant sans prénom : rien ne change
     ctx, pg, errs = newpage(br, 390, 844)
     pg.goto(base + 'index.html'); pg.wait_for_timeout(900)
