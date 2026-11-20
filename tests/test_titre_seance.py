@@ -52,7 +52,7 @@ with Srv() as base, sync_playwright() as p:
         check(tag + 'séance libre (1.8.18) : échauffement dans son 1er exercice de force', pg.evaluate("(document.getElementById('warmup-note').closest('.exercise-item')||{dataset:{}}).dataset.ex") == pg.evaluate("[...document.querySelectorAll('#exercises-list .exercise-item')].map(e=>e.dataset.ex).find(n=>!exInfo(n).cardio)") and not pg.evaluate("document.getElementById('warmup-note').hidden"))
         check(tag + 'séance libre (1.7.42) : titre et icône à la même hauteur que pour un programme', pg.evaluate(f"({RECT})('#page-title')")['t'] == t_prog['t'] and pg.evaluate(f"({RECT})('#seance-prog-ico')")['t'] == ico_prog['t'] and pg.evaluate(f"({RECT})('#seance-prog-ico')")['b'] == ico_prog['b'], f"{t_prog} {ico_prog}")
         col = pg.evaluate("getComputedStyle(document.getElementById('seance-prog-ico')).color")
-        check(tag + "séance libre (1.7.43) : « 1× » brun en clair, doré en sombre", col == ('rgb(168, 118, 31)' if scheme == 'dark' else 'rgb(74, 56, 24)'), col)
+        check(tag + "séance libre (1.8.69) : « 1× » couleur du texte, comme ⇄", col == ('rgb(242, 242, 244)' if scheme == 'dark' else 'rgb(17, 17, 20)'), col)
         check(tag + 'séance libre : icône 1× + nom en titre, plus de ligne pastille / nom (1.7.41)', pg.inner_text('#page-title') == 'Dorsaux'
               and pg.inner_text('#seance-prog-ico') == '1×' and not pg.is_visible('#seance-head') and not pg.evaluate(OVERFLOW_JS)['out'])
         pg.evaluate("switchTab('programme')"); pg.wait_for_timeout(200)

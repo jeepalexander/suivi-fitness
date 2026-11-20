@@ -1,5 +1,5 @@
 """1.7.44 : chaque pastille « 1× » de séance libre est lisible (contraste texte / fond >= 4.4), en clair et en sombre.
-1.8.69 : partout, le « 1× » a le format de ⇄ : fond transparent, liseré plein 2 px de la couleur du texte."""
+1.8.69 : partout, le « 1× » a le format de ⇄ : fond transparent, liseré pointillé 2 px de la couleur du texte (pointillés gardés)."""
 import sys
 from harness import *
 
@@ -32,7 +32,7 @@ with Srv() as base, sync_playwright() as p:
             pg.evaluate(js); pg.wait_for_timeout(400)
             r = pg.evaluate(SCAN)
             check(f'[{scheme}] {name} : « 1× » lisible', r and all(x[3] >= 4.4 for x in r), str(r))
-            check(f'[{scheme}] {name} : « 1× » au format de ⇄ (transparent, liseré plein 2 px)', r and all(x[4]=='rgba(0, 0, 0, 0)' and x[5]=='solid' and x[6]=='2px' and x[7] for x in r), str([x[4:] for x in r]))
+            check(f'[{scheme}] {name} : « 1× » au format de ⇄ (transparent, liseré pointillé 2 px)', r and all(x[4]=='rgba(0, 0, 0, 0)' and x[5]=='dashed' and x[6]=='2px' and x[7] for x in r), str([x[4:] for x in r]))
             pg.screenshot(path=f'/tmp/1x_{scheme}_{len(res)}.png')
         check(f'[{scheme}] aucune erreur JavaScript', not errs, str(errs))
         ctx.close()

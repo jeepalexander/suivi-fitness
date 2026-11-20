@@ -9,9 +9,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [1.8.69] - 2026-11-20
 ### 1× au format de ⇄ (co-auteur : Claude)
-- Le « 1× » de la séance libre prend partout le format de l'icône double flèche : fond transparent, liseré plein de 2 px de la couleur du texte. Cela vaut pour l'Historique, l'éditeur, la Séance, la Progression, le volet « Voir les statistiques de », Restaurer, les tuiles et la carte « Une séance ».
+- Le « 1× » de la séance libre prend partout le format de l'icône double flèche : fond transparent, liseré de 2 px de la couleur du texte, en gardant ses pointillés. Cela vaut pour l'Historique, l'éditeur, la Séance, la Progression, le volet « Voir les statistiques de », Restaurer, les tuiles et la carte « Une séance ».
 - Sur les supports sable (tuile active, tuile en mémoire, carte « Une séance »), il prend l'encre sable, comme ⇄ prend l'encre de sa tuile.
-- Fin du fond sable et des pointillés de la pastille 1×.
+- Fin du fond sable de la pastille 1× et des pointillés `sand-line` : les pointillés prennent la couleur du texte.
+
+### « Voir les statistiques de » et gélule du périmètre de Progression
+- « En pause depuis le … » en ambre (`warn`, 600) ; sur la gélule inversée, ambre inversé (`--inv-warn`).
+- Point vert (`live`) devant « En cours » dans le volet, comme sur la gélule.
 
 ---
 

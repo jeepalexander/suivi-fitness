@@ -29,7 +29,7 @@
   /* 1.8.52 (co-auteur : Claude) : éléments inversés sur le fond — foncés en clair, clairs en sombre :
      menu du bas, gélules de saisie des séries, cadre d'allure cardio, pastilles d'illustration d'exercice */
   --inv-surface: #2E2E35; --inv-row: #2E2E35; --inv-field: #41414A; --inv-text: #F2F2F4; --inv-muted: #A8A8B0; --inv-todo: #A0A0A9;
-  --inv-strong: #F2F2F4; --inv-on-strong: #111114; --inv-ring: none; --inv-accent: #FF4D3F;
+  --inv-strong: #F2F2F4; --inv-on-strong: #111114; --inv-ring: none; --inv-accent: #FF4D3F; --inv-warn: #F6C26B;
   --surface: #FFFFFF;          /* navigation, chrono prêt, ligne active */
   /* 1.8.1 : champs de saisie des séries (variante G de la planche contrastes) */
   --set-field: #FFFFFF;                                                  /* champs relevés, blancs */
@@ -175,7 +175,7 @@
   --icon-pastille: #2C2C33;
   --icon-pastille-rim: inset 0 1px 0 rgba(255, 255, 255, 0.12); /* 1.8.4 : liseré du haut, comme la gélule de la série en cours (7 %), un peu plus visible */
   --inv-surface: #E4E4E9; --inv-row: #E4E4E9; --inv-field: #EDEDF1; --inv-text: #111114; --inv-muted: #55555D; --inv-todo: #66666E;
-  --inv-accent: #E5392B;
+  --inv-accent: #E5392B; --inv-warn: #92400E;
   --inv-strong: #131316; --inv-on-strong: #FFFFFF; --inv-ring: 0 0 0 1px rgba(17, 17, 20, 0.10), 0 1px 3px rgba(17, 17, 20, 0.10);
   --surface: #17171C;
   --set-field: #2A2A32;                 /* 1.8.1 : champs plus clairs que le fond */
@@ -1296,10 +1296,15 @@ body[data-pview="choose"] .ed-top { margin-bottom: 8px; }
 .stats-scope .mem-ico.libre, .restore-item .mem-ico.libre, .restore-item.libre .mem-ico { background: transparent; border: 2px dashed var(--sand-line); color: var(--text); }
 /* 1.8.67 : « Tous les programmes » (grille) : même contour que ⇄ ; elle était blanche sur blanc dans la gélule inversée de Progression */
 .stats-scope .mem-ico.grid, .restore-item .mem-ico.grid { background: transparent; border: 2px solid currentColor; color: var(--text); }
-/* 1.8.69 (co-auteur : Claude) : le « 1× » prend partout le format de l'icône double flèche :
-   fond transparent, liseré plein 2 px de la couleur du texte (Historique, éditeur, Séance, Progression, Restaurer, partage, tuiles, carte « Une séance »).
+/* 1.8.69 (co-auteur : Claude) : le « 1× » prend partout le format de l'icône double flèche, en gardant ses pointillés :
+   fond transparent, liseré pointillé 2 px de la couleur du texte (Historique, éditeur, Séance, Progression, Restaurer, partage, tuiles, carte « Une séance »).
    Sur les supports sable (tuile, tuile en mémoire, carte « Une séance »), il prend l'encre sable, comme ⇄ prend l'encre de sa tuile. */
 .type-pill-libre, .prog-ico.libre, .mem-ico.libre, .mem-tile.libre .mem-ico, .restore-item.libre .mem-ico,
 .stats-scope .mem-ico.libre, .restore-item .mem-ico.libre, body[data-tab="seance"] #seance-prog-ico.libre,
-:root[data-theme="dark"] .restore-item.libre .mem-ico, :root[data-theme="dark"] body[data-tab="seance"] #seance-prog-ico.libre { background: transparent; border: 2px solid currentColor; color: var(--text); }
+:root[data-theme="dark"] .restore-item.libre .mem-ico, :root[data-theme="dark"] body[data-tab="seance"] #seance-prog-ico.libre { background: transparent; border: 2px dashed currentColor; color: var(--text); }
 .prog-tile.libre .prog-ico.libre, .mem-tile.libre .mem-ico, .choose-card.libre .type-pill-libre { color: var(--sand-ink); }
+/* 1.8.69 : « Voir les statistiques de » et gélule du périmètre de Progression : « En pause depuis… » en ambre (warn, 600),
+   en ambre inversé sur la gélule inversée ; point vert (live) devant « En cours », comme sur la gélule */
+.scope-pause { font-weight: 600; color: var(--warn); }
+.stats-scope .scope-pause { color: var(--inv-warn); }
+.restore-when .prog-dot { display: inline-block; vertical-align: middle; margin: -2px 8px 0 0; }

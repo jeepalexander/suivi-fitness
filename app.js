@@ -2673,6 +2673,15 @@ function statsScopeStatusText(scope) {
   return p.pausedAt ? `En pause depuis le ${formatShortDate(p.pausedAt)}` : 'En pause';
 }
 
+// 1.8.69 : statut d'un périmètre en HTML : point vert devant « En cours », « En pause depuis… » en ambre
+function statsScopeStatusHtml(scope) {
+  const p = scope !== 'all' && getProgram(scope);
+  const txt = escapeHtml(statsScopeStatusText(scope));
+  if (p && p.status === 'active') return `<span class="prog-dot on"></span>${txt}`;
+  if (p && !isLibre(p) && p.status !== 'active' && p.status !== 'new') return `<span class="scope-pause">${txt}</span>`;
+  return txt;
+}
+
 function renderStatsScopeButton() {
   const btn = document.getElementById('stats-scope-btn');
   if (!btn) return;
@@ -2681,7 +2690,7 @@ function renderStatsScopeButton() {
   const active = scope !== 'all' && getProgram(scope) && getProgram(scope).status === 'active';
   btn.innerHTML = `
     <span class="mem-ico${libre ? ' libre' : ''}${scope === 'all' ? ' grid' : ''}">${scope === 'all' ? GRID_SVG : (libre ? '1×' : SWAP_SVG)}</span>
-    <span class="scope-text"><span class="scope-name">${escapeHtml(statsScopeName(scope))}</span><span class="scope-sub">${active ? '<span class="prog-dot on"></span>' : ''}${escapeHtml(statsScopeStatusText(scope))}</span></span>
+    <span class="scope-text"><span class="scope-name">${escapeHtml(statsScopeName(scope))}</span><span class="scope-sub">${statsScopeStatusHtml(scope)}</span></span>
     <span class="scope-chevron">${CHEVRON_SVG}</span>`;
   const label = document.querySelector('#tab-progression .hero-label');
   if (label) label.textContent = 'Indice de progression';   // 1.7.29 : même titre quel que soit le programme
@@ -2699,7 +2708,7 @@ function openStatsScopeSheet() {
     return `
       <button type="button" class="restore-item scope-item${on ? ' on' : ''}${it.libre ? ' libre' : ''}" ${it.has ? '' : 'disabled'} onclick="setStatsScope('${escapeHtml(it.id)}')">
         <span class="mem-ico${it.id === 'all' ? ' grid' : ''}">${it.id === 'all' ? GRID_SVG : (it.libre ? '1×' : SWAP_SVG)}</span>
-        <span class="restore-text"><span class="restore-name"><b>${escapeHtml(it.name)}</b></span><span class="restore-when">${it.has ? escapeHtml(statsScopeStatusText(it.id)) : 'Pas encore de séance'}</span></span>
+        <span class="restore-text"><span class="restore-name"><b>${escapeHtml(it.name)}</b></span><span class="restore-when">${it.has ? statsScopeStatusHtml(it.id) : 'Pas encore de séance'}</span></span>
         <span class="restore-box round">${on ? CHECK_SVG : ''}</span>
       </button>`;
   };
