@@ -57,8 +57,8 @@ with Srv() as url, sync_playwright() as p:
         # Réglages : liens légaux
         pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(200)
         links = pg.evaluate("[...document.querySelectorAll('#update-card .legal-links a')].map(a=>[a.textContent,a.getAttribute('href'),a.target])")
-        ok(tag + "Réglages › Application : liens « Règles de confidentialité » et « Conditions d'utilisation » (nouvel onglet)",
-           links == [['Règles de confidentialité', 'confidentialite.html', '_blank'], ["Conditions d'utilisation", 'conditions.html', '_blank']], links)
+        ok(tag + "Réglages › Application : liens « Règles de confidentialité », « Conditions d'utilisation » et « Crédits des images » (1.8.71, nouvel onglet)",
+           links == [['Règles de confidentialité', 'confidentialite.html', '_blank'], ["Conditions d'utilisation", 'conditions.html', '_blank'], ['Crédits des images', 'credits.html', '_blank']], links)
         for href in ('confidentialite.html', 'conditions.html'):
             r = pg.request.get(url + href)
             ok(tag + f"{href} servie avec l'app", r.ok and '<title>' in r.text())

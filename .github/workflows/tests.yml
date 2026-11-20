@@ -8,12 +8,20 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # 25 min : l'installation des paquets système de Chromium dépasse parfois 8 min sur les serveurs de GitHub (20/11/2026)
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: .github/workflows/tests.yml
+      # Chromium de Playwright gardé d'un passage à l'autre (seuls les paquets système restent à installer)
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('.github/workflows/tests.yml') }}
       - name: Installer Playwright et Chromium
         run: |
           pip install playwright pillow
