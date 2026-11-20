@@ -191,7 +191,7 @@
       <div class="weight-current"><span id="weight-current" class="weight-value">–</span><span class="weight-unit">kg</span></div>
       <canvas id="weightChart" height="150"></canvas>
       <div class="weight-form">
-        <input type="number" step="0.1" id="new-weight" placeholder="Poids (kg)" class="weight-field" oninput="saveWeightDraft()">
+        <label class="ed-field weight-pen"><input type="number" step="0.1" id="new-weight" placeholder="Poids (kg)" inputmode="decimal" oninput="saveWeightDraft()"><span class="ed-pen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></span></label>
         <button onclick="addWeight()" class="btn weight-add">Ajouter</button>
       </div>
     </div>
@@ -211,6 +211,10 @@
   </div>
 
   <div id="tab-reglages" class="container">
+    <div class="card name-card">
+      <div class="card-title">Ton prénom</div>
+      <label class="ed-field name-field"><input id="settings-name" type="text" autocomplete="given-name" maxlength="30" placeholder="Ton prénom" aria-label="Ton prénom" onchange="setUserName(this.value)"><span class="ed-pen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></span></label>
+    </div>
     <div class="card theme-card">
       <div class="card-title">Apparence</div>
       <div class="filter-group seg-group" id="theme-choice" role="radiogroup" aria-label="Thème de l'application">

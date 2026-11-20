@@ -63,18 +63,15 @@ with Srv() as base, sync_playwright() as p:
             check("bilan du mois disponible : phrase sur le bilan d'octobre", 'bilan' in l and ('octobre' in l.lower()), l)
         ctx.close()
     br.close()
-# 1.7.80 : « Bienvenue ! » (à la place de « Bonjour, ») seulement au premier lancement (aucun programme, aucune séance), à gauche de la flèche
+# 1.8.62 : premier lancement = écran du prénom ; ensuite « Bonjour + prénom » (voir test_premier_lancement.py)
 with Srv() as url, sync_playwright() as p:
     br = p.chromium.launch()
     for w in (390, 360):
         ctx, pg, errs = newpage(br, w=w, seed=False)
         pg.goto(url + 'index.html'); pg.wait_for_timeout(500)
-        r = pg.evaluate("""(()=>{const g=document.querySelector('.prog-greet-welcome'),t=document.querySelector('.prog-empty-title');
-          if(!g) return null; const gr=g.getBoundingClientRect(),tr=t.getBoundingClientRect();
-          return {txt:g.innerText.replace(/\\s+/g,' '), libre:gr.bottom<=document.querySelector('.prog-empty-arrow').getBoundingClientRect().top /* 1.8.30 : petite flèche au-dessus du texte */, auDessus:gr.bottom<tr.top}})()""")
-        check(f"[{w}px] premier lancement : « Bienvenue ! » seul (pas de Bonjour), sans chevaucher la flèche ni le texte", r and r['txt'].strip() == 'Bienvenue !' and r['libre'] and r['auDessus'], r)
+        check(f"[{w}px] premier lancement : écran du prénom", pg.locator('#onb-name').count() == 1)
         pg.evaluate("state.history=[{id:1,date:'2026-10-01',type:'A',exercises:[],tonnage:0}]; renderProgramOverview(); 0"); pg.wait_for_timeout(200)
-        check(f"[{w}px] plus de programme mais un historique : pas de « Bienvenue »", pg.locator('.prog-greet-welcome').count() == 0)
+        check(f"[{w}px] plus de programme mais un historique : pas d'écran du prénom, « Bonjour »", pg.locator('#onb-name').count() == 0 and pg.locator('.prog-empty .prog-greet').count() == 1)
         check(f"[{w}px] aucune erreur JavaScript (écran vide)", not errs, errs)
         ctx.close()
     br.close()

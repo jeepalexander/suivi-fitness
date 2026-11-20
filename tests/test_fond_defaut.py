@@ -41,24 +41,19 @@ with Srv() as base, sync_playwright() as p:
     pg.goto(base + 'index.html'); pg.wait_for_timeout(900)
     check('usager existant avec Barre : inchangé', pg.evaluate("getWallpaper()") == 'barre')
     ctx.close()
-    # Écran de premier lancement (1.8.29) : texte en bas, couleur pleine, icône + dans le texte, petite flèche vers le bouton + (1.8.30)
+    # Écran d'aide après le prénom (1.8.62) : texte en bas, couleur pleine, icône + dans le texte
     for sch, (w, h) in (('light', (390, 844)), ('dark', (360, 667))):
         ctx, pg, errs = newpage(br, w=w, h=h, seed=False, pref=sch)
+        pg.add_init_script("localStorage.setItem('h49_user_name','Carine')")
         pg.goto(base + 'index.html'); pg.wait_for_timeout(1000)
         m = pg.evaluate("""() => { const r = s => document.querySelector(s).getBoundingClientRect();
-          const sc = document.getElementById('app-scroll'), cs = s => getComputedStyle(document.querySelector(s)).color;
-          return { gap: r('nav').top - r('.prog-empty-restore').bottom, scroll: sc.scrollHeight - sc.clientHeight,
-            sub: cs('.prog-empty-sub'), restore: cs('.prog-empty-restore'), title: cs('.prog-empty-title'),
-            icon: !!document.querySelector('.prog-empty-sub .prog-empty-plus svg'),
-            arrow: r('.prog-empty-arrow'), greet: r('.prog-greet-welcome').bottom, titleTop: r('.prog-empty-title').top,
-            btn: r('#add-program-btn') }; }""")
-        check(f'{sch} {w}×{h} : texte en bas (moins de 60 px au-dessus du menu), sans défilement', 0 <= m['gap'] < 60 and m['scroll'] <= 0, m)
-        check(f'{sch} : sous-titre et « Restaurer » de la couleur du titre (noir / blanc)', m['sub'] == m['title'] == m['restore'], m)
+          const sc = document.getElementById('app-scroll');
+          return { gap: r('nav').top - r('.prog-empty-sub').bottom, scroll: sc.scrollHeight - sc.clientHeight,
+            sub: getComputedStyle(document.querySelector('.prog-empty-sub')).color, text: getComputedStyle(document.body).color,
+            icon: !!document.querySelector('.prog-empty-sub .prog-empty-plus svg') }; }""")
+        check(f'{sch} {w}×{h} : texte en bas, 40 px de marge en plus au-dessus du menu (1.8.62), sans défilement', 60 <= m['gap'] < 90 and m['scroll'] <= 0, m)
+        check(f'{sch} : texte d\'aide de la couleur du texte', m['sub'] == m['text'], m)
         check(f'{sch} : icône + dans le texte', m['icon'])
-        a = m['arrow']
-        check(f'{sch} : petite flèche (≈ 3 cm) juste au-dessus du titre, sous « Bienvenue ! »',
-              120 <= a['height'] <= 180 and 0 <= m['titleTop'] - a['bottom'] <= 20 and a['top'] > m['greet'], a)
-        check(f'{sch} : flèche alignée sous le bouton +', a['left'] < m['btn']['left'] + m['btn']['width'] / 2 < a['right'] + 10, (a, m['btn']))
         check(f'{sch} : aucune erreur', not errs, errs)
         ctx.close()
     br.close()

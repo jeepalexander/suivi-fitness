@@ -1234,3 +1234,57 @@ body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 .exf-list.avoid li { display: flex; gap: 8px; }
 .exf-list.avoid li::before { content: '×'; color: var(--danger); font-weight: 700; }
 .ex-icon-badge img { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+
+/* 1.8.62 (co-auteur : Claude) : accueil du premier lancement, + qui clignote, « C'est parti » en vert, marges de l'accueil */
+body.onboarding #app-title, body.onboarding nav, body.onboarding #settings-btn { display: none; }
+.onb { min-height: calc(var(--app-h) - 120px); display: flex; flex-direction: column; justify-content: center; gap: 16px; }
+.onb-title { margin: 0 0 12px; font-family: var(--font-display); font-weight: 700; font-size: 2.625rem; line-height: 1.05; text-transform: uppercase; text-align: center; color: var(--text); }
+.onb-field, .name-field, .weight-pen, .recv-pen { flex: none; height: 52px; }
+.weight-pen { flex: 1; }
+.recv-pen { margin: 0 0 24px; } /* 1.8.62 : même champ que l'éditeur (pilule au gris inversé, texte à gauche, crayon) */
+.onb-field input, .name-field input, .weight-pen input, .recv-pen input { font-size: 1.0625rem; }
+.onb-btn:disabled { opacity: 0.4; box-shadow: none; }
+.hdr-btn-add.attention { animation: plusBlink 1.2s ease-in-out infinite; }
+/* anneau rouge rond autour du + (pseudo-élément, plus d'ombre animée : elle laissait un carré rouge sur Android) */
+.hdr-btn-add.attention::before { content: ''; position: absolute; inset: -9px; border: 5px solid var(--accent); border-radius: 50%; pointer-events: none; animation: plusRing 1.2s ease-out infinite; }
+@keyframes plusBlink { 50% { transform: scale(1.12); } }
+@keyframes plusRing { 0% { transform: scale(0.85); opacity: 1; } 100% { transform: scale(1.35); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .hdr-btn-add.attention, .hdr-btn-add.attention::before { animation: none; } }
+.prog-empty .prog-greet { position: absolute; top: 0; left: 0; margin-top: 8px; }
+.prog-empty-sub { margin-bottom: 40px; } /* 1.8.62 : texte d'aide remonté au-dessus du menu */
+.prog-greet-hello { overflow-wrap: anywhere; }
+.prog-sep { display: block; width: 50%; height: 0; margin: 16px auto 0; border: none; border-top: 1px solid var(--text-muted); opacity: 0.5; } /* 1.8.62 : demi-ligne entre « Tes autres programmes… » et l'astuce */
+.prog-hint { margin-bottom: 24px; }
+.prog-tile .btn-start { width: auto; height: 52px; padding: 0 24px; border-radius: 999px; background: var(--success); color: var(--on-success); box-shadow: 0 2px 2px rgba(11, 122, 67, 0.45), 0 7px 10px -3px rgba(11, 122, 67, 0.5); font-family: var(--font-body); font-size: 1.0625rem; font-weight: 700; }
+.recv-pen + .btn { margin-top: 0; } /* 1.8.62 : une seule marge sous le champ du lien */
+
+/* 1.8.63 : écran « Ajouter » (choix séance / programme) */
+.choose-head { font-family: var(--font-display); font-weight: 700; font-size: 1.75rem; line-height: 1.05; color: var(--text); }
+.choose-card:has(+ .choose-options) { margin-bottom: 0; }
+.choose-options { display: flex; flex-direction: column; gap: 4px; margin-top: 16px; }
+.choose-options .choose-recv { margin-top: 0; }
+.choose-recv svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.choose-recv:disabled { color: var(--text-muted); cursor: default; }
+.choose-soon { font-weight: 400; }
+/* 1.8.63 : cartes plus compactes pour que l'écran tienne sans défiler avec les trois options */
+body[data-pview="choose"] .ed-top { margin-bottom: 8px; }
+.choose-card { padding: 20px 20px 16px; gap: 6px; }
+.choose-card .choose-foot { margin-top: 4px; }
+.choose-options { gap: 0; margin-top: 8px; }
+.choose-card .choose-title { font-size: 1.75rem; }
+.choose-card .choose-text { line-height: 1.4; }
+.choose-card .btn-start { width: 52px; height: 52px; }
+.choose-card.libre .btn-start { width: 44px; height: 44px; }
+/* 1.8.63 : flèche de la carte « Un programme » : rond aux couleurs inverses de la carte (blanc sur la carte noire, noir sur la carte blanche) */
+.choose-card:not(.libre) .btn-start { background: var(--pill-ink); color: var(--pill-bg); box-shadow: none; }
+/* 1.8.63 : sur les deux cartes, pastilles A, B, ···, 1× et flèche au même diamètre (44 px) */
+.choose-card .type-pill, .choose-card .btn-start, .choose-card.libre .btn-start { width: 44px; height: 44px; }
+.choose-card .choose-swap svg { width: 24px; height: 24px; }
+/* 1.8.64 : écran « Ajouter », la flèche de « Un programme » retrouve une ombre */
+.choose-card:not(.libre) .btn-start { box-shadow: var(--sh-chip); }
+/* 1.8.64 : icône double flèche de la tuile programme active : fond de la tuile et liseré plein (même langage que le 1× en pointillés), pour ne pas passer pour un bouton */
+.prog-tile:not(.libre) .prog-ico { background: transparent; border: 2px solid var(--pill-ink); color: var(--pill-ink); }
+/* 1.8.64 : même icône double flèche (fond de la carte, liseré plein) sur la carte « Un programme », devant A, B, ··· ; et sur les tuiles « En mémoire » */
+.choose-card .choose-ico { width: 44px; height: 44px; background: transparent; border: 2px solid var(--pill-ink); color: var(--pill-ink); }
+.choose-card .choose-ico svg { width: 22px; height: 22px; }
+.mem-tile:not(.libre) .mem-ico { background: transparent; border: 2px solid var(--pill-ink); color: var(--pill-ink); }

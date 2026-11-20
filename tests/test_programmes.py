@@ -79,8 +79,8 @@ with Srv() as base, sync_playwright() as p:
     pg.click('#add-program-btn'); pg.wait_for_timeout(200)
     check('écran 4 : deux choix (programme / séance libre)', pg.locator('.choose-card').count() == 2)
     # 1.7.52 : « Recevoir un programme » sous les deux cartes ; l'ensemble reste calé au-dessus de la navigation
-    gap = pg.evaluate("document.querySelector('nav').getBoundingClientRect().top - document.querySelector('.choose-recv').getBoundingClientRect().bottom")
-    check('écran 4 : cartes et « Recevoir » alignés vers le bas, juste au-dessus de la navigation', 0 <= gap <= 60, f'{gap:.0f} px')
+    gap = pg.evaluate("document.querySelector('nav').getBoundingClientRect().top - [...document.querySelectorAll('.choose-recv')].pop().getBoundingClientRect().bottom")
+    check('écran 4 : cartes et options alignées vers le bas, juste au-dessus de la navigation (1.8.63)', 0 <= gap <= 60, f'{gap:.0f} px')
     pg.click('.choose-card:not(.libre)'); pg.wait_for_timeout(200)
     check('éditeur : 3 séances A, B, C par défaut', pg.evaluate("[...document.querySelectorAll('.ed-seg-btn:not(.ed-seg-op)')].map(b=>b.textContent).join('')") == 'ABC')
     pg.click('.ed-seg-op:not(.plus)'); pg.wait_for_timeout(100)
@@ -181,7 +181,7 @@ with Srv() as base, sync_playwright() as p:
     pg.evaluate("switchTab('programme')"); pg.wait_for_timeout(200)
     pg.click('.mem-tile:has-text("Sèche") .mem-btn'); pg.wait_for_timeout(300)
     lt = pg.inner_text('.mem-tile.libre')
-    check('séance libre remise en mémoire : « 2 exercices », bouton Activer, jamais « En pause » ni « Nouveau »', 'En pause' not in lt and 'Nouveau' not in lt and '2 exercices' in lt and 'Activer' in lt, lt)
+    check('séance libre remise en mémoire : « 2 exercices », bouton Réactiver (1.8.62), jamais « En pause » ni « Nouveau »', 'En pause' not in lt and 'Nouveau' not in lt and '2 exercices' in lt and 'Réactiver' in lt, lt)
 
     # ---------- 7. Appui long : modifier, supprimer (l'historique reste) ----------
     box = pg.locator('.mem-tile.libre').bounding_box()
@@ -262,11 +262,9 @@ with Srv() as base, sync_playwright() as p:
     # ---------- 12. Premier lancement (aucune donnée) ----------
     ctx, pg, errs = newpage(br, 390, 844, pref='light', seed=False)
     pg.goto(base + 'index.html'); pg.wait_for_timeout(900)
-    check('premier lancement : écran 1 « rien de prévu », lien Restaurer', 'rien de prévu au programme' in pg.inner_text('#program-overview') and pg.locator('.prog-empty-restore .link-btn').count() == 1)
+    check('premier lancement : écran du prénom (1.8.62)', pg.locator('#onb-name').count() == 1)
     check('premier lancement : aucun programme créé', state(pg).get('programs') == [])
-    pg.click('.prog-empty-restore .link-btn'); pg.wait_for_timeout(200)
-    check('Restaurer sans Google Drive : écran 2 « Se connecter à Google Drive »', 'Se connecter à Google Drive' in pg.inner_text('.sheet'))
-    pg.evaluate("closeSheet()")
+    pg.fill('#onb-name', 'Carine'); pg.click('#onb-continue'); pg.wait_for_timeout(200)
     pg.evaluate("switchTab('historique')"); pg.click('#tab-historique .backup-card .btn-secondary'); pg.wait_for_timeout(300)
     check('Historique « Restaurer » sans Drive : fenêtre « Restaurer une sauvegarde », seulement « Choisir un fichier… » et le lien de connexion', 'Restaurer une sauvegarde' in pg.inner_text('.sheet') and pg.locator('.sheet .backup-item.drive').count() == 0 and pg.locator('.sheet .backup-item.file').count() == 1 and 'Se connecter à Google Drive' in pg.inner_text('.sheet') and not pg.locator('#backup-restore-go').count())
     pg.click('.sheet .backup-item.file')

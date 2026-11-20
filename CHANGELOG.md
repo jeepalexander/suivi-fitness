@@ -7,6 +7,35 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.64] - 2026-11-20
+### 🔁 Icône du programme : même langage que le 1× (co-auteur : Claude)
+- L'icône double flèche des programmes (tuile active, tuiles « En mémoire », carte « Un programme » de l'écran « Ajouter ») prend le fond de sa tuile avec un liseré plein de la couleur du texte, comme le 1× en pointillés de la séance libre : elle ne passe plus pour un bouton.
+- Carte « Un programme » : la double flèche passe devant A, B, ··· (rond de 44 px) ; la flèche retrouve son ombre.
+
+---
+
+## [1.8.63] - 2026-11-20
+### ➕ Écran « Ajouter » refait, accueil corrigé (co-auteur : Claude)
+- Écran du bouton + : titre « Ajouter » derrière la flèche retour, plus de « Choisis comment t'entraîner ». « Une séance » d'abord (« Tu peux suivre la même séance à chaque fois, ou créer plusieurs séances différentes à réaliser selon tes envies. »), puis « Un programme » (« Plusieurs séances spécialisées qui tournent en boucle. Lancer le programme démarre automatiquement la bonne séance. »), sans sur-titres.
+- Dessous, trois options : « Restaurer un programme sauvegardé », « Recevoir un programme », « Avec notre aide (bientôt disponible) » (inactive).
+- Cartes plus compactes (titre 28 px) pour tenir sans défiler dès 360 px ; pastilles A, B, ···, 1× et flèches toutes à 44 px ; flèche de « Un programme » aux couleurs inverses de la carte (plus de rouge).
+- Accueil : texte d'aide remonté de 40 px ; le + clignote avec un anneau rouge rond plus visible (l'ombre animée laissait un carré rouge sur Android) ; un prénom long passe sous « Bonjour ».
+- Tests mis à jour : `test_choix_espace.py`, `test_partage.py`, `test_programmes.py`, `test_fond_defaut.py`, `test_premier_lancement.py` (36 contrôles).
+
+---
+
+## [1.8.62] - 2026-11-20
+### 👋 Nouvel accueil au premier lancement (co-auteur : Claude)
+- Premier lancement (ni prénom, ni programme, ni séance) : « Bienvenue sur Mon Carnet de Salle » en grand sur le fond d'écran, champ « Quel est ton nom ? » et bouton « Continuer », inactif tant que le prénom est vide. Ni menu, ni nom de l'app, ni bouton + sur cet écran.
+- Ensuite : « Bonjour + prénom » (ou Bonsoir) avec la phrase manuscrite, puis le texte d'aide en bas : « Pour créer ta première séance ou un programme complet… À toi de jouer ! ». Le bouton + clignote jusqu'au premier appui (`h49_plus_seen`), sans animation si le téléphone demande de réduire les animations.
+- Le prénom est gardé sur le téléphone seulement (`h49_user_name`, hors sauvegarde Drive) et se modifie dans Réglages › Ton prénom. Un usager qui a déjà des programmes ou des séances ne voit pas l'écran du prénom.
+- Accueil Programmes : demi-ligne entre « Tes autres programmes apparaîtront ici » et l'astuce ; l'astuce remonte de 24 px au-dessus du menu ; le bouton démarrer devient « C'est parti », en vert (programme et séance libre).
+- Une séance libre en mémoire déjà activée propose « Réactiver » au lieu de « Activer ».
+- Champs de saisie : même logique partout (pilule au gris inversé, sans ombre, texte à gauche, crayon) pour le prénom, la pesée et le lien d'un programme reçu.
+- Nouveau test `test_premier_lancement.py` (34 contrôles) ; tests du premier lancement, des marges et de la séance libre mis à jour.
+
+---
+
 ## [1.8.61] - 2026-11-19
 ### 🎨 Icônes : Tirage facial refait, Développé militaire arrondi en bas (co-auteur : Claude)
 - Tirage facial : refait depuis la photo d'origine ; la corde garde sa texture, le câble est redessiné en jaune à liseré noir et s'arrête au cercle (plus d'ancrage qui dépasse à droite) ; athlète recentrée.

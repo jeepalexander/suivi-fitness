@@ -45,10 +45,36 @@ function setProgramView(view) {
   if (scroller) scroller.scrollTop = 0;
 }
 
-// Bouton + de l'en-tête : seulement sur l'accueil de l'onglet Programme
+// 1.8.62 (co-auteur : Claude) : prénom de l'usager et premier usage du bouton +, gardés sur le téléphone seulement
+const USER_NAME_KEY = 'h49_user_name';
+const PLUS_SEEN_KEY = 'h49_plus_seen';
+function userName() { try { return (localStorage.getItem(USER_NAME_KEY) || '').trim(); } catch (e) { return ''; } }
+function setUserName(v) { try { const t = String(v || '').trim().slice(0, 30); if (t) localStorage.setItem(USER_NAME_KEY, t); else localStorage.removeItem(USER_NAME_KEY); } catch (e) {} }
+function plusSeen() { try { return localStorage.getItem(PLUS_SEEN_KEY) === '1'; } catch (e) { return true; } }
+// Premier lancement : ni prénom, ni programme, ni séance (un usager qui a déjà des données ne voit pas l'écran du prénom)
+function isOnboarding() {
+  const hist = (state && Array.isArray(state.history)) ? state.history : [];
+  return !userName() && !getPrograms().length && !hist.length;
+}
+function onboardingInput(el) { const b = document.getElementById('onb-continue'); if (b) b.disabled = !el.value.trim(); }
+function onboardingContinue(ev) {
+  if (ev) ev.preventDefault();
+  const el = document.getElementById('onb-name');
+  if (!el || !el.value.trim()) return;
+  setUserName(el.value);
+  renderProgramOverview();
+}
+
+// Bouton + de l'en-tête : seulement sur l'accueil de l'onglet Programme ; il clignote tant qu'il n'a jamais été touché
+// et qu'aucun programme n'existe (1.8.62)
 function updateProgramHeader() {
   const add = document.getElementById('add-program-btn');
-  if (add) add.style.display = (document.body.dataset.tab || 'programme') === 'programme' && programView === 'home' ? 'flex' : 'none';
+  const onb = (document.body.dataset.tab || 'programme') === 'programme' && programView === 'home' && isOnboarding();
+  document.body.classList.toggle('onboarding', onb);
+  if (add) {
+    add.style.display = (document.body.dataset.tab || 'programme') === 'programme' && programView === 'home' && !onb ? 'flex' : 'none';
+    add.classList.toggle('attention', !plusSeen() && !getPrograms().length);
+  }
 }
 
 // ============================================================
@@ -99,6 +125,7 @@ function renderProgramOverview() {
     html += `</div>`;
   } else {
     html += `<p class="mem-empty">Tes autres programmes apparaîtront ici</p>`;
+    html += `<hr class="prog-sep">`;
   }
   html += `<p class="prog-hint"><span class="prog-hint-ico">${INFO_SVG}</span>Astuce : Reste appuyé sur un programme pour entrer en mode édition</p>`; // 1.7.21 : (i) + « Astuce : »
   container.innerHTML = html;
@@ -108,6 +135,7 @@ function renderProgramOverview() {
 // Message d'accueil manuscrit (1.7.24, variantes en 1.7.78) : « Bonjour » ou « Bonsoir » selon l'heure, puis une phrase
 // selon le contexte. La première situation qui s'applique décide ; une variante est tirée par jour (la même toute la journée).
 const GREET = {
+  vide: ['On commence quand tu veux !', 'Première séance en vue ?', 'Tout commence ici.'],
   aucunActif: ["Choisis ton programme, et c'est parti !", 'Un programme à activer, et on y va ?', 'Réactive un programme pour reprendre.'],
   faite: ["Belle séance aujourd'hui. Place à la récup !", "Mission accomplie pour aujourd'hui !", 'Bien joué ! Repos et protéines.', 'Séance validée. Tes muscles te remercient.'],
   bilan: [m => `Ton bilan ${m.de} t'attend !`, m => `${m.Nom} est bouclé : jette un œil à ton bilan.`, m => `Ton bilan ${m.de} est prêt. Alors, ce mois ?`],
@@ -134,7 +162,9 @@ function programGreeting(active, now = new Date()) {
   const pick = list => list[day % list.length];
   const bilanKey = (typeof bilanPostitKey === 'function') ? bilanPostitKey() : null;
   let line;
-  if (!active) line = pick(GREET.aucunActif);
+  const progs = (typeof getPrograms === 'function') ? getPrograms() : [];
+  if (!progs.length) line = pick(GREET.vide); // 1.8.62 : rien encore créé
+  else if (!active) line = pick(GREET.aucunActif);
   else if (last === today) line = pick(GREET.faite);
   else if (bilanKey) {
     const nom = bilanMonthName(bilanKey);
@@ -144,26 +174,31 @@ function programGreeting(active, now = new Date()) {
   else if (!isLibre(active) && typeof checkDeloadStatus === 'function' && checkDeloadStatus()) line = pick(GREET.deload);
   else if (!hist.length) line = pick(GREET.premiere);
   else line = pick(GREET.motivation);
-  return { hello, line };
+  const nom = (typeof userName === 'function') ? userName() : '';
+  return { hello: nom ? `${hello} ${nom}` : hello, line };
 }
 
 function programGreetingHtml(active) {
   const g = programGreeting(active);
-  return `<p class="prog-greet"><span class="prog-greet-hello">${g.hello},</span><span class="prog-greet-line">${escapeHtml(g.line)}</span></p>`;
+  // 1.8.62 : prénom long (plus de 16 caractères avec « Bonjour ») : le prénom passe sous « Bonjour »
+  const nom = (typeof userName === 'function') ? userName() : '';
+  const hello = nom && g.hello.length > 16
+    ? `<span class="prog-greet-hello">${escapeHtml(g.hello.slice(0, g.hello.length - nom.length - 1))}</span><span class="prog-greet-hello prog-greet-name">${escapeHtml(nom)},</span>`
+    : `<span class="prog-greet-hello">${escapeHtml(g.hello)},</span>`;
+  return `<p class="prog-greet">${hello}<span class="prog-greet-line">${escapeHtml(g.line)}</span></p>`;
 }
 
 function emptyProgramsHtml() {
-  // 1.7.78–1.7.80 : premier lancement (aucun programme, aucune séance) : « Bienvenue ! » à la place de « Bonjour, ».
-  // 1.8.29 : le texte (en bas) montre l'icône du bouton + ; 1.8.30 : petite flèche manuscrite au-dessus du texte,
-  // vers le bouton + (environ 3 cm)
-  const hist = (state && Array.isArray(state.history)) ? state.history : [];
-  const welcome = hist.length ? '' : `<p class="prog-greet prog-greet-welcome"><span class="prog-greet-hello">Bienvenue !</span></p>`;
+  // 1.8.62 : premier lancement = écran du prénom ; ensuite « Bonjour + prénom », phrase manuscrite, texte d'aide en bas
+  if (isOnboarding()) return `
+    <form class="onb" onsubmit="onboardingContinue(event)">
+      <h1 class="onb-title">Bienvenue sur Mon Carnet de Salle</h1>
+      <label class="ed-field onb-field"><input id="onb-name" type="text" autocomplete="given-name" maxlength="30" placeholder="Quel est ton nom ?" aria-label="Quel est ton nom ?" oninput="onboardingInput(this)"><span class="ed-pen">${PEN_SVG}</span></label>
+      <button id="onb-continue" class="btn onb-btn" type="submit" disabled>Continuer</button>
+    </form>`;
   return `
-    <div class="prog-empty">${welcome}
-      <svg class="prog-empty-arrow" viewBox="0 0 200 230" aria-hidden="true"><path d="M8 214 C 78 208, 146 168, 154 20"/><path d="M141 36 L 154 18 L 165 37"/></svg>
-      <p class="prog-empty-title">Tu n'as pour l'instant rien de prévu au programme.</p>
-      <p class="prog-empty-sub">Clique sur le bouton <span class="prog-empty-plus" role="img" aria-label="+"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span> pour en créer un&nbsp;!</p>
-      <p class="prog-empty-restore">Tu as déjà un programme sauvegardé ? <button type="button" class="link-btn" onclick="openProgramRestore()">Restaurer</button></p>
+    <div class="prog-empty">${programGreetingHtml(null)}
+      <p class="prog-empty-sub">Pour créer ta première séance ou un programme complet, de toi-même ou avec notre aide, clique sur le bouton <span class="prog-empty-plus" role="img" aria-label="+"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span> en haut à droite. Tu pourras aussi y recevoir un programme d'un ami, ou récupérer tes anciens programmes. À toi de jouer&nbsp;!</p>
     </div>`;
 }
 
@@ -192,7 +227,7 @@ function activeTileHtml(p) {
       ${middle}
       <div class="next-card-row prog-tile-foot">
         <button type="button" class="prog-detail-btn" aria-expanded="${programDetailOpen}" onclick="toggleProgramDetail()">${programDetailOpen ? '- de détail' : '+ de détail'}</button>
-        <button type="button" class="btn-start${libre ? ' libre' : ''}" aria-label="Démarrer la séance" onclick="switchTab('seance')">${ARROW_SVG}</button>
+        <button type="button" class="btn-start${libre ? ' libre' : ''}" aria-label="Démarrer la séance" onclick="switchTab('seance')">C'est parti</button>
       </div>
     </div>`;
 }
@@ -248,7 +283,7 @@ function memSubHtml(p) {
 
 function memTileHtml(p) {
   const libre = isLibre(p);
-  const label = !libre && p.status === 'paused' ? 'Réactiver' : 'Activer';
+  const label = (p.status === 'paused' || (libre && p.activatedAt)) ? 'Réactiver' : 'Activer'; // 1.8.62 : séance libre déjà activée
   return `
     <div class="mem-tile${libre ? ' libre' : ''}" data-lp="${escapeHtml(p.id)}">
       <span class="mem-ico">${libre ? '1×' : SWAP_SVG}</span>
@@ -312,33 +347,38 @@ async function pauseActiveProgram() {
 // 4. CHOIX : PROGRAMME OU SÉANCE LIBRE (écran 4)
 // ============================================================
 function openProgramChooser() {
+  try { localStorage.setItem(PLUS_SEEN_KEY, '1'); } catch (e) {} // 1.8.62 : le + ne clignote plus
   setProgramView('choose');
 }
 
+// 1.8.63 (co-auteur : Claude) : « Ajouter » derrière la flèche, séance d'abord, programme ensuite, puis trois options
+const RESTORE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 8v4l3 2"/></svg>';
+const AIDE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>';
 function chooserHtml() {
   return `
-    <div class="ed-top"><button type="button" class="ed-back" aria-label="Retour" onclick="setProgramView('home')">${BACK_SVG}</button></div>
+    <div class="ed-top"><button type="button" class="ed-back" aria-label="Retour" onclick="setProgramView('home')">${BACK_SVG}</button><span class="choose-head">Ajouter</span></div>
     <div class="prog-spacer" aria-hidden="true"></div>
-    <p class="choose-lead">Choisis comment t'entraîner</p>
-    <button type="button" class="choose-card" onclick="startProgramEditor('program')">
-      <span class="choose-over">Séances qui reviennent</span>
-      <span class="choose-title">Créer un programme</span>
-      <span class="choose-text">Tes séances tournent en boucle. L'app te propose toujours la suivante.</span>
-      <span class="choose-foot">
-        <span class="choose-pills"><span class="type-pill type-pill-A small">A</span><span class="type-pill type-pill-B small">B</span><span class="type-pill choose-more small">···</span><span class="choose-swap">${SWAP_SVG}</span></span>
-        <span class="btn-start" aria-hidden="true">${ARROW_SVG}</span>
-      </span>
-    </button>
     <button type="button" class="choose-card libre" onclick="startProgramEditor('libre')">
-      <span class="choose-over">Une seule fois</span>
-      <span class="choose-title">Séance libre</span>
-      <span class="choose-text">Une séance isolée, sans récurrence. Elle rejoint l'historique, rien de plus.</span>
+      <span class="choose-title">Une séance</span>
+      <span class="choose-text">Tu peux suivre la même séance à chaque fois, ou créer plusieurs séances différentes à réaliser selon tes envies.</span>
       <span class="choose-foot">
         <span class="type-pill type-pill-libre">1×</span>
         <span class="btn-start libre" aria-hidden="true">${ARROW_SVG}</span>
       </span>
     </button>
-    ${receiveProgramButtonHtml()}`;
+    <button type="button" class="choose-card" onclick="startProgramEditor('program')">
+      <span class="choose-title">Un programme</span>
+      <span class="choose-text">Plusieurs séances spécialisées qui tournent en boucle. Lancer le programme démarre automatiquement la bonne séance.</span>
+      <span class="choose-foot">
+        <span class="choose-pills"><span class="prog-ico choose-ico">${SWAP_SVG}</span><span class="type-pill type-pill-A small">A</span><span class="type-pill type-pill-B small">B</span><span class="type-pill choose-more small">···</span></span>
+        <span class="btn-start" aria-hidden="true">${ARROW_SVG}</span>
+      </span>
+    </button>
+    <div class="choose-options">
+      <button type="button" class="choose-recv" onclick="openProgramRestore()">${RESTORE_SVG}Restaurer un programme sauvegardé</button>
+      ${receiveProgramButtonHtml()}
+      <button type="button" class="choose-recv" disabled aria-disabled="true">${AIDE_SVG}Avec notre aide <span class="choose-soon">(bientôt disponible)</span></button>
+    </div>`;
 }
 
 // ============================================================
