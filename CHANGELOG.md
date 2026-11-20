@@ -7,6 +7,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.74] - 2026-11-20
+### 🎬 Film d'accueil plus net (co-auteur : Claude)
+- Film réencodé avec bien moins de compression (H.264 « high », CRF 16, préréglage lent) : 1,5 Mo au lieu de 290 Ko, à l'œil identique au film d'origine (SSIM 0,994 au lieu de 0,984 ; plus d'aplats ni de bandes dans le fond sombre). Il reste chargé une seule fois, au premier lancement, hors du cache.
+
+---
+
 ## [1.8.73] - 2026-11-20
 ### 🎬 Film d'accueil, suite (co-auteur : Claude)
 - Écran du prénom : « Bienvenue sur » en manuscrit puis MON CARNET DE SALLE en haut de l'écran, pour laisser voir le visage ; champ du prénom et flèche « Continuer » sur une même ligne, à la hauteur des haltères de l'image (calés sur l'image, quelle que soit la taille de l'écran) ; flèche grisée tant que le prénom est vide.
@@ -20,7 +26,7 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ### 🎬 Film d'accueil au premier lancement (co-auteur : Claude)
 - Après « Continuer » sur l'écran du prénom, un film de 5 s se joue une seule fois, à la place du fond d'écran et sous le voile habituel ; « Bonjour + prénom » apparaît pendant sa dernière seconde, puis le menu, le + et le texte d'aide (fondu de 0,4 s).
 - L'écran du prénom montre la première image du film ; la dernière image devient le fond « Bienvenue » (Réglages › Fond d'écran, ambiance de salle), fond par défaut des nouveaux usagers à la place de « Râtelier ».
-- Le film (`wallpapers/intro.mp4`, 290 Ko, H.264 sans son) passe par le réseau, hors du cache du service worker ; s'il ne se lance pas, ou avec un autre fond, « Bonjour » s'affiche tout de suite.
+- Le film (`wallpapers/intro.mp4`, 290 Ko en 1.8.72, 1,5 Mo depuis la 1.8.74, H.264 sans son) passe par le réseau, hors du cache du service worker ; s'il ne se lance pas, ou avec un autre fond, « Bonjour » s'affiche tout de suite.
 - Crédits : création générée avec Artlist à partir de photos générées avec Manus (`credits.html`, `NOTICE`).
 
 ---
