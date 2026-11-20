@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.72] - 2026-11-20
+### 🎬 Film d'accueil au premier lancement (co-auteur : Claude)
+- Après « Continuer » sur l'écran du prénom, un film de 5 s se joue une seule fois, à la place du fond d'écran et sous le voile habituel ; « Bonjour + prénom » apparaît pendant sa dernière seconde, puis le menu, le + et le texte d'aide (fondu de 0,4 s).
+- L'écran du prénom montre la première image du film ; la dernière image devient le fond « Bienvenue » (Réglages › Fond d'écran, ambiance de salle), fond par défaut des nouveaux usagers à la place de « Râtelier ».
+- Le film (`wallpapers/intro.mp4`, 290 Ko, H.264 sans son) passe par le réseau, hors du cache du service worker ; s'il ne se lance pas, ou avec un autre fond, « Bonjour » s'affiche tout de suite.
+- Crédits : création générée avec Artlist à partir de photos générées avec Manus (`credits.html`, `NOTICE`).
+
+---
+
 ## [1.8.71] - 2026-11-20
 ### 🖼️ Lien « Crédits des images » dans les Réglages (co-auteur : Claude)
 - **Réglages › Application** : « Crédits des images » s'ajoute après « Règles de confidentialité · Conditions d'utilisation », même style de lien souligné ; il ouvre la page `credits.html` dans le navigateur. La ligne passe sur deux lignes à 390 et 360 px (prototype validé le 20 novembre 2026).

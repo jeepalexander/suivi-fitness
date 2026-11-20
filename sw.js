@@ -4,7 +4,7 @@
 // APP_VERSION doit être incrémenté à chaque release (en même temps que
 // manifest.json) : le navigateur ne réinstalle le service worker que si
 // le contenu de ce fichier change.
-const APP_VERSION = '1.8.71';
+const APP_VERSION = '1.8.72';
 // 1.7.64 (co-auteur : Claude) : production (…/suivi-fitness/) et test (…/suivi-fitness/dev/) sont sur le même
 // domaine et partagent le stockage des caches : chaque version nomme ses caches d'après son dossier et ne
 // supprime que les siens (plus les anciens caches sans dossier, d'avant la 1.7.64).
@@ -41,6 +41,9 @@ const ASSETS = [
   './wallpapers/halteres-mini.jpg',
   './wallpapers/kettlebell.jpg',
   './wallpapers/kettlebell-mini.jpg',
+  './wallpapers/bienvenue.jpg',
+  './wallpapers/bienvenue-mini.jpg',
+  './wallpapers/intro-debut.jpg',
   './wallpapers/ratelier.jpg',
   './wallpapers/ratelier-mini.jpg',
   './wallpapers/squat.jpg',
@@ -183,6 +186,8 @@ self.addEventListener('fetch', (event) => {
     if (u.origin !== self.location.origin) return;
     // la version de test (dossier dev/) a son propre service worker : la production ne s'en mêle pas
     if (u.pathname.startsWith(SCOPE_PATH + 'dev/')) return;
+    // 1.8.72 : le film d'accueil (lu une seule fois, par plages d'octets) passe par le réseau, hors cache : Safari refuse une vidéo servie en entier depuis le cache
+    if (u.pathname.endsWith('.mp4')) return;
   } catch (e) { return; }
   event.respondWith(
     caches.open(CACHE_NAME).then((cache) =>

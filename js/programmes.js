@@ -64,7 +64,48 @@ function onboardingContinue(ev) {
   setUserName(el.value);
   // 1.8.65 : nouveau départ = le + clignote de nouveau (le drapeau peut rester d'un essai précédent, ou de la version de test qui partage le stockage)
   try { localStorage.removeItem(PLUS_SEEN_KEY); } catch (e) {}
-  renderProgramOverview();
+  if (!playIntroFilm()) renderProgramOverview();
+}
+
+// 1.8.72 (co-auteur : Claude) : film d'accueil entre le prénom validé et « Bonjour + prénom », une seule fois.
+// Il se joue à la place du fond « Bienvenue », sous le voile habituel : l'écran du prénom montre sa première image,
+// le fond « Bienvenue » est sa dernière image. « Bonjour + prénom » apparaît pendant la dernière seconde ;
+// le menu, le + et le texte d'aide apparaissent à la fin. Sans le fond « Bienvenue », ou si le film ne se lance pas : « Bonjour » direct.
+const INTRO_FILM = 'wallpapers/intro.mp4';
+function playIntroFilm() {
+  const wp = document.getElementById('app-wallpaper');
+  if (!wp || getWallpaper() !== 'bienvenue' || !document.createElement('video').canPlayType) return false;
+  const v = document.createElement('video');
+  v.className = 'intro-video';
+  v.muted = true; v.defaultMuted = true; v.playsInline = true;
+  v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('aria-hidden', 'true');
+  v.preload = 'auto'; v.poster = 'wallpapers/intro-debut.jpg'; v.src = INTRO_FILM;
+  document.body.classList.add('intro');
+  wp.appendChild(v);
+  let greeted = false, done = false, timer = null;
+  const greet = () => {
+    if (greeted) return;
+    greeted = true;
+    document.body.classList.add('intro-end');
+    renderProgramOverview();
+  };
+  const end = () => {
+    if (done) return;
+    done = true;
+    clearTimeout(timer);
+    greet();
+    document.body.classList.remove('intro', 'intro-end');
+    document.body.classList.add('intro-reveal');
+    v.remove();
+    setTimeout(() => document.body.classList.remove('intro-reveal'), 600);
+  };
+  v.addEventListener('timeupdate', () => { if (v.duration && v.currentTime >= v.duration - 1) greet(); });
+  v.addEventListener('ended', end);
+  v.addEventListener('error', end);
+  timer = setTimeout(end, 9000);   // filet : le film dure 5,2 s
+  const pr = v.play();
+  if (pr && pr.catch) pr.catch(end);
+  return true;
 }
 
 // Bouton + de l'en-tête : seulement sur l'accueil de l'onglet Programme ; il clignote tant qu'il n'a jamais été touché

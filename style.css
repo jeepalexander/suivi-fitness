@@ -1013,6 +1013,7 @@ body:not([data-tab="programme"]) #app-wallpaper::after, body[data-pview="editor"
 :root[data-wallpaper="barre"] #app-wallpaper { background-image: url('wallpapers/barre.jpg'); background-position: center 55%; }
 :root[data-wallpaper="halteres"] #app-wallpaper { background-image: url('wallpapers/halteres.jpg'); background-position: center 45%; }
 :root[data-wallpaper="kettlebell"] #app-wallpaper { background-image: url('wallpapers/kettlebell.jpg'); background-position: center 45%; }
+:root[data-wallpaper="bienvenue"] #app-wallpaper { background-image: url('wallpapers/bienvenue.jpg'); background-position: center center; } /* 1.8.72 */
 :root[data-wallpaper="ratelier"] #app-wallpaper { background-image: url('wallpapers/ratelier.jpg'); background-position: center 60%; }
 :root[data-wallpaper="squat"] #app-wallpaper { background-image: url('wallpapers/squat.jpg'); background-position: center 40%; }
 :root[data-wallpaper="poigne"] #app-wallpaper { background-image: url('wallpapers/poigne.jpg'); background-position: center 40%; }
@@ -1304,3 +1305,13 @@ body[data-pview="choose"] .ed-top { margin-bottom: 8px; }
 .scope-pause { font-weight: 600; color: var(--warn); }
 .stats-scope .scope-pause { color: var(--inv-warn); }
 .restore-when .prog-dot { display: inline-block; vertical-align: middle; margin: -2px 8px 0 0; }
+/* 1.8.72 (co-auteur : Claude) : film d'accueil (premier lancement, entre le prénom et « Bonjour + prénom »).
+   L'écran du prénom montre la première image du film ; le film se joue dans le calque du fond, sous le voile ;
+   « Bonjour + prénom » apparaît pendant la dernière seconde ; le reste apparaît à la fin (fondu de 0,4 s). */
+:root[data-wallpaper="bienvenue"] body.onboarding #app-wallpaper, :root[data-wallpaper="bienvenue"] body.intro #app-wallpaper { background-image: url('wallpapers/intro-debut.jpg'); }
+#app-wallpaper .intro-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+body.intro .onb, body.intro #app-title, body.intro nav, body.intro #add-program-btn, body.intro #settings-btn, body.intro .prog-empty-sub, body.intro .prog-sep { visibility: hidden; }
+body.intro:not(.intro-end) .prog-greet { visibility: hidden; }
+body.intro-end .prog-greet { animation: introFade 0.8s ease-out both; }
+body.intro-reveal #app-title, body.intro-reveal nav, body.intro-reveal #add-program-btn, body.intro-reveal .prog-empty-sub { animation: introFade 0.4s ease-out both; }
+@keyframes introFade { from { opacity: 0; } to { opacity: 1; } }

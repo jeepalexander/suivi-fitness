@@ -19,6 +19,12 @@ with Srv() as base, sync_playwright() as p:
         pg.fill('#onb-name', '   '); check(f'[{scheme}] espaces seuls : « Continuer » reste inactif', pg.is_disabled('#onb-continue'))
         pg.fill('#onb-name', 'Carine'); check(f'[{scheme}] prénom saisi : « Continuer » actif', not pg.is_disabled('#onb-continue'))
         pg.press('#onb-name', 'Enter'); pg.wait_for_timeout(300)
+        # 1.8.72 : film d'accueil (fond « Bienvenue ») : première image sur l'écran du prénom, film sous le voile, « Bonjour » pendant la dernière seconde
+        check(f'[{scheme}] film d\'accueil : il se joue dans le calque du fond, menu et texte d\'aide cachés', pg.evaluate("(()=>{const v=document.querySelector('#app-wallpaper .intro-video');return !!v && !v.paused && document.body.classList.contains('intro')})()") and not pg.is_visible('nav'))
+        [pg.wait_for_timeout(100) for _ in range(80) if not pg.evaluate("document.body.classList.contains('intro-end')")]
+        check(f'[{scheme}] film : « Bonjour + prénom » visible pendant la fin, le reste caché', pg.is_visible('.prog-empty .prog-greet') and not pg.is_visible('.prog-empty-sub') and not pg.is_visible('nav'))
+        [pg.wait_for_timeout(100) for _ in range(80) if pg.evaluate("!!document.querySelector('.intro-video')")]; pg.wait_for_timeout(600)
+        check(f'[{scheme}] fin du film : fond « Bienvenue » (dernière image), classes retirées', pg.evaluate("getWallpaper()") == 'bienvenue' and 'bienvenue.jpg' in pg.evaluate("getComputedStyle(document.getElementById('app-wallpaper')).backgroundImage") and not pg.evaluate("/intro/.test(document.body.className)"))
         check(f'[{scheme}] prénom gardé sur le téléphone, hors sauvegarde', pg.evaluate("localStorage.getItem('h49_user_name')") == 'Carine' and 'Carine' not in pg.evaluate("localStorage.getItem('h49_state')||''"))
         g = pg.inner_text('.prog-empty .prog-greet')
         check(f'[{scheme}] « Bonjour Carine, » (ou Bonsoir) et phrase manuscrite', ('Bonjour Carine' in g or 'Bonsoir Carine' in g) and len(g.split('\n')) >= 2, g)
@@ -54,7 +60,7 @@ with Srv() as base, sync_playwright() as p:
     ctx, pg, errs = newpage(br, 390, 844, seed=False)
     pg.add_init_script("if(!sessionStorage.getItem('pv')){localStorage.setItem('h49_plus_seen','1');sessionStorage.setItem('pv','1')}")
     pg.goto(base + 'index.html'); pg.wait_for_timeout(800)
-    pg.fill('#onb-name', 'Carine'); pg.click('#onb-continue'); pg.wait_for_timeout(300)
+    pg.fill('#onb-name', 'Carine'); pg.click('#onb-continue'); pg.wait_for_timeout(6500)   # 1.8.72 : après le film d'accueil
     check('ancien drapeau « + vu » : le + clignote quand même après le prénom', pg.evaluate("getComputedStyle(document.getElementById('add-program-btn')).animationName") == 'plusBlink')
     ctx.close()
     # Usager existant sans prénom : rien ne change

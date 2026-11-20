@@ -36,7 +36,7 @@ def main():
         miss = pg.evaluate("""(()=>{const css=[...document.styleSheets].flatMap(s=>{try{return [...s.cssRules].map(r=>r.cssText)}catch(e){return []}}).join(' ');
           const idx=document.documentElement.outerHTML;return WALLPAPERS.filter(w=>w.id!=='none').filter(w=>!css.includes('data-wallpaper="'+w.id+'"')||!new RegExp('[(|]'+w.id+'[|)]').test(idx)).map(w=>w.id)})()""")
         check("1.7.94 : chaque fond a sa règle CSS et son entrée dans le script de démarrage", not miss, miss)
-        check("17 choix (16 images rangées par style + Aucun), « Aucun » coché (1.7.94, Slam ball en 1.8.38 ; Course, Cuivre, Silhouette, Escaliers retirés en 1.8.70)", len(opts) == 17 and [o[0] for o in opts] == ['frontsquat', 'salle', 'halteres', 'barre', 'kettlebell', 'ratelier', 'suspension', 'wod', 'cordes', 'fente', 'squat', 'poigne', 'disques', 'rack', 'slamball', 'geometrie', 'none']
+        check("18 choix (17 images rangées par style + Aucun), « Aucun » coché (1.7.94, Slam ball en 1.8.38 ; Course, Cuivre, Silhouette, Escaliers retirés en 1.8.70 ; Bienvenue en 1.8.72)", len(opts) == 18 and [o[0] for o in opts] == ['frontsquat', 'salle', 'halteres', 'barre', 'kettlebell', 'bienvenue', 'ratelier', 'suspension', 'wod', 'cordes', 'fente', 'squat', 'poigne', 'disques', 'rack', 'slamball', 'geometrie', 'none']
               and opts[-1][1] == 'true' and sum(o[1] == 'true' for o in opts) == 1, opts)
         # 1.7.55 : 17 vignettes (19 depuis la 1.7.94) en chargement différé ; on fait défiler la rangée jusqu'au bout pour toutes les charger
         pg.evaluate("document.getElementById('wallpaper-grid').scrollTo(0, 0)"); pg.wait_for_timeout(200)
@@ -44,7 +44,7 @@ def main():
             pg.evaluate("document.getElementById('wallpaper-grid').scrollBy(200, 0)"); pg.wait_for_timeout(120)
         pg.wait_for_timeout(500)
         thumbs = pg.evaluate("[...document.querySelectorAll('#wallpaper-grid img')].map(i=>[i.getAttribute('src'),i.complete&&i.naturalWidth>0])")
-        check("les 16 vignettes se chargent", len(thumbs) == 16 and all(ok for _, ok in thumbs), thumbs)
+        check("les 17 vignettes se chargent", len(thumbs) == 17 and all(ok for _, ok in thumbs), thumbs)
         pg.evaluate("document.getElementById('wallpaper-grid').scrollTo(0, 0)")
         if shots: pg.screenshot(path=str(SHOTS / 'fond_grille_aucun.png'))
 
@@ -99,8 +99,8 @@ def main():
 
         sw = (REPO / 'sw.js').read_text(encoding='utf-8')
         check("les 32 images sont mises en cache par le service worker (hors connexion)",
-              all(f"'./wallpapers/{k}{s}.jpg'" in sw for k in ['frontsquat', 'salle', 'halteres', 'barre', 'kettlebell', 'ratelier', 'suspension', 'wod', 'cordes', 'fente', 'squat', 'poigne', 'disques', 'rack', 'slamball', 'geometrie'] for s in ['', '-mini'])
-              and all((REPO / 'wallpapers' / f'{k}{s}.jpg').exists() for k in ['frontsquat', 'salle', 'halteres', 'barre', 'kettlebell', 'ratelier', 'suspension', 'wod', 'cordes', 'fente', 'squat', 'poigne', 'disques', 'rack', 'slamball', 'geometrie'] for s in ['', '-mini']))
+              all(f"'./wallpapers/{k}{s}.jpg'" in sw for k in ['frontsquat', 'salle', 'halteres', 'barre', 'kettlebell', 'bienvenue', 'ratelier', 'suspension', 'wod', 'cordes', 'fente', 'squat', 'poigne', 'disques', 'rack', 'slamball', 'geometrie'] for s in ['', '-mini'])
+              and all((REPO / 'wallpapers' / f'{k}{s}.jpg').exists() for k in ['frontsquat', 'salle', 'halteres', 'barre', 'kettlebell', 'bienvenue', 'ratelier', 'suspension', 'wod', 'cordes', 'fente', 'squat', 'poigne', 'disques', 'rack', 'slamball', 'geometrie'] for s in ['', '-mini']))
         sw_gone = [k for k in ['course', 'cuivre', 'silhouette', 'escaliers'] if f"'./wallpapers/{k}" in sw or (REPO / 'wallpapers' / f'{k}.jpg').exists()]
         check("1.8.70 : Course, Cuivre, Silhouette et Escaliers retirés (fichiers et cache)", not sw_gone, sw_gone)
         pg.evaluate("localStorage.setItem('h49_wallpaper','cuivre')"); pg.reload(); pg.wait_for_timeout(600)

@@ -18,12 +18,12 @@ with Srv() as base, sync_playwright() as p:
     # 1. Nouvel usager : ni données ni fond
     ctx, pg, errs = newpage(br, seed=False)
     pg.goto(base + 'index.html'); pg.wait_for_timeout(900)
-    check('nouvel usager : fond Râtelier', pg.evaluate("getWallpaper()") == 'ratelier' and pg.evaluate(WP) == 'ratelier',
+    check('nouvel usager : fond Bienvenue (1.8.72)', pg.evaluate("getWallpaper()") == 'bienvenue' and pg.evaluate(WP) == 'bienvenue',
           (pg.evaluate("getWallpaper()"), pg.evaluate(WP)))
     check('image affichée', pg.evaluate("getComputedStyle(document.getElementById('app-wallpaper')).display") != 'none')
     pg.evaluate("switchTab('fond')"); pg.wait_for_timeout(200)
-    check('Réglages › Fond d\'écran : Râtelier coché',
-          pg.get_attribute('.wallpaper-opt[data-wallpaper="ratelier"]', 'aria-checked') == 'true')
+    check('Réglages › Fond d\'écran : Bienvenue coché',
+          pg.get_attribute('.wallpaper-opt[data-wallpaper="bienvenue"]', 'aria-checked') == 'true')
     # « Aucun » choisi : retenu après relance
     pg.click('.wallpaper-opt[data-wallpaper="none"]'); pg.wait_for_timeout(200)
     pg.reload(); pg.wait_for_timeout(700)
