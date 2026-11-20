@@ -370,7 +370,7 @@ function chooserHtml() {
       <span class="choose-title">Un programme</span>
       <span class="choose-text">Plusieurs séances spécialisées qui tournent en boucle. Lancer le programme démarre automatiquement la bonne séance.</span>
       <span class="choose-foot">
-        <span class="choose-pills"><span class="type-pill type-pill-A small">A</span><span class="type-pill type-pill-B small">B</span><span class="type-pill choose-more small">···</span><span class="choose-swap">${SWAP_SVG}</span></span>
+        <span class="choose-pills"><span class="prog-ico choose-ico">${SWAP_SVG}</span><span class="type-pill type-pill-A small">A</span><span class="type-pill type-pill-B small">B</span><span class="type-pill choose-more small">···</span></span>
         <span class="btn-start" aria-hidden="true">${ARROW_SVG}</span>
       </span>
     </button>

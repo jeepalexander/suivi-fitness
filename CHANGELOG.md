@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.64] - 2026-11-20
+### 🔁 Icône du programme : même langage que le 1× (co-auteur : Claude)
+- L'icône double flèche des programmes (tuile active, tuiles « En mémoire », carte « Un programme » de l'écran « Ajouter ») prend le fond de sa tuile avec un liseré plein de la couleur du texte, comme le 1× en pointillés de la séance libre : elle ne passe plus pour un bouton.
+- Carte « Un programme » : la double flèche passe devant A, B, ··· (rond de 44 px) ; la flèche retrouve son ombre.
+
+---
+
 ## [1.8.63] - 2026-11-20
 ### ➕ Écran « Ajouter » refait, accueil corrigé (co-auteur : Claude)
 - Écran du bouton + : titre « Ajouter » derrière la flèche retour, plus de « Choisis comment t'entraîner ». « Une séance » d'abord (« Tu peux suivre la même séance à chaque fois, ou créer plusieurs séances différentes à réaliser selon tes envies. »), puis « Un programme » (« Plusieurs séances spécialisées qui tournent en boucle. Lancer le programme démarre automatiquement la bonne séance. »), sans sur-titres.

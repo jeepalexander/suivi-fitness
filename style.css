@@ -1280,3 +1280,11 @@ body[data-pview="choose"] .ed-top { margin-bottom: 8px; }
 /* 1.8.63 : sur les deux cartes, pastilles A, B, ···, 1× et flèche au même diamètre (44 px) */
 .choose-card .type-pill, .choose-card .btn-start, .choose-card.libre .btn-start { width: 44px; height: 44px; }
 .choose-card .choose-swap svg { width: 24px; height: 24px; }
+/* 1.8.64 : écran « Ajouter », la flèche de « Un programme » retrouve une ombre */
+.choose-card:not(.libre) .btn-start { box-shadow: var(--sh-chip); }
+/* 1.8.64 : icône double flèche de la tuile programme active : fond de la tuile et liseré plein (même langage que le 1× en pointillés), pour ne pas passer pour un bouton */
+.prog-tile:not(.libre) .prog-ico { background: transparent; border: 2px solid var(--pill-ink); color: var(--pill-ink); }
+/* 1.8.64 : même icône double flèche (fond de la carte, liseré plein) sur la carte « Un programme », devant A, B, ··· ; et sur les tuiles « En mémoire » */
+.choose-card .choose-ico { width: 44px; height: 44px; background: transparent; border: 2px solid var(--pill-ink); color: var(--pill-ink); }
+.choose-card .choose-ico svg { width: 22px; height: 22px; }
+.mem-tile:not(.libre) .mem-ico { background: transparent; border: 2px solid var(--pill-ink); color: var(--pill-ink); }
