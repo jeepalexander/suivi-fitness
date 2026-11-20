@@ -1010,7 +1010,6 @@ body[data-pview="choose"] .prog-spacer { min-height: 0; }
    autres onglets (1.7.13) et éditeur de programme (1.7.15) : 100/95/76/100 % à 0/30/72/100 %. Mêmes opacités en noir pour le thème sombre. */
 body:not([data-tab="programme"]) #app-wallpaper::after, body[data-pview="editor"] #app-wallpaper::after { background: var(--veil-page); }
 :root[data-wallpaper] #app-wallpaper { display: block; }
-:root[data-wallpaper="course"] #app-wallpaper { background-image: url('wallpapers/course.jpg'); background-position: center 30%; }
 :root[data-wallpaper="barre"] #app-wallpaper { background-image: url('wallpapers/barre.jpg'); background-position: center 55%; }
 :root[data-wallpaper="halteres"] #app-wallpaper { background-image: url('wallpapers/halteres.jpg'); background-position: center 45%; }
 :root[data-wallpaper="kettlebell"] #app-wallpaper { background-image: url('wallpapers/kettlebell.jpg'); background-position: center 45%; }
@@ -1018,15 +1017,12 @@ body:not([data-tab="programme"]) #app-wallpaper::after, body[data-pview="editor"
 :root[data-wallpaper="squat"] #app-wallpaper { background-image: url('wallpapers/squat.jpg'); background-position: center 40%; }
 :root[data-wallpaper="poigne"] #app-wallpaper { background-image: url('wallpapers/poigne.jpg'); background-position: center 40%; }
 :root[data-wallpaper="disques"] #app-wallpaper { background-image: url('wallpapers/disques.jpg'); background-position: center 50%; }
-:root[data-wallpaper="cuivre"] #app-wallpaper { background-image: url('wallpapers/cuivre.jpg'); background-position: center 50%; }
 :root[data-wallpaper="geometrie"] #app-wallpaper { background-image: url('wallpapers/geometrie.jpg'); background-position: center 50%; }
 :root[data-wallpaper="salle"] #app-wallpaper { background-image: url('wallpapers/salle.jpg'); background-position: right center; }
 :root[data-wallpaper="cordes"] #app-wallpaper { background-image: url('wallpapers/cordes.jpg'); background-position: center 50%; }
 :root[data-wallpaper="fente"] #app-wallpaper { background-image: url('wallpapers/fente.jpg'); background-position: 45% center; }
 :root[data-wallpaper="rack"] #app-wallpaper { background-image: url('wallpapers/rack.jpg'); background-position: center 50%; }
 :root[data-wallpaper="slamball"] #app-wallpaper { background-image: url('wallpapers/slamball.jpg'); background-position: center 45%; } /* 1.8.38 */
-:root[data-wallpaper="silhouette"] #app-wallpaper { background-image: url('wallpapers/silhouette.jpg'); background-position: center 40%; }
-:root[data-wallpaper="escaliers"] #app-wallpaper { background-image: url('wallpapers/escaliers.jpg'); background-position: 45% center; }
 :root[data-wallpaper="frontsquat"] #app-wallpaper { background-image: url('wallpapers/frontsquat.jpg'); background-position: 75% center; }   /* 1.7.94 */
 :root[data-wallpaper="suspension"] #app-wallpaper { background-image: url('wallpapers/suspension.jpg'); background-position: right center; }
 :root[data-wallpaper="wod"] #app-wallpaper { background-image: url('wallpapers/wod.jpg'); background-position: center 62%; }

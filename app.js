@@ -356,14 +356,12 @@ const WALLPAPER_KEY = 'h49_wallpaper';
 // 1.7.94 : rangés par style ; Traction retiré (un fond retiré ramène à « Aucun ») ; Squat avant, Suspension, Carnet WOD ajoutés
 const WALLPAPERS = [
   // Illustrations
-  { id: 'course', name: 'Course', pos: 'center 30%' },
   { id: 'frontsquat', name: 'Squat avant', pos: '75% center' },
   // Clairs
   { id: 'salle', name: 'Salle blanche', pos: 'right center' },
   { id: 'halteres', name: 'Haltères', pos: 'center 45%' },
   { id: 'barre', name: 'Barre', pos: 'center 55%' },
   { id: 'kettlebell', name: 'Kettlebell', pos: 'center 45%' },
-  { id: 'cuivre', name: 'Cuivre', pos: 'center 50%' },
   // Ambiance de salle
   { id: 'ratelier', name: 'Râtelier', pos: 'center 60%' },
   { id: 'suspension', name: 'Suspension', pos: 'right center' },
@@ -378,8 +376,6 @@ const WALLPAPERS = [
   { id: 'slamball', name: 'Slam ball', pos: 'center 45%' }, // 1.8.38 : Eduardo Cano (Unsplash)
   // Graphiques et couleurs vives
   { id: 'geometrie', name: 'Géométrie', pos: 'center 50%' },
-  { id: 'silhouette', name: 'Silhouette', pos: 'center 40%' },
-  { id: 'escaliers', name: 'Escaliers', pos: '45% center' },
   { id: 'none', name: 'Aucun' }
 ];
 

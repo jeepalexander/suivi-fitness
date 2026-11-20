@@ -7,6 +7,17 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.70] - 2026-11-20
+### 🖼️ Crédits des images, 4 fonds d'écran retirés (co-auteur : Claude)
+- **Fonds d'écran retirés** (origine introuvable) : Course, Cuivre, Silhouette et Escaliers. Il en reste 16 (plus « Aucun »). Si l'un d'eux était choisi, l'app revient à « Aucun ». Fichiers, règles CSS, script de démarrage et cache du service worker mis à jour.
+- **Nouvelle page publique `credits.html`** (« Crédits des images », style des conditions d'utilisation) : une ligne par fond d'écran avec sa vignette et sa source — Pexels (Kettlebell, Rack, Disques, Fente, Haltères), Unsplash avec le nom du photographe (Barre et Slam ball : Eduardo Cano ; Poigne : Farkas Mario ; Râtelier : Ambitious Studio, Rick Barrett ; Squat : Tyler Raye), créations de l'auteur générées avec Manus (Squat avant, Salle blanche, Géométrie, Cordes) ou ChatGPT (Suspension, Carnet WOD) — et les illustrations des exercices (créations de l'auteur générées avec Meta AI). Liens depuis les conditions et la confidentialité.
+- **`NOTICE`** : section des fonds d'écran réécrite (sources image par image, créations IA, illustrations Meta AI) ; la phrase sur la redistribution n'est plus collée à la liste Unsplash ; Pixabay et Magnific retirés (aucun fond n'en vient).
+- **Conditions d'utilisation** (article « Propriété », résumé anglais) et **README** alignés sur ces sources ; lien vers la page des crédits.
+### 🧪 Tests
+- Nouveau `test_credits.py` (groupe `reglages`) : la page liste les mêmes fonds que l'app, dans le même ordre, chacun avec une source ; vignettes chargées, aucun débordement (clair, sombre, 390 et 360 px) ; liens depuis les conditions et la confidentialité ; NOTICE cite chaque fond. `test_fond_ecran.py` : 16 fonds, un fond retiré ramène à « Aucun ».
+
+---
+
 ## [1.8.69] - 2026-11-20
 ### 1× au format de ⇄ (co-auteur : Claude)
 - Le « 1× » de la séance libre prend partout le format de l'icône double flèche : fond transparent, liseré de 2 px de la couleur du texte, en gardant ses pointillés. Cela vaut pour l'Historique, l'éditeur, la Séance, la Progression, le volet « Voir les statistiques de », Restaurer, les tuiles et la carte « Une séance ».
