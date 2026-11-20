@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.66] - 2026-11-20
+### 🔁 Icônes de type rationalisées (co-auteur : Claude)
+- Règle 1, icône de TYPE (ce qu'est l'élément) : toujours en contour sur le fond de son support, ⇄ avec un liseré plein, 1× en pointillés sable. Étendue à l'éditeur de programme, à l'en-tête de Séance, au choix « Voir les statistiques de » et à « Progression par programme », et à la liste « Restaurer un programme » (elles étaient en rond plein contrasté).
+- Règle 2, pastille de SÉANCE (quelle séance, à côté de A, B…) : rond plein, A–F en couleur, 1× sur fond sable (Historique, détail d'une séance, progression par séance, programme reçu, éditeur de séance libre). Les boutons restent des ronds pleins.
+
+---
+
 ## [1.8.65] - 2026-11-20
 ### 🐛 Le + clignote de nouveau après l'écran du prénom (co-auteur : Claude)
 - Le drapeau « + déjà touché » (`h49_plus_seen`) restait d'un essai précédent, y compris depuis la version de test, qui partage le stockage du téléphone avec la production : après l'écran du prénom, le + ne clignotait plus. Valider son prénom efface maintenant ce drapeau.
