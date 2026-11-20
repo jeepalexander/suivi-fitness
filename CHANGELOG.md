@@ -7,6 +7,36 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.71] - 2026-11-20
+### 🖼️ Lien « Crédits des images » dans les Réglages (co-auteur : Claude)
+- **Réglages › Application** : « Crédits des images » s'ajoute après « Règles de confidentialité · Conditions d'utilisation », même style de lien souligné ; il ouvre la page `credits.html` dans le navigateur. La ligne passe sur deux lignes à 390 et 360 px (prototype validé le 20 novembre 2026).
+- Test : `test_credits.py` vérifie le lien et son ordre.
+
+---
+
+## [1.8.70] - 2026-11-20
+### 🖼️ Crédits des images, 4 fonds d'écran retirés (co-auteur : Claude)
+- **Fonds d'écran retirés** (origine introuvable) : Course, Cuivre, Silhouette et Escaliers. Il en reste 16 (plus « Aucun »). Si l'un d'eux était choisi, l'app revient à « Aucun ». Fichiers, règles CSS, script de démarrage et cache du service worker mis à jour.
+- **Nouvelle page publique `credits.html`** (« Crédits des images », style des conditions d'utilisation) : une ligne par fond d'écran avec sa vignette et sa source — Pexels (Kettlebell, Rack, Disques, Fente, Haltères), Unsplash avec le nom du photographe (Barre et Slam ball : Eduardo Cano ; Poigne : Farkas Mario ; Râtelier : Ambitious Studio, Rick Barrett ; Squat : Tyler Raye), créations de l'auteur générées avec Manus (Squat avant, Salle blanche, Géométrie, Cordes) ou ChatGPT (Suspension, Carnet WOD) — et les illustrations des exercices (créations de l'auteur générées avec Meta AI). Liens depuis les conditions et la confidentialité.
+- **`NOTICE`** : section des fonds d'écran réécrite (sources image par image, créations IA, illustrations Meta AI) ; la phrase sur la redistribution n'est plus collée à la liste Unsplash ; Pixabay et Magnific retirés (aucun fond n'en vient).
+- **Conditions d'utilisation** (article « Propriété », résumé anglais) et **README** alignés sur ces sources ; lien vers la page des crédits.
+### 🧪 Tests
+- Nouveau `test_credits.py` (groupe `reglages`) : la page liste les mêmes fonds que l'app, dans le même ordre, chacun avec une source ; vignettes chargées, aucun débordement (clair, sombre, 390 et 360 px) ; liens depuis les conditions et la confidentialité ; NOTICE cite chaque fond. `test_fond_ecran.py` : 16 fonds, un fond retiré ramène à « Aucun ».
+
+---
+
+## [1.8.69] - 2026-11-20
+### 1× au format de ⇄ (co-auteur : Claude)
+- Le « 1× » de la séance libre prend partout le format de l'icône double flèche : fond transparent, liseré de 2 px de la couleur du texte, en gardant ses pointillés. Cela vaut pour l'Historique, l'éditeur, la Séance, la Progression, le volet « Voir les statistiques de », Restaurer, les tuiles et la carte « Une séance ».
+- Sur les supports sable (tuile active, tuile en mémoire, carte « Une séance »), il prend l'encre sable, comme ⇄ prend l'encre de sa tuile.
+- Fin du fond sable de la pastille 1× et des pointillés `sand-line` : les pointillés prennent la couleur du texte.
+
+### « Voir les statistiques de » et gélule du périmètre de Progression
+- « En pause depuis le … » en ambre (`warn`, 600) ; sur la gélule inversée, ambre inversé (`--inv-warn`).
+- Point vert (`live`) devant « En cours » dans le volet, comme sur la gélule.
+
+---
+
 ## [1.8.68] - 2026-11-20
 ### 🔁 « Voir les statistiques de » et « Tous les programmes » (co-auteur : Claude)
 - Dans le volet « Voir les statistiques de », ⇄ en contour à liseré plein et 1× en pointillés sable (en 1.8.66, le 1× y prenait par erreur un liseré plein).

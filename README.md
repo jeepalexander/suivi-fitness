@@ -2,7 +2,7 @@
 
 **Application PWA de suivi d'entraînement en salle de sport** (dépôt `suivi-fitness`)
 
-[![Version](https://img.shields.io/badge/version-1.8.32-blue)](https://github.com/jeepalexander/suivi-fitness)
+[![Version](https://img.shields.io/badge/version-1.8.71-blue)](https://github.com/jeepalexander/suivi-fitness)
 [![Licence](https://img.shields.io/badge/licence-PolyForm%20Strict%201.0.0-lightgrey)](LICENSE)
 
 ---
@@ -90,7 +90,7 @@ Le détail est dans [CHANGELOG.md](CHANGELOG.md).
 
 - Accès par la roue crantée de l’Historique.
 - Choix du thème : clair, sombre ou automatique.
-- Fond d’écran : 17 images (Course, Barre, Haltères, Kettlebell, Râtelier, Squat, Poigne, Disques, Cuivre, Géométrie, Salle blanche, Traction, Cordes, Fente, Rack, Silhouette, Escaliers) ou aucun, propre à l’appareil.
+- Fond d’écran : 16 images (Squat avant, Salle blanche, Haltères, Barre, Kettlebell, Râtelier, Suspension, Carnet WOD, Cordes, Fente, Squat, Poigne, Disques, Rack, Slam ball, Géométrie) ou aucun, propre à l’appareil ; sources sur la page `credits.html`.
 - Sauvegarde Google Drive (connexion, état, déconnexion).
 - Inviter quelqu’un : QR code vers l’application et son adresse.
 - Soutenir l’app : lien « Offrir un café » vers Buy Me a Coffee (simple lien, aucun script tiers).
@@ -108,6 +108,7 @@ suivi-fitness/
 ├── sw.js               # Service Worker (PWA)
 ├── manifest.json       # Configuration PWA
 ├── data.json           # Données par défaut
+├── credits.html        # Crédits des images (fonds d'écran, illustrations)
 ├── presentation.html, confidentialite.html, conditions.html   # Pages publiques (Google : page d'accueil, confidentialité, conditions)
 ├── wallpapers/         # Fonds d’écran (images + vignettes)
 ├── CHANGELOG.md        # Historique des versions
@@ -140,7 +141,7 @@ Copyright (c) 2026 Jean-Philippe Alexander. Code publié sous la licence **[Poly
 - ❌ **Interdit** : redistribuer le code, le modifier, en publier une version dérivée ou l'utiliser à des fins commerciales sans accord écrit.
 - Le nom « Mon Carnet de Salle », l'icône et les illustrations des exercices ne sont concédés sous aucune licence.
 - Les composants tiers (Chart.js, qrcode-generator, jsQR, polices) restent sous leur propre licence : voir [NOTICE](NOTICE).
-- Les fonds d'écran (`wallpapers/`) viennent de Pexels (Kettlebell, Rack, Disques, Fente, Haltères), Unsplash (Barre et Slam ball : Eduardo Cano ; Poigne : Farkas Mario ; Râtelier : Ambitious Studio, Rick Barrett ; Squat : Tyler Raye), Pixabay, Magnific ou de générations IA (détail dans `NOTICE`) : ils restent sous la licence de leur source et ne sont pas couverts par celle de l'application.
+- Les fonds d'écran (`wallpapers/`) viennent de Pexels (Kettlebell, Rack, Disques, Fente, Haltères), d'Unsplash (Barre et Slam ball : Eduardo Cano ; Poigne : Farkas Mario ; Râtelier : Ambitious Studio, Rick Barrett ; Squat : Tyler Raye) ou sont des créations de l'auteur générées par IA (Manus : Squat avant, Salle blanche, Géométrie, Cordes ; ChatGPT : Suspension, Carnet WOD). Ils restent sous la licence de leur source et ne sont pas couverts par celle de l'application. Les illustrations des exercices sont des créations de l'auteur générées avec Meta AI. Détail : [`NOTICE`](NOTICE) et page [Crédits des images](credits.html).
 
 Seul le texte du fichier [LICENSE](LICENSE) fait foi. Pour toute autre utilisation, contacter l'auteur via le dépôt.
 

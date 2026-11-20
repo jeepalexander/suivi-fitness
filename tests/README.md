@@ -72,6 +72,7 @@ Un test seul : `python3 tests/test_validation.py` ou `python3 tests/run_tests.py
 | `test_recu_seance.py` | 8 | Programme ou séance libre reçu sur un téléphone sans programme actif (1.8.28) : devient actif et l'onglet Séance le charge (titre, exercices) ; reçu à côté d'un programme actif : reste « Reçu » en mémoire |
 | `test_fond_defaut.py` | 19 | Fond « Râtelier » par défaut pour un nouvel usager, usagers existants inchangés, « Aucun » retenu (1.8.29) ; premier lancement : texte en bas sans défilement, couleur du titre, icône + dans le texte, petite flèche vers le bouton + (1.8.33) |
 | `test_soutien.py` | 35 | Réglages › « Soutenir l'app » : place, lien Buy Me a Coffee, allure du bouton, sans script tiers ni débordement (clair, sombre, 390 et 360 px) ; conditions : article « Propriété » (1.8.31) |
+| `test_credits.py` | 26 | Page « Crédits des images » : mêmes fonds que l'app et même ordre, une source par image, vignettes, sans débordement (clair, sombre, 390 et 360 px) ; liens depuis conditions et confidentialité ; NOTICE complet (1.8.70) |
 
 ## Quand les lancer
 Automatiquement : GitHub les exécute à chaque envoi de code et à chaque demande de fusion (`.github/workflows/tests.yml`, onglet **Actions** du dépôt) ; un échec apparaît en rouge sur le commit.
