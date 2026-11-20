@@ -72,6 +72,12 @@ function onboardingContinue(ev) {
 // le fond « Bienvenue » est sa dernière image. « Bonjour + prénom » apparaît pendant la dernière seconde ;
 // le menu, le + et le texte d'aide apparaissent à la fin. Sans le fond « Bienvenue », ou si le film ne se lance pas : « Bonjour » direct.
 const INTRO_FILM = 'wallpapers/intro.mp4';
+// 1.8.73 : le fond « Bienvenue » est imposé à l'écran du prénom (et à la réinitialisation des données), sinon le film ne se jouait pas
+function forceWelcomeWallpaper() {
+  if (getWallpaper() === 'bienvenue') return;
+  try { localStorage.setItem(WALLPAPER_KEY, 'bienvenue'); } catch (e) {}
+  applyWallpaper();
+}
 function playIntroFilm() {
   const wp = document.getElementById('app-wallpaper');
   if (!wp || getWallpaper() !== 'bienvenue' || !document.createElement('video').canPlayType) return false;
@@ -79,27 +85,31 @@ function playIntroFilm() {
   v.className = 'intro-video';
   v.muted = true; v.defaultMuted = true; v.playsInline = true;
   v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('aria-hidden', 'true');
-  v.preload = 'auto'; v.poster = 'wallpapers/intro-debut.jpg'; v.src = INTRO_FILM;
+  v.preload = 'auto'; v.src = INTRO_FILM;
   document.body.classList.add('intro');
   wp.appendChild(v);
   let greeted = false, done = false, timer = null;
+  // « Bonjour + prénom » dès la première seconde du film (1.8.73)
   const greet = () => {
     if (greeted) return;
     greeted = true;
     document.body.classList.add('intro-end');
     renderProgramOverview();
   };
+  // Fin : le film s'efface sur l'image haute définition (même cadrage), le texte d'aide monte du bas en fondu
   const end = () => {
     if (done) return;
     done = true;
     clearTimeout(timer);
     greet();
+    v.classList.add('out');
     document.body.classList.remove('intro', 'intro-end');
     document.body.classList.add('intro-reveal');
-    v.remove();
-    setTimeout(() => document.body.classList.remove('intro-reveal'), 600);
+    setTimeout(() => v.remove(), 400);
+    setTimeout(() => document.body.classList.remove('intro-reveal'), 900);
   };
-  v.addEventListener('timeupdate', () => { if (v.duration && v.currentTime >= v.duration - 1) greet(); });
+  v.addEventListener('playing', () => v.classList.add('on'));
+  v.addEventListener('timeupdate', () => { if (v.currentTime >= 1) greet(); });
   v.addEventListener('ended', end);
   v.addEventListener('error', end);
   timer = setTimeout(end, 9000);   // filet : le film dure 5,2 s
@@ -114,6 +124,7 @@ function updateProgramHeader() {
   const add = document.getElementById('add-program-btn');
   const onb = (document.body.dataset.tab || 'programme') === 'programme' && programView === 'home' && isOnboarding();
   document.body.classList.toggle('onboarding', onb);
+  if (onb) forceWelcomeWallpaper();   // 1.8.73 : l'écran du prénom a toujours le fond du film d'accueil
   if (add) {
     add.style.display = (document.body.dataset.tab || 'programme') === 'programme' && programView === 'home' && !onb ? 'flex' : 'none';
     add.classList.toggle('attention', !plusSeen() && !getPrograms().length);
@@ -235,9 +246,11 @@ function emptyProgramsHtml() {
   // 1.8.62 : premier lancement = écran du prénom ; ensuite « Bonjour + prénom », phrase manuscrite, texte d'aide en bas
   if (isOnboarding()) return `
     <form class="onb" onsubmit="onboardingContinue(event)">
-      <h1 class="onb-title">Bienvenue sur Mon Carnet de Salle</h1>
-      <label class="ed-field onb-field"><input id="onb-name" type="text" autocomplete="given-name" maxlength="30" placeholder="Quel est ton nom ?" aria-label="Quel est ton nom ?" oninput="onboardingInput(this)"><span class="ed-pen">${PEN_SVG}</span></label>
-      <button id="onb-continue" class="btn onb-btn" type="submit" disabled>Continuer</button>
+      <h1 class="onb-title"><span class="onb-hello">Bienvenue sur</span><span class="onb-app">Mon Carnet de Salle</span></h1>
+      <div class="onb-row">
+        <label class="ed-field onb-field"><input id="onb-name" type="text" autocomplete="given-name" maxlength="30" placeholder="Quel est ton nom ?" aria-label="Quel est ton nom ?" oninput="onboardingInput(this)"><span class="ed-pen">${PEN_SVG}</span></label>
+        <button id="onb-continue" class="onb-go" type="submit" disabled aria-label="Continuer">${ARROW_SVG}</button>
+      </div>
     </form>`;
   return `
     <div class="prog-empty">${programGreetingHtml(null)}

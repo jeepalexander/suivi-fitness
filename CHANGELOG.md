@@ -7,6 +7,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.73] - 2026-11-20
+### 🎬 Film d'accueil, suite (co-auteur : Claude)
+- Écran du prénom : « Bienvenue sur » en manuscrit puis MON CARNET DE SALLE en haut de l'écran, pour laisser voir le visage ; champ du prénom et flèche « Continuer » sur une même ligne, à la hauteur des haltères de l'image (calés sur l'image, quelle que soit la taille de l'écran) ; flèche grisée tant que le prénom est vide.
+- Images de début et de fin en haute définition (1240 × 2152), au cadrage exact du film : les photos d'origine sont recalées sur la première et la dernière image du film ; le film s'efface (0,3 s) sur l'image de fin.
+- « Bonjour + prénom » apparaît dès la première seconde du film ; à la fin, le texte d'aide monte du bas en fondu (0,6 s).
+- Le fond « Bienvenue » est imposé à l'écran du prénom et à la réinitialisation des données : avec un autre fond déjà choisi, ni les images ni le film ne s'affichaient.
+
+---
+
 ## [1.8.72] - 2026-11-20
 ### 🎬 Film d'accueil au premier lancement (co-auteur : Claude)
 - Après « Continuer » sur l'écran du prénom, un film de 5 s se joue une seule fois, à la place du fond d'écran et sous le voile habituel ; « Bonjour + prénom » apparaît pendant sa dernière seconde, puis le menu, le + et le texte d'aide (fondu de 0,4 s).

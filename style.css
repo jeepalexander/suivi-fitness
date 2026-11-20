@@ -1305,13 +1305,29 @@ body[data-pview="choose"] .ed-top { margin-bottom: 8px; }
 .scope-pause { font-weight: 600; color: var(--warn); }
 .stats-scope .scope-pause { color: var(--inv-warn); }
 .restore-when .prog-dot { display: inline-block; vertical-align: middle; margin: -2px 8px 0 0; }
-/* 1.8.72 (co-auteur : Claude) : film d'accueil (premier lancement, entre le prénom et « Bonjour + prénom »).
-   L'écran du prénom montre la première image du film ; le film se joue dans le calque du fond, sous le voile ;
-   « Bonjour + prénom » apparaît pendant la dernière seconde ; le reste apparaît à la fin (fondu de 0,4 s). */
+/* 1.8.72–1.8.73 (co-auteur : Claude) : film d'accueil (premier lancement, entre le prénom et « Bonjour + prénom »).
+   Images de début et de fin en haute définition, au cadrage exact du film ; le film se joue dans le calque du fond, sous le voile,
+   et s'efface (0,3 s) sur l'image de fin ; « Bonjour + prénom » apparaît dès la première seconde ; à la fin, le texte d'aide
+   monte du bas en fondu (0,6 s), le nom de l'app, le + et le menu apparaissent en fondu (0,4 s). */
 :root[data-wallpaper="bienvenue"] body.onboarding #app-wallpaper, :root[data-wallpaper="bienvenue"] body.intro #app-wallpaper { background-image: url('wallpapers/intro-debut.jpg'); }
-#app-wallpaper .intro-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+#app-wallpaper .intro-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 0; transition: opacity 0.3s ease; }
+#app-wallpaper .intro-video.on { opacity: 1; }
+#app-wallpaper .intro-video.out { opacity: 0; }
 body.intro .onb, body.intro #app-title, body.intro nav, body.intro #add-program-btn, body.intro #settings-btn, body.intro .prog-empty-sub, body.intro .prog-sep { visibility: hidden; }
 body.intro:not(.intro-end) .prog-greet { visibility: hidden; }
 body.intro-end .prog-greet { animation: introFade 0.8s ease-out both; }
-body.intro-reveal #app-title, body.intro-reveal nav, body.intro-reveal #add-program-btn, body.intro-reveal .prog-empty-sub { animation: introFade 0.4s ease-out both; }
+body.intro-reveal #app-title, body.intro-reveal nav, body.intro-reveal #add-program-btn { animation: introFade 0.4s ease-out both; }
+body.intro-reveal .prog-empty-sub { animation: introRise 0.6s ease-out both; }
 @keyframes introFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes introRise { from { opacity: 0; transform: translateY(48px); } to { opacity: 1; transform: none; } }
+/* 1.8.73 : écran du prénom : « Bienvenue sur » manuscrit et MON CARNET DE SALLE en haut (le visage reste visible) ;
+   champ et flèche « Continuer » sur une ligne, à la hauteur des haltères de l'image (calés sur l'image, quelle que soit la taille de l'écran) */
+.onb { justify-content: flex-start; }
+.onb-title { margin: 0; text-align: left; text-transform: none; }
+.onb-hello { display: block; font-family: var(--font-hand); font-weight: 600; font-size: 2.625rem; line-height: 1.05; transform: rotate(-2deg); transform-origin: left top; }
+.onb-app { display: block; margin-top: 4px; font-family: var(--font-display); font-weight: 700; font-size: 2rem; line-height: 1.05; text-transform: uppercase; }
+.onb-row { --hr: max(var(--app-h), 100vw / var(--ui-zoom) / 0.5762); position: fixed; left: var(--gutter); right: var(--gutter); top: calc(var(--app-h) / 2 + (0.836 - 0.5) * var(--hr) - 26px); display: flex; align-items: center; gap: 12px; }
+.onb-row .onb-field { flex: 1; min-width: 0; }
+.onb-go { flex: none; width: 52px; height: 52px; padding: 0; display: flex; align-items: center; justify-content: center; border: none; border-radius: 50%; background: var(--primary-strong); color: var(--on-strong); box-shadow: var(--sh-btn); cursor: pointer; }
+.onb-go svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.onb-go:disabled { opacity: 0.4; box-shadow: none; cursor: default; }

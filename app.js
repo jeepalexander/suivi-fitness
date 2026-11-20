@@ -5187,6 +5187,7 @@ async function resetData() {
       state = migrateState(defaultData).state;
       normalizePrograms();
       programDraft = null; programView = 'home';
+      forceWelcomeWallpaper();   // 1.8.73
       clearEditState();
       clearDraft();
       discardWeightInput();

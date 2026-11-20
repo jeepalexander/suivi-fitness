@@ -24,6 +24,11 @@ with Srv() as base, sync_playwright() as p:
     pg.evaluate("switchTab('fond')"); pg.wait_for_timeout(200)
     check('Réglages › Fond d\'écran : Bienvenue coché',
           pg.get_attribute('.wallpaper-opt[data-wallpaper="bienvenue"]', 'aria-checked') == 'true')
+    # 1.8.73 : à l'écran du prénom, le fond « Bienvenue » est imposé ; une fois le prénom donné, le choix est libre
+    pg.evaluate("localStorage.setItem('h49_wallpaper','ratelier')"); pg.reload(); pg.wait_for_timeout(700)
+    check('écran du prénom : fond « Bienvenue » imposé (1.8.73)', pg.evaluate("getWallpaper()") == 'bienvenue')
+    pg.evaluate("localStorage.setItem('h49_user_name','Test')"); pg.reload(); pg.wait_for_timeout(700)
+    pg.evaluate("switchTab('fond')"); pg.wait_for_timeout(200)
     # « Aucun » choisi : retenu après relance
     pg.click('.wallpaper-opt[data-wallpaper="none"]'); pg.wait_for_timeout(200)
     pg.reload(); pg.wait_for_timeout(700)
