@@ -7,6 +7,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.67] - 2026-11-20
+### 🔁 « Voir les statistiques de » (co-auteur : Claude)
+- Dans le volet « Voir les statistiques de », ⇄ en contour à liseré plein et 1× en pointillés sable (en 1.8.66, le 1× y prenait par erreur un liseré plein).
+
+---
+
 ## [1.8.66] - 2026-11-20
 ### 🔁 Icônes de type rationalisées (co-auteur : Claude)
 - Règle 1, icône de TYPE (ce qu'est l'élément) : toujours en contour sur le fond de son support, ⇄ avec un liseré plein, 1× en pointillés sable. Étendue à l'éditeur de programme, à l'en-tête de Séance, au choix « Voir les statistiques de » et à « Progression par programme », et à la liste « Restaurer un programme » (elles étaient en rond plein contrasté).

@@ -1292,5 +1292,5 @@ body[data-pview="choose"] .ed-top { margin-bottom: 8px; }
    partout où elle dit ce qu'est l'élément : éditeur (programme), en-tête de Séance, choix et liste de Progression, Restaurer.
    Les pastilles de SÉANCE (A–F, 1× sable de l'Historique et de l'éditeur de séance libre) restent pleines ; les boutons aussi. */
 .ed-kind .prog-ico.dark, #seance-prog-ico.dark { background: transparent; border: 2px solid currentColor; color: var(--text); }
-.stats-scope .mem-ico:not(.libre):not(.grid), .restore-item .mem-ico:not(.libre):not(.grid), .mem-ico.small:not(.libre):not(.grid) { background: transparent; border: 2px solid currentColor; color: var(--text); }
-.stats-scope .mem-ico.libre, .restore-item .mem-ico.libre { background: transparent; border: 2px dashed var(--sand-line); color: var(--text); }
+.stats-scope .mem-ico:not(.libre):not(.grid), .restore-item:not(.libre) .mem-ico:not(.libre):not(.grid), .mem-ico.small:not(.libre):not(.grid) { background: transparent; border: 2px solid currentColor; color: var(--text); }
+.stats-scope .mem-ico.libre, .restore-item .mem-ico.libre, .restore-item.libre .mem-ico { background: transparent; border: 2px dashed var(--sand-line); color: var(--text); }
