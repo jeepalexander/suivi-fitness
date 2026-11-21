@@ -64,7 +64,64 @@ function onboardingContinue(ev) {
   setUserName(el.value);
   // 1.8.65 : nouveau départ = le + clignote de nouveau (le drapeau peut rester d'un essai précédent, ou de la version de test qui partage le stockage)
   try { localStorage.removeItem(PLUS_SEEN_KEY); } catch (e) {}
-  renderProgramOverview();
+  if (!playIntroFilm()) renderProgramOverview();
+}
+
+// 1.8.72 (co-auteur : Claude) : film d'accueil entre le prénom validé et « Bonjour + prénom », une seule fois.
+// Il se joue à la place du fond « Bienvenue », sous le voile habituel : l'écran du prénom montre sa première image,
+// le fond « Bienvenue » est sa dernière image. « Bonjour + prénom » apparaît pendant la dernière seconde ;
+// le menu, le + et le texte d'aide apparaissent à la fin. Sans le fond « Bienvenue », ou si le film ne se lance pas : « Bonjour » direct.
+const INTRO_FILM = 'wallpapers/intro.mp4';
+// 1.8.73 : le fond « Bienvenue » est imposé à l'écran du prénom (et à la réinitialisation des données), sinon le film ne se jouait pas
+function forceWelcomeWallpaper() {
+  if (getWallpaper() === 'bienvenue') return;
+  try { localStorage.setItem(WALLPAPER_KEY, 'bienvenue'); } catch (e) {}
+  applyWallpaper();
+}
+function playIntroFilm() {
+  const wp = document.getElementById('app-wallpaper');
+  if (!wp || getWallpaper() !== 'bienvenue' || !document.createElement('video').canPlayType) return false;
+  const v = document.createElement('video');
+  v.className = 'intro-video';
+  v.muted = true; v.defaultMuted = true; v.playsInline = true;
+  v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('aria-hidden', 'true');
+  v.preload = 'auto'; v.src = INTRO_FILM;
+  // 1.8.75 : le champ et la flèche restent jusqu'au lancement du film (sinon les haltères de la 1re image apparaissaient)
+  const go = document.getElementById('onb-continue'), inp = document.getElementById('onb-name');
+  if (go) go.disabled = true;
+  if (inp) inp.readOnly = true;
+  wp.appendChild(v);
+  let greeted = false, done = false, timer = null;
+  // « Bonjour + prénom » dès la première seconde du film (1.8.73)
+  const greet = () => {
+    if (greeted) return;
+    greeted = true;
+    document.body.classList.add('intro-end');
+    renderProgramOverview();
+  };
+  // Fin : le film s'efface sur l'image haute définition (même cadrage), le texte d'aide monte du bas en fondu
+  const end = () => {
+    if (done) return;
+    done = true;
+    clearTimeout(timer);
+    greet();
+    v.classList.add('out');
+    document.body.classList.remove('intro', 'intro-end', 'onboarding');
+    document.body.classList.add('intro-reveal');
+    setTimeout(() => v.remove(), 400);
+    setTimeout(() => document.body.classList.remove('intro-reveal'), 900);
+  };
+  v.addEventListener('playing', () => {
+    v.classList.add('on');   // le film apparaît sous le champ (0,3 s), puis le titre, le champ et la flèche s'effacent (0,3 s)
+    setTimeout(() => { if (!done) document.body.classList.add('intro'); }, 300);
+  }, { once: true });
+  v.addEventListener('timeupdate', () => { if (v.currentTime >= 1) greet(); });
+  v.addEventListener('ended', end);
+  v.addEventListener('error', end);
+  timer = setTimeout(end, 9000);   // filet : le film dure 5,2 s
+  const pr = v.play();
+  if (pr && pr.catch) pr.catch(end);
+  return true;
 }
 
 // Bouton + de l'en-tête : seulement sur l'accueil de l'onglet Programme ; il clignote tant qu'il n'a jamais été touché
@@ -73,6 +130,7 @@ function updateProgramHeader() {
   const add = document.getElementById('add-program-btn');
   const onb = (document.body.dataset.tab || 'programme') === 'programme' && programView === 'home' && isOnboarding();
   document.body.classList.toggle('onboarding', onb);
+  if (onb) forceWelcomeWallpaper();   // 1.8.73 : l'écran du prénom a toujours le fond du film d'accueil
   if (add) {
     add.style.display = (document.body.dataset.tab || 'programme') === 'programme' && programView === 'home' && !onb ? 'flex' : 'none';
     add.classList.toggle('attention', !plusSeen() && !getPrograms().length);
@@ -194,9 +252,11 @@ function emptyProgramsHtml() {
   // 1.8.62 : premier lancement = écran du prénom ; ensuite « Bonjour + prénom », phrase manuscrite, texte d'aide en bas
   if (isOnboarding()) return `
     <form class="onb" onsubmit="onboardingContinue(event)">
-      <h1 class="onb-title">Bienvenue sur Mon Carnet de Salle</h1>
-      <label class="ed-field onb-field"><input id="onb-name" type="text" autocomplete="given-name" maxlength="30" placeholder="Quel est ton nom ?" aria-label="Quel est ton nom ?" oninput="onboardingInput(this)"><span class="ed-pen">${PEN_SVG}</span></label>
-      <button id="onb-continue" class="btn onb-btn" type="submit" disabled>Continuer</button>
+      <h1 class="onb-title"><span class="onb-hello">Bienvenue sur</span><span class="onb-app">Mon Carnet de Salle</span></h1>
+      <div class="onb-row">
+        <label class="ed-field onb-field"><input id="onb-name" type="text" autocomplete="given-name" maxlength="30" placeholder="Quel est ton nom ?" aria-label="Quel est ton nom ?" oninput="onboardingInput(this)"><span class="ed-pen">${PEN_SVG}</span></label>
+        <button id="onb-continue" class="onb-go" type="submit" disabled aria-label="Continuer">${ARROW_SVG}</button>
+      </div>
     </form>`;
   return `
     <div class="prog-empty">${programGreetingHtml(null)}
@@ -350,7 +410,21 @@ async function pauseActiveProgram() {
 // ============================================================
 function openProgramChooser() {
   try { localStorage.setItem(PLUS_SEEN_KEY, '1'); } catch (e) {} // 1.8.62 : le + ne clignote plus
+  chooserFromSeance = false;
   setProgramView('choose');
+}
+// 1.8.76 (co-auteur : Claude) : ouvert depuis l'onglet Séance vide, la flèche retour de « Ajouter » ramène à la Séance
+let chooserFromSeance = false;
+function openChooserFromSeance() {
+  switchTab('programme');
+  openProgramChooser();
+  chooserFromSeance = true;
+}
+function chooserBack() {
+  const toSeance = chooserFromSeance;
+  chooserFromSeance = false;
+  setProgramView('home');
+  if (toSeance) switchTab('seance');
 }
 
 // 1.8.63 (co-auteur : Claude) : « Ajouter » derrière la flèche, séance d'abord, programme ensuite, puis trois options
@@ -358,7 +432,7 @@ const RESTORE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a
 const AIDE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>';
 function chooserHtml() {
   return `
-    <div class="ed-top"><button type="button" class="ed-back" aria-label="Retour" onclick="setProgramView('home')">${BACK_SVG}</button><span class="choose-head">Ajouter</span></div>
+    <div class="ed-top"><button type="button" class="ed-back" aria-label="Retour" onclick="chooserBack()">${BACK_SVG}</button><span class="choose-head">Ajouter</span></div>
     <div class="prog-spacer" aria-hidden="true"></div>
     <button type="button" class="choose-card libre" onclick="startProgramEditor('libre')">
       <span class="choose-title">Une séance</span>

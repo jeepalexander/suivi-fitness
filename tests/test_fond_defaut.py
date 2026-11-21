@@ -18,12 +18,17 @@ with Srv() as base, sync_playwright() as p:
     # 1. Nouvel usager : ni données ni fond
     ctx, pg, errs = newpage(br, seed=False)
     pg.goto(base + 'index.html'); pg.wait_for_timeout(900)
-    check('nouvel usager : fond Râtelier', pg.evaluate("getWallpaper()") == 'ratelier' and pg.evaluate(WP) == 'ratelier',
+    check('nouvel usager : fond Bienvenue (1.8.72)', pg.evaluate("getWallpaper()") == 'bienvenue' and pg.evaluate(WP) == 'bienvenue',
           (pg.evaluate("getWallpaper()"), pg.evaluate(WP)))
     check('image affichée', pg.evaluate("getComputedStyle(document.getElementById('app-wallpaper')).display") != 'none')
     pg.evaluate("switchTab('fond')"); pg.wait_for_timeout(200)
-    check('Réglages › Fond d\'écran : Râtelier coché',
-          pg.get_attribute('.wallpaper-opt[data-wallpaper="ratelier"]', 'aria-checked') == 'true')
+    check('Réglages › Fond d\'écran : Bienvenue coché',
+          pg.get_attribute('.wallpaper-opt[data-wallpaper="bienvenue"]', 'aria-checked') == 'true')
+    # 1.8.73 : à l'écran du prénom, le fond « Bienvenue » est imposé ; une fois le prénom donné, le choix est libre
+    pg.evaluate("localStorage.setItem('h49_wallpaper','ratelier')"); pg.reload(); pg.wait_for_timeout(700)
+    check('écran du prénom : fond « Bienvenue » imposé (1.8.73)', pg.evaluate("getWallpaper()") == 'bienvenue')
+    pg.evaluate("localStorage.setItem('h49_user_name','Test')"); pg.reload(); pg.wait_for_timeout(700)
+    pg.evaluate("switchTab('fond')"); pg.wait_for_timeout(200)
     # « Aucun » choisi : retenu après relance
     pg.click('.wallpaper-opt[data-wallpaper="none"]'); pg.wait_for_timeout(200)
     pg.reload(); pg.wait_for_timeout(700)

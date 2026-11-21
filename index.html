@@ -44,7 +44,7 @@
         var w = localStorage.getItem('h49_wallpaper');
         // 1.8.23 : retour de la connexion Google (« Reconnecter ») : la page reste masquée jusqu'au choix de l'onglet (sinon Programme s'affichait d'abord)
         if (/(^#|&)(access_token|error)=/.test(location.hash) && /state=/.test(location.hash)) document.documentElement.setAttribute('data-drive-return', '');
-        if (/^(barre|halteres|kettlebell|ratelier|squat|poigne|disques|geometrie|salle|cordes|fente|rack|frontsquat|suspension|wod|slamball)$/.test(w || '')) document.documentElement.setAttribute('data-wallpaper', w);
+        if (/^(bienvenue|barre|halteres|kettlebell|ratelier|squat|poigne|disques|geometrie|salle|cordes|fente|rack|frontsquat|suspension|wod|slamball)$/.test(w || '')) document.documentElement.setAttribute('data-wallpaper', w);
       } catch (e) {}
     })();
   </script>
@@ -132,7 +132,7 @@
       <h2 class="seance-empty-title">Aucune séance prévue</h2>
       <p class="seance-empty-text">Active un programme ou une séance libre dans l'onglet Programme, ou crée-en un pour commencer.</p>
       <button type="button" class="btn" onclick="switchTab('programme')">Voir mes programmes</button>
-      <button type="button" class="btn btn-secondary" onclick="switchTab('programme'); openProgramChooser()">Créer un programme ou une séance</button>
+      <button type="button" class="btn btn-secondary" onclick="openChooserFromSeance()">Créer un programme ou une séance</button>
     </div>
     <form id="workout-form">
     <p id="warmup-note" class="warmup-note"><svg class="warmup-info" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.4"/></svg><span>Ajoute 2 séries légères au premier exercice de force <svg class="warmup-weight" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7v10M3.5 9.5v5M17.5 7v10M20.5 9.5v5M6.5 12h11"/></svg> pour t'échauffer <svg class="warmup-flame" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c.9 3.1 4.6 4.9 4.6 9.7a4.6 4.6 0 0 1-9.2 0c0-2.5 1.3-3.9 2.5-4.9.2 1.7 1 2.7 2.2 3.1.2-3-.9-5.3-.1-7.9z"/></svg></span></p>
@@ -190,6 +190,7 @@
       <h3 class="analysis-section-title">Poids corporel</h3>
       <div class="weight-current"><span id="weight-current" class="weight-value">–</span><span class="weight-unit">kg</span></div>
       <canvas id="weightChart" height="150"></canvas>
+      <p class="analysis-note weight-note">Ton poids sert à calculer l’effort des exercices au poids du corps (tractions, dips…) : la charge comptée est ta dernière pesée, plus le lest s’il y en a un. Pense à le mettre à jour de temps en temps.</p>
       <div class="weight-form">
         <label class="ed-field weight-pen"><input type="number" step="0.1" id="new-weight" placeholder="Poids (kg)" inputmode="decimal" oninput="saveWeightDraft()"><span class="ed-pen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></span></label>
         <button onclick="addWeight()" class="btn weight-add">Ajouter</button>

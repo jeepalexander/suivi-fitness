@@ -7,6 +7,43 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.76] - 2026-11-21
+### Progression et retour vers la Séance (co-auteur : Claude)
+- Progression › Poids corporel : texte sous le graphique, « Ton poids sert à calculer l'effort des exercices au poids du corps (tractions, dips…) : la charge comptée est ta dernière pesée, plus le lest s'il y en a un. Pense à le mettre à jour de temps en temps. » (style des autres explications, `analysis-note`).
+- Séance vide › « Créer un programme ou une séance » : la flèche retour de l'écran « Ajouter » ramène à l'onglet Séance (et non plus aux Programmes). Ouvert par le +, il ramène toujours aux Programmes.
+
+---
+
+## [1.8.75] - 2026-11-20
+### 🎬 Film d'accueil : pas d'haltères avant le film (co-auteur : Claude)
+- Après la flèche, le titre, le champ et la flèche restent affichés (flèche inactive, champ en lecture seule) jusqu'au lancement réel du film : le film apparaît sous le champ (0,3 s), puis le titre, le champ et la flèche s'effacent (0,3 s). Avant, ils disparaissaient tout de suite et l'on voyait les haltères de la première image du film apparaître sur la photo.
+
+---
+
+## [1.8.74] - 2026-11-20
+### 🎬 Film d'accueil plus net (co-auteur : Claude)
+- Film réencodé avec bien moins de compression (H.264 « high », CRF 16, préréglage lent) : 1,5 Mo au lieu de 290 Ko, à l'œil identique au film d'origine (SSIM 0,994 au lieu de 0,984 ; plus d'aplats ni de bandes dans le fond sombre). Il reste chargé une seule fois, au premier lancement, hors du cache.
+
+---
+
+## [1.8.73] - 2026-11-20
+### 🎬 Film d'accueil, suite (co-auteur : Claude)
+- Écran du prénom : « Bienvenue sur » en manuscrit puis MON CARNET DE SALLE en haut de l'écran, pour laisser voir le visage ; champ du prénom et flèche « Continuer » sur une même ligne, à la hauteur des haltères de l'image (calés sur l'image, quelle que soit la taille de l'écran) ; flèche grisée tant que le prénom est vide.
+- Images de début et de fin en haute définition (1240 × 2152), au cadrage exact du film : les photos d'origine sont recalées sur la première et la dernière image du film ; le film s'efface (0,3 s) sur l'image de fin.
+- « Bonjour + prénom » apparaît dès la première seconde du film ; à la fin, le texte d'aide monte du bas en fondu (0,6 s).
+- Le fond « Bienvenue » est imposé à l'écran du prénom et à la réinitialisation des données : avec un autre fond déjà choisi, ni les images ni le film ne s'affichaient.
+
+---
+
+## [1.8.72] - 2026-11-20
+### 🎬 Film d'accueil au premier lancement (co-auteur : Claude)
+- Après « Continuer » sur l'écran du prénom, un film de 5 s se joue une seule fois, à la place du fond d'écran et sous le voile habituel ; « Bonjour + prénom » apparaît pendant sa dernière seconde, puis le menu, le + et le texte d'aide (fondu de 0,4 s).
+- L'écran du prénom montre la première image du film ; la dernière image devient le fond « Bienvenue » (Réglages › Fond d'écran, ambiance de salle), fond par défaut des nouveaux usagers à la place de « Râtelier ».
+- Le film (`wallpapers/intro.mp4`, 290 Ko en 1.8.72, 1,5 Mo depuis la 1.8.74, H.264 sans son) passe par le réseau, hors du cache du service worker ; s'il ne se lance pas, ou avec un autre fond, « Bonjour » s'affiche tout de suite.
+- Crédits : création générée avec Artlist à partir de photos générées avec Manus (`credits.html`, `NOTICE`).
+
+---
+
 ## [1.8.71] - 2026-11-20
 ### 🖼️ Lien « Crédits des images » dans les Réglages (co-auteur : Claude)
 - **Réglages › Application** : « Crédits des images » s'ajoute après « Règles de confidentialité · Conditions d'utilisation », même style de lien souligné ; il ouvre la page `credits.html` dans le navigateur. La ligne passe sur deux lignes à 390 et 360 px (prototype validé le 20 novembre 2026).

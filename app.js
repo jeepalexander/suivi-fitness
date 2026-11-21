@@ -363,6 +363,7 @@ const WALLPAPERS = [
   { id: 'barre', name: 'Barre', pos: 'center 55%' },
   { id: 'kettlebell', name: 'Kettlebell', pos: 'center 45%' },
   // Ambiance de salle
+  { id: 'bienvenue', name: 'Bienvenue', pos: 'center center' }, // 1.8.72 : dernière image du film d'accueil
   { id: 'ratelier', name: 'Râtelier', pos: 'center 60%' },
   { id: 'suspension', name: 'Suspension', pos: 'right center' },
   { id: 'wod', name: 'Carnet WOD', pos: 'center 62%' },
@@ -387,7 +388,8 @@ function getWallpaper() {
 
 // 1.8.29 (co-auteur : Claude) : fond « Râtelier » par défaut pour un NOUVEL usager (premier lancement : ni données
 // ni fond enregistrés). Les usagers existants gardent leur fond, blanc compris.
-const DEFAULT_WALLPAPER = 'ratelier';
+// 1.8.72 : « Bienvenue » (dernière image du film d'accueil) remplace « Râtelier » pour un nouvel usager
+const DEFAULT_WALLPAPER = 'bienvenue';
 function initDefaultWallpaper() {
   try {
     if (localStorage.getItem('h49_state') === null && localStorage.getItem(WALLPAPER_KEY) === null) {
@@ -5185,6 +5187,7 @@ async function resetData() {
       state = migrateState(defaultData).state;
       normalizePrograms();
       programDraft = null; programView = 'home';
+      forceWelcomeWallpaper();   // 1.8.73
       clearEditState();
       clearDraft();
       discardWeightInput();
