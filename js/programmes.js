@@ -410,7 +410,21 @@ async function pauseActiveProgram() {
 // ============================================================
 function openProgramChooser() {
   try { localStorage.setItem(PLUS_SEEN_KEY, '1'); } catch (e) {} // 1.8.62 : le + ne clignote plus
+  chooserFromSeance = false;
   setProgramView('choose');
+}
+// 1.8.76 (co-auteur : Claude) : ouvert depuis l'onglet Séance vide, la flèche retour de « Ajouter » ramène à la Séance
+let chooserFromSeance = false;
+function openChooserFromSeance() {
+  switchTab('programme');
+  openProgramChooser();
+  chooserFromSeance = true;
+}
+function chooserBack() {
+  const toSeance = chooserFromSeance;
+  chooserFromSeance = false;
+  setProgramView('home');
+  if (toSeance) switchTab('seance');
 }
 
 // 1.8.63 (co-auteur : Claude) : « Ajouter » derrière la flèche, séance d'abord, programme ensuite, puis trois options
@@ -418,7 +432,7 @@ const RESTORE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a
 const AIDE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>';
 function chooserHtml() {
   return `
-    <div class="ed-top"><button type="button" class="ed-back" aria-label="Retour" onclick="setProgramView('home')">${BACK_SVG}</button><span class="choose-head">Ajouter</span></div>
+    <div class="ed-top"><button type="button" class="ed-back" aria-label="Retour" onclick="chooserBack()">${BACK_SVG}</button><span class="choose-head">Ajouter</span></div>
     <div class="prog-spacer" aria-hidden="true"></div>
     <button type="button" class="choose-card libre" onclick="startProgramEditor('libre')">
       <span class="choose-title">Une séance</span>

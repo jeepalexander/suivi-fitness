@@ -7,6 +7,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.76] - 2026-11-21
+### Progression et retour vers la Séance (co-auteur : Claude)
+- Progression › Poids corporel : texte sous le graphique, « Ton poids sert à calculer l'effort des exercices au poids du corps (tractions, dips…) : la charge comptée est ta dernière pesée, plus le lest s'il y en a un. Pense à le mettre à jour de temps en temps. » (style des autres explications, `analysis-note`).
+- Séance vide › « Créer un programme ou une séance » : la flèche retour de l'écran « Ajouter » ramène à l'onglet Séance (et non plus aux Programmes). Ouvert par le +, il ramène toujours aux Programmes.
+
+---
+
 ## [1.8.75] - 2026-11-20
 ### 🎬 Film d'accueil : pas d'haltères avant le film (co-auteur : Claude)
 - Après la flèche, le titre, le champ et la flèche restent affichés (flèche inactive, champ en lecture seule) jusqu'au lancement réel du film : le film apparaît sous le champ (0,3 s), puis le titre, le champ et la flèche s'effacent (0,3 s). Avant, ils disparaissaient tout de suite et l'on voyait les haltères de la première image du film apparaître sur la photo.

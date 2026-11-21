@@ -254,6 +254,14 @@ with Srv() as base, sync_playwright() as p:
     # ---------- 11. Rien d'actif : écran Séance vide ----------
     pg.evaluate("state.programs.forEach(p=>{if(p.status==='active'){p.status='paused'}}); saveState(); initWorkoutForm(); switchTab('seance')"); pg.wait_for_timeout(300)
     check('rien d\'actif : « Aucune séance prévue », formulaire et chrono masqués', pg.is_visible('#seance-empty') and not pg.is_visible('#workout-form') and not pg.is_visible('#timer-btn'))
+    # 1.8.76 : « Créer un programme ou une séance » depuis la Séance vide : la flèche retour de « Ajouter » ramène à la Séance
+    pg.click("#seance-empty .btn-secondary"); pg.wait_for_timeout(300)
+    check('Séance vide › « Créer… » : écran « Ajouter »', pg.evaluate("[document.body.dataset.tab, programView]") == ['programme', 'choose'])
+    pg.click('#tab-programme button.ed-back'); pg.wait_for_timeout(300)
+    check('1.8.76 : retour de « Ajouter » vers l\'onglet Séance', pg.evaluate("document.body.dataset.tab") == 'seance' and pg.is_visible('#seance-empty'))
+    pg.evaluate("switchTab('programme'); openProgramChooser()"); pg.wait_for_timeout(200); pg.click('#tab-programme button.ed-back'); pg.wait_for_timeout(300)
+    check('1.8.76 : depuis le +, retour de « Ajouter » vers les Programmes', pg.evaluate("[document.body.dataset.tab, programView]") == ['programme', 'home'])
+    pg.evaluate("switchTab('seance')"); pg.wait_for_timeout(200)
     pg.evaluate("switchTab('programme')"); pg.wait_for_timeout(200)
     check('rien d\'actif : « Aucun programme actif »', 'Aucun programme actif' in pg.inner_text('#program-overview'))
     check('aucune erreur JS', not errs, str(errs))
