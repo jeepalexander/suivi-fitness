@@ -7,6 +7,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.77] - 2026-11-21
+### Progression (co-auteur : Claude)
+- Poids corporel : le texte d'explication passe sous le champ de saisie et le bouton « Ajouter » (il était entre le graphique et le champ).
+
+---
+
 ## [1.8.76] - 2026-11-21
 ### Progression et retour vers la Séance (co-auteur : Claude)
 - Progression › Poids corporel : texte sous le graphique, « Ton poids sert à calculer l'effort des exercices au poids du corps (tractions, dips…) : la charge comptée est ta dernière pesée, plus le lest s'il y en a un. Pense à le mettre à jour de temps en temps. » (style des autres explications, `analysis-note`).
