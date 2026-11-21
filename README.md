@@ -18,6 +18,7 @@
 - ✅ **Gestion automatique du deload** (séances 10 à 12 de chaque cycle), reportable d'une séance
 - ✅ **Chronomètre de séance** et **timer de repos** propre à chaque exercice, avec notification sonore
 - ✅ **Design « Blanc minimaliste »** : peu de couleurs, ombres légères, thème **clair, sombre ou automatique** et **fond d’écran** au choix (mémorisés sur l’appareil) ; fenêtres de l’app dans un seul style (aucune boîte système)
+- ✅ **« Avec notre aide »** : 5 questions (objectif, niveau, temps, séances par semaine, matériel), puis une séance ou un programme proposé, expliqué avec ses sources scientifiques et ouvert dans l’éditeur (1.8.78)
 - ✅ **Fin de séance** : fenêtre « Bravo ! » avec le tonnage, l’écart avec la séance précédente et les nouveaux records
 - ✅ **Interface mobile optimisée** : en-tête fixe, navigation basse stable et zone de contenu défilante
 - ✅ **Mode hors-ligne complet** (PWA avec Service Worker)
@@ -114,7 +115,7 @@ suivi-fitness/
 ├── CHANGELOG.md        # Historique des versions
 ├── LICENSE, NOTICE     # Licence (PolyForm Strict 1.0.0) et composants tiers
 ├── tests/              # Tests automatiques (voir tests/README.md)
-├── js/                 # catalogue.js (exercices), programmes.js (onglet Programmes), Chart.js, qrcode.js et security.js
+├── js/                 # catalogue.js (exercices), programmes.js (onglet Programmes), aide.js (« Avec notre aide »), Chart.js, qrcode.js et security.js
 ├── css/                # Styles complémentaires (polices)
 ├── fonts/              # Polices embarquées
 └── icons/              # Icônes de l’application et des exercices
@@ -140,7 +141,7 @@ Copyright (c) 2026 Jean-Philippe Alexander. Code publié sous la licence **[Poly
 - ✅ **Autorisé** : utiliser l'application, lire le code, l'étudier, le tester à titre personnel et non commercial. Le code est public pour que chacun puisse vérifier ce que fait l'application de ses données.
 - ❌ **Interdit** : redistribuer le code, le modifier, en publier une version dérivée ou l'utiliser à des fins commerciales sans accord écrit.
 - Le nom « Mon Carnet de Salle », l'icône et les illustrations des exercices ne sont concédés sous aucune licence.
-- Les composants tiers (Chart.js, qrcode-generator, jsQR, polices) restent sous leur propre licence : voir [NOTICE](NOTICE).
+- Les composants tiers (Chart.js, qrcode-generator, jsQR, polices, icône Lucide) restent sous leur propre licence : voir [NOTICE](NOTICE).
 - Les fonds d'écran (`wallpapers/`) viennent de Pexels (Kettlebell, Rack, Disques, Fente, Haltères), d'Unsplash (Barre et Slam ball : Eduardo Cano ; Poigne : Farkas Mario ; Râtelier : Ambitious Studio, Rick Barrett ; Squat : Tyler Raye) ou sont des créations de l'auteur générées par IA (Manus : Squat avant, Salle blanche, Géométrie, Cordes ; ChatGPT : Suspension, Carnet WOD). Ils restent sous la licence de leur source et ne sont pas couverts par celle de l'application. Les illustrations des exercices sont des créations de l'auteur générées avec Meta AI. Détail : [`NOTICE`](NOTICE) et page [Crédits des images](credits.html).
 
 Seul le texte du fichier [LICENSE](LICENSE) fait foi. Pour toute autre utilisation, contacter l'auteur via le dépôt.

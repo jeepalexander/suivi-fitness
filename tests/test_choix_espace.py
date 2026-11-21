@@ -1,5 +1,5 @@
 """Écran « Ajouter » du bouton + (1.7.58, 1.8.63) : tout tient au-dessus du menu sans défiler, la dernière option à 32 px au-dessus du menu,
-« Ajouter » derrière la flèche, « Une séance » puis « Un programme », puis Restaurer, Recevoir et « Avec notre aide » (inactif), dès 360 × 844."""
+« Ajouter » derrière la flèche, « Une séance » puis « Un programme », puis Restaurer, Recevoir et « Avec notre aide » (actif depuis la 1.8.78), dès 360 × 844."""
 import sys
 from harness import Srv, newpage, sync_playwright
 
@@ -27,7 +27,7 @@ def main():
             check(f"{w}×{h} : dernière option à 32 px au-dessus du menu", r['gap'] == 32, r)
             check(f"{w}×{h} : « Ajouter » derrière la flèche, plus de « Choisis comment t'entraîner »", r['head'] == 'Ajouter' and r['ed'] == '8px' and pg.locator('.choose-lead').count() == 0, r)
             check(f"{w}×{h} : « Une séance » puis « Un programme »", r['cards'] == ['Une séance', 'Un programme'], r)
-            check(f"{w}×{h} : trois options, « Avec notre aide » inactive", [o[0].split('\n')[0].split(' (')[0] for o in r['opts']] == ['Restaurer un programme sauvegardé', 'Recevoir un programme', 'Avec notre aide'] and [o[1] for o in r['opts']] == [False, False, True], r)
+            check(f"{w}×{h} : trois options, « Avec notre aide » active", [o[0].split('\n')[0].split(' (')[0] for o in r['opts']] == ['Restaurer un programme sauvegardé', 'Recevoir un programme', 'Avec notre aide'] and [o[1] for o in r['opts']] == [False, False, False], r)
             check(f"{w}×{h} : aucune erreur JavaScript", not errs, errs)
             ctx.close()
         br.close()

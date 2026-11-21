@@ -158,6 +158,7 @@ function renderProgramOverview() {
   updateProgramHeader();
   if (programView === 'choose') { container.innerHTML = chooserHtml(); return; }
   if (programView === 'editor' && programDraft) { container.innerHTML = editorHtml(); bindEditor(); return; }
+  if (programView === 'aide' && typeof aideHtml === 'function') { container.innerHTML = aideHtml(); return; } // 1.8.78 : questionnaire « Avec notre aide »
   programView = 'home';
   document.body.dataset.pview = 'home';
   updateProgramHeader();
@@ -453,7 +454,7 @@ function chooserHtml() {
     <div class="choose-options">
       <button type="button" class="choose-recv" onclick="openProgramRestore()">${RESTORE_SVG}Restaurer un programme sauvegardé</button>
       ${receiveProgramButtonHtml()}
-      <button type="button" class="choose-recv" disabled aria-disabled="true">${AIDE_SVG}Avec notre aide <span class="choose-soon">(bientôt disponible)</span></button>
+      <button type="button" class="choose-recv" onclick="openAide()">${AIDE_SVG}Avec notre aide</button>
     </div>`;
 }
 
@@ -462,17 +463,21 @@ function chooserHtml() {
 // ============================================================
 function draftSnapshot(d) { return JSON.stringify({ n: d.name, s: d.sessions }); }
 
-function startProgramEditor(kind, id) {
+// preset (1.8.78, « Avec notre aide ») : brouillon proposé { name, goal, sessions } ; quitter l'éditeur sans enregistrer
+// demande confirmation, comme pour une saisie à la main.
+function startProgramEditor(kind, id, preset) {
   const p = id ? getProgram(id) : null;
   const sessions = p
     ? JSON.parse(JSON.stringify(p.sessions))
+    : preset ? JSON.parse(JSON.stringify(preset.sessions))
     : (kind === 'libre' ? [{ key: '', name: '', exercises: [] }] : SESSION_KEYS.slice(0, 3).map(k => ({ key: k, name: '', exercises: [] })));
-  programDraft = { id: p ? p.id : null, kind: p ? p.kind : kind, name: p ? p.name : '', sessions, idx: 0 };
+  programDraft = { id: p ? p.id : null, kind: p ? p.kind : kind, name: p ? p.name : (preset ? preset.name : ''), sessions, idx: 0,
+    goal: p ? (p.goal || null) : (preset ? preset.goal : null), fromAide: !!preset };
   if (p && !isLibre(p)) {
     const i = p.sessions.findIndex(s => s.key === p.nextKey);
     programDraft.idx = i >= 0 ? i : 0;
   }
-  programDraft.start = draftSnapshot(programDraft);
+  programDraft.start = preset ? draftSnapshot({ name: '', sessions: [] }) : draftSnapshot(programDraft);
   setProgramView('editor');
 }
 
@@ -495,7 +500,8 @@ function exerciseSubText(e) {
     return info.mode === 'floors' ? 'Cardio · durée, étages' : 'Cardio · durée, distance';
   }
   const n = e.sets || info.sets || 3;
-  return `${n} série${n > 1 ? 's' : ''} · ${info.mode === 'time' ? info.reps : (info.reps || '') + ' reps'}`;
+  const reps = goalPrescription(info, programDraft && programDraft.goal).reps; // 1.8.78 : répétitions de l'objectif du programme
+  return `${n} série${n > 1 ? 's' : ''} · ${info.mode === 'time' ? reps : (reps || '') + ' reps'}`;
 }
 
 function editorHtml() {
@@ -614,8 +620,9 @@ async function programEditorBack() {
   if (programDraft && draftSnapshot(programDraft) !== programDraft.start
       && !await askSheet(LEAVE_EDITOR_ASK)) return;
   const wasNew = programDraft && !programDraft.id;
+  const fromAide = programDraft && programDraft.fromAide;
   programDraft = null;
-  setProgramView(wasNew ? 'choose' : 'home');
+  setProgramView(fromAide ? 'aide' : wasNew ? 'choose' : 'home'); // 1.8.78 : retour sur la proposition d'« Avec notre aide »
 }
 
 // Résumé quand des séances sont encore vides à l'enregistrement (1.7.28)
@@ -682,6 +689,7 @@ function saveProgramDraft() {
       createdAt: now, activatedAt: active ? null : now, pausedAt: null, savedAt: now,
       nextKey: libre ? '' : 'A', sessions
     };
+    if (PROGRAM_GOALS.includes(d.goal)) p.goal = d.goal; // 1.8.78 : objectif choisi dans « Avec notre aide »
     state.programs.push(p);
     startNow = libre && !active;
   }

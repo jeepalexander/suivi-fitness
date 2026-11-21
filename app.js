@@ -550,15 +550,37 @@ function exInfo(ref) {
   return CATALOGUE_BY_NAME[name] || { id: null, name, group: '', mode: 'weight', sets: 3, reps: '8–12', rest: REST_DURATION };
 }
 
+// 1.8.78 (co-auteur : Claude) : objectif d'un programme (« Avec notre aide »). La force et l'endurance ont leurs propres
+// répétitions et repos ; sans objectif (programmes faits à la main) ou pour les autres objectifs, ceux du catalogue.
+//   force : polyarticulaires lourds 3–6 réps, 3:00 ; autres polyarticulaires 6–8 réps, 2:30 (ACSM 2009 et 2026)
+//   endurance : 15–20 réps, 1:00 sur les polyarticulaires, 0:45 sur l'isolation (ACSM 2009)
+// Abdos, gainage, exercices en durée et cardio gardent toujours les réglages du catalogue.
+const PROGRAM_GOALS = ['masse', 'force', 'forme', 'endurance', 'gras'];
+function goalPrescription(ref, goal) {
+  const info = typeof ref === 'object' && ref ? ref : exInfo(ref);
+  const base = { reps: info.reps, rest: info.rest };
+  if (!goal || info.cardio || info.mode === 'time' || info.group === 'Abdos' || info.group === 'Cardio') return base;
+  if (goal === 'force') {
+    if (!info.poly) return base;
+    return (info.rest || 0) >= 180 ? { reps: '3–6', rest: 180 } : { reps: '6–8', rest: 150 };
+  }
+  if (goal === 'endurance') return { reps: '15–20', rest: info.poly ? 60 : 45 };
+  return base;
+}
+function activePrescription(name) {
+  const p = typeof getActiveProgram === 'function' ? getActiveProgram() : null;
+  return goalPrescription(exInfo(name), p && p.goal);
+}
+
 function exMode(name) { return exInfo(name).mode; }
 function isCardioName(name) { return !!exInfo(name).cardio; }
 function isCardioDistName(name) { const e = exInfo(name); return !!e.cardio && e.mode === 'dist'; }
 
 // Valeur proposée la première fois, dans la fourchette du catalogue (« 6–10 » -> 8, « 8–12 » -> 10…) ;
 // pour un exercice en durée (gainage « 20–45 s »), une durée en secondes.
-const DEFAULT_REPS = { '6–10': 8, '8–12': 10, '10–15': 12, '12–15': 12, '8–15': 10, '15–20': 15, '20–30': 20, '20–45 s': 30 };
+const DEFAULT_REPS = { '3–6': 5, '6–8': 7, '6–10': 8, '8–12': 10, '10–15': 12, '12–15': 12, '8–15': 10, '15–20': 15, '20–30': 20, '20–45 s': 30 };
 function defaultRepsFor(name) {
-  const r = exInfo(name).reps || '';
+  const r = activePrescription(name).reps || '';
   if (DEFAULT_REPS[r] !== undefined) return DEFAULT_REPS[r];
   const m = /^(\d+)/.exec(r);
   return m ? +m[1] : '';
@@ -1039,7 +1061,7 @@ function runRestTimer(endTime) {
 // Repos adapté à l'exercice : durée (s) associée à un exercice, ou repos par défaut
 // (repos du catalogue : 3:00 polyarticulaire lourd, 2:00 polyarticulaire, 1:30 isolation, 1:00 abdos / gainage)
 function restDurationFor(exName) {
-  return exInfo(exName).rest || REST_DURATION;
+  return activePrescription(exName).rest || REST_DURATION;
 }
 
 // Durée du prochain repos : celle de l'exercice actuellement ouvert dans la Séance
@@ -1664,7 +1686,7 @@ function exerciseLastTimeText(exName, occ = 0) {
   if (info.cardio || !info.reps) return 'Première fois';
   const defEx = findProgramExercise(exName);
   const n = defEx ? defEx.seriesCount : (info.sets || 3);
-  return `Première fois · ${n} × ${info.reps}${info.mode === 'time' ? '' : ' réps'}`;
+  return `Première fois · ${n} × ${activePrescription(exName).reps}${info.mode === 'time' ? '' : ' réps'}`;
 }
 
 // Ouvre un seul exercice à la fois, met en évidence la série en cours et met à jour les libellés

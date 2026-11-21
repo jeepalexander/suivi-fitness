@@ -1333,3 +1333,53 @@ body.intro .onb { animation: introOut 0.3s ease-in both; }
 .onb-go { flex: none; width: 52px; height: 52px; padding: 0; display: flex; align-items: center; justify-content: center; border: none; border-radius: 50%; background: var(--primary-strong); color: var(--on-strong); box-shadow: var(--sh-btn); cursor: pointer; }
 .onb-go svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .onb-go:disabled { opacity: 0.4; box-shadow: none; cursor: default; }
+
+/* 1.8.78 (co-auteur : Claude) : « Avec notre aide », questionnaire et proposition (planches 39 à 39g).
+   Pas de menu ni de flèche en haut ; barre de progression en 5 tirets ; réponses écrites avec un cercle (choix unique)
+   ou un carré (choix multiple), coche verte épaisse une fois choisie ; Retour et Suivant sur une ligne. */
+body[data-pview="aide"] nav { display: none !important; }
+body[data-pview="aide"]::after { display: none; }
+body[data-pview="aide"] #app-scroll { padding-bottom: calc(20px + var(--safe-bottom)); }
+body[data-tab="programme"][data-pview="aide"] header h1 { display: none; }
+.aide-head { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.aide-bar { display: flex; gap: 6px; }
+.aide-bar span { flex: 1; height: 6px; border-radius: 3px; background: var(--fill); }
+.aide-bar span.on { background: var(--inv-surface); }
+.aide-step { margin-top: 6px; font-size: 0.875rem; color: var(--text-muted); }
+.aide-q { margin: 0; font-family: var(--font-display); font-size: 1.375rem; font-weight: 700; line-height: 1.2; color: var(--text); }
+.aide-rows { display: flex; flex-direction: column; }
+.aide-row { width: 100%; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 4px 0; border: none; background: none; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.aide-row-t { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.aide-row-t b { font-size: 1.0625rem; font-weight: 600; }
+.aide-row-t span { font-size: 0.875rem; color: var(--text-muted); }
+.aide-tick { flex: none; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: var(--success); }
+.aide-tick i { display: block; width: 22px; height: 22px; border: 2px solid var(--text); border-radius: 50%; box-sizing: border-box; }
+.aide-tick.sq i { border-radius: 6px; }
+.aide-tick svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 3.6; stroke-linecap: round; stroke-linejoin: round; }
+.aide-sub { display: flex; flex-direction: column; padding-left: 40px; }
+.aide-sub .aide-row { min-height: 48px; }
+.aide-sub .aide-tick, .aide-sub .aide-tick svg { width: 24px; height: 24px; }
+.aide-nav { display: flex; gap: 8px; align-items: center; }
+.aide-nav .btn { margin: 0; height: 56px; }
+.aide-nav .btn:not(.btn-secondary) { flex: 1; background: var(--inv-surface); color: var(--inv-text); }
+.aide-nav .btn.btn-secondary { flex: 0 0 34%; background: var(--fill); color: var(--text); box-shadow: none; font-weight: 600; }
+.aide-nav .btn:disabled { opacity: 0.4; cursor: default; }
+.aide-amber { align-items: center; color: var(--text); }
+.aide-amber .advice-text { color: var(--text); }
+.aide-amber-ico { flex: none; width: 24px; height: 24px; color: var(--warn); }
+.aide-amber-ico svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.aide-reco { margin: 0 0 12px; }
+.aide-end { margin-top: 16px; }
+.aide-why { flex-direction: column; gap: 12px; margin: 12px 0 0; }
+.aide-why-h { font-family: var(--font-display); font-size: 1.0625rem; font-weight: 700; }
+.aide-why p { margin: 0; font-size: 0.9375rem; line-height: 1.45; }
+.aide-why small { display: block; margin-top: 2px; font-size: 0.8125rem; color: var(--text-muted); }
+.aide-sessions { position: relative; display: flex; flex-direction: column; }
+.aide-line { position: absolute; left: 21px; top: 30px; bottom: 30px; border-left: 2px dotted color-mix(in srgb, var(--text) 40%, transparent); pointer-events: none; }
+.aide-sess { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+.aide-sess .type-pill { position: relative; z-index: 1; }
+.aide-sess-t { display: flex; flex-direction: column; gap: 1px; }
+.aide-sess-t b { font-size: 1.0625rem; font-weight: 600; }
+.aide-sess-t span { font-size: 0.875rem; color: var(--text-muted); }
+.aide-sess-ex { padding-left: 56px; margin: 0 0 8px; }
+.aide-detail-btn { align-self: flex-start; position: relative; z-index: 1; height: 44px; margin-top: 4px; padding: 0 20px; border: none; border-radius: 999px; background: var(--fill); color: var(--text); font: inherit; font-size: 0.9375rem; font-weight: 600; cursor: pointer; }
