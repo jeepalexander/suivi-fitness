@@ -7,6 +7,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.79] - 2026-11-22
+### Corrigé
+- Si l'enregistrement local d'une séance échoue, le brouillon et le chrono restent disponibles. Un message permet de repérer l'échec et de réessayer sans ajouter de doublon à l'historique.
+
+---
+
 ## [1.8.78] - 2026-11-21
 ### 🧭 « Avec notre aide » : programme sur mesure (co-auteur : Claude)
 - Menu + › **« Avec notre aide »** est actif : un questionnaire de 5 questions (objectif, niveau, temps par séance, séances par semaine, matériel) propose une séance ou un programme, puis l'ouvre dans l'éditeur pour l'ajuster et lui donner un nom. Tout est calculé sur le téléphone ; les réponses ne sont pas gardées.

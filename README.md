@@ -2,7 +2,7 @@
 
 **Application PWA de suivi d'entraînement en salle de sport** (dépôt `suivi-fitness`)
 
-[![Version](https://img.shields.io/badge/version-1.8.71-blue)](https://github.com/jeepalexander/suivi-fitness)
+[![Version](https://img.shields.io/badge/version-1.8.79-blue)](https://github.com/jeepalexander/suivi-fitness)
 [![Licence](https://img.shields.io/badge/licence-PolyForm%20Strict%201.0.0-lightgrey)](LICENSE)
 
 ---
@@ -12,7 +12,7 @@
 - ✅ **Programmes sur mesure** : 2 à 6 séances (A à F) qui tournent en boucle, ou **séances libres** ; un seul élément actif, les autres en mémoire (activation, appui long pour modifier)
 - ✅ **Catalogue de 86 exercices** (`js/catalogue.js`) : séries, répétitions et repos par défaut issus de la littérature, modes de saisie (kg × réps, poids du corps + lest, réps, durée, cardio durée + distance ou étages), filtre « Polyarticulaires » (34 exercices)
 - ✅ **Suivi des séances** : poids, répétitions, séries, tonnage, durée et historique détaillé
-- ✅ **Brouillon de séance** : la saisie en cours est sauvegardée automatiquement et restaurée après un rechargement ou une fermeture de l’application
+- ✅ **Brouillon de séance** : la saisie en cours est sauvegardée automatiquement et restaurée après un rechargement ou une fermeture de l’application. Si l’enregistrement d’une séance échoue, le brouillon et le chrono ne sont pas effacés (1.8.79).
 - ✅ **Progression** : indice de progression, volume total, progression par exercice (charge max avec **1RM estimé** en pointillé, ou répétitions pour le poids du corps) et poids corporel
 - ✅ **Analyse mensuelle** : records, paliers détectés par exercice et progression par séance, par programme ou pour tous les programmes
 - ✅ **Gestion automatique du deload** (séances 10 à 12 de chaque cycle), reportable d'une séance
