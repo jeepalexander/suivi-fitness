@@ -2793,7 +2793,7 @@ function refreshSessionFilteredCharts() {
   renderCardioChart();
 }
 
-// Exercices à charge (catalogue + historique, hors cardio), ceux du programme actif d'abord
+// Exercices à charge (filtrés selon le scope statistique sélectionné), ceux du programme actif d'abord
 function populateExerciseSelect() {
   const select = document.getElementById('exercise-filter');
   if(!select) return;
@@ -2816,13 +2816,28 @@ function populateExerciseSelect() {
     return;
   }
   if (card) card.hidden = false;
-  const active = getActiveProgram();
-  if (active) active.sessions.forEach(s => (s.exercises || []).forEach(e => add(exInfo(e.exId).name)));
-  const others = [];
-  getPrograms().forEach(p => p.sessions.forEach(s => (s.exercises || []).forEach(e => others.push(exInfo(e.exId).name))));
-  (state.history || []).forEach(h => (h.exercises || []).forEach(ex => { if (!ex.cardio) others.push(ex.name); }));
-  others.map(canonicalExerciseName).sort((a, b) => a.localeCompare(b, 'fr')).forEach(add);
+  
+  const scope = currentStatsScope();
+  if (scope === 'all') {
+    // Mode "Tous les programmes" : afficher tous les exercices (catalogue + historique)
+    const active = getActiveProgram();
+    if (active) active.sessions.forEach(s => (s.exercises || []).forEach(e => add(exInfo(e.exId).name)));
+    const others = [];
+    getPrograms().forEach(p => p.sessions.forEach(s => (s.exercises || []).forEach(e => others.push(exInfo(e.exId).name))));
+    (state.history || []).forEach(h => (h.exercises || []).forEach(ex => { if (!ex.cardio) others.push(ex.name); }));
+    others.map(canonicalExerciseName).sort((a, b) => a.localeCompare(b, 'fr')).forEach(add);
+  } else {
+    // Mode programme/séance spécifique : afficher uniquement les exercices de ce scope
+    const hist = statsHistory(scope);
+    hist.forEach(h => (h.exercises || []).forEach(ex => { if (!ex.cardio) add(ex.name); }));
+    // Ajouter aussi les exercices du programme lui-même (pas seulement ceux de l'historique)
+    const program = getProgram(scope);
+    if (program) {
+      program.sessions.forEach(s => (s.exercises || []).forEach(e => add(exInfo(e.exId).name)));
+    }
+  }
 
+  names.sort((a, b) => a.localeCompare(b, 'fr'));
   names.forEach(exName => {
     const opt = document.createElement('option');
     opt.value = exName;

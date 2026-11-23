@@ -7,6 +7,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.81] - 2026-11-22
+### Progression (co-auteur : Vibe Code)
+- Correction : le filtre des exercices n'affichait que ceux du programme actif et de l'historique complet. Désormais, il n'affiche que les exercices du programme ou de la séance libre sélectionnée dans les statistiques.
+
+---
+
 ## [1.8.80] - 2026-11-22
 ### Séance (co-auteur : Vibe Code)
 - Correction : réinitialisation de `workoutDef` lors du changement d'onglet vers Séance pour éviter un pop-up de fin de séance manquant quand le programme a été désactivé entre-temps.
