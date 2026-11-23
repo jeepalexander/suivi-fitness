@@ -23,6 +23,9 @@ Composants tiers inclus, qui restent sous leur propre licence
 - qrcode-generator 2.0.4 (js/qrcode.js), Copyright (c) 2009 Kazuhiko Arase : licence MIT
 - jsQR 1.4.0 (js/jsqr.min.js), https://github.com/cozmo/jsQR : licence Apache 2.0
 - Polices Caveat, Figtree et Saira Semi Condensed (dossier fonts/) : licence SIL Open Font License 1.1
+- Icône « pointer » de Lucide (js/aide.js), https://lucide.dev : licence ISC,
+  Copyright (c) for portions of Lucide are held by Cole Bemis 2013-2022 as part of Feather (MIT).
+  All other copyright (c) for Lucide are held by Lucide Contributors 2022.
 
 ------------------------------------------------------------------------
 Fonds d'écran (dossier wallpapers/)

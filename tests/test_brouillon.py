@@ -1,4 +1,4 @@
-"""Brouillon de séance : la saisie en cours survit à un rechargement (17 contrôles)."""
+"""Brouillon de séance : la saisie survit à un rechargement et à un échec d'écriture locale."""
 import json, sys
 from harness import *
 def snap(pg):
@@ -54,8 +54,40 @@ with Srv() as base, sync_playwright() as p:
     check('saisie en modification : n\'écrase pas le brouillon',json.loads(pg.evaluate("localStorage.getItem('h49_draft')"))['exercises'][1]['sets'][0]['w']=='61.5')
     pg.evaluate("cancelEditSession()"); pg.wait_for_timeout(500); pg.evaluate("switchTab('seance')")
     f=snap(pg); check('après annulation : saisie en cours retrouvée',[(r['n'],r['sets']) for r in f['rows']]==[(r['n'],r['sets']) for r in a['rows']])
-    # enregistrement : brouillon effacé, formulaire neuf
-    pg.on('dialog',accept_once); pg.click('#submit-workout-btn'); pg.wait_for_timeout(700)
+    # L'écriture de la séance échoue, mais les autres clés restent accessibles.
+    fail_write = """(() => {
+      const setItem = Storage.prototype.setItem;
+      Storage.prototype.setItem = function(key, value) {
+        if (this === localStorage && key === 'h49_state' && sessionStorage.getItem('failWorkoutWrite')) {
+          throw new DOMException('Stockage plein', 'QuotaExceededError');
+        }
+        return setItem.call(this, key, value);
+      };
+    })()"""
+    pg.add_init_script(fail_write)
+    pg.evaluate(fail_write)
+    pg.evaluate("sessionStorage.setItem('failWorkoutWrite', '1')")
+    before = pg.evaluate("() => [JSON.stringify(state), localStorage.getItem('h49_state'), localStorage.getItem('h49_draft'), localStorage.getItem('workout_start_time')]")
+    dialogs = []
+    def capture(d):
+        dialogs.append(d.message)
+        accept_once(d)
+    pg.on('dialog', capture)
+    pg.click('#submit-workout-btn')
+    after = pg.evaluate("() => [JSON.stringify(state), localStorage.getItem('h49_state'), localStorage.getItem('h49_draft'), localStorage.getItem('workout_start_time')]")
+    check('échec signalé, sans confirmation de succès', any('Séance non enregistrée' in msg for msg in dialogs) and pg.locator('.finish-ok').count()==0)
+    check('échec : état, historique, brouillon et chrono inchangés', before==after and bool(after[2]) and bool(after[3]))
+    pg.reload()
+    pg.locator('#exercises-list .set-row.done').first.wait_for(state='attached')
+    pg.click('#nav-seance')
+    restored=snap(pg)
+    check('stockage toujours plein après rechargement : formulaire et séries restaurés', [(r['n'],r['sets']) for r in restored['rows']]==[(r['n'],r['sets']) for r in a['rows']])
+    pg.evaluate("sessionStorage.removeItem('failWorkoutWrite')")
+    # nouvel essai : une seule séance ajoutée, brouillon effacé
+    pg.click('#submit-workout-btn')
+    pg.wait_for_selector('.finish-ok')
+    pg.click('.finish-ok')
+    check('nouvel essai : une seule nouvelle séance enregistrée', pg.evaluate("JSON.parse(localStorage.getItem('h49_state')).history.length")==len(json.loads(before[1])['history'])+1)
     g=snap(pg); check('séance enregistrée : brouillon effacé',not g['draft'])
     pg.reload(); pg.wait_for_timeout(900); pg.evaluate("switchTab('seance')"); h=snap(pg)
     check('rechargement après enregistrement : formulaire neuf (pas de fantôme)',not any(s[2] or s[3] for r in h['rows'] for s in r['sets']))

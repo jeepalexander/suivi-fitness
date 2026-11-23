@@ -34,7 +34,7 @@ async function shareStream(bytes, Stream) {
 
 async function encodeProgram(p) {
   const data = {
-    v: 1, n: p.name, k: isLibre(p) ? 'l' : 'p',
+    v: 1, n: p.name, k: isLibre(p) ? 'l' : 'p', ...(PROGRAM_GOALS.includes(p.goal) ? { g: p.goal } : {}),
     s: (p.sessions || []).map(s => [s.key || '', s.name || '', (s.exercises || []).map(e => [e.exId, e.sets || 3])])
   };
   return shareB64u(await shareStream(new TextEncoder().encode(JSON.stringify(data)), CompressionStream));
@@ -59,7 +59,8 @@ async function decodeProgram(code) {
     if (!sessions.every(s => s.exercises.length)) return null;
     const name = clean(o.n, 60) || (libre ? 'Séance libre' : 'Programme reçu');
     if (libre) sessions[0].name = name;
-    return { name, kind: libre ? 'libre' : 'program', sessions };
+    const goal = PROGRAM_GOALS.includes(o.g) ? o.g : null; // 1.8.78 : objectif du programme (répétitions et repos)
+    return { name, kind: libre ? 'libre' : 'program', sessions, goal };
   } catch (e) {
     return null;
   }
@@ -145,7 +146,7 @@ function addReceivedProgram() {
   state.programs.push({
     id: newProgramId(), name, kind: p.kind, status: active ? 'new' : 'active',
     createdAt: now, activatedAt: active ? null : now, pausedAt: null, savedAt: now, receivedAt: now,
-    nextKey: p.kind === 'libre' ? '' : 'A', sessions: p.sessions
+    nextKey: p.kind === 'libre' ? '' : 'A', sessions: p.sessions, ...(p.goal ? { goal: p.goal } : {})
   });
   normalizePrograms();
   // 1.8.28 : reçu sur un téléphone sans programme actif, il devient actif : l'onglet Séance doit le charger

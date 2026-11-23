@@ -486,11 +486,15 @@ function openInviteSheet() {
 // ============================================================
 // 4. DONNÉES : SAUVEGARDE ET OUTILS COMMUNS
 // ============================================================
+function writeLocalState(data) {
+  localStorage.setItem('h49_state', JSON.stringify(data));
+}
+
 function saveState() {
   if (state && state.history) {
     state.history.sort((a, b) => new Date(a.date) - new Date(b.date));
   }
-  localStorage.setItem('h49_state', JSON.stringify(state));
+  writeLocalState(state);
   scheduleDriveSync(); // Google Drive : la sauvegarde complète suit les modifications (si l'accès est valide)
 }
 
@@ -534,7 +538,6 @@ function recalculateHistoryTonnages() {
   });
 
   state.history.sort((a, b) => new Date(a.date) - new Date(b.date));
-  saveState();
 }
 
 // --- Exercices du catalogue ---
@@ -550,15 +553,37 @@ function exInfo(ref) {
   return CATALOGUE_BY_NAME[name] || { id: null, name, group: '', mode: 'weight', sets: 3, reps: '8–12', rest: REST_DURATION };
 }
 
+// 1.8.78 (co-auteur : Claude) : objectif d'un programme (« Avec notre aide »). La force et l'endurance ont leurs propres
+// répétitions et repos ; sans objectif (programmes faits à la main) ou pour les autres objectifs, ceux du catalogue.
+//   force : polyarticulaires lourds 3–6 réps, 3:00 ; autres polyarticulaires 6–8 réps, 2:30 (ACSM 2009 et 2026)
+//   endurance : 15–20 réps, 1:00 sur les polyarticulaires, 0:45 sur l'isolation (ACSM 2009)
+// Abdos, gainage, exercices en durée et cardio gardent toujours les réglages du catalogue.
+const PROGRAM_GOALS = ['masse', 'force', 'forme', 'endurance', 'gras'];
+function goalPrescription(ref, goal) {
+  const info = typeof ref === 'object' && ref ? ref : exInfo(ref);
+  const base = { reps: info.reps, rest: info.rest };
+  if (!goal || info.cardio || info.mode === 'time' || info.group === 'Abdos' || info.group === 'Cardio') return base;
+  if (goal === 'force') {
+    if (!info.poly) return base;
+    return (info.rest || 0) >= 180 ? { reps: '3–6', rest: 180 } : { reps: '6–8', rest: 150 };
+  }
+  if (goal === 'endurance') return { reps: '15–20', rest: info.poly ? 60 : 45 };
+  return base;
+}
+function activePrescription(name) {
+  const p = typeof getActiveProgram === 'function' ? getActiveProgram() : null;
+  return goalPrescription(exInfo(name), p && p.goal);
+}
+
 function exMode(name) { return exInfo(name).mode; }
 function isCardioName(name) { return !!exInfo(name).cardio; }
 function isCardioDistName(name) { const e = exInfo(name); return !!e.cardio && e.mode === 'dist'; }
 
 // Valeur proposée la première fois, dans la fourchette du catalogue (« 6–10 » -> 8, « 8–12 » -> 10…) ;
 // pour un exercice en durée (gainage « 20–45 s »), une durée en secondes.
-const DEFAULT_REPS = { '6–10': 8, '8–12': 10, '10–15': 12, '12–15': 12, '8–15': 10, '15–20': 15, '20–30': 20, '20–45 s': 30 };
+const DEFAULT_REPS = { '3–6': 5, '6–8': 7, '6–10': 8, '8–12': 10, '10–15': 12, '12–15': 12, '8–15': 10, '15–20': 15, '20–30': 20, '20–45 s': 30 };
 function defaultRepsFor(name) {
-  const r = exInfo(name).reps || '';
+  const r = activePrescription(name).reps || '';
   if (DEFAULT_REPS[r] !== undefined) return DEFAULT_REPS[r];
   const m = /^(\d+)/.exec(r);
   return m ? +m[1] : '';
@@ -584,9 +609,9 @@ function escapeHtml(str) {
 // state.programs : [{ id, name, kind: 'program' | 'libre', status: 'active' | 'paused' | 'new', createdAt, activatedAt,
 //   pausedAt, savedAt, nextKey, sessions: [{ key: 'A'..'F' ('' pour une séance libre), name, exercises: [{ exId, sets }] }] }]
 // Un seul élément est actif à la fois. Chaque séance de l'historique garde une copie du nom de son programme.
-function getPrograms() { return (state && Array.isArray(state.programs)) ? state.programs : []; }
+function getPrograms(data = state) { return (data && Array.isArray(data.programs)) ? data.programs : []; }
 function getProgram(id) { return getPrograms().find(p => p.id === id) || null; }
-function getActiveProgram() { return getPrograms().find(p => p.status === 'active') || null; }
+function getActiveProgram(data = state) { return getPrograms(data).find(p => p.status === 'active') || null; }
 function newProgramId() { return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 function isLibre(p) { return !!p && p.kind === 'libre'; }
 
@@ -604,10 +629,10 @@ function sessionLabel(p, session) {
 }
 
 // Séance suivante de la rotation : celle qui suit la dernière séance faite de ce programme
-function nextKeyFromHistory(p) {
+function nextKeyFromHistory(p, history = state && state.history) {
   if (!p || isLibre(p) || !p.sessions.length) return p && p.sessions[0] ? p.sessions[0].key : '';
   const keys = p.sessions.map(s => s.key);
-  const hist = (state.history || []).filter(h => h.programId === p.id && keys.includes(h.sessionKey));
+  const hist = (history || []).filter(h => h.programId === p.id && keys.includes(h.sessionKey));
   if (!hist.length) return keys.includes(p.nextKey) ? p.nextKey : keys[0];
   const last = hist.slice().sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : (a.id || 0) - (b.id || 0))).pop();
   return keys[(keys.indexOf(last.sessionKey) + 1) % keys.length];
@@ -622,9 +647,9 @@ function currentSessionDef() {
 }
 
 // Compatibilité : nextType reste renseigné (anciennes sauvegardes, import) avec la séance suivante du programme actif
-function syncNextType() {
-  const p = getActiveProgram();
-  state.nextType = p && !isLibre(p) && p.nextKey ? p.nextKey : 'A';
+function syncNextType(data = state) {
+  const p = getActiveProgram(data);
+  data.nextType = p && !isLibre(p) && p.nextKey ? p.nextKey : 'A';
 }
 
 // Pastille d'une séance de l'historique (lettre de couleur ou « 1× » sable)
@@ -1039,7 +1064,7 @@ function runRestTimer(endTime) {
 // Repos adapté à l'exercice : durée (s) associée à un exercice, ou repos par défaut
 // (repos du catalogue : 3:00 polyarticulaire lourd, 2:00 polyarticulaire, 1:30 isolation, 1:00 abdos / gainage)
 function restDurationFor(exName) {
-  return exInfo(exName).rest || REST_DURATION;
+  return activePrescription(exName).rest || REST_DURATION;
 }
 
 // Durée du prochain repos : celle de l'exercice actuellement ouvert dans la Séance
@@ -1664,7 +1689,7 @@ function exerciseLastTimeText(exName, occ = 0) {
   if (info.cardio || !info.reps) return 'Première fois';
   const defEx = findProgramExercise(exName);
   const n = defEx ? defEx.seriesCount : (info.sets || 3);
-  return `Première fois · ${n} × ${info.reps}${info.mode === 'time' ? '' : ' réps'}`;
+  return `Première fois · ${n} × ${activePrescription(exName).reps}${info.mode === 'time' ? '' : ' réps'}`;
 }
 
 // Ouvre un seul exercice à la fois, met en évidence la série en cours et met à jour les libellés
@@ -1985,7 +2010,6 @@ async function submitWorkout(e) {
   let totalTonnage = 0;
   let exerciseLogs = [];
 
-  if (!state.lastWeights) state.lastWeights = {};
   const isEditing = editingOriginalId !== null;
   const bodyKg = latestBodyWeight();
 
@@ -2056,6 +2080,10 @@ async function submitWorkout(e) {
     if (!workoutDef) return;
   }
 
+  // 1.8.79 : préparer la séance sans modifier l'état courant tant que l'écriture locale peut échouer.
+  const nextState = { ...state, history: state.history.slice(), lastWeights: { ...state.lastWeights } };
+  if (Array.isArray(state.programs)) nextState.programs = JSON.parse(JSON.stringify(state.programs));
+
   // 1.7.59 : un journal par passage (un exercice peut revenir plusieurs fois dans la séance)
   const logFor = (exName, cardio, occ = 0) => {
     let exLog = exerciseLogs.find(x => x.name === exName && exOccOf(x) === occ);
@@ -2105,7 +2133,7 @@ async function submitWorkout(e) {
     if (w > exLog.maxWeight) exLog.maxWeight = w;
 
     // On ne touche pas aux dernières charges quand on corrige une ancienne séance
-    if (!isEditing && mode === 'weight') state.lastWeights[exName] = w;
+    if (!isEditing && mode === 'weight') nextState.lastWeights[exName] = w;
   });
 
   // En modification sans chrono lancé, on garde la durée d'origine (même si elle n'était pas renseignée)
@@ -2141,16 +2169,17 @@ async function submitWorkout(e) {
 
   // En modification, la séance d'origine est encore dans l'historique : on la remplace
   if (isEditing) {
-    const originalIdx = state.history.findIndex(h => h.id === editingOriginalId);
-    if (originalIdx !== -1) state.history.splice(originalIdx, 1);
+    const originalIdx = nextState.history.findIndex(h => h.id === editingOriginalId);
+    if (originalIdx !== -1) nextState.history.splice(originalIdx, 1);
   }
 
-  state.history.push(entry);
-  state.history.sort((a, b) => new Date(a.date) - new Date(b.date));
+  nextState.history.push(entry);
+  nextState.history.sort((a, b) => new Date(a.date) - new Date(b.date));
 
   // Programme : le nombre de séries fait devient la référence ; la rotation passe à la séance suivante.
   // Une séance libre reste active.
-  const p = def.programId ? getProgram(def.programId) : null;
+  const programs = getPrograms(nextState);
+  const p = def.programId ? programs.find(pr => pr.id === def.programId) : null;
   if (p && !isEditing) {
     const session = isLibre(p) ? p.sessions[0] : p.sessions.find(s => s.key === def.key);
     if (session) {
@@ -2164,16 +2193,24 @@ async function submitWorkout(e) {
       });
     }
   }
-  getPrograms().forEach(pr => { if (!isLibre(pr)) pr.nextKey = nextKeyFromHistory(pr); });
-  if (state.deload && !isEditing) state.deload.postponedAt = null; // le report est consommé par cette séance
-  syncNextType();
+  programs.forEach(pr => { if (!isLibre(pr)) pr.nextKey = nextKeyFromHistory(pr, nextState.history); });
+  if (state.deload && !isEditing) nextState.deload = { ...state.deload, postponedAt: null };
+  syncNextType(nextState);
+
+  try {
+    writeLocalState(nextState);
+  } catch (e) {
+    appAlert('Séance non enregistrée', "Impossible d'écrire dans le stockage de cet appareil. Ta saisie est toujours à l'écran. Vérifie l'espace disponible, puis réessaie.", 'warn');
+    return;
+  }
+  state = nextState;
 
   clearEditState();
   localStorage.removeItem('workout_start_time');
   // Une séance enregistrée vide le brouillon ; une modification d'ancienne séance le laisse intact
   if (!isEditing) clearDraft();
 
-  saveState();
+  scheduleDriveSync();
 
   // Sauvegarde automatique Google Drive (si connecté) : fichier de sauvegarde complète mis à jour.
   // 1.7.63 : après une nouvelle séance, l'envoi (et une éventuelle reconnexion à Google, qui quitte l'application)
@@ -2756,7 +2793,7 @@ function refreshSessionFilteredCharts() {
   renderCardioChart();
 }
 
-// Exercices à charge (catalogue + historique, hors cardio), ceux du programme actif d'abord
+// Exercices à charge (filtrés selon le scope statistique sélectionné), ceux du programme actif d'abord
 function populateExerciseSelect() {
   const select = document.getElementById('exercise-filter');
   if(!select) return;
@@ -2779,13 +2816,28 @@ function populateExerciseSelect() {
     return;
   }
   if (card) card.hidden = false;
-  const active = getActiveProgram();
-  if (active) active.sessions.forEach(s => (s.exercises || []).forEach(e => add(exInfo(e.exId).name)));
-  const others = [];
-  getPrograms().forEach(p => p.sessions.forEach(s => (s.exercises || []).forEach(e => others.push(exInfo(e.exId).name))));
-  (state.history || []).forEach(h => (h.exercises || []).forEach(ex => { if (!ex.cardio) others.push(ex.name); }));
-  others.map(canonicalExerciseName).sort((a, b) => a.localeCompare(b, 'fr')).forEach(add);
+  
+  const scope = currentStatsScope();
+  if (scope === 'all') {
+    // Mode "Tous les programmes" : afficher tous les exercices (catalogue + historique)
+    const active = getActiveProgram();
+    if (active) active.sessions.forEach(s => (s.exercises || []).forEach(e => add(exInfo(e.exId).name)));
+    const others = [];
+    getPrograms().forEach(p => p.sessions.forEach(s => (s.exercises || []).forEach(e => others.push(exInfo(e.exId).name))));
+    (state.history || []).forEach(h => (h.exercises || []).forEach(ex => { if (!ex.cardio) others.push(ex.name); }));
+    others.map(canonicalExerciseName).sort((a, b) => a.localeCompare(b, 'fr')).forEach(add);
+  } else {
+    // Mode programme/séance spécifique : afficher uniquement les exercices de ce scope
+    const hist = statsHistory(scope);
+    hist.forEach(h => (h.exercises || []).forEach(ex => { if (!ex.cardio) add(ex.name); }));
+    // Ajouter aussi les exercices du programme lui-même (pas seulement ceux de l'historique)
+    const program = getProgram(scope);
+    if (program) {
+      program.sessions.forEach(s => (s.exercises || []).forEach(e => add(exInfo(e.exId).name)));
+    }
+  }
 
+  names.sort((a, b) => a.localeCompare(b, 'fr'));
   names.forEach(exName => {
     const opt = document.createElement('option');
     opt.value = exName;
@@ -3941,7 +3993,7 @@ function switchTab(tabName) {
   updateStickyOffsets();
   const pageTitle = document.getElementById('page-title');
   if (pageTitle) pageTitle.innerText = PAGE_TITLES[tabName] || '';
-  if (tabName === 'seance') updateSeancePageTitle();
+  if (tabName === 'seance') { updateSeancePageTitle(); initWorkoutForm(); }
   if (tabName === 'historique' && pageTitle) pageTitle.innerText = historyTitle(); // 1.7.75
 
   if (tabName === 'programme') renderProgramOverview();
@@ -5380,7 +5432,8 @@ async function initApp() {
   recalculateHistoryTonnages();
   getPrograms().forEach(p => { if (!isLibre(p)) p.nextKey = nextKeyFromHistory(p); });
   syncNextType();
-  saveState();
+  // Un stockage encore plein ne doit pas empêcher de rouvrir le brouillon déjà enregistré.
+  try { saveState(); } catch (e) { console.warn('Écriture locale indisponible au démarrage.', e); }
 
   // Affichage de la version de l'application dans le titre
   fetch('manifest.json').then(r => r.json()).then(m => {

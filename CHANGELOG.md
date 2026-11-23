@@ -7,6 +7,36 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.81] - 2026-11-22
+### Progression (co-auteur : Vibe Code)
+- Correction : le filtre des exercices n'affichait que ceux du programme actif et de l'historique complet. Désormais, il n'affiche que les exercices du programme ou de la séance libre sélectionnée dans les statistiques.
+
+---
+
+## [1.8.80] - 2026-11-22
+### Séance (co-auteur : Vibe Code)
+- Correction : réinitialisation de `workoutDef` lors du changement d'onglet vers Séance pour éviter un pop-up de fin de séance manquant quand le programme a été désactivé entre-temps.
+
+---
+
+## [1.8.79] - 2026-11-22
+### Corrigé
+- Si l'enregistrement local d'une séance échoue, le brouillon et le chrono restent disponibles. Un message permet de repérer l'échec et de réessayer sans ajouter de doublon à l'historique.
+
+---
+
+## [1.8.78] - 2026-11-21
+### 🧭 « Avec notre aide » : programme sur mesure (co-auteur : Claude)
+- Menu + › **« Avec notre aide »** est actif : un questionnaire de 5 questions (objectif, niveau, temps par séance, séances par semaine, matériel) propose une séance ou un programme, puis l'ouvre dans l'éditeur pour l'ajuster et lui donner un nom. Tout est calculé sur le téléphone ; les réponses ne sont pas gardées.
+- **Écrans** (planches 39 à 39g) : titre « Ton programme sur mesure », barre de progression en 5 tirets, « Question n sur 5 », réponses écrites avec un cercle (choix unique) ou un carré (choix multiple) et une coche verte épaisse une fois choisies ; « Retour » et « Suivant » sur une ligne ; pas de menu ni de flèche en haut pendant le questionnaire. Question 4 : encadré ambre avec une main (icône « pointer » de Lucide, licence ISC) et une ligne grise sous chaque nombre de séances selon le niveau.
+- **Proposition** : nom court (« Premiers pas », « Prise de masse », « Force »…), séances A, B, C reliées par un pointillé avec « + de détail », encadré « Pourquoi ce choix ? » (2 ou 3 raisons et leurs sources : ACSM 2009 et 2026, OMS 2020, Schoenfeld 2016 et 2017, Kassiano 2022, Haugen 2023, Wewege 2022, Iversen 2021), encadré ambre « Ce programme te plaît ? … » avec le crayon, puis « Ouvrir dans l'éditeur ».
+- **Règles** (`claude/ACCOMPAGNEMENT_CREATION.md` du projet) : une seule séance « tout le corps » à 1 séance par semaine, pour un débutant à 2 ou 3 séances, et pour « Rester en forme » ou « Perdre du gras » à 2 séances ; sinon un programme (tout le corps jusqu'à 3 séances, haut / bas à 4, puis poussée / tirage / jambes). Gros mouvements d'abord ; machines et haltères pour un débutant, la barre ensuite ; nombre d'exercices selon le temps ; cardio en fin de séance pour la forme, l'endurance et la perte de gras.
+- **Objectif du programme** (`goal`) : un programme créé avec « Avec notre aide » garde son objectif. « Développer ma force » (3–6 réps et 3:00 sur les gros polyarticulaires, 6–8 réps et 2:30 sur les autres) et « Travailler mon endurance » (15–20 réps, repos de 1:00 ou 0:45) changent les répétitions proposées, « Première fois · … », le chrono de pause et l'éditeur ; abdos, gainage et cardio gardent le catalogue. Sans objectif, rien ne change. Le lien de partage emporte l'objectif.
+- **Catalogue** : champ `gear` (matériel demandé) sur les 85 exercices.
+- Tests : `test_aide.py` (parcours complet à 390 et 360 px, clair et sombre ; règles, matériel, objectif, partage) ; `test_choix_espace.py` attend « Avec notre aide » actif.
+
+---
+
 ## [1.8.77] - 2026-11-21
 ### Progression (co-auteur : Claude)
 - Poids corporel : le texte d'explication passe sous le champ de saisie et le bouton « Ajouter » (il était entre le graphique et le champ).
