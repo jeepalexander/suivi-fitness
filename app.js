@@ -3978,7 +3978,7 @@ function switchTab(tabName) {
   updateStickyOffsets();
   const pageTitle = document.getElementById('page-title');
   if (pageTitle) pageTitle.innerText = PAGE_TITLES[tabName] || '';
-  if (tabName === 'seance') updateSeancePageTitle();
+  if (tabName === 'seance') { updateSeancePageTitle(); initWorkoutForm(); }
   if (tabName === 'historique' && pageTitle) pageTitle.innerText = historyTitle(); // 1.7.75
 
   if (tabName === 'programme') renderProgramOverview();

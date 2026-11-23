@@ -7,6 +7,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ---
 
+## [1.8.80] - 2026-11-22
+### Séance (co-auteur : Vibe Code)
+- Correction : réinitialisation de `workoutDef` lors du changement d'onglet vers Séance pour éviter un pop-up de fin de séance manquant quand le programme a été désactivé entre-temps.
+
+---
+
 ## [1.8.79] - 2026-11-22
 ### Corrigé
 - Si l'enregistrement local d'une séance échoue, le brouillon et le chrono restent disponibles. Un message permet de repérer l'échec et de réessayer sans ajouter de doublon à l'historique.
