@@ -6,6 +6,13 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/)
 et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
+---
+
+## [1.8.82] - 2026-11-22
+### Progression (co-auteur : Vibe Code)
+- Correction : le filtre des exercices en mode "Tous les programmes" n'affichait que les exercices déjà réalisés dans l'historique (et non plus ceux du catalogue non utilisés).
+
+---
 
 ## [1.8.81] - 2026-11-22
 ### Progression (co-auteur : Vibe Code)
