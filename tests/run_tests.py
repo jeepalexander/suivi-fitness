@@ -5,6 +5,9 @@
   python3 tests/run_tests.py test_rameur.py   un ou plusieurs fichiers précis
   python3 tests/run_tests.py -j 3 seance      3 tests en parallèle (par défaut : 2)
   python3 tests/run_tests.py --liste          affiche les groupes
+  python3 tests/run_tests.py --auto           les tests concernés par les modifications (voir selection.py)
+  python3 tests/run_tests.py --auto --quoi    affiche seulement ce choix et sa raison
+  python3 tests/run_tests.py --auto HEAD~1    choix d'après les modifications depuis une autre référence git
 
 1.7.45 (co-auteur : Claude) : groupes par onglet et exécution en parallèle, pour ne lancer que les tests
 concernés par une modification. Chaque test démarre son propre serveur sur un port libre : ils peuvent
@@ -15,7 +18,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-TESTS = ['test_validation.py', 'test_rameur.py', 'test_drive_reset.py', 'test_progression_jours.py', 'test_supprimer_seance.py', 'test_annuler_seance.py', 'test_brouillon.py', 'test_poids_brouillon.py', 'test_chrono.py', 'test_mise_a_jour.py', 'test_reglages.py', 'test_drive_compte.py', 'test_drive_sauvegarde.py', 'test_drive_versions.py', 'test_drive_installee.py', 'test_drive_android.py', 'test_drive_reconnexion.py', 'test_programmes.py', 'test_editeur_deplacer.py', 'test_fond_ecran.py', 'test_invitation.py', 'test_accueil.py', 'test_fin_seance.py', 'test_editeur_incomplet.py', 'test_fenetres.py', 'test_pause_actif.py', 'test_mise_en_page.py', 'test_poly_1rm.py', 'test_poids_du_corps.py', 'test_titre_seance.py', 'test_pastille_1x.py', 'test_contraste.py', 'test_presentation.py', 'test_bilan.py', 'test_partage.py', 'test_choix_espace.py', 'test_premier_lancement.py', 'test_doublons.py', 'test_sauvegarde_fichier.py', 'test_prod_test.py', 'test_trophees.py', 'test_ecart_memoire.py', 'test_marges_doublees.py', 'test_alignement_titres.py', 'test_exercice_retire.py', 'test_fiches.py', 'test_stockage_persistant.py', 'test_scanner_jsqr.py', 'test_recu_seance.py', 'test_fond_defaut.py', 'test_soutien.py', 'test_credits.py', 'test_progression_seance.py', 'test_sauvegarde_historique.py', 'test_couleurs_inversees.py', 'test_aide.py', 'test_modifier_pause.py']
+TESTS = ['test_validation.py', 'test_rameur.py', 'test_drive_reset.py', 'test_progression_jours.py', 'test_supprimer_seance.py', 'test_annuler_seance.py', 'test_brouillon.py', 'test_poids_brouillon.py', 'test_chrono.py', 'test_mise_a_jour.py', 'test_reglages.py', 'test_drive_compte.py', 'test_drive_sauvegarde.py', 'test_drive_versions.py', 'test_drive_installee.py', 'test_drive_android.py', 'test_drive_reconnexion.py', 'test_programmes.py', 'test_editeur_deplacer.py', 'test_fond_ecran.py', 'test_invitation.py', 'test_accueil.py', 'test_fin_seance.py', 'test_editeur_incomplet.py', 'test_fenetres.py', 'test_pause_actif.py', 'test_mise_en_page.py', 'test_poly_1rm.py', 'test_poids_du_corps.py', 'test_titre_seance.py', 'test_pastille_1x.py', 'test_contraste.py', 'test_presentation.py', 'test_bilan.py', 'test_partage.py', 'test_choix_espace.py', 'test_premier_lancement.py', 'test_doublons.py', 'test_sauvegarde_fichier.py', 'test_prod_test.py', 'test_trophees.py', 'test_ecart_memoire.py', 'test_marges_doublees.py', 'test_alignement_titres.py', 'test_exercice_retire.py', 'test_fiches.py', 'test_stockage_persistant.py', 'test_scanner_jsqr.py', 'test_recu_seance.py', 'test_fond_defaut.py', 'test_soutien.py', 'test_credits.py', 'test_progression_seance.py', 'test_sauvegarde_historique.py', 'test_couleurs_inversees.py', 'test_aide.py', 'test_modifier_pause.py', 'test_plein_ecran.py', 'test_agrandissement.py', 'test_ecrans.py']
 
 # Un test peut appartenir à plusieurs groupes.
 GROUPES = {
@@ -28,7 +31,7 @@ GROUPES = {
     'reglages': ['test_credits.py', 'test_soutien.py', 'test_fond_defaut.py', 'test_reglages.py', 'test_stockage_persistant.py', 'test_prod_test.py', 'test_fond_ecran.py', 'test_invitation.py', 'test_mise_a_jour.py', 'test_presentation.py'],
     'drive': ['test_drive_reset.py', 'test_drive_compte.py', 'test_drive_sauvegarde.py', 'test_drive_versions.py',
               'test_drive_installee.py', 'test_drive_android.py', 'test_drive_reconnexion.py', 'test_sauvegarde_historique.py'],
-    'style': ['test_fenetres.py', 'test_mise_en_page.py', 'test_choix_espace.py', 'test_pastille_1x.py', 'test_titre_seance.py', 'test_contraste.py', 'test_plein_ecran.py', 'test_agrandissement.py', 'test_couleurs_inversees.py'],
+    'style': ['test_ecrans.py', 'test_fenetres.py', 'test_mise_en_page.py', 'test_choix_espace.py', 'test_pastille_1x.py', 'test_titre_seance.py', 'test_contraste.py', 'test_plein_ecran.py', 'test_agrandissement.py', 'test_couleurs_inversees.py'],
 }
 
 
@@ -45,6 +48,19 @@ def main(args):
     if '--liste' in args:
         for g, ts in GROUPES.items(): print(f'{g:12} {len(ts):2} tests  ' + ', '.join(t[5:-3] for t in ts))
         return 0
+    if '--auto' in args:
+        from selection import choisir
+        i = args.index('--auto'); quoi = '--quoi' in args
+        ref = args[i + 1] if i + 1 < len(args) and not args[i + 1].startswith('-') else None
+        args = [a for a in args if a not in ('--auto', '--quoi', ref)]
+        auto, raisons, tout = choisir(ref)
+        print('Choix automatique :'); [print('  ' + r) for r in raisons]
+        if not auto and not tout:
+            print('Aucun test concerné.'); return 0
+        print('  => ' + ('suite complète' if tout else ', '.join(auto)), flush=True)
+        if quoi:
+            return 0
+        args = args + (list(GROUPES) if tout else auto)
     choisis = []
     for a in args:
         lot = GROUPES.get(a) or ([a] if a in TESTS else [a + '.py'] if a + '.py' in TESTS else ['test_' + a + '.py'] if 'test_' + a + '.py' in TESTS else None)

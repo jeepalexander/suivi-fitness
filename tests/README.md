@@ -13,11 +13,20 @@ python3 tests/run_tests.py --liste               # les groupes et leurs tests
 ```
 Un test seul : `python3 tests/test_validation.py` ou `python3 tests/run_tests.py rameur`.
 
+**Choix automatique (1.8.87)** : `python3 tests/run_tests.py --auto` regarde ce qui a changé depuis `origin/dev` (fichiers, et sections de `app.js` touchées) et lance seulement les tests concernés, plus `test_ecrans.py` dès que le code de l'app change. `--auto --quoi` affiche le choix et sa raison sans rien lancer. La table de correspondance est dans `tests/selection.py` : y ajouter un fichier quand on en crée un.
+
+**Briques communes (1.8.87, `tests/harness.py`)** : `ECRANS` (nom court → ouverture de l'écran : `programmes`, `plus`, `editeur`, `ajout`, `aide`, `seance`, `seance-ouverte`, `fiche`, `progression`, `perimetre`, `historique`, `detail`, `reglages`, `fond`, `invitation`), `ouvrir(pg, 'reglages')`, `debordements(pg)`, `Bilan()` (compteur de contrôles) et `variantes()` (390 / 360 px × clair / sombre). Un nouveau test les utilise plutôt que de recopier ces lignes.
+
+**Captures et prototypes (1.8.87)** : `python3 tools/captures.py seance --css proto.css --avant` photographie un écran à 390 et 360 px, en clair et en sombre, avec et sans le CSS d'essai, et assemble une planche dans `/tmp/captures` (débordements et erreurs signalés). `--liste` pour les écrans, `--js` pour un script d'essai, `--zoom-reel` pour l'agrandissement du téléphone.
+
 **Groupes (1.7.45)** : `seance`, `programmes`, `progression`, `historique`, `reglages`, `drive`, `style`. Avant un déploiement, on lance les groupes touchés par la modification ; la suite complète reste disponible. En parallèle (2 à la fois), un groupe va environ deux fois plus vite (groupe `programmes` : 45 s au lieu de 80 s).
 
 ## Ce qui est couvert
 | Fichier | Contrôles | Vérifie |
 |---|---|---|
+| `test_ecrans.py` | 60 | Tour rapide (1.8.87) : les 15 écrans de `harness.ECRANS` s'ouvrent, sans débordement ni erreur JavaScript (390 et 360 px, clair et sombre) ; lancé à chaque modification du code |
+| `test_exercice_retire.py` | 13 | Exercice retiré du catalogue (1.7.76) : « Extension triceps à la poulie » remplacé par « Extension triceps » dans les programmes, l'historique et les dernières charges ; toutes les icônes du catalogue existent et sont en cache |
+| `test_premier_lancement.py` | 26 | Premier lancement (1.8.62) : prénom, « Bonjour + prénom », + qui clignote jusqu'au premier appui, « C'est parti », « Réactiver » d'une séance libre, « Ton prénom » dans les Réglages (clair et sombre) |
 | `test_validation.py` | 11 | Seules les séries cochées sont enregistrées ; refus sans coche ou avec valeurs invalides ; confirmation en séance partielle ; modification d'une séance (séries précochées) |
 | `test_brouillon.py` | 17 | La saisie en cours survit au rechargement (valeurs, coches, chrono, exercice ouvert) ; brouillon périmé ou piégé ignoré ; « tirer pour rafraîchir » désactivé |
 | `test_poids_brouillon.py` | 18 | Le poids corporel saisi (onglet Progression) survit au rechargement ; vidé à l'ajout, à la réinitialisation ; brouillon périmé, négatif, absurde ou piégé ignoré |

@@ -51,3 +51,65 @@ def newpage(br, w=390, h=844, scheme='light', sw='block', pref=None, seed=True, 
         init += "window.__askHook=function(o){var m=[o.title,o.text].filter(Boolean).join('\\n\\n');if(o.cancel)return confirm(m);alert(m);return true};"
     pg.add_init_script(init)
     return ctx, pg, errs
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# 1.8.87 (co-auteur : Claude) : briques réutilisables, pour ne plus réécrire les mêmes lignes dans chaque test
+# et dans les prototypes (tools/captures.py s'en sert aussi).
+# ---------------------------------------------------------------------------------------------------------------
+
+# Écrans de l'app : nom court -> JavaScript qui l'ouvre depuis n'importe quel autre écran (jeu d'essai chargé).
+_RAZ = ("document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none');"
+        "if(typeof closeSheet==='function')closeSheet();if(typeof closeFiche==='function')closeFiche();"
+        "if(typeof closeBilan==='function')closeBilan();")
+ECRANS = {
+    'programmes':  "switchTab('programme'); setProgramView('home')",
+    'plus':        "switchTab('programme'); setProgramView('home'); openProgramChooser()",
+    'editeur':     "switchTab('programme'); editProgram(state.programs[0].id)",
+    'ajout':       "switchTab('programme'); editProgram(state.programs[0].id); openAddExercise()",
+    'aide':        "switchTab('programme'); openAide()",
+    'seance':      "switchTab('programme'); setProgramView('home'); switchTab('seance')",
+    'seance-ouverte': "switchTab('programme'); setProgramView('home'); switchTab('seance');"
+                      "document.querySelectorAll('.ex-toggle').forEach(b=>{if(b.getAttribute('aria-expanded')!=='true')toggleExercise(b)})",
+    'fiche':       "switchTab('seance'); openFiche(document.querySelector('#tab-seance [data-ex], [data-ex]').dataset.ex)",
+    'progression': "switchTab('progression')",
+    'perimetre':   "switchTab('progression'); openStatsScopeSheet()",
+    'historique':  "switchTab('historique')",
+    'detail':      "switchTab('historique'); openSessionModal(state.history.length-1)",
+    'reglages':    "switchTab('reglages')",
+    'fond':        "switchTab('fond')",
+    'invitation':  "switchTab('reglages'); openInviteSheet()",
+}
+
+
+def ouvrir(pg, ecran, attente=400):
+    """Ouvre un écran de ECRANS (ou exécute le JavaScript donné) après avoir fermé fenêtres et volets."""
+    js = ECRANS.get(ecran, ecran)
+    pg.evaluate("(()=>{" + _RAZ + js + "})()")
+    pg.wait_for_timeout(attente)
+
+
+def debordements(pg):
+    """Liste des problèmes de mise en page de l'écran affiché (vide = rien ne déborde)."""
+    o = pg.evaluate(OVERFLOW_JS)
+    return o['out'] + (['page plus large que l\'écran (%s > %s px)' % (o['docW'], o['vw'])] if o['docW'] > o['vw'] else [])
+
+
+class Bilan:
+    """Compteur de contrôles commun : b = Bilan(); b.ok('nom', condition, détail); sys.exit(b.fin())."""
+    def __init__(self):
+        self.res = []
+
+    def ok(self, nom, cond, extra=''):
+        self.res.append(bool(cond))
+        print(('OK   ' if cond else 'ÉCHEC'), nom, '' if cond else str(extra)[:300], flush=True)
+        return bool(cond)
+
+    def fin(self):
+        print('\n', sum(self.res), '/', len(self.res), 'contrôles OK')
+        return 0 if self.res and all(self.res) else 1
+
+
+def variantes(largeurs=(390, 360), themes=('light', 'dark')):
+    """Les combinaisons habituelles : [(390, 'light'), (390, 'dark'), (360, 'light'), (360, 'dark')]."""
+    return [(w, t) for w in largeurs for t in themes]

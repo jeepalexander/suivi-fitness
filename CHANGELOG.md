@@ -8,6 +8,17 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.87] - 2026-11-24
+### Outils de travail : release automatique et tests réutilisables (co-auteur : Claude)
+- Rien ne change dans l'application : cette version prépare des mises à jour plus rapides.
+- **Release automatique** (`tools/release.py`) : une commande lance les tests concernés, passe à la version suivante dans `manifest.json`, `sw.js` (`APP_VERSION`) et le badge du README, ajoute l'entrée du CHANGELOG, crée le commit signé co-auteur, l'envoie sur `dev` et suit la publication. Si une autre conversation a publié entre-temps, l'outil repart de sa version. `--essai`, `--etat` (versions de dev et de main), `--production --confirme` (seulement après accord).
+- **Choix automatique des tests** : `python3 tests/run_tests.py --auto` lance seulement les tests concernés par ce qui a changé (fichiers et sections de `app.js`), `--quoi` affiche ce choix (`tests/selection.py`).
+- **Briques communes des tests** (`tests/harness.py`) : liste des 15 écrans de l'app et leur ouverture (`ECRANS`, `ouvrir`), détection des débordements, compteur de contrôles, variantes 390 / 360 px en clair et en sombre.
+- **Captures et prototypes** (`tools/captures.py`) : planche d'un écran à 390 et 360 px, en clair et en sombre, avec ou sans un CSS ou un script d'essai, sans modifier le code.
+- Nouveau test `tests/test_ecrans.py` (tour rapide des 15 écrans, 60 contrôles). `test_plein_ecran.py` et `test_agrandissement.py` rejoignent la suite complète ; `test_exercice_retire.py` et `test_premier_lancement.py` sont maintenant décrits dans `tests/README.md`.
+
+---
+
 ## [1.8.86] - 2026-11-24
 ### Progression (co-auteur : Claude)
 - Choix de l'exercice (« Progression par exercice ») et de l'appareil (« Suivi cardio ») : la petite flèche du navigateur, collée au bord, est remplacée par un chevron de 20 px, comme celui de « Voir les statistiques de », à 18 px du bord. Il prend la couleur du texte de la gélule, en clair comme en sombre (variante A choisie parmi 20, 24 et 28 px).

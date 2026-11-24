@@ -2,7 +2,7 @@
 
 **Application PWA de suivi d'entraînement en salle de sport** (dépôt `suivi-fitness`)
 
-[![Version](https://img.shields.io/badge/version-1.8.79-blue)](https://github.com/jeepalexander/suivi-fitness)
+[![Version](https://img.shields.io/badge/version-1.8.87-blue)](https://github.com/jeepalexander/suivi-fitness)
 [![Licence](https://img.shields.io/badge/licence-PolyForm%20Strict%201.0.0-lightgrey)](LICENSE)
 
 ---
@@ -115,6 +115,7 @@ suivi-fitness/
 ├── CHANGELOG.md        # Historique des versions
 ├── LICENSE, NOTICE     # Licence (PolyForm Strict 1.0.0) et composants tiers
 ├── tests/              # Tests automatiques (voir tests/README.md)
+├── tools/              # release.py (publier une version), captures.py (captures et prototypes), assembler_site.py (site publié)
 ├── js/                 # catalogue.js (exercices), programmes.js (onglet Programmes), aide.js (« Avec notre aide »), Chart.js, qrcode.js et security.js
 ├── css/                # Styles complémentaires (polices)
 ├── fonts/              # Polices embarquées
@@ -130,7 +131,9 @@ suivi-fitness/
 - `version` dans `manifest.json` ;
 - `APP_VERSION` dans `sw.js`.
 
-Le changement du Service Worker permet au navigateur de mettre à jour le cache et donc l’application sur les appareils déjà installés. Tenir aussi `CHANGELOG.md` et ce fichier à jour, et lancer les tests des groupes concernés (`python3 tests/run_tests.py seance`, voir `tests/README.md`) avant chaque déploiement sur `dev`.
+Le changement du Service Worker permet au navigateur de mettre à jour le cache et donc l’application sur les appareils déjà installés. Tenir aussi `CHANGELOG.md` et ce fichier à jour, et lancer les tests concernés (`python3 tests/run_tests.py --auto`, voir `tests/README.md`) avant chaque déploiement sur `dev`.
+
+**Depuis la 1.8.87, une seule commande fait tout** : `python3 tools/release.py --titre "Texte court" --notes notes.md` lance les tests concernés, passe à la version suivante dans `manifest.json`, `sw.js` et le badge ci-dessus, ajoute l’entrée du `CHANGELOG.md`, crée le commit signé co-auteur, l’envoie sur `dev` et suit la publication. `--essai` montre ce qui serait fait ; `--etat` donne les versions de `dev` et de `main` ; `--production --confirme` fusionne `dev` dans `main` (seulement après accord explicite).
 
 ---
 
