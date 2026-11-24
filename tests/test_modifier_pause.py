@@ -46,6 +46,8 @@ with Srv() as base, sync_playwright() as p:
     val = pg.evaluate("""(n) => { const it = [...document.querySelectorAll('#exercises-list .exercise-item')]
       .find(e => e.textContent.includes(n)); const i = it && it.querySelector('.weight-input'); return i ? i.value : null; }""", info['name'])
     check("valeurs de la séance reprises", val == str(info['w']), f"{info['name']} : {val!r} / {info['w']!r}")
+    toast = pg.evaluate("(window.__toastLog || []).slice(-1)[0] || ''")
+    check("message au tutoiement", 'Corrige-la puis valide' in toast and 'tu n' in toast and 'vous' not in toast, toast)
     check("bouton « Enregistrer les modifications »", pg.inner_text('#submit-workout-btn') == 'Enregistrer les modifications')
     # Aller-retour vers un autre onglet : la modification reste en place
     pg.evaluate("switchTab('progression')"); pg.wait_for_timeout(300)

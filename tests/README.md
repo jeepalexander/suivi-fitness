@@ -53,7 +53,7 @@ Un test seul : `python3 tests/test_validation.py` ou `python3 tests/run_tests.py
 | `test_rameur.py` | 28 | Rameur : exercice durée + distance sur une ligne en tête de séance, allure /500 m |
 | `test_drive_reset.py` | 10 | Réinitialisation locale : la sauvegarde Google Drive n'est jamais écrasée par des données vides |
 | `test_progression_jours.py` | 23 | Progression : bascule « par jour » du graphique global (écarts entre séances, défilement horizontal) |
-| `test_modifier_pause.py` | 10 | Modification depuis l'Historique d'une séance d'un programme en pause : programme, séance et valeurs de la séance gardés (pas le programme en cours), même après un aller-retour d'onglet ; « Annuler » revient à la séance en cours |
+| `test_modifier_pause.py` | 11 | Modification depuis l'Historique d'une séance d'un programme en pause : programme, séance et valeurs de la séance gardés (pas le programme en cours), même après un aller-retour d'onglet ; « Annuler » revient à la séance en cours ; message au tutoiement |
 | `test_supprimer_seance.py` | 13 | Suppression d'une séance : l'historique, les dernières charges et la sauvegarde Google Drive suivent |
 | `test_annuler_seance.py` | 14 | Annulation d'une séance en cours : chrono remis à zéro, brouillon supprimé, rien d'enregistré |
 | `test_fin_seance.py` | 56 | Séance (1.7.27) : bouton Programmes → page de départ, en-tête allégé, échauffement, noms sur une ligne, fenêtre de fin (« Bravo ! », tonnage, écart, records) ; 390 / 360 px, clair et sombre |

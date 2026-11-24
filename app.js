@@ -2540,7 +2540,7 @@ function injectSessionModalHtml() {
       closeSessionModal();
       switchTab('seance');
 
-      showToast(`${historySessionTitle(sessionToEdit)} chargée dans le formulaire. Corrigez-la puis validez, ou annulez : l'originale reste intacte tant que vous n'avez pas validé.`);
+      showToast(`${historySessionTitle(sessionToEdit)} chargée dans le formulaire. Corrige-la puis valide, ou annule : l'originale reste intacte tant que tu n'as pas validé.`);
     }
   });
 }
