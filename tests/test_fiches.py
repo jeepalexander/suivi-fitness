@@ -103,6 +103,10 @@ with Srv() as url, sync_playwright() as p:
     pg.click('.fiche-close-btn'); pg.wait_for_timeout(250)
     ok('appui long sans clic au relâché : « Fermer » ferme la fiche au 1er appui', opened and not pg.evaluate(FICHE_OPEN))
     ok('aucune erreur JavaScript (appui long sans clic)', not errs, errs)
+    # 1.8.88 : aucune pastille en double sur les fiches (les exercices de cardio affichaient « Cardio » deux fois)
+    doubles = pg.evaluate("""()=>CATALOGUE.map(e=>{openFiche(e.name);const c=[...document.querySelectorAll('.exf-chip')].map(x=>x.textContent);
+      return new Set(c).size!==c.length?e.name+' : '+c.join(' / '):''}).filter(Boolean)""")
+    ok('aucune pastille en double sur les fiches (cardio : « Cardio » une seule fois)', not doubles, doubles)
     ctx.close()
     br.close()
 print(f"\n {sum(res)} / {len(res)} contrôles OK")

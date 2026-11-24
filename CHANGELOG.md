@@ -8,6 +8,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.88] - 2026-11-24
+### Fiches d'exercice (co-auteur : Claude)
+- Correction : les fiches des 7 exercices de cardio (Rameur, Vélo, Tapis de course, Ski trainer, Vélo elliptique, Stair climber, Corde à sauter) affichaient deux fois la pastille « Cardio ». Elles n'en ont plus qu'une.
+- Test : `tests/test_fiches.py` vérifie qu'aucune fiche n'a de pastille en double.
+
+---
+
 ## [1.8.87] - 2026-11-24
 ### Outils de travail : release automatique et tests réutilisables (co-auteur : Claude)
 - Rien ne change dans l'application : cette version prépare des mises à jour plus rapides.
