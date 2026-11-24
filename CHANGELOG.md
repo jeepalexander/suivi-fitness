@@ -11,6 +11,7 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ## [1.8.83] - 2026-11-24
 ### Historique (co-auteur : Claude)
 - Correction : « Modifier la séance » sur une séance d'un programme en pause ouvrait la séance du programme en cours, sans les valeurs enregistrées. Depuis la 1.8.80, l'ouverture de l'onglet Séance rechargeait toujours la séance du programme actif. En modification, le formulaire de la séance choisie est désormais gardé (son programme, sa séance, ses valeurs), même après un passage par un autre onglet.
+- Le rechargement de la 1.8.80 (fenêtre de fin de séance après la désactivation d'un programme) est conservé hors modification.
 - Le message affiché après « Modifier la séance » passe au tutoiement : « Corrige-la puis valide, ou annule : l'originale reste intacte tant que tu n'as pas validé. »
 - Test ajouté : `tests/test_modifier_pause.py` (groupe `historique`).
 - Test `test_programmes.py` mis à jour selon la 1.8.81 : la liste « Progression par exercice » ne montre que les exercices faits dans le programme choisi ; « Tous les programmes » les montre tous.
