@@ -8,6 +8,19 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.85] - 2026-11-24
+### Historique (co-auteur : Claude)
+- « Restaurer une sauvegarde » : sous chaque sauvegarde Google Drive, le nombre de séances qu'elle contient (« 33 séances », « 1 séance », « Aucune séance ») remplace « La plus récente » / « Version précédente » / « Ancienne sauvegarde unique ».
+- Chaque nouvelle sauvegarde Drive porte ce nombre dans les propriétés du fichier : la liste l'affiche sans relire le fichier. Le contenu JSON ne change pas.
+- Sauvegardes plus anciennes (sans ce nombre) : lues une fois à l'ouverture de la fenêtre pour compter leurs séances (« Comptage des séances… » le temps de la lecture, « Nombre de séances inconnu » si la lecture échoue) ; le résultat est gardé jusqu'à la fermeture de l'application.
+- Texte d'introduction de la fenêtre : « séances, programmes et pesées » en gras.
+- Tests : `tests/test_drive_versions.py` (nombres affichés, sauvegardes non relues à la réouverture, propriété écrite à l'envoi) ; faux Drive des tests : propriétés des fichiers gardées.
+
+### Programmes › Avec notre aide (co-auteur : Claude)
+- Correction : en thème clair avec un fond d'écran, les sous-textes gris des réponses (ex. « Recommandé pour toi ») étaient illisibles, car l'écran gardait le voile de l'accueil, presque transparent au milieu. Il prend désormais le même voile que l'éditeur de programme, en clair comme en sombre. Écran sans fond d'écran inchangé. Vérifié avec les 17 fonds, en clair et en sombre.
+
+---
+
 ## [1.8.84] - 2026-11-24
 ### Historique (co-auteur : Claude)
 - Après « Enregistrer les modifications », l'app revient à l'Historique, sur la séance modifiée, avec la même barre de sauvegarde qu'en fin de séance : « Sauvegarde sur le Drive… », puis « Sauvegardée sur le Drive » (ou « Sauvegarde en attente »), puis la ligne redevient normale. Accès Drive expiré dans l'application installée : reconnexion comme en fin de séance, la barre reprend au retour de Google.

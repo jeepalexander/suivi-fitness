@@ -4636,7 +4636,7 @@ function isDriveBackupName(name) {
 // quiet : en cas d'échec, ne pas afficher d'erreur dans Réglages (nettoyage des anciennes versions).
 async function listDriveBackups(accessToken, folderId, quiet) {
   const q = encodeURIComponent(`'${folderId}' in parents and trashed=false and (name contains '${DRIVE_BACKUP_PREFIX}' or name='${DRIVE_BACKUP_NAME}')`);
-  const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name,modifiedTime)&orderBy=modifiedTime%20desc&pageSize=100`, {
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name,modifiedTime,appProperties)&orderBy=modifiedTime%20desc&pageSize=100`, {
     headers: { Authorization: 'Bearer ' + accessToken }
   });
   if (!res.ok) {
@@ -4644,9 +4644,17 @@ async function listDriveBackups(accessToken, folderId, quiet) {
     throw await driveFolderError('Recherche de la sauvegarde Drive échouée', res);
   }
   const files = ((await res.json()).files || []).filter(f => f && typeof f.id === 'string' && isDriveBackupName(f.name));
+  // 1.8.85 : nombre de séances noté dans les propriétés du fichier (sans toucher au JSON) ; absent des anciennes sauvegardes
+  files.forEach(f => {
+    const n = f.appProperties && /^\d+$/.test(String(f.appProperties.seances)) ? parseInt(f.appProperties.seances, 10) : null;
+    f.sessions = n != null ? n : (driveSessionCounts.has(f.id) ? driveSessionCounts.get(f.id) : null);
+  });
   const time = (f) => { const t = new Date(f.modifiedTime || 0).getTime(); return isNaN(t) ? 0 : t; };
   return files.sort((a, b) => time(b) - time(a) || String(b.name).localeCompare(String(a.name)));
 }
+
+// Nombres de séances déjà lus dans les anciennes sauvegardes (sans propriété « seances ») : id -> nombre.
+const driveSessionCounts = new Map();
 
 // Sauvegarde la plus récente du dossier ; null s'il n'y en a aucune.
 async function findDriveBackup(accessToken, folderId) {
@@ -4706,6 +4714,10 @@ function driveRemoteIsContainedInLocal(remote) {
 let driveLastWrittenName = ''; // nom du dernier fichier écrit sur le Drive (message de « Sauvegarder »)
 async function writeDriveBackup(accessToken, folderId, payload) {
   const metadata = { name: driveBackupFileName(), parents: [folderId], mimeType: 'application/json' };
+  // 1.8.85 : nombre de séances en propriété du fichier, pour la liste « Restaurer une sauvegarde » (JSON inchangé)
+  let n = null;
+  try { const h = JSON.parse(payload).history; if (Array.isArray(h)) n = h.length; } catch (e) { /* ignoré */ }
+  if (n != null) metadata.appProperties = { seances: String(n) };
   const form = new FormData();
   form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
   form.append('file', new Blob([payload], { type: 'application/json' }));
@@ -4883,6 +4895,24 @@ function backupRestoreRow(i, title, sub, drive) {
     </button>`;
 }
 
+// Sous-titre d'une sauvegarde Drive : son nombre de séances (1.8.85).
+function backupSessionsLabel(f) {
+  if (f.sessions === undefined || f.sessions === null) return f.sessionsError ? 'Nombre de séances inconnu' : 'Comptage des séances…';
+  if (f.sessions === 0) return 'Aucune séance';
+  return f.sessions + ' séance' + (f.sessions > 1 ? 's' : '');
+}
+
+// Anciennes sauvegardes sans propriété « seances » : on les lit (en parallèle) pour compter leurs séances.
+async function countMissingBackupSessions(token, files) {
+  await Promise.all(files.filter(f => f.sessions == null).map(async f => {
+    try {
+      const dl = await downloadDriveBackup(token, f.id);
+      if (dl.ok && dl.data && Array.isArray(dl.data.history)) { f.sessions = dl.data.history.length; driveSessionCounts.set(f.id, f.sessions); }
+      else f.sessionsError = true;
+    } catch (e) { f.sessionsError = true; }
+  }));
+}
+
 function renderBackupRestoreSheet() {
   if (!backupRestore) return;
   const st = backupRestore;
@@ -4893,14 +4923,14 @@ function renderBackupRestoreSheet() {
     else if (st.error) drive += `<p class="sheet-text">${escapeHtml(st.error)}</p>`;
     else if (!st.files.length) drive += `<p class="sheet-text">Aucune sauvegarde dans le dossier « ${escapeHtml(DRIVE_FOLDER_NAME)} » de ton Drive.</p>`;
     else drive += `<div class="restore-list" role="radiogroup" aria-label="Sauvegardes Google Drive">` + st.files.map((f, i) =>
-      backupRestoreRow(i, formatBackupDayLabel(f.modifiedTime), i === 0 ? 'La plus récente' : (f.name === DRIVE_BACKUP_NAME ? 'Ancienne sauvegarde unique' : 'Version précédente'), true)).join('') + `</div>`;
+      backupRestoreRow(i, formatBackupDayLabel(f.modifiedTime), backupSessionsLabel(f), true)).join('') + `</div>`;
   }
   const file = `<div class="sheet-section">Sur cet appareil</div><div class="restore-list">${backupRestoreRow(-2, 'Choisir un fichier…', 'Fichier créé avec « Sauvegarder »', false)}</div>`;
   const connect = getDriveToken() ? '' : `<p class="sheet-text small">Tes sauvegardes Google Drive apparaîtront ici. <button type="button" class="link-btn" onclick="closeSheet(); backupRestore = null; connectGoogleDrive()">${isDriveWanted() ? 'Reconnecter Google Drive' : 'Se connecter à Google Drive'}</button></p>`;
   const action = st.sel === -1 ? '' : `<button type="button" class="btn" id="backup-restore-go" onclick="confirmBackupRestore()">${st.sel === -2 ? 'Choisir le fichier' : 'Restaurer cette sauvegarde'}</button>`;
   openSheet(`
     <h3 class="sheet-title">Restaurer une sauvegarde</h3>
-    <p class="sheet-text">Choisis la sauvegarde à reprendre. Elle remplacera toutes les données de cet appareil : séances, programmes et pesées.</p>
+    <p class="sheet-text">Choisis la sauvegarde à reprendre. Elle remplacera toutes les données de cet appareil : <b>séances, programmes et pesées</b>.</p>
     <div class="backup-scroll">${drive}${file}${connect}</div>
     <div class="sheet-actions">${action}<button type="button" class="btn btn-secondary" onclick="hideDriveBackupList()">Annuler</button></div>`,
     { update: true, onClose: () => { backupRestore = null; } });
@@ -4944,6 +4974,11 @@ async function restoreFromDrive() {
     backupRestore.error = 'Sauvegardes Drive indisponibles : ' + (e && e.message ? e.message : 'erreur réseau') + '.';
   }
   renderBackupRestoreSheet();
+  const st = backupRestore;
+  if (st && st.files && st.files.some(f => f.sessions == null)) {
+    await countMissingBackupSessions(token.access_token, st.files);
+    if (backupRestore === st) renderBackupRestoreSheet();
+  }
 }
 function openBackupRestore() { loadGoogleIdentity(); restoreFromDrive(); }
 

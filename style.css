@@ -1008,7 +1008,8 @@ body[data-pview="choose"] .prog-spacer { min-height: 0; }
 #app-wallpaper::after { content: ''; position: absolute; inset: 0; background: var(--veil-home); }
 /* Voile (1.7.12, valeurs de la planche, écrans 31 et 32) — Programmes : 95/82/15/60/88 % à 0/22/42/72/100 % de la hauteur ;
    autres onglets (1.7.13) et éditeur de programme (1.7.15) : 100/95/76/100 % à 0/30/72/100 %. Mêmes opacités en noir pour le thème sombre. */
-body:not([data-tab="programme"]) #app-wallpaper::after, body[data-pview="editor"] #app-wallpaper::after { background: var(--veil-page); }
+body:not([data-tab="programme"]) #app-wallpaper::after, body[data-pview="editor"] #app-wallpaper::after,
+body[data-pview="aide"] #app-wallpaper::after { background: var(--veil-page); } /* 1.8.85 : « Avec notre aide » comme l'éditeur (sous-textes gris lisibles en clair) */
 :root[data-wallpaper] #app-wallpaper { display: block; }
 :root[data-wallpaper="barre"] #app-wallpaper { background-image: url('wallpapers/barre.jpg'); background-position: center 55%; }
 :root[data-wallpaper="halteres"] #app-wallpaper { background-image: url('wallpapers/halteres.jpg'); background-position: center 45%; }

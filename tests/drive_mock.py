@@ -110,7 +110,7 @@ class FakeDrive:
             fid = 'BK%d' % self._n if not any(f['id'] == 'BK%d' % self._n for f in self.files) else 'N%d' % self._n
             name = meta.get('name', 'n')
             self.post_names.append(name)
-            self.files.append({'id': fid, 'name': name, 'modifiedTime': _iso(_BASE + timedelta(seconds=self._n)), 'body': body, 'trashed': False})
+            self.files.append({'id': fid, 'name': name, 'modifiedTime': _iso(_BASE + timedelta(seconds=self._n)), 'body': body, 'trashed': False, 'appProperties': meta.get('appProperties')})
             self.last_body = body
             if 'list_after_post' in self.fail:
                 self.fail['search'] = self.fail['list_after_post']
@@ -158,5 +158,5 @@ class FakeDrive:
             st = self.fail.get('search', 200)
             if st != 200:
                 return self._json(route, st, err)
-            return self._json(route, 200, {'files': [{'id': f['id'], 'name': f['name'], 'modifiedTime': f['modifiedTime']} for f in self.live()]})
+            return self._json(route, 200, {'files': [dict({'id': f['id'], 'name': f['name'], 'modifiedTime': f['modifiedTime']}, **({'appProperties': f['appProperties']} if f.get('appProperties') else {})) for f in self.live()]})
         return self._json(route, 200, {'files': []})
