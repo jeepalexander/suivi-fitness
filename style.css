@@ -347,6 +347,11 @@ nav button.active.has-update::after { right: 5px; top: 6px; }
 
 /* Champs */
 select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0 20px; background: var(--fill); border: none; border-radius: var(--radius-field); color: var(--text); font-size: 0.9375rem; }
+/* 1.8.86 : flèche des choix d'exercice (Progression, Suivi cardio) : chevron de 20 px comme « Voir les statistiques de »,
+   à la place de la petite flèche du navigateur ; couleur = texte de la gélule (gris inversé) dans chaque thème. */
+select.filter-select { -webkit-appearance: none; appearance: none; padding-right: 50px; background-repeat: no-repeat; background-position: right 18px center; background-size: 20px 20px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F2F2F4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); }
+:root[data-theme="dark"] select.filter-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111114' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); }
 .weight-field { flex: 1; min-width: 0; height: 52px; padding: 0 20px; background: var(--fill); border: none; border-radius: var(--radius-field); color: var(--text); font-size: 1.0625rem; font-family: inherit; }
 
 /* Sélecteurs segmentés et filtres */

@@ -8,6 +8,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.86] - 2026-11-24
+### Progression (co-auteur : Claude)
+- Choix de l'exercice (« Progression par exercice ») et de l'appareil (« Suivi cardio ») : la petite flèche du navigateur, collée au bord, est remplacée par un chevron de 20 px, comme celui de « Voir les statistiques de », à 18 px du bord. Il prend la couleur du texte de la gélule, en clair comme en sombre (variante A choisie parmi 20, 24 et 28 px).
+- Le nom de l'exercice s'arrête avant la flèche.
+
+---
+
 ## [1.8.85] - 2026-11-24
 ### Historique (co-auteur : Claude)
 - « Restaurer une sauvegarde » : sous chaque sauvegarde Google Drive, le nombre de séances qu'elle contient (« 33 séances », « 1 séance », « Aucune séance ») remplace « La plus récente » / « Version précédente » / « Ancienne sauvegarde unique ».
