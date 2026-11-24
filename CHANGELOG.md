@@ -8,6 +8,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.83] - 2026-11-24
+### Historique (co-auteur : Claude)
+- Correction : « Modifier la séance » sur une séance d'un programme en pause ouvrait la séance du programme en cours, sans les valeurs enregistrées. Depuis la 1.8.80, l'ouverture de l'onglet Séance rechargeait toujours la séance du programme actif. En modification, le formulaire de la séance choisie est désormais gardé (son programme, sa séance, ses valeurs), même après un passage par un autre onglet.
+- Test ajouté : `tests/test_modifier_pause.py` (groupe `historique`).
+
+---
+
 ## [1.8.82] - 2026-11-22
 ### Progression (co-auteur : Vibe Code)
 - Correction : le filtre des exercices en mode "Tous les programmes" n'affichait que les exercices déjà réalisés dans l'historique (et non plus ceux du catalogue non utilisés).

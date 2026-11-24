@@ -3983,7 +3983,9 @@ function switchTab(tabName) {
   updateStickyOffsets();
   const pageTitle = document.getElementById('page-title');
   if (pageTitle) pageTitle.innerText = PAGE_TITLES[tabName] || '';
-  if (tabName === 'seance') { updateSeancePageTitle(); initWorkoutForm(); }
+  // 1.8.83 (co-auteur : Claude) : en modification d'une séance de l'historique, le formulaire déjà chargé est gardé
+  // (sinon il était remplacé par la séance du programme en cours, cas d'un programme en pause)
+  if (tabName === 'seance') { if (editingOriginalId === null) initWorkoutForm(); updateSeancePageTitle(); }
   if (tabName === 'historique' && pageTitle) pageTitle.innerText = historyTitle(); // 1.7.75
 
   if (tabName === 'programme') renderProgramOverview();
