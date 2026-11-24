@@ -8,6 +8,18 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.89] - 2026-11-24
+### Programmes › Avec notre aide (co-auteur : Claude)
+- **« Avant de commencer »** (planches 38e et 38f) : à chaque ouverture d'« Avec notre aide », avant la question 1, un avertissement : la proposition est purement informative et ne constitue pas un avis professionnel ; consulter un médecin avant de commencer, surtout en cas d'antécédents ou de douleurs ; usage sous sa seule responsabilité ; arrêter en cas de douleur ou de malaise, progresser doucement, bien s'échauffer. Case « J'ai lu et j'accepte » (carré, coche verte) ; « Continuer » inactif tant qu'elle n'est pas cochée ; « Retour » depuis la question 1 y ramène. L'accord n'est gardé nulle part : l'écran revient à chaque ouverture.
+- **Phrase de rappel** sous l'encadré ambre de la proposition, en petit et en gris : « Conseil général, sans valeur d'avis professionnel : tu l'utilises sous ta responsabilité. Arrête en cas de douleur et, au moindre doute, demande l'avis d'un médecin. »
+- Pas de question sur le sexe ni sur la santé (décidé : elles ne changeraient pas la proposition ou laisseraient croire qu'elle tient compte d'une pathologie).
+
+### Conditions d'utilisation (co-auteur : Claude)
+- Nouvel article « Programme proposé » (après « Santé ») : proposition informative, ni avis médical ni avis de coach, sans prise en compte d'un problème de santé, blessure, grossesse ou traitement ; avertissement à accepter ; usage sous sa seule responsabilité ; réponses non enregistrées. Résumé anglais complété ; mise à jour du 24 novembre 2026.
+- Tests : `test_aide.py` (avertissement : texte, case, Continuer, Retour, pas de barre, rien de gardé ; phrase de rappel entre l'encadré ambre et les boutons) ; `test_soutien.py` (date et article des conditions).
+
+---
+
 ## [1.8.88] - 2026-11-24
 ### Fiches d'exercice (co-auteur : Claude)
 - Correction : les fiches des 7 exercices de cardio (Rameur, Vélo, Tapis de course, Ski trainer, Vélo elliptique, Stair climber, Corde à sauter) affichaient deux fois la pastille « Cardio ». Elles n'en ont plus qu'une.

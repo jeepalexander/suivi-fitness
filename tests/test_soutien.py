@@ -61,8 +61,8 @@ with Srv() as base, sync_playwright() as p:
     h2 = pg.evaluate("[...document.querySelectorAll('h2')].map(e=>e.textContent)")
     check("conditions : article « Propriété » avant « Évolutions »", 'Propriété' in h2 and h2.index('Propriété') + 1 == h2.index('Évolutions'), h2)
     txt = pg.inner_text('body')
-    check("conditions : PolyForm Strict, date du 16 novembre 2026, soutien facultatif",
-          'PolyForm Strict 1.0.0' in txt and '16 novembre 2026' in txt and 'Offrir un café' in txt)
+    check("conditions : PolyForm Strict, date du 24 novembre 2026, soutien facultatif, article « Programme proposé » (1.8.89)",
+          'PolyForm Strict 1.0.0' in txt and '24 novembre 2026' in txt and 'Offrir un café' in txt and 'Programme proposé' in txt)
     check("conditions : aucune erreur", not errs, errs)
     br.close()
 

@@ -1389,3 +1389,6 @@ body[data-tab="programme"][data-pview="aide"] header h1 { display: none; }
 .aide-sess-t span { font-size: 0.875rem; color: var(--text-muted); }
 .aide-sess-ex { padding-left: 56px; margin: 0 0 8px; }
 .aide-detail-btn { align-self: flex-start; position: relative; z-index: 1; height: 44px; margin-top: 4px; padding: 0 20px; border: none; border-radius: 999px; background: var(--fill); color: var(--text); font: inherit; font-size: 0.9375rem; font-weight: 600; cursor: pointer; }
+/* 1.8.89 : « Avant de commencer » et phrase de rappel sous la proposition */
+.aide-disc p { margin: 0 0 12px; font-size: 0.9375rem; line-height: 1.5; color: var(--text); }
+.aide-recall { margin: 12px 0 0; font-size: 0.8125rem; line-height: 1.45; color: var(--text-muted); }
