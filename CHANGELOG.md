@@ -8,6 +8,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.84] - 2026-11-24
+### Historique (co-auteur : Claude)
+- Après « Enregistrer les modifications », l'app revient à l'Historique, sur la séance modifiée, avec la même barre de sauvegarde qu'en fin de séance : « Sauvegarde sur le Drive… », puis « Sauvegardée sur le Drive » (ou « Sauvegarde en attente »), puis la ligne redevient normale. Accès Drive expiré dans l'application installée : reconnexion comme en fin de séance, la barre reprend au retour de Google.
+- Sans compte Drive : retour à l'Historique avec un court message « Séance modifiée » (l'ancien message détaillé temps / séries / tonnage est retiré).
+- L'onglet Séance revient ensuite à la séance du programme en cours.
+- Tests : `tests/test_sauvegarde_historique.py` (modification avec et sans Drive, clair et sombre).
+
+---
+
 ## [1.8.83] - 2026-11-24
 ### Historique (co-auteur : Claude)
 - Correction : « Modifier la séance » sur une séance d'un programme en pause ouvrait la séance du programme en cours, sans les valeurs enregistrées. Depuis la 1.8.80, l'ouverture de l'onglet Séance rechargeait toujours la séance du programme actif. En modification, le formulaire de la séance choisie est désormais gardé (son programme, sa séance, ses valeurs), même après un passage par un autre onglet.

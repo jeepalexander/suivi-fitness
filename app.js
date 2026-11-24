@@ -2215,8 +2215,8 @@ async function submitWorkout(e) {
   // Sauvegarde automatique Google Drive (si connecté) : fichier de sauvegarde complète mis à jour.
   // 1.7.63 : après une nouvelle séance, l'envoi (et une éventuelle reconnexion à Google, qui quitte l'application)
   // attend le « OK » de la fenêtre de fin de séance, pour ne pas la faire disparaître avant qu'on l'ait lue.
-  if (isEditing) backupToDrive();
-  else { finishPendingBackup = true; finishSavedId = entry.id; }
+  // 1.8.84 : en modification, l'envoi part tout de suite, avec la barre de l'Historique (voir plus bas)
+  if (!isEditing) { finishPendingBackup = true; finishSavedId = entry.id; }
 
   // Actualise la bannière de déload en temps réel
   displayDeloadNotificationIfNeeded();
@@ -2224,7 +2224,23 @@ async function submitWorkout(e) {
   const usedBodyweight = exerciseLogs.some(x => x.sets.some(st => st.lest !== undefined));
   const weighNotice = usedBodyweight && !bodyKg ? '\n• Poids du corps non renseigné : seul le lest est compté (ajoute ta pesée dans Progression)' : '';
   if (isEditing) {
-    showToast(`Séance modifiée !\n• Temps : ${sessionDuration || 'N/A'}\n• Séries enregistrées : ${validatedRows.length}\n• Tonnage réel : ${Math.round(totalTonnage).toLocaleString()} kg${weighNotice}${driveSaveNotice()}`);
+    // 1.8.84 (co-auteur : Claude) : retour à l'Historique, avec la même barre de sauvegarde qu'en fin de séance,
+    // sur la ligne de la séance modifiée ; sans compte Drive, un court message « Séance modifiée »
+    initWorkoutForm();
+    renderHistory();
+    renderCharts();
+    switchTab('historique');
+    const row = document.querySelector(`.history-item[data-id="${entry.id}"]`);
+    if (row && row.scrollIntoView) row.scrollIntoView({ block: 'center' });
+    const driveOn = isDriveWanted() || !!getDriveToken();
+    const notes = weighNotice.replace(/^\n• /, '');
+    if (driveOn) {
+      trackHistorySave(entry.id, () => backupToDrive({ forceReconnect: true, historyId: entry.id }));
+      if (notes) showToast(notes);
+    } else {
+      showToast('Séance modifiée' + (notes ? '\n' + notes : ''));
+    }
+    return;
   } else {
     // Fin de séance (1.7.27) : fenêtre « Bravo ! » ; les éventuels avertissements suivent en message
     openFinishDialog(entry, previousEntry, records);
