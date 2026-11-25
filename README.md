@@ -2,7 +2,7 @@
 
 **Application PWA de suivi d'entraînement en salle de sport** (dépôt `suivi-fitness`)
 
-[![Version](https://img.shields.io/badge/version-1.8.89-blue)](https://github.com/jeepalexander/suivi-fitness)
+[![Version](https://img.shields.io/badge/version-1.8.90-blue)](https://github.com/jeepalexander/suivi-fitness)
 [![Licence](https://img.shields.io/badge/licence-PolyForm%20Strict%201.0.0-lightgrey)](LICENSE)
 
 ---
@@ -104,7 +104,7 @@ Le détail est dans [CHANGELOG.md](CHANGELOG.md).
 ```text
 suivi-fitness/
 ├── index.html          # Page principale
-├── app.js              # Logique de l’application
+├── app.js              # Logique de l’application (constantes, état, données communes, déload, navigation, démarrage)
 ├── style.css           # Styles et thèmes
 ├── sw.js               # Service Worker (PWA)
 ├── manifest.json       # Configuration PWA
@@ -116,7 +116,7 @@ suivi-fitness/
 ├── LICENSE, NOTICE     # Licence (PolyForm Strict 1.0.0) et composants tiers
 ├── tests/              # Tests automatiques (voir tests/README.md)
 ├── tools/              # release.py (publier une version), captures.py (captures et prototypes), assembler_site.py (site publié)
-├── js/                 # catalogue.js (exercices), programmes.js (onglet Programmes), aide.js (« Avec notre aide »), Chart.js, qrcode.js et security.js
+├── js/                 # catalogue.js (exercices), programmes.js (onglet Programmes), aide.js (« Avec notre aide »), theme.js (thème et fonds), chronos.js (chronos et brouillon), seance.js (onglet Séance), historique.js (Historique), graphiques.js et analyse.js (Progression), drive.js (Google Drive), sauvegarde.js (sauvegarde et import), mises-a-jour.js, Chart.js, qrcode.js et security.js
 ├── css/                # Styles complémentaires (polices)
 ├── fonts/              # Polices embarquées
 └── icons/              # Icônes de l’application et des exercices

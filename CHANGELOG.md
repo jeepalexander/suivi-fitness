@@ -8,6 +8,28 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.90] - 2026-11-25
+### Code : découpage en plusieurs fichiers (co-auteur : Claude)
+- Aucun changement visible ni de fonctionnement : neuf sections d'`app.js` sont déplacées telles quelles, ligne pour ligne, dans leurs propres fichiers, chargés juste après `app.js` et dans l'ordre d'origine :
+  - `js/theme.js` : thème clair / sombre / auto et fonds d'écran (ancienne section 3) ;
+  - `js/chronos.js` : chronos de repos et de séance, brouillon de séance (anciennes sections 7 et 8) ;
+  - `js/seance.js` : onglet Séance (séries, exercices, formulaire, enregistrement, fenêtre de fin de séance ; anciennes sections 9 et 10) ;
+  - `js/historique.js` : Historique et modification d'une séance (ancienne section 11) ;
+  - `js/graphiques.js` : Progression, filtres et courbes (ancienne section 12) ;
+  - `js/analyse.js` : analyse mensuelle (ancienne section 13) ;
+  - `js/drive.js` : sauvegarde Google Drive (ancienne section 15b) ;
+  - `js/sauvegarde.js` : sauvegarde, import et réinitialisation (ancienne section 15) ;
+  - `js/mises-a-jour.js` : mises à jour de l'application (ancienne section 16).
+- `app.js` passe de 5 500 à environ 990 lignes : constantes, état, données communes, déload, navigation et démarrage.
+- Contrôles : une fois recollés dans l'ordre d'origine, les fichiers redonnent exactement l'ancien `app.js` (seuls le sommaire et des lignes vides changent) ; aucun nom en double entre les fichiers ; aucun code lu au chargement n'utilise un nom défini dans un fichier chargé plus tard ; le démarrage attend la fin du chargement de la page.
+- `index.html` charge les neuf fichiers ; `sw.js` les met en cache pour l'usage hors ligne ; sommaire d'`app.js` et README mis à jour.
+- Nouveau test `test_decoupage.py`, lancé d'office dès que le code change : chaque script est dans le cache hors ligne, aucun nom global défini dans deux fichiers, ouverture de l'app sans erreur JavaScript (clair et sombre), chaque fonction appelée par un bouton existe. Vérifié en cassant volontairement le découpage : le test le signale.
+- Tests adaptés : choix automatique (`tests/selection.py`) étendu aux nouveaux fichiers ; `test_fenetres.py` cherche aussi les `alert()` / `confirm()` dans ces fichiers ; `test_credits.py` lit la liste des fonds dans `js/theme.js`.
+- `test_sauvegarde_historique.py` réparé : avec son jeton Drive factice, l'app demandait le nom du compte à Google par un vrai appel réseau, bloqué hors connexion (4 contrôles « aucune erreur JS » en échec, déjà avant le découpage). L'API Drive y est maintenant simulée : 35 / 35.
+- Suite complète lancée : 61 tests sur 61 réussis.
+
+---
+
 ## [1.8.89] - 2026-11-24
 ### Programmes › Avec notre aide (co-auteur : Claude)
 - **« Avant de commencer »** (planches 38e et 38f) : à chaque ouverture d'« Avec notre aide », avant la question 1, un avertissement : la proposition est purement informative et ne constitue pas un avis professionnel ; consulter un médecin avant de commencer, surtout en cas d'antécédents ou de douleurs ; usage sous sa seule responsabilité ; arrêter en cas de douleur ou de malaise, progresser doucement, bien s'échauffer. Case « J'ai lu et j'accepte » (carré, coche verte) ; « Continuer » inactif tant qu'elle n'est pas cochée ; « Retour » depuis la question 1 y ramène. L'accord n'est gardé nulle part : l'écran revient à chaque ouverture.

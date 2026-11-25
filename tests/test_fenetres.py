@@ -136,7 +136,7 @@ with Srv() as url, sync_playwright() as p:
         ctx.close()
     br.close()
 
-src = '\n'.join((REPO / f).read_text(encoding='utf-8') for f in ['app.js', 'js/programmes.js', 'js/security.js'])
+src = '\n'.join((REPO / f).read_text(encoding='utf-8') for f in ['app.js', 'js/theme.js', 'js/chronos.js', 'js/mises-a-jour.js', 'js/seance.js', 'js/historique.js', 'js/sauvegarde.js', 'js/drive.js', 'js/graphiques.js', 'js/analyse.js', 'js/programmes.js', 'js/security.js'])
 import re
 code = re.sub(r'//[^\n]*', '', src)  # commentaires ignorés
 left = [m.group(0) for m in re.finditer(r'(?<![\w.])(confirm|alert)\(', code)]

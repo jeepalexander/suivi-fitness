@@ -13,7 +13,7 @@ def check(label, cond, detail=''):
     print(('  OK  ' if cond else '  ÉCHEC ') + label + ('' if cond else f'  -> {detail}'))
     OK = OK and bool(cond)
 
-app = (REPO / 'app.js').read_text(encoding='utf-8')
+app = (REPO / 'js' / 'theme.js').read_text(encoding='utf-8')  # liste WALLPAPERS (dans app.js avant 1.8.90)
 block = app[app.index('const WALLPAPERS = ['):]
 block = block[:block.index('];')]
 WP = [(i, n) for i, n in re.findall(r"\{ id: '([a-z]+)', name: '([^']+)'", block) if i != 'none']

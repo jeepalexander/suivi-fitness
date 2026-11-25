@@ -2,9 +2,18 @@
 Drive est configuré, une fine barre verte se déploie sous la nouvelle séance pendant l'envoi, puis « Sauvegardée sur
 le Drive » et la ligne redevient normale. Sans Drive : Historique sans barre. Échec : « Sauvegarde en attente ».
 Accès expiré dans l'application installée : reconnexion forcée, la séance est gardée pour le retour de Google.
-1.8.84 : après « Enregistrer les modifications », même parcours sur la ligne de la séance modifiée."""
-import os, sys, tempfile
-from harness import Srv, newpage, sync_playwright
+1.8.84 : après « Enregistrer les modifications », même parcours sur la ligne de la séance modifiée.
+1.8.90 : l'API Google Drive est simulée (le nom du compte demandé par l'app ne part plus sur le réseau)."""
+import json, os, sys, tempfile
+from harness import Srv, newpage as _newpage, sync_playwright
+
+
+def newpage(*a, **k):
+    """Page du harness + réponse factice de l'API Drive : le jeton factice « tok » pousse l'app à demander le compte."""
+    ctx, pg, errs = _newpage(*a, **k)
+    pg.route('**/www.googleapis.com/**', lambda r: r.fulfill(status=200, content_type='application/json',
+             body=json.dumps({'user': {'emailAddress': 'jean@example.com'}, 'files': []})))
+    return ctx, pg, errs
 
 SHOTS = os.environ.get('SHOTS_DIR') or tempfile.gettempdir()
 res = []

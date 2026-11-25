@@ -2,7 +2,8 @@
 
 Compare le dépôt à une référence (par défaut origin/dev, sinon HEAD) : fichiers modifiés et, pour app.js, les
 sections touchées (« // 9. ÉCRAN SÉANCE … »). Chaque fichier ou section renvoie à des groupes ou des tests de
-run_tests.py. test_ecrans.py (tour rapide des écrans) est toujours ajouté dès que le code de l'app change.
+run_tests.py. test_ecrans.py (tour rapide des écrans) et test_decoupage.py (garde-fou du découpage en fichiers) sont
+toujours ajoutés dès que le code de l'app change.
 
   python3 tests/run_tests.py --auto            lance les tests choisis
   python3 tests/run_tests.py --auto --quoi     affiche seulement le choix et sa raison
@@ -12,6 +13,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 BASE = 'test_ecrans.py'
+DECOUPAGE = 'test_decoupage.py'  # 1.8.90 : garde-fou du découpage en fichiers, quelques secondes
 TOUT = '*'
 
 # Sections de app.js : mot-clé du titre -> tests (ordre : le premier mot-clé trouvé l'emporte)
@@ -39,6 +41,15 @@ SECTIONS = [
 # Fichier (ou début de chemin) -> tests. None = ne demande aucun test (documentation).
 FICHIERS = [
     ('js/aide.js', ['test_aide.py']),
+    ('js/drive.js', ['drive']),
+    ('js/theme.js', ['style', 'test_fond_ecran.py', 'test_fond_defaut.py', 'test_credits.py']),
+    ('js/chronos.js', ['test_chrono.py', 'test_titre_seance.py', 'test_pause_actif.py', 'test_brouillon.py', 'test_poids_brouillon.py']),
+    ('js/mises-a-jour.js', ['test_mise_a_jour.py', 'test_reglages.py']),
+    ('js/seance.js', ['seance', 'test_fin_seance.py', 'test_sauvegarde_historique.py']),
+    ('js/historique.js', ['historique']),
+    ('js/sauvegarde.js', ['historique', 'test_drive_reset.py']),
+    ('js/graphiques.js', ['progression']),
+    ('js/analyse.js', ['test_bilan.py', 'test_trophees.py']),
     ('js/programmes.js', ['programmes']),
     ('js/partage.js', ['test_partage.py', 'test_scanner_jsqr.py', 'test_recu_seance.py']),
     ('js/bilan.js', ['test_bilan.py', 'test_trophees.py']),
@@ -129,4 +140,6 @@ def choisir(ref=None):
         return [], raisons, True
     if code and BASE not in choix:
         choix.append(BASE)
+    if code and DECOUPAGE not in choix:
+        choix.append(DECOUPAGE)
     return choix, raisons, False
