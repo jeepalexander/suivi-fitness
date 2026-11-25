@@ -13,7 +13,9 @@ python3 tests/run_tests.py --liste               # les groupes et leurs tests
 ```
 Un test seul : `python3 tests/test_validation.py` ou `python3 tests/run_tests.py rameur`.
 
-**Choix automatique (1.8.87)** : `python3 tests/run_tests.py --auto` regarde ce qui a changé depuis `origin/dev` (fichiers, et sections de `app.js` touchées) et lance seulement les tests concernés, plus `test_ecrans.py` dès que le code de l'app change. `--auto --quoi` affiche le choix et sa raison sans rien lancer. La table de correspondance est dans `tests/selection.py` : y ajouter un fichier quand on en crée un.
+**Choix automatique (1.8.87)** : `python3 tests/run_tests.py --auto` regarde ce qui a changé depuis `origin/dev` (fichiers de `js/`, et sections de `app.js` touchées) et lance seulement les tests concernés, plus `test_ecrans.py` et `test_decoupage.py` dès que le code de l'app change. `--auto --quoi` affiche le choix et sa raison sans rien lancer. La table de correspondance est dans `tests/selection.py` : y ajouter un fichier quand on en crée un.
+
+**Code réparti en fichiers (1.8.90)** : `app.js` ne garde que les constantes, l'état, les données communes, le déload, la navigation et le démarrage ; le reste est dans `js/` (`theme.js`, `chronos.js`, `seance.js`, `historique.js`, `graphiques.js`, `analyse.js`, `drive.js`, `sauvegarde.js`, `mises-a-jour.js`, en plus de `programmes.js`, `aide.js`, `bilan.js`, `partage.js`, `fiches.js`, `catalogue.js`). Le sommaire en tête d'`app.js` dit où est chaque section. Un test qui lit le texte du code doit lire le bon fichier (exemples : `test_fenetres.py` parcourt tous ces fichiers, `test_credits.py` lit la liste des fonds dans `js/theme.js`). Un nouveau fichier `js/` s'ajoute dans `index.html`, dans `ASSETS` de `sw.js` et dans `FICHIERS` de `tests/selection.py` ; `test_decoupage.py` signale un oubli.
 
 **Briques communes (1.8.87, `tests/harness.py`)** : `ECRANS` (nom court → ouverture de l'écran : `programmes`, `plus`, `editeur`, `ajout`, `aide`, `seance`, `seance-ouverte`, `fiche`, `progression`, `perimetre`, `historique`, `detail`, `reglages`, `fond`, `invitation`), `ouvrir(pg, 'reglages')`, `debordements(pg)`, `Bilan()` (compteur de contrôles) et `variantes()` (390 / 360 px × clair / sombre). Un nouveau test les utilise plutôt que de recopier ces lignes.
 
@@ -89,7 +91,7 @@ Un test seul : `python3 tests/test_validation.py` ou `python3 tests/run_tests.py
 ## Quand les lancer
 Automatiquement : GitHub les exécute à chaque envoi de code et à chaque demande de fusion (`.github/workflows/tests.yml`, onglet **Actions** du dépôt) ; un échec apparaît en rouge sur le commit.
 
-À la main, avant chaque commit sur `dev` qui touche `app.js`, `index.html` ou `style.css`. Si un test échoue après une modification, le message dit lequel et pourquoi.
+À la main, avant chaque commit sur `dev` qui touche le code (`app.js`, un fichier de `js/`, `index.html` ou `style.css`) : `python3 tests/run_tests.py --auto` suffit ; la suite complète quand on déplace du code d'un fichier à l'autre. Si un test échoue après une modification, le message dit lequel et pourquoi.
 
 ## Limites
 - Chromium uniquement : pas de test sur Safari ni sur un vrai Android (Chrome ou Firefox), où certains comportements du système (fenêtre de partage, choix de fichier, permissions) diffèrent.
