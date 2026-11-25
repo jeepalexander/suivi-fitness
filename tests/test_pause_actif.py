@@ -16,7 +16,7 @@ with Srv() as url, sync_playwright() as p:
         name = pg.evaluate("getActiveProgram().name")
         g = pg.evaluate("""(()=>{const t=document.querySelector('.prog-tile');const b=t.querySelector('.prog-pause-btn');const tr=t.getBoundingClientRect(),br=b.getBoundingClientRect();
             const ico=t.querySelector('.prog-ico').getBoundingClientRect();return {right:tr.right-br.right,top:br.top-tr.top,w:br.width,h:br.height,icoMid:ico.top+ico.height/2,btnMid:br.top+br.height/2,label:b.getAttribute('aria-label')}})()""")
-        ok(tag + "bouton pause 40 px en haut à droite de la tuile active, aligné sur l'icône", g['w'] == 40 and g['h'] == 40 and 10 <= g['right'] <= 14 and abs(g['icoMid'] - g['btnMid']) < 1 and name in g['label'], g)
+        ok(tag + "bouton pause 44 px (40 avant le nombre d'or, 1.8.91) en haut à droite de la tuile active, aligné sur l'icône", g['w'] == 44 and g['h'] == 44 and 10 <= g['right'] <= 14 and abs(g['icoMid'] - g['btnMid']) < 1 and name in g['label'], g)
         ov = pg.evaluate(OVERFLOW_JS)
         ok(tag + "rien ne déborde", ov['docW'] <= ov['vw'] and not ov['out'], ov)
         pg.screenshot(path=f'/tmp/claude-0/pause_actif_{w}_{theme}.png')

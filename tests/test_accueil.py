@@ -23,12 +23,12 @@ with Srv() as base, sync_playwright() as p:
             return {h:Math.round(t.getBoundingClientRect().height), txt:t.innerText, tile:r(t), ico:r(t.querySelector('.prog-ico')), pill:r(t.querySelector('.prog-tile-next .type-pill')),
             name:r(t.querySelector('.prog-tile-name')), sess:r(t.querySelector('.prog-tile-session')), det:r(t.querySelector('.prog-tile-foot .prog-detail-btn')), start:r(t.querySelector('.prog-tile-foot .btn-start')),
             line:r(t.querySelector('.prog-tile-line')), deload:!!t.querySelector('.prog-tile-sum .deload-inline')}})()""")
-        check(f"[{w}px] tuile active compacte (≤ 215 px avec la pastille déload, 278 px avant)", tile['h'] <= 215, tile['h'])
+        check(f"[{w}px] tuile active compacte (≤ 222 px avec la pastille déload ; 215 avant le nombre d'or, 278 avant la 1.7.24)", tile['h'] <= 222, tile['h'])
         check(f"[{w}px] mêmes informations : nom, séance, exercices · séries, + de détail, démarrer, déload",
               'exercice' in tile['txt'] and 'série' in tile['txt'] and ('Déload' in tile['txt']) == tile['deload'], tile['txt'])
-        check(f"[{w}px] pastille de séance de la taille de l'icône du programme, dans la même colonne", tile['pill'][1] - tile['pill'][0] == 40 and tile['pill'][0] == tile['ico'][0])
+        check(f"[{w}px] pastille de séance de la taille de l'icône du programme, dans la même colonne", tile['pill'][1] - tile['pill'][0] == tile['ico'][1] - tile['ico'][0] and tile['pill'][0] == tile['ico'][0])
         check(f"[{w}px] nom de la séance aligné sur le nom du programme", tile['sess'][0] == tile['name'][0])
-        check(f"[{w}px] « + de détail » en bas à gauche, démarrer en bas à droite, alignés sur le bas", tile['det'][0] == tile['ico'][0] and tile['start'][1] == tile['tile'][1] - 12 and tile['det'][3] == tile['start'][3])
+        check(f"[{w}px] « + de détail » en bas à gauche, démarrer en bas à droite, alignés sur le bas", tile['det'][0] == tile['ico'][0] and tile['start'][1] == tile['tile'][1] - 13 and tile['det'][3] == tile['start'][3])
         check(f"[{w}px] trait pointillé : de sous l'icône jusqu'à « + de détail », sur l'axe de l'icône", tile['line'][2] == tile['ico'][3] and tile['line'][3] == tile['det'][2] and abs((tile['line'][0] + tile['line'][1]) / 2 - (tile['ico'][0] + tile['ico'][1]) / 2) <= 1, tile)
         st = pg.evaluate("""(()=>{const tx=sel=>{const e=document.querySelector(sel);const n=[...e.childNodes].reverse().find(n=>n.nodeType===3&&n.textContent.trim());const R=document.createRange();R.selectNodeContents(n);return [Math.round(R.getBoundingClientRect().left), n.textContent.trim()]};
             return {actif:tx('.prog-status'), mem:tx('.prog-mem-title')}})()""")

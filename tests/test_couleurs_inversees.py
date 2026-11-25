@@ -34,7 +34,7 @@ with Srv() as base, sync_playwright() as p:
         check(f'[{scheme}] pastille de la fiche d\'exercice inversée (1.8.53)', fb == INV[scheme], fb)
         pg.evaluate("closeFiche && closeFiche(); switchTab('reglages'); 0"); pg.wait_for_timeout(300)
         wr = pg.evaluate("(()=>{const r=document.getElementById('wallpaper-row');const t=r.querySelector('.wallpaper-row-thumb');return [r.offsetHeight,getComputedStyle(r).borderRadius,t.offsetWidth,t.offsetHeight,getComputedStyle(t).borderRadius]})()")
-        check(f'[{scheme}] Fond d\'écran : gélule de 56 px, vignette ronde de 40 px (1.8.54)', wr[0] == 56 and wr[1] == '999px' and wr[2] == 40 and wr[3] == 40 and wr[4] == '50%', wr)
+        check(f'[{scheme}] Fond d\'écran : gélule de 56 px, vignette ronde de 44 px (1.8.54 ; 44 px depuis le nombre d\'or, 1.8.91)', wr[0] == 56 and wr[1] == '999px' and wr[2] == 44 and wr[3] == 44 and wr[4] == '50%', wr)
         g = pg.evaluate("[...document.querySelectorAll('#tab-reglages .seg-group, #tab-reglages .wallpaper-row')].map(e=>getComputedStyle(e).backgroundColor)")
         b2 = pg.evaluate("[...document.querySelectorAll('#tab-reglages .btn-secondary:not(.support-btn)')].filter(e=>e.offsetParent).map(e=>getComputedStyle(e).backgroundColor)")
         check(f'[{scheme}] Réglages : Clair / Sombre / Auto et Fond d\'écran au gris inversé (1.8.53)', g and all(x == INV[scheme] for x in g), g)

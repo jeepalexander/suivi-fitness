@@ -8,6 +8,22 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.91] - 2026-11-25
+### Design system : nombre d'or, moins de tailles (co-auteur : Claude)
+- Toutes les tailles suivent des échelles courtes, réglées sur le nombre d'or (φ ≈ 1,618) et la suite de Fibonacci (planches 42a à 43j de la maquette) :
+  - texte : 13 · 15 · 17 · 22 · 28 · 44 · 72 px (×1,27 = √φ de 17 à 28, puis ×φ), plus 18 (nom d'exercice ouvert, éditeur de séances, post-it) et 24 (chiffres de la grille des séries) ; 15 tailles avant ;
+  - espacements : 5 · 8 · 13 · 21 · 34 px (suite de Fibonacci), 1 à 3 px pour les petits décalages, marge de page 26 px inchangée ; 30 valeurs avant ;
+  - boutons, champs et ronds : 36 · 44 · 56 px (rapport √φ) ; 9 hauteurs avant ;
+  - icônes : 16 · 20 · 24 px ; rayons : 8 · 13 · 21 · 25 · 34 px et pilule ; interlignes : 1,05 · 1,35 · 1,6 ; graisses : 400 · 600 · 700.
+- 14 libellés de 15 px passent à 17 parce que cela ne déplace aucun autre élément (essayé sur tous les écrans, à 390 et 360 px) : « Retour », onglet actif du menu, menus déroulants de Progression, boutons de choix (Clair / Sombre / Auto, Séances / A / B / C / Mois, puces d'« Ajouter un exercice »), bouton Déload, « + de détail », « 7 exercices · 22 séries », « 0 / 22 séries », intitulés Série / Kg / Réps, chiffres des Trophées, « 4 séances · 62,5 T », texte de Fond d'écran.
+- Gardés : la position de l'en-tête sous la caméra, les coins de 25 px des champs et des encadrés (pas de forme de gélule), les chiffres des séries à 24 px, « PAUSE ADAPTATIVE » à 13 px.
+- Boutons − / + d'un exercice ouvert à 36 px (40 avant) pour que « Développé militaire » tienne sur une ligne.
+- Trait pointillé de la tuile active recalé sur la nouvelle icône (marge 13 + icône 44).
+- `style.css` réécrit en place (547 valeurs), commentaires et ordre des règles conservés ; design system en ligne (jetons, nouvelle famille « tailles », feuille des aperçus, fiches) et `claude/DESIGN_SYSTEM.md` mis à jour.
+- Tests mis aux nouvelles valeurs : `test_accueil.py`, `test_alignement_titres.py`, `test_couleurs_inversees.py`, `test_ecart_memoire.py`, `test_pause_actif.py`. Suite complète : tous les tests réussis.
+
+---
+
 ## [1.8.90] - 2026-11-25
 ### Code : découpage en plusieurs fichiers (co-auteur : Claude)
 - Aucun changement visible ni de fonctionnement : neuf sections d'`app.js` sont déplacées telles quelles, ligne pour ligne, dans leurs propres fichiers, chargés juste après `app.js` et dans l'ordre d'origine :
