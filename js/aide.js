@@ -40,14 +40,15 @@ const AIDE_GEAR_ITEMS = [['halteres', 'Haltères'], ['banc', 'Banc'], ['barre_tr
 const AIDE_NAMES = { masse: 'Prise de masse', force: 'Force', forme: 'Forme', endurance: 'Endurance', gras: 'Perte de gras' };
 
 function openAide() {
-  aide = { step: 1, goal: null, level: null, time: null, freq: null, gear: null, items: [], detail: false, result: null };
+  // 1.8.89 : l'écran « Avant de commencer » (step 0) s'affiche à chaque ouverture ; l'accord n'est pas gardé
+  aide = { step: 0, accepted: false, goal: null, level: null, time: null, freq: null, gear: null, items: [], detail: false, result: null };
   setProgramView('aide');
 }
 
 function aideBack() {
   if (!aide) return setProgramView('choose');
   if (aide.step === 'result') { aide.step = AIDE_STEPS; aide.result = null; }
-  else if (aide.step > 1) aide.step--;
+  else if (aide.step > 0) aide.step--;
   else { aide = null; setProgramView('choose'); return; }
   renderAide();
 }
@@ -61,6 +62,7 @@ function aideNext() {
 
 function aideAnswered() {
   switch (aide.step) {
+    case 0: return !!aide.accepted;
     case 1: return !!aide.goal;
     case 2: return !!aide.level;
     case 3: return !!aide.time;
@@ -68,6 +70,12 @@ function aideAnswered() {
     case 5: return aide.gear === 'salle' || aide.gear === 'none' || (aide.gear === 'some' && aide.items.length > 0);
     default: return true;
   }
+}
+
+function aideToggleAccept() {
+  if (!aide) return;
+  aide.accepted = !aide.accepted;
+  renderAide();
 }
 
 function aidePick(field, value) {
@@ -122,9 +130,22 @@ function aideAmberHtml(icon, text, cls = '') {
   return `<div class="advice-item advice-warning aide-amber ${cls}"><span class="aide-amber-ico" aria-hidden="true">${icon}</span><span class="advice-text">${text}</span></div>`;
 }
 
+// 1.8.89 : « Avant de commencer » (planches 38e et 38f) ; « Continuer » reste inactif tant que la case n'est pas cochée
+function aideDisclaimerHtml() {
+  return `<div class="aide-head"><span class="choose-head">Ton programme sur mesure</span><h2 class="aide-q">Avant de commencer</h2></div>
+    <div class="aide-disc">
+      <p>Ce questionnaire t'aide à créer un programme. La proposition qui en découle est purement informative : elle ne constitue pas un avis professionnel.</p>
+      <p>Toute pratique physique comporte un risque de blessure. Il est conseillé de consulter un médecin avant de commencer un programme, en particulier si tu as des antécédents médicaux ou des douleurs.</p>
+      <p>Tu utilises ces suggestions sous ta seule responsabilité. Arrête immédiatement un exercice en cas de douleur ou de malaise. Respecte tes sensations et ton rythme, progresse doucement, et n'oublie pas de bien t'échauffer.</p>
+    </div>
+    <div class="aide-rows">${aideOptHtml({ title: "J'ai lu et j'accepte", on: aide.accepted, multi: true, onclick: 'aideToggleAccept()' })}</div>
+    ${aideNavHtml('Continuer', aide.accepted)}`;
+}
+
 function aideHtml() {
-  if (!aide) aide = { step: 1, goal: null, level: null, time: null, freq: null, gear: null, items: [], detail: false, result: null };
+  if (!aide) aide = { step: 0, accepted: false, goal: null, level: null, time: null, freq: null, gear: null, items: [], detail: false, result: null };
   if (aide.step === 'result') return aideResultHtml();
+  if (aide.step === 0) return aideDisclaimerHtml();
   const n = aide.step;
   const bar = Array.from({ length: AIDE_STEPS }, (_, i) => `<span class="${i < n ? 'on' : ''}"></span>`).join('');
   const QUESTIONS = ['Ton objectif ?', 'Où en es-tu ?', 'Combien de temps es-tu prêt à passer par séance ?',
@@ -192,6 +213,7 @@ function aideResultHtml() {
   return `<div class="aide-head"><span class="choose-head">Voici ta proposition</span></div>
     <div class="ed-kind">${ico}<div><div class="ed-kind-title">${escapeHtml(r.name)}</div><div class="ed-kind-sub">${escapeHtml(r.sub)}</div></div></div>
     ${content}${why}${aideAmberHtml(PEN_SVG, end, 'aide-end')}
+    <p class="aide-recall">Conseil général, sans valeur d'avis professionnel : tu l'utilises sous ta responsabilité. Arrête en cas de douleur et, au moindre doute, demande l'avis d'un médecin.</p>
     ${aideNavHtml("Ouvrir dans l'éditeur", true, 'aideOpenEditor()')}`;
 }
 

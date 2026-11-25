@@ -123,7 +123,11 @@ with Srv() as base, sync_playwright() as p:
     lbl = pg.evaluate("[formatBackupDayLabel('2026-11-08T17:42:00', new Date('2026-11-08T21:00:00')), formatBackupDayLabel('2026-11-07T19:15:00', new Date('2026-11-08T21:00:00')), formatBackupDayLabel('2026-11-05T19:15:00', new Date('2026-11-08T21:00:00'))]")
     check("dates de la fenêtre : « Aujourd'hui », « Hier », sinon la date", lbl == ["Aujourd'hui à 17:42:00", 'Hier à 19:15:00', '05/11/2026 à 19:15:00'], lbl)
     check("triées de la plus récente à la plus ancienne, avec date et heure (secondes comprises)", [r['t'] for r in rows] == shown and all(re.match(r'^\d{2}/\d{2}/2026 à \d{2}:\d{2}:\d{2}$', r['t']) for r in rows), [r['t'] for r in rows])
-    check("un seul choix, la plus récente cochée par défaut et marquée « La plus récente »", [r['on'] for r in rows] == [True, False, False, False, False] and rows[0]['s'] == 'La plus récente' and rows[1]['s'] == 'Version précédente', rows[:2])
+    check("un seul choix, la plus récente cochée par défaut", [r['on'] for r in rows] == [True, False, False, False, False], rows[:2])
+    check("sous-titre = nombre de séances de chaque sauvegarde (anciennes sauvegardes lues pour les compter)", [r['s'] for r in rows] == ['16 séances', '15 séances', '14 séances', '13 séances', '12 séances'], [r['s'] for r in rows])
+    dl0 = sum(1 for (mm, u) in d.calls if 'alt=media' in u)
+    pg.evaluate("hideDriveBackupList(); restoreFromDrive()"); pg.wait_for_timeout(1200)
+    check("réouverture : nombres gardés, sauvegardes non relues", [r['s'] for r in pg.evaluate(ROWS)][:2] == ['16 séances', '15 séances'] and sum(1 for (mm, u) in d.calls if 'alt=media' in u) == dl0)
     pg.evaluate("document.querySelector('.sheet').dataset.mark='1'")
     pg.evaluate("document.querySelectorAll('.sheet .backup-item.drive')[2].click()"); pg.wait_for_timeout(100)
     check("choisir une ligne ne rouvre pas la fenêtre (mise à jour sur place)", pg.evaluate("document.querySelector('.sheet').dataset.mark") == '1')
@@ -154,6 +158,21 @@ with Srv() as base, sync_playwright() as p:
     # déconnexion : la fenêtre se ferme
     pg.evaluate("disconnectGoogleDrive()"); pg.wait_for_timeout(300)
     check("« Déconnecter » : la fenêtre des sauvegardes se ferme", not pg.evaluate("!!document.querySelector('#sheet-overlay.open')"))
+    ctx.close()
+
+    # 4b) nouvelle sauvegarde : nombre de séances dans les propriétés du fichier, affiché sans relire le fichier
+    d = FakeDrive(folder=True, versions=versions(2))
+    ctx, pg, dlg, logs, errs = run(br, base, d, seeds=[VALID, FOLDER, BKID])
+    pg.wait_for_timeout(1500)
+    pg.evaluate("syncDriveBackup({force:true})"); pg.wait_for_timeout(2000)
+    nf = [f for f in d.live() if f['name'] == d.post_names[-1]][0] if d.post_names else {}
+    n_local = len(local_state(pg)['history'])
+    check("envoi : propriété « seances » = nombre de séances, JSON inchangé", (nf.get('appProperties') or {}).get('seances') == str(n_local) and 'seances' not in json.loads(nf['body']), nf.get('appProperties'))
+    pg.evaluate("restoreFromDrive()"); pg.wait_for_timeout(300)
+    dl0 = sum(1 for (mm, u) in d.calls if 'alt=media' in u)
+    pg.wait_for_timeout(1200)
+    first = pg.evaluate(ROWS)[0]['s']
+    check("liste : « %d séances » sur la nouvelle sauvegarde" % n_local, first == '%d séances' % n_local, first)
     ctx.close()
 
     # 5) appareil vidé : aucune version vide n'est envoyée par-dessus la plus récente (protection inchangée)

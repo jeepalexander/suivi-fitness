@@ -191,7 +191,7 @@ function ficheHtml(e) {
   const chips = [e.group];
   if (e.poly) chips.push('Polyarticulaire');
   if (!e.cardio && e.sets && e.reps) chips.push(`${e.sets} × ${e.reps}${e.rest ? ' · repos ' + formatRestDuration(e.rest) : ''}`);
-  else if (e.cardio) chips.push('Cardio');
+  else if (e.cardio && e.group !== 'Cardio') chips.push('Cardio');  // 1.8.88 : le groupe dit déjà « Cardio » (pastille en double)
   let html = `<div class="exf-hero"><div class="ex-icon-badge">${getIcon(e.name, true)}</div></div>
     <h2 class="sheet-title center" id="fiche-title">${escapeHtml(e.name)}</h2>
     <div class="exf-chips">${chips.map(c => `<span class="exf-chip">${escapeHtml(c)}</span>`).join('')}</div>`;

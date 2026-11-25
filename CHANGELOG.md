@@ -8,6 +8,75 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.89] - 2026-11-24
+### Programmes › Avec notre aide (co-auteur : Claude)
+- **« Avant de commencer »** (planches 38e et 38f) : à chaque ouverture d'« Avec notre aide », avant la question 1, un avertissement : la proposition est purement informative et ne constitue pas un avis professionnel ; consulter un médecin avant de commencer, surtout en cas d'antécédents ou de douleurs ; usage sous sa seule responsabilité ; arrêter en cas de douleur ou de malaise, progresser doucement, bien s'échauffer. Case « J'ai lu et j'accepte » (carré, coche verte) ; « Continuer » inactif tant qu'elle n'est pas cochée ; « Retour » depuis la question 1 y ramène. L'accord n'est gardé nulle part : l'écran revient à chaque ouverture.
+- **Phrase de rappel** sous l'encadré ambre de la proposition, en petit et en gris : « Conseil général, sans valeur d'avis professionnel : tu l'utilises sous ta responsabilité. Arrête en cas de douleur et, au moindre doute, demande l'avis d'un médecin. »
+- Pas de question sur le sexe ni sur la santé (décidé : elles ne changeraient pas la proposition ou laisseraient croire qu'elle tient compte d'une pathologie).
+
+### Conditions d'utilisation (co-auteur : Claude)
+- Nouvel article « Programme proposé » (après « Santé ») : proposition informative, ni avis médical ni avis de coach, sans prise en compte d'un problème de santé, blessure, grossesse ou traitement ; avertissement à accepter ; usage sous sa seule responsabilité ; réponses non enregistrées. Résumé anglais complété ; mise à jour du 24 novembre 2026.
+- Tests : `test_aide.py` (avertissement : texte, case, Continuer, Retour, pas de barre, rien de gardé ; phrase de rappel entre l'encadré ambre et les boutons) ; `test_soutien.py` (date et article des conditions).
+
+---
+
+## [1.8.88] - 2026-11-24
+### Fiches d'exercice (co-auteur : Claude)
+- Correction : les fiches des 7 exercices de cardio (Rameur, Vélo, Tapis de course, Ski trainer, Vélo elliptique, Stair climber, Corde à sauter) affichaient deux fois la pastille « Cardio ». Elles n'en ont plus qu'une.
+- Test : `tests/test_fiches.py` vérifie qu'aucune fiche n'a de pastille en double.
+
+---
+
+## [1.8.87] - 2026-11-24
+### Outils de travail : release automatique et tests réutilisables (co-auteur : Claude)
+- Rien ne change dans l'application : cette version prépare des mises à jour plus rapides.
+- **Release automatique** (`tools/release.py`) : une commande lance les tests concernés, passe à la version suivante dans `manifest.json`, `sw.js` (`APP_VERSION`) et le badge du README, ajoute l'entrée du CHANGELOG, crée le commit signé co-auteur, l'envoie sur `dev` et suit la publication. Si une autre conversation a publié entre-temps, l'outil repart de sa version. `--essai`, `--etat` (versions de dev et de main), `--production --confirme` (seulement après accord).
+- **Choix automatique des tests** : `python3 tests/run_tests.py --auto` lance seulement les tests concernés par ce qui a changé (fichiers et sections de `app.js`), `--quoi` affiche ce choix (`tests/selection.py`).
+- **Briques communes des tests** (`tests/harness.py`) : liste des 15 écrans de l'app et leur ouverture (`ECRANS`, `ouvrir`), détection des débordements, compteur de contrôles, variantes 390 / 360 px en clair et en sombre.
+- **Captures et prototypes** (`tools/captures.py`) : planche d'un écran à 390 et 360 px, en clair et en sombre, avec ou sans un CSS ou un script d'essai, sans modifier le code.
+- Nouveau test `tests/test_ecrans.py` (tour rapide des 15 écrans, 60 contrôles). `test_plein_ecran.py` et `test_agrandissement.py` rejoignent la suite complète ; `test_exercice_retire.py` et `test_premier_lancement.py` sont maintenant décrits dans `tests/README.md`.
+
+---
+
+## [1.8.86] - 2026-11-24
+### Progression (co-auteur : Claude)
+- Choix de l'exercice (« Progression par exercice ») et de l'appareil (« Suivi cardio ») : la petite flèche du navigateur, collée au bord, est remplacée par un chevron de 20 px, comme celui de « Voir les statistiques de », à 18 px du bord. Il prend la couleur du texte de la gélule, en clair comme en sombre (variante A choisie parmi 20, 24 et 28 px).
+- Le nom de l'exercice s'arrête avant la flèche.
+
+---
+
+## [1.8.85] - 2026-11-24
+### Historique (co-auteur : Claude)
+- « Restaurer une sauvegarde » : sous chaque sauvegarde Google Drive, le nombre de séances qu'elle contient (« 33 séances », « 1 séance », « Aucune séance ») remplace « La plus récente » / « Version précédente » / « Ancienne sauvegarde unique ».
+- Chaque nouvelle sauvegarde Drive porte ce nombre dans les propriétés du fichier : la liste l'affiche sans relire le fichier. Le contenu JSON ne change pas.
+- Sauvegardes plus anciennes (sans ce nombre) : lues une fois à l'ouverture de la fenêtre pour compter leurs séances (« Comptage des séances… » le temps de la lecture, « Nombre de séances inconnu » si la lecture échoue) ; le résultat est gardé jusqu'à la fermeture de l'application.
+- Texte d'introduction de la fenêtre : « séances, programmes et pesées » en gras.
+- Tests : `tests/test_drive_versions.py` (nombres affichés, sauvegardes non relues à la réouverture, propriété écrite à l'envoi) ; faux Drive des tests : propriétés des fichiers gardées.
+
+### Programmes › Avec notre aide (co-auteur : Claude)
+- Correction : en thème clair avec un fond d'écran, les sous-textes gris des réponses (ex. « Recommandé pour toi ») étaient illisibles, car l'écran gardait le voile de l'accueil, presque transparent au milieu. Il prend désormais le même voile que l'éditeur de programme, en clair comme en sombre. Écran sans fond d'écran inchangé. Vérifié avec les 17 fonds, en clair et en sombre.
+
+---
+
+## [1.8.84] - 2026-11-24
+### Historique (co-auteur : Claude)
+- Après « Enregistrer les modifications », l'app revient à l'Historique, sur la séance modifiée, avec la même barre de sauvegarde qu'en fin de séance : « Sauvegarde sur le Drive… », puis « Sauvegardée sur le Drive » (ou « Sauvegarde en attente »), puis la ligne redevient normale. Accès Drive expiré dans l'application installée : reconnexion comme en fin de séance, la barre reprend au retour de Google.
+- Sans compte Drive : retour à l'Historique avec un court message « Séance modifiée » (l'ancien message détaillé temps / séries / tonnage est retiré).
+- L'onglet Séance revient ensuite à la séance du programme en cours.
+- Tests : `tests/test_sauvegarde_historique.py` (modification avec et sans Drive, clair et sombre).
+
+---
+
+## [1.8.83] - 2026-11-24
+### Historique (co-auteur : Claude)
+- Correction : « Modifier la séance » sur une séance d'un programme en pause ouvrait la séance du programme en cours, sans les valeurs enregistrées. Depuis la 1.8.80, l'ouverture de l'onglet Séance rechargeait toujours la séance du programme actif. En modification, le formulaire de la séance choisie est désormais gardé (son programme, sa séance, ses valeurs), même après un passage par un autre onglet.
+- Le rechargement de la 1.8.80 (fenêtre de fin de séance après la désactivation d'un programme) est conservé hors modification.
+- Le message affiché après « Modifier la séance » passe au tutoiement : « Corrige-la puis valide, ou annule : l'originale reste intacte tant que tu n'as pas validé. »
+- Test ajouté : `tests/test_modifier_pause.py` (groupe `historique`).
+- Test `test_programmes.py` mis à jour selon la 1.8.81 : la liste « Progression par exercice » ne montre que les exercices faits dans le programme choisi ; « Tous les programmes » les montre tous.
+
+---
+
 ## [1.8.82] - 2026-11-22
 ### Progression (co-auteur : Vibe Code)
 - Correction : le filtre des exercices en mode "Tous les programmes" n'affichait que les exercices déjà réalisés dans l'historique (et non plus ceux du catalogue non utilisés).

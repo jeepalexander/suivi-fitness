@@ -347,6 +347,11 @@ nav button.active.has-update::after { right: 5px; top: 6px; }
 
 /* Champs */
 select.filter-select { width: 100%; height: 52px; margin-bottom: 8px; padding: 0 20px; background: var(--fill); border: none; border-radius: var(--radius-field); color: var(--text); font-size: 0.9375rem; }
+/* 1.8.86 : flèche des choix d'exercice (Progression, Suivi cardio) : chevron de 20 px comme « Voir les statistiques de »,
+   à la place de la petite flèche du navigateur ; couleur = texte de la gélule (gris inversé) dans chaque thème. */
+select.filter-select { -webkit-appearance: none; appearance: none; padding-right: 50px; background-repeat: no-repeat; background-position: right 18px center; background-size: 20px 20px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F2F2F4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); }
+:root[data-theme="dark"] select.filter-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111114' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); }
 .weight-field { flex: 1; min-width: 0; height: 52px; padding: 0 20px; background: var(--fill); border: none; border-radius: var(--radius-field); color: var(--text); font-size: 1.0625rem; font-family: inherit; }
 
 /* Sélecteurs segmentés et filtres */
@@ -1008,7 +1013,8 @@ body[data-pview="choose"] .prog-spacer { min-height: 0; }
 #app-wallpaper::after { content: ''; position: absolute; inset: 0; background: var(--veil-home); }
 /* Voile (1.7.12, valeurs de la planche, écrans 31 et 32) — Programmes : 95/82/15/60/88 % à 0/22/42/72/100 % de la hauteur ;
    autres onglets (1.7.13) et éditeur de programme (1.7.15) : 100/95/76/100 % à 0/30/72/100 %. Mêmes opacités en noir pour le thème sombre. */
-body:not([data-tab="programme"]) #app-wallpaper::after, body[data-pview="editor"] #app-wallpaper::after { background: var(--veil-page); }
+body:not([data-tab="programme"]) #app-wallpaper::after, body[data-pview="editor"] #app-wallpaper::after,
+body[data-pview="aide"] #app-wallpaper::after { background: var(--veil-page); } /* 1.8.85 : « Avec notre aide » comme l'éditeur (sous-textes gris lisibles en clair) */
 :root[data-wallpaper] #app-wallpaper { display: block; }
 :root[data-wallpaper="barre"] #app-wallpaper { background-image: url('wallpapers/barre.jpg'); background-position: center 55%; }
 :root[data-wallpaper="halteres"] #app-wallpaper { background-image: url('wallpapers/halteres.jpg'); background-position: center 45%; }
@@ -1383,3 +1389,6 @@ body[data-tab="programme"][data-pview="aide"] header h1 { display: none; }
 .aide-sess-t span { font-size: 0.875rem; color: var(--text-muted); }
 .aide-sess-ex { padding-left: 56px; margin: 0 0 8px; }
 .aide-detail-btn { align-self: flex-start; position: relative; z-index: 1; height: 44px; margin-top: 4px; padding: 0 20px; border: none; border-radius: 999px; background: var(--fill); color: var(--text); font: inherit; font-size: 0.9375rem; font-weight: 600; cursor: pointer; }
+/* 1.8.89 : « Avant de commencer » et phrase de rappel sous la proposition */
+.aide-disc p { margin: 0 0 12px; font-size: 0.9375rem; line-height: 1.5; color: var(--text); }
+.aide-recall { margin: 12px 0 0; font-size: 0.8125rem; line-height: 1.45; color: var(--text-muted); }

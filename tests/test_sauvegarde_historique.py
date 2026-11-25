@@ -1,7 +1,8 @@
 """Fin de séance → Historique (1.8.50, planche 27d variante C) : après « OK », l'Historique s'ouvre ; si un compte
 Drive est configuré, une fine barre verte se déploie sous la nouvelle séance pendant l'envoi, puis « Sauvegardée sur
 le Drive » et la ligne redevient normale. Sans Drive : Historique sans barre. Échec : « Sauvegarde en attente ».
-Accès expiré dans l'application installée : reconnexion forcée, la séance est gardée pour le retour de Google."""
+Accès expiré dans l'application installée : reconnexion forcée, la séance est gardée pour le retour de Google.
+1.8.84 : après « Enregistrer les modifications », même parcours sur la ligne de la séance modifiée."""
 import os, sys, tempfile
 from harness import Srv, newpage, sync_playwright
 
@@ -86,6 +87,45 @@ with Srv() as url, sync_playwright() as p:
     pg.wait_for_timeout(500); r = pg.evaluate(ROW)
     ok("au retour : « Sauvegardée sur le Drive »", 'saved' in r['cls'], r)
     ok("marque consommée", pg.evaluate("localStorage.getItem('h49_hist_save_mark')") is None)
+    ctx.close()
+
+    # 5. 1.8.84 : modification d'une ancienne séance → Historique, même barre sur la ligne modifiée
+    EDITROW = """(id)=>{const r=document.querySelector(`.history-item[data-id="${id}"]`); const b=r.getBoundingClientRect();
+      return {tab:document.body.dataset.tab, cls:r.className, label:r.querySelector('.history-save-label').textContent.trim(),
+      visible: b.top >= 0 && b.bottom <= innerHeight}}"""
+    def edit_old(pg, drive):
+        pg.evaluate(drive)
+        pg.evaluate("switchTab('historique')"); pg.wait_for_timeout(200)
+        idx = pg.evaluate("Math.min(15, state.history.length - 1)")
+        hid = pg.evaluate(f"String(state.history[{idx}].id)")
+        pg.evaluate(f"openSessionModal({idx})"); pg.click('#modal-edit-btn'); pg.wait_for_timeout(300)
+        pg.evaluate("document.getElementById('workout-form').requestSubmit()"); pg.wait_for_timeout(400)
+        return hid
+    for scheme in ('light', 'dark'):
+        tag = f'[{scheme}] modification : '
+        ctx, pg, errs = newpage(br, 390, 844, scheme=scheme, pref=scheme); pg.on('dialog', lambda d: d.accept())
+        pg.goto(url + 'index.html'); pg.wait_for_timeout(500)
+        hid = edit_old(pg, """()=>{window.isDriveWanted=()=>true; window.getDriveToken=()=>'tok'; window.updateDriveUI=()=>{};
+          window.__sync=0; window.syncDriveBackup=()=>{window.__sync++; return new Promise(r=>setTimeout(()=>r({ok:true}),1500))};}""")
+        r = pg.evaluate(EDITROW, hid)
+        ok(tag + "Historique ouvert, barre « Sauvegarde sur le Drive… » sur la séance modifiée, visible à l'écran",
+           r['tab'] == 'historique' and 'saving' in r['cls'] and r['label'] == 'Sauvegarde sur le Drive…' and r['visible'], r)
+        ok(tag + "une seule barre", pg.locator('.history-item.save-mark').count() == 1)
+        pg.wait_for_timeout(1400); r = pg.evaluate(EDITROW, hid)
+        ok(tag + "puis « Sauvegardée sur le Drive »", 'saved' in r['cls'] and r['label'] == 'Sauvegardée sur le Drive', r)
+        ok(tag + "l'envoi vers le Drive est bien parti", pg.evaluate("window.__sync") >= 1, pg.evaluate("window.__sync"))
+        pg.wait_for_timeout(2200); r = pg.evaluate(EDITROW, hid)
+        ok(tag + "puis ligne normale", 'save-mark' not in r['cls'], r)
+        pg.evaluate("switchTab('seance')"); pg.wait_for_timeout(200)
+        ok(tag + "l'onglet Séance revient à la séance du programme en cours", pg.evaluate("editingOriginalId === null") and pg.evaluate("document.getElementById('seance-overline').hidden"))
+        if scheme == 'light': pg.evaluate("switchTab('historique')"); pg.wait_for_timeout(100)
+        ok(tag + "aucune erreur JS", not [e for e in errs if 'TUNNEL' not in e and 'Failed to load resource' not in e], errs)
+        ctx.close()
+    ctx, pg, errs = newpage(br); pg.on('dialog', lambda d: d.accept()); pg.goto(url + 'index.html'); pg.wait_for_timeout(500)
+    hid = edit_old(pg, "()=>{window.isDriveWanted=()=>false; window.getDriveToken=()=>null;}")
+    r = pg.evaluate(EDITROW, hid)
+    ok("modification sans Drive : Historique, aucune barre, message « Séance modifiée »", r['tab'] == 'historique' and 'save-mark' not in r['cls']
+       and pg.evaluate("(window.__toastLog||[]).slice(-1)[0]") == 'Séance modifiée', (r, pg.evaluate("(window.__toastLog||[]).slice(-1)[0]")))
     ctx.close()
 
 print(f"\n{sum(res)}/{len(res)} contrôles OK")

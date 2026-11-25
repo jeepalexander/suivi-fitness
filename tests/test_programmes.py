@@ -214,7 +214,11 @@ with Srv() as base, sync_playwright() as p:
     check('filtre de séances : lettres du programme (A / B)', pg.inner_text('#btn-vol-type') == 'A / B', pg.inner_text('#btn-vol-type'))
     check('graphique de volume limité à Sèche (2 points)', pg.evaluate("tonnageChart.data.labels.length") == 2)
     check('Suivi cardio : menu limité au cardio de Sèche (Vélo elliptique, km/h)', 'Vélo elliptique' in pg.inner_text('#cardio-unit') and 'km/h' in pg.inner_text('#cardio-unit') and pg.inner_text('#cardio-current') == '16,5', pg.inner_text('#cardio-unit'))
-    check('Progression par exercice : tous programmes confondus (Tractions et exercices d\'Hypertrophie)', all(n in pg.evaluate("[...document.querySelectorAll('#exercise-filter option')].map(o=>o.value)") for n in ['Tractions', 'Presse à cuisses', 'Leg extension']))
+    # 1.8.81 : la liste ne garde que les exercices faits dans le périmètre choisi ; « Tous » reprend tout l'historique (1.8.82)
+    ex_opts = lambda: pg.evaluate("[...document.querySelectorAll('#exercise-filter option')].map(o=>o.value)")
+    seche_ex = pg.evaluate("""() => { const s = new Set(); statsHistory().forEach(h => (h.exercises||[]).forEach(e => { const n = canonicalExerciseName(e.name);
+      const m = exMode(n); if (!e.cardio && (m === 'weight' || m === 'bw')) s.add(n); })); return [...s].sort(); }""")
+    check('Progression par exercice : seulement les exercices faits dans Sèche (pas ceux d\'Hypertrophie)', sorted(ex_opts()) == seche_ex and 'Leg extension' not in ex_opts(), (ex_opts(), seche_ex))
     pg.click('#stats-scope-btn'); pg.wait_for_timeout(200)
     check('écran 26 : liste des programmes + « Tous les programmes »', 'Tous les programmes' in pg.inner_text('.sheet') and 'Hypertrophie' in pg.inner_text('.sheet'))
     pg.click('.scope-item >> text=Hypertrophie'); pg.wait_for_timeout(500)
@@ -224,6 +228,7 @@ with Srv() as base, sync_playwright() as p:
     check('A / B / C : premier appui = séance A', pg.inner_text('#btn-vol-type') == 'Séance A')
     pg.click('#stats-scope-btn'); pg.click('.scope-item >> text=Tous les programmes'); pg.wait_for_timeout(500)
     check('Tous : même titre « Indice de progression », filtre de lettres masqué, progression par programme', pg.inner_text('#tab-progression .hero-label') == 'Indice de progression' and not pg.is_visible('#btn-vol-type') and 'Progression par programme' in pg.inner_text('#monthly-analysis'))
+    check('Tous : Progression par exercice, tous programmes confondus (Tractions et exercices d\'Hypertrophie)', all(n in ex_opts() for n in ['Tractions', 'Presse à cuisses', 'Leg extension']), ex_opts())
 
     # ---------- 10. Déload : reporter puis annuler ----------
     pg.evaluate("activateProgram('hypertrophie'); switchTab('seance')"); pg.wait_for_timeout(300)
