@@ -1480,3 +1480,11 @@ body[data-tab="programme"][data-pview="aide"] header h1 { display: none; }
 .prog-tile .btn-start.running svg { width: 20px; height: 20px; }
 /* 1.8.96 : la boîte d'archive devant « En mémoire » prend la couleur du titre (le doré du liseré se voyait mal sur fond clair) */
 .mem-pause-ico { color: var(--text); }
+/* 1.8.97 (co-auteur : Claude) : « En mémoire » repliable, flèche vers le bas en bout de ligne (vers le haut quand la liste est ouverte) */
+.mem-toggle { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 0; border: none; background: none; color: inherit; font: inherit; font-family: var(--font-display); font-size: 22px; font-weight: 700; text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.mem-toggle-label { flex: 1; font-family: var(--font-display); }
+.mem-chevron { display: flex; color: var(--text-muted); transform: rotate(90deg); transition: transform var(--t-fast) ease; }
+.mem-chevron svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.mem-toggle[aria-expanded="true"] .mem-chevron { transform: rotate(-90deg); }
+.mem-list[hidden] { display: none; }
+.mem-count { font-family: var(--font-display); color: var(--text-muted); } /* nombre de programmes en mémoire, ligne repliée ou non */

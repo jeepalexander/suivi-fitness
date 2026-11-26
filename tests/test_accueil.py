@@ -15,7 +15,7 @@ with Srv() as base, sync_playwright() as p:
     br = p.chromium.launch()
     for w in (390, 360):
         ctx, pg, errs = newpage(br, w=w)
-        pg.goto(base + 'index.html'); pg.wait_for_timeout(1200)
+        pg.goto(base + 'index.html'); pg.wait_for_timeout(1200); pg.evaluate("memListOpen = true; renderProgramOverview()")  # 1.8.97 : liste « En mémoire » dépliée pour les contrôles
         check(f"[{w}px] message manuscrit (Caveat) en haut de l'accueil", pg.locator('#tab-programme .prog-greet').count() == 1
               and 'Caveat' in pg.evaluate("getComputedStyle(document.querySelector('.prog-greet-hello')).fontFamily")
               and pg.evaluate("[...document.fonts].some(f=>f.family.includes('Caveat')&&f.status==='loaded')"))

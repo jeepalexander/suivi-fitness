@@ -8,6 +8,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.99] - 2026-11-26
+### Programmes (co-auteur : Claude)
+- **« En mémoire » repliable** : sur Programmes, la liste des programmes en mémoire est repliée à chaque ouverture de l'app, pour aérer l'écran. Une flèche vers le bas en bout de ligne la déplie (flèche vers le haut une fois ouverte) ; toute la ligne est le bouton.
+- **Nombre de programmes en mémoire** sur la ligne : « En mémoire · 2 ».
+- Quand on met le programme actif en mémoire, la liste s'ouvre d'elle-même pour qu'on le voie arriver.
+- Sans programme en mémoire, rien ne change : pas de flèche, « Tes autres programmes apparaîtront ici ».
+- Tests : 4 nouveaux contrôles dans `test_programmes.py` ; `test_accueil.py` et `test_pastille_1x.py` ouvrent la liste avant leurs contrôles.
+
+---
+
 ## [1.8.98] - 2026-11-26
 ### Programmes : petit bonhomme (co-auteur : Claude)
 - Les portes du petit bonhomme gardent la marge de la page entre elles et le bord de l'écran (26 px, 20 px sur les petits écrans), au lieu de toucher le bord.

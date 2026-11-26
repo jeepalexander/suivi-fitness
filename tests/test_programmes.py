@@ -44,7 +44,7 @@ with Srv() as base, sync_playwright() as p:
     ctx, pg, errs = newpage(br, 390, 844, pref='light')
     dialogs = []
     pg.on('dialog', lambda d: (dialogs.append(d.message), d.accept()))
-    pg.goto(base + 'index.html'); pg.wait_for_timeout(900)
+    pg.goto(base + 'index.html'); pg.wait_for_timeout(900); pg.evaluate("memListOpen = true; renderProgramOverview()")  # 1.8.97 : liste « En mémoire » dépliée pour les contrôles
     st = state(pg)
     progs = st.get('programs', [])
     check('migration : programme « Hypertrophie » actif créé avec les séances A, B, C', len(progs) == 1 and progs[0]['name'] == 'Hypertrophie' and progs[0]['status'] == 'active' and [s['key'] for s in progs[0]['sessions']] == ['A', 'B', 'C'], json.dumps([(x['name'], x['status']) for x in progs]))
@@ -60,7 +60,7 @@ with Srv() as base, sync_playwright() as p:
     attendu = {'A': 'B', 'B': 'C', 'C': 'A'}[last]
     check('migration : prochaine séance = celle qui suit la dernière faite', progs[0]['nextKey'] == attendu and st['nextType'] == attendu, f"{progs[0]['nextKey']} (dernière : {last})")
     check('migration : schéma 2 et déload initialisé', st.get('schema') == 2 and st.get('deload') == {'shift': 0, 'postponedAt': None})
-    pg.reload(); pg.wait_for_timeout(700)
+    pg.reload(); pg.wait_for_timeout(700); pg.evaluate("memListOpen = true; renderProgramOverview()")  # 1.8.97 : liste « En mémoire » dépliée pour les contrôles
     check('migration faite une seule fois (rechargement : rien ne change)', state(pg)['programs'] == state(pg)['programs'] and len(state(pg)['programs']) == 1)
 
     # Accueil Programme
@@ -129,10 +129,21 @@ with Srv() as base, sync_playwright() as p:
     check('Activer Sèche : actif, Hypertrophie en pause sans confirmation', next(x for x in st['programs'] if x['name'] == 'Sèche')['status'] == 'active' and next(x for x in st['programs'] if x['name'] == 'Hypertrophie')['status'] == 'paused' and len(dialogs) == n_dialogs)
     hyp_txt = pg.inner_text('.mem-tile:has-text("Hypertrophie")')
     check('Hypertrophie en mémoire : « En pause depuis le … », bouton Réactiver', 'En pause depuis le' in hyp_txt and 'Réactiver' in hyp_txt, hyp_txt)
+    # 1.8.97 : « En mémoire » repliée par défaut ; la flèche en bout de ligne déplie puis replie la liste
+    pg.evaluate("memListOpen = false; renderProgramOverview()"); pg.wait_for_timeout(150)
+    rep = pg.evaluate("(()=>{const b=document.querySelector('.prog-mem-title .mem-toggle'),c=b&&b.querySelector('.mem-chevron'),t=b&&b.getBoundingClientRect(),cr=c&&c.getBoundingClientRect();return {btn:!!b,exp:b&&b.getAttribute('aria-expanded'),vis:[...document.querySelectorAll('.mem-tile')].some(e=>e.offsetParent),fin:t&&cr&&Math.abs(t.right-cr.right)<2,rot:c&&getComputedStyle(c).transform,h:t&&t.height}})()")
+    nb = pg.evaluate("getPrograms().length - 1")
+    check('En mémoire (1.8.97) : nombre de programmes en mémoire sur la ligne (« En mémoire · n »)', pg.inner_text('.mem-toggle-label').replace('\n', '') == f'En mémoire · {nb}', pg.inner_text('.mem-toggle-label'))
+    check('En mémoire (1.8.97) : repliée par défaut, flèche vers le bas en bout de ligne, cible ≥ 44 px', rep['btn'] and rep['exp'] == 'false' and not rep['vis'] and rep['fin'] and rep['h'] >= 44 and rep['rot'].startswith('matrix(0, 1'), rep)
+    pg.click('.mem-toggle'); pg.wait_for_timeout(300)
+    check('En mémoire (1.8.97) : un appui déplie la liste, flèche vers le haut', pg.get_attribute('.mem-toggle', 'aria-expanded') == 'true' and pg.is_visible('.mem-tile:has-text("Hypertrophie")') and pg.evaluate("getComputedStyle(document.querySelector('.mem-chevron')).transform").startswith('matrix(0, -1'))
+    pg.click('.mem-toggle'); pg.wait_for_timeout(300)
+    check('En mémoire (1.8.97) : un second appui replie la liste', pg.get_attribute('.mem-toggle', 'aria-expanded') == 'false' and not pg.is_visible('.mem-tile:has-text("Hypertrophie")'))
+    pg.evaluate("memListOpen = true; renderProgramOverview()")
 
     # ---------- 5. Séance du programme : poids du corps + lest, cardio km/h, durée ----------
     pg.evaluate("localStorage.setItem('h49_state', JSON.stringify(Object.assign(JSON.parse(localStorage.getItem('h49_state')), {weights:[{date:'2026-11-01',weight:78}]})))")
-    pg.reload(); pg.wait_for_timeout(800)
+    pg.reload(); pg.wait_for_timeout(800); pg.evaluate("memListOpen = true; renderProgramOverview()")  # 1.8.97 : liste « En mémoire » dépliée pour les contrôles
     pg.evaluate("switchTab('seance')"); pg.wait_for_timeout(300)
     check('Séance : titre de la page = nom du programme (1.7.40)', pg.inner_text('#page-title') == pg.evaluate('workoutDef.programName') != 'Séance', pg.inner_text('#page-title'))
     check('Séance : plus de « Séance du jour · programme » (1.7.27), séance A « Haut »', not pg.is_visible('#seance-overline') and pg.inner_text('#seance-type-title') == 'Haut' and pg.inner_text('#seance-badge') == 'A')
@@ -274,7 +285,7 @@ with Srv() as base, sync_playwright() as p:
 
     # ---------- 12. Premier lancement (aucune donnée) ----------
     ctx, pg, errs = newpage(br, 390, 844, pref='light', seed=False)
-    pg.goto(base + 'index.html'); pg.wait_for_timeout(900)
+    pg.goto(base + 'index.html'); pg.wait_for_timeout(900); pg.evaluate("memListOpen = true; renderProgramOverview()")  # 1.8.97 : liste « En mémoire » dépliée pour les contrôles
     check('premier lancement : écran du prénom (1.8.62)', pg.locator('#onb-name').count() == 1)
     check('premier lancement : aucun programme créé', state(pg).get('programs') == [])
     pg.fill('#onb-name', 'Carine'); pg.click('#onb-continue'); pg.wait_for_timeout(200)
@@ -303,7 +314,7 @@ with Srv() as base, sync_playwright() as p:
     # ---------- 13. Import d'une ancienne sauvegarde (sans programmes) ----------
     ctx, pg, errs = newpage(br, 390, 844, pref='light', seed=False)
     pg.on('dialog', lambda d: d.accept())
-    pg.goto(base + 'index.html'); pg.wait_for_timeout(700)
+    pg.goto(base + 'index.html'); pg.wait_for_timeout(700); pg.evaluate("memListOpen = true; renderProgramOverview()")  # 1.8.97 : liste « En mémoire » dépliée pour les contrôles
     pg.set_input_files('#import-file', files=[{'name': 'vieux.json', 'mimeType': 'application/json', 'buffer': json.dumps(DATA).encode()}])
     pg.wait_for_timeout(700)
     st = state(pg)
@@ -315,7 +326,7 @@ with Srv() as base, sync_playwright() as p:
     for w, scheme in ((390, 'light'), (360, 'dark')):
         ctx, pg, errs = newpage(br, w, 760, pref=scheme)
         pg.on('dialog', lambda d: d.accept())
-        pg.goto(base + 'index.html'); pg.wait_for_timeout(800)
+        pg.goto(base + 'index.html'); pg.wait_for_timeout(800); pg.evaluate("memListOpen = true; renderProgramOverview()")  # 1.8.97 : liste « En mémoire » dépliée pour les contrôles
         screens = {}
         pg.evaluate("toggleProgramDetail()"); screens['accueil'] = pg.evaluate(OVERFLOW_JS)
         pg.click('#add-program-btn'); screens['choix'] = pg.evaluate(OVERFLOW_JS)

@@ -20,6 +20,7 @@
 // view : 'home' (accueil), 'choose' (écran 4), 'editor' (écrans 5, 6, 9, 17, 20)
 let programView = 'home';
 let programDetailOpen = false;
+let memListOpen = false; // 1.8.97 : liste « En mémoire » repliée à chaque ouverture de l'app, la flèche la déplie
 // Brouillon de l'éditeur : { id (null = création), kind, name, sessions: [{ key, name, exercises: [{ exId, sets }] }], idx, start }
 let programDraft = null;
 
@@ -181,12 +182,14 @@ function renderProgramOverview() {
     html += `<div class="prog-status"><span class="prog-dot-slot"><span class="prog-dot"></span></span>Aucun programme actif</div>`;
   }
   // 1.7.20 : la catégorie « En mémoire » est toujours là ; vide, elle annonce où iront les autres programmes
-  html += `<h2 class="section-label prog-mem-title"><span class="mem-pause-ico">${ARCHIVE_SVG}</span>En mémoire</h2>`;
+  // 1.8.97 : avec des programmes, toute la ligne est un bouton ; la flèche au bout déplie ou replie la liste
   if (others.length) {
-    html += `<div class="mem-list">`;
+    html += `<h2 class="section-label prog-mem-title"><button type="button" class="mem-toggle" aria-expanded="${memListOpen}" aria-controls="mem-list" aria-label="En mémoire : ${others.length} programme${others.length > 1 ? 's' : ''}" onclick="toggleMemList()"><span class="mem-pause-ico">${ARCHIVE_SVG}</span><span class="mem-toggle-label">En mémoire<span class="mem-count"> · ${others.length}</span></span><span class="mem-chevron">${CHEVRON_SVG}</span></button></h2>`;
+    html += `<div class="mem-list" id="mem-list"${memListOpen ? '' : ' hidden'}>`;
     others.forEach(p => { html += memTileHtml(p); });
     html += `</div>`;
   } else {
+    html += `<h2 class="section-label prog-mem-title"><span class="mem-pause-ico">${ARCHIVE_SVG}</span>En mémoire</h2>`;
     html += `<p class="mem-empty">Tes autres programmes apparaîtront ici</p>`;
     html += `<hr class="prog-sep">`;
   }
@@ -344,6 +347,12 @@ function activeDetailHtml(p) {
   return html;
 }
 
+// 1.8.97 : déplier / replier la liste « En mémoire »
+function toggleMemList() {
+  memListOpen = !memListOpen;
+  renderProgramOverview();
+}
+
 function toggleProgramDetail() {
   programDetailOpen = !programDetailOpen;
   renderProgramOverview();
@@ -423,6 +432,7 @@ async function pauseActiveProgram() {
   saveState();
   backupToDrive({ autoReconnect: false });
   programDetailOpen = false;
+  memListOpen = true; // 1.8.97 : on voit où est parti le programme
   if (started) {
     resetWorkoutTimer();
     if (restTimerInterval) { clearInterval(restTimerInterval); restTimerInterval = null; }

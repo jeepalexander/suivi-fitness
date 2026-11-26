@@ -20,7 +20,7 @@ with Srv() as base, sync_playwright() as p:
         ctx, pg, errs = newpage(br, 390, 844, pref=scheme)
         pg.goto(base + 'index.html'); pg.wait_for_timeout(800)
         pg.evaluate("""(()=>{const p=JSON.parse(JSON.stringify(state.programs[0]));p.id='lt';p.kind='libre';p.status='paused';p.name='Test';p.sessions=[Object.assign(p.sessions[0],{key:'',name:'Test'})];state.programs.push(p);
-          const h=JSON.parse(JSON.stringify(state.history[state.history.length-1]));h.id=Date.now();h.programId='lt';h.kind='libre';h.programName='Test';state.history.push(h);renderProgramOverview();})()""")
+          const h=JSON.parse(JSON.stringify(state.history[state.history.length-1]));h.id=Date.now();h.programId='lt';h.kind='libre';h.programName='Test';state.history.push(h);memListOpen=true;renderProgramOverview();})()""")
         views = [('Programmes', "switchTab('programme')"),
                  ('Progression (périmètre séance libre)', "statsScope='lt'; switchTab('progression')"),
                  ('Choix du périmètre', "openStatsScopeSheet()"),
