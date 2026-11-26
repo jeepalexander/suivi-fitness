@@ -33,6 +33,8 @@ const CLOSE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 
 const SEARCH_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>';
 const CLOUD_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a5 5 0 1 1 1-9.9A6 6 0 0 1 19.5 10 4 4 0 0 1 18 18"/><path d="M12 12v8M9 17l3 3 3-3"/></svg>';
 const PAUSE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/></svg>';
+// 1.8.95 (co-auteur : Claude) : mise en mémoire = boîte d'archive (la pause faisait croire qu'on arrêtait le chrono)
+const ARCHIVE_SVG = '<svg class="archive-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v9.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V9"/><path d="M10 13h4"/></svg>';
 const INFO_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.4"/></svg>';
 const GRID_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="2"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="2"/></svg>';
 
@@ -179,7 +181,7 @@ function renderProgramOverview() {
     html += `<div class="prog-status"><span class="prog-dot-slot"><span class="prog-dot"></span></span>Aucun programme actif</div>`;
   }
   // 1.7.20 : la catégorie « En mémoire » est toujours là ; vide, elle annonce où iront les autres programmes
-  html += `<h2 class="section-label prog-mem-title"><span class="mem-pause-ico">${PAUSE_SVG}</span>En mémoire</h2>`;
+  html += `<h2 class="section-label prog-mem-title"><span class="mem-pause-ico">${ARCHIVE_SVG}</span>En mémoire</h2>`;
   if (others.length) {
     html += `<div class="mem-list">`;
     others.forEach(p => { html += memTileHtml(p); });
@@ -191,6 +193,7 @@ function renderProgramOverview() {
   html += `<p class="prog-hint"><span class="prog-hint-ico">${INFO_SVG}</span>Astuce : Reste appuyé sur un programme pour entrer en mode édition</p>`; // 1.7.21 : (i) + « Astuce : »
   container.innerHTML = html;
   bindLongPress(container);
+  if (!tileTimerInterval && document.querySelector('.prog-tile .btn-start.running')) tileTimerInterval = setInterval(tickTileTimer, 1000);
 }
 
 // Message d'accueil manuscrit (1.7.24, variantes en 1.7.78) : « Bonjour » ou « Bonsoir » selon l'heure, puis une phrase
@@ -285,14 +288,38 @@ function activeTileHtml(p) {
       <div class="prog-tile-top">
         ${libre ? '<span class="prog-ico libre">1×</span>' : `<span class="prog-ico">${SWAP_SVG}</span>`}
         <span class="session-name prog-tile-name">${escapeHtml(p.name)}</span>
-        <button type="button" class="prog-pause-btn" aria-label="Mettre « ${escapeHtml(p.name)} » en pause (en mémoire)" title="Mettre en pause" onclick="pauseActiveProgram()">${PAUSE_SVG}</button>
+        <button type="button" class="prog-pause-btn" aria-label="Mettre « ${escapeHtml(p.name)} » en mémoire" title="Mettre en mémoire" onclick="pauseActiveProgram()">${ARCHIVE_SVG}</button>
       </div>
       ${middle}
       <div class="next-card-row prog-tile-foot">
         <button type="button" class="prog-detail-btn" aria-expanded="${programDetailOpen}" onclick="toggleProgramDetail()">${programDetailOpen ? '- de détail' : '+ de détail'}</button>
-        <button type="button" class="btn-start${libre ? ' libre' : ''}" aria-label="Démarrer la séance" onclick="switchTab('seance')">C'est parti</button>
+        ${startButtonHtml(libre)}
       </div>
     </div>`;
+}
+
+// 1.8.95 : pendant une séance, le bouton vert montre sa durée et une flèche, et ramène dans la séance
+function seanceInProgress() {
+  if (editingOriginalId !== null) return false;
+  try { return localStorage.getItem('workout_start_time') !== null; } catch (e) { return false; }
+}
+function seanceElapsedText() {
+  let t = 0;
+  try { t = parseInt(localStorage.getItem('workout_start_time'), 10) || 0; } catch (e) { /* ignoré */ }
+  const sec = t ? Math.max(0, Math.floor((Date.now() - t) / 1000)) : 0;
+  const m = Math.floor(sec / 60), s = sec % 60;
+  return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+}
+function startButtonHtml(libre) {
+  const cls = `btn-start${libre ? ' libre' : ''}`;
+  if (seanceInProgress()) return `<button type="button" class="${cls} running" aria-label="Reprendre la séance en cours" onclick="startSeance()"><span class="tile-dur">${seanceElapsedText()}</span>${ARROW_SVG}</button>`;
+  return `<button type="button" class="${cls}" aria-label="Démarrer la séance" onclick="startSeance()">C'est parti</button>`;
+}
+let tileTimerInterval = null;
+function tickTileTimer() {
+  const el = document.querySelector('.prog-tile .btn-start.running .tile-dur');
+  if (!el) { clearInterval(tileTimerInterval); tileTimerInterval = null; return; }
+  el.textContent = seanceElapsedText();
 }
 
 function activeDetailHtml(p) {

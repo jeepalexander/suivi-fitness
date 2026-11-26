@@ -79,7 +79,8 @@ with Srv() as base, sync_playwright() as p:
     check('échec : état, historique, brouillon et chrono inchangés', before==after and bool(after[2]) and bool(after[3]))
     pg.reload()
     pg.locator('#exercises-list .set-row.done').first.wait_for(state='attached')
-    pg.click('#nav-seance')
+    pg.evaluate("startSeance()")   # 1.8.95 : la séance se reprend depuis la tuile
+    pg.wait_for_timeout(300)
     restored=snap(pg)
     check('stockage toujours plein après rechargement : formulaire et séries restaurés', [(r['n'],r['sets']) for r in restored['rows']]==[(r['n'],r['sets']) for r in a['rows']])
     pg.evaluate("sessionStorage.removeItem('failWorkoutWrite')")

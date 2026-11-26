@@ -32,16 +32,11 @@ function renderUpdateStatus() {
   if (bannerText && ready) bannerText.textContent = `La version ${activeVersion} est prête. Touche « Installer » pour l'utiliser.`;
   const statusEl = document.getElementById('update-status');
   if (statusEl && ready) statusEl.textContent = `Mise à jour téléchargée : version ${activeVersion}`; // 1.8.19
-  const nav = document.getElementById('nav-historique');
+  // 1.8.95 : la pastille est sur l'onglet Réglages, là où se trouve l'avis
+  const nav = document.getElementById('nav-reglages');
   if (nav) {
     nav.classList.toggle('has-update', ready);
-    nav.setAttribute('aria-label', ready ? 'Historique, mise à jour disponible' : 'Historique');
-  }
-  // La pastille suit aussi le bouton Réglages (là où se trouve l'avis)
-  const gear = document.getElementById('settings-btn');
-  if (gear) {
-    gear.classList.toggle('has-update', ready);
-    gear.setAttribute('aria-label', ready ? 'Réglages, mise à jour disponible' : 'Réglages');
+    nav.setAttribute('aria-label', ready ? 'Réglages, mise à jour disponible' : 'Réglages');
   }
 }
 

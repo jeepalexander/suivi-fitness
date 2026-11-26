@@ -11,7 +11,9 @@ def ok(n, c, extra=''):
     res.append(bool(c)); print(('OK   ' if c else 'FAIL ') + n, '' if c else str(extra)[:200])
 
 
-TOPS = """() => ['#app-title', '#page-title', '#settings-btn'].map(s => Math.round(document.querySelector(s).getBoundingClientRect().top))"""
+# 1.8.95 : plus de roue dentée ; le bouton + de Programmes (44 px) sert de repère pour les boutons de l'en-tête
+TOPS = """() => { switchTab('historique'); const t = ['#app-title', '#page-title'].map(s => Math.round(document.querySelector(s).getBoundingClientRect().top));
+  switchTab('programme'); t.push(Math.round(document.getElementById('add-program-btn').getBoundingClientRect().top)); switchTab('historique'); return t; }"""
 SAFE = 40
 
 with Srv() as url, sync_playwright() as p:
@@ -24,14 +26,14 @@ with Srv() as url, sync_playwright() as p:
             ok(f'[{scheme} {w}] viewport-fit=cover', 'viewport-fit=cover' in vp, vp)
             pg.evaluate("switchTab('historique'); 0"); pg.wait_for_timeout(300)
             a = pg.evaluate(TOPS)
-            ok(f'[{scheme} {w}] sans encoche : en-tête à sa place (nom de l\'app à 28 px, bouton Réglages de 36 px à 18 px, 1.8.49)', a[0] == 28 and a[2] == 18, a)
+            ok(f'[{scheme} {w}] sans encoche : en-tête à sa place (nom de l\'app à 28 px, bouton + à 24 px)', a[0] == 28 and a[2] == 24, a)
             pg.evaluate("document.documentElement.style.setProperty('--safe-top', '10px'); 0"); pg.wait_for_timeout(200)
             c = pg.evaluate(TOPS)
             ok(f'[{scheme} {w}] petite zone (10 px) : l\'en-tête ne remonte pas au-dessus de 28 px', c == a, (a, c))
             pg.evaluate("document.documentElement.style.setProperty('--safe-top', '%dpx'); 0" % SAFE); pg.wait_for_timeout(200)
             b = pg.evaluate(TOPS)
-            ok(f'[{scheme} {w}] caméra de {SAFE} px : nom de l\'app juste dessous, bouton 10 px plus haut (comme sans encoche), titre décalé d\'autant',
-               b[0] == SAFE and b[2] == SAFE - 10 and b[1] - a[1] == SAFE - 28, (a, b))
+            ok(f'[{scheme} {w}] caméra de {SAFE} px : nom de l\'app juste dessous, bouton + 4 px plus haut (comme sans encoche), titre décalé d\'autant',
+               b[0] == SAFE and b[2] == SAFE - 4 and b[1] - a[1] == SAFE - 28, (a, b))
             hb = pg.evaluate("Math.round(document.querySelector('header').getBoundingClientRect().top)")
             ok(f'[{scheme} {w}] le fond de l\'en-tête part du bord haut de l\'écran', hb == 0, hb)
             ok(f'[{scheme} {w}] aucune erreur JavaScript', not errs, errs)

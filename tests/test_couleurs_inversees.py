@@ -51,7 +51,7 @@ with Srv() as base, sync_playwright() as p:
         gs = pg.evaluate("[...document.querySelectorAll('#tab-historique .btn-secondary, #drive-disconnect-btn')].map(e=>getComputedStyle(e).backgroundColor)")
         check(f'[{scheme}] « Restaurer » (Historique) et « Déconnecter » gris clair en clair, anthracite en sombre (1.8.55)', len(gs) == 2 and all(x == ('rgb(46, 46, 53)' if scheme == 'dark' else 'rgb(243, 243, 245)') for x in gs), gs)
         check(f'[{scheme}] boutons de Progression, Historique et Réglages au gris inversé (1.8.54)', bt and all(x == INV[scheme] for x in bt), set(bt))
-        check(f'[{scheme}] « Retour » des Réglages au gris inversé (1.8.54)', pg.evaluate("getComputedStyle(document.getElementById('settings-back')).backgroundColor") == INV[scheme])
+        check(f'[{scheme}] flèche retour de la Séance au gris inversé (1.8.95)', pg.evaluate("getComputedStyle(document.getElementById('seance-back')).backgroundColor") == INV[scheme])
         pg.evaluate("switchTab('programme'); startProgramEditor('program'); 0"); pg.wait_for_timeout(400)
         ed = pg.evaluate("[...document.querySelectorAll('button.ed-back, .ed-field, .ed-seg')].filter(e=>e.offsetParent).map(e=>getComputedStyle(e).backgroundColor)")
         check(f'[{scheme}] éditeur : retour et gélules au gris inversé (1.8.54)', len(ed) >= 3 and all(x == INV[scheme] for x in ed), ed)

@@ -21,10 +21,10 @@ with Srv() as url, sync_playwright() as p:
             ctx, pg, errs = newpage(br, w=w, pref=scheme, scheme=scheme)
             pg.goto(url + 'index.html'); pg.wait_for_timeout(500)
             pg.evaluate("switchTab('seance'); 0"); pg.wait_for_timeout(500)
-            a = pg.evaluate(GAP, ['#page-title', '#seance-prog-ico'])
+            a = pg.evaluate(GAP, ['#page-title', '#seance-back'])   # 1.8.95 : flèche retour à la place de l'icône du programme
             b = pg.evaluate(GAP, ['#seance-head .session-head-text', '#seance-head .type-pill'])
             x = pg.evaluate("[document.querySelector('#page-title').getBoundingClientRect().left, document.querySelector('#seance-head .session-head-text').getBoundingClientRect().left].map(Math.round)")
-            ok(f'[{scheme} {w}] Séance : 13 px icône → programme, 13 px pastille → séance (12 avant le nombre d\'or)', a == 13 and b == 13, (a, b))
+            ok(f'[{scheme} {w}] Séance : 13 px flèche retour → programme, 13 px pastille → séance (12 avant le nombre d\'or)', a == 13 and b == 13, (a, b))
             ok(f'[{scheme} {w}] Séance : programme et séance alignés', x[0] == x[1], x)
             pg.evaluate("switchTab('fond'); 0"); pg.wait_for_timeout(400)
             f = pg.evaluate(GAP, ['#page-title', '#fond-back'])

@@ -48,7 +48,7 @@ try:
         pg.wait_for_timeout(600)
         check(f'version exécutée affichée dans Historique ({version})', pg.inner_text('#update-version') == f'Version {version}', pg.inner_text('#update-version'))
         check('titre de l\'en-tête : sans numéro de version (il est dans Réglages)', pg.inner_text('#app-title').strip() == 'MON CARNET DE SALLE')
-        check('première installation : aucun avis de mise à jour', pg.evaluate("document.getElementById('update-banner').hidden") is True and not pg.evaluate("document.getElementById('nav-historique').classList.contains('has-update')"))
+        check('première installation : aucun avis de mise à jour', pg.evaluate("document.getElementById('update-banner').hidden") is True and not pg.evaluate("document.getElementById('nav-reglages').classList.contains('has-update')"))
 
         # vérification sans nouvelle version
         pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(300)
@@ -74,7 +74,7 @@ try:
         check('nouvelle version installée : statut « Mise à jour téléchargée »', ok and pg.evaluate("document.getElementById('update-banner').hidden") is True)
         txt = pg.inner_text('#update-status')
         check('le statut cite la nouvelle version (9.9.9)', txt.strip() == 'Mise à jour téléchargée : version 9.9.9', txt)
-        check('pastille sur l\'icône Historique + libellé d\'accessibilité', pg.evaluate("document.getElementById('nav-historique').classList.contains('has-update')") and 'mise à jour' in pg.evaluate("document.getElementById('nav-historique').getAttribute('aria-label')"))
+        check('pastille sur l\'onglet Réglages + libellé d\'accessibilité', pg.evaluate("document.getElementById('nav-reglages').classList.contains('has-update')") and 'mise à jour' in pg.evaluate("document.getElementById('nav-reglages').getAttribute('aria-label')"))
         check('la page affiche toujours la version exécutée (pas 9.9.9)', pg.inner_text('#update-version') == f'Version {version}', pg.inner_text('#update-version'))
         check('AUCUN rechargement automatique (témoin conservé)', pg.evaluate("window.__temoin") == 12345)
         pg.evaluate("switchTab('progression')")
@@ -86,7 +86,7 @@ try:
         pg.click('.update-check'); pg.wait_for_timeout(1800)
         check('après relance : version 9.9.9 en service', wait_for(pg, "document.getElementById('update-version').textContent==='Version 9.9.9'", 8000), pg.inner_text('#update-version'))
         check('après relance : le bouton redevient « Vérifier »', pg.inner_text('.update-check') == 'Vérifier', pg.inner_text('.update-check'))
-        check('après relance : plus d\'avis', pg.evaluate("document.getElementById('update-banner').hidden") is True and not pg.evaluate("document.getElementById('nav-historique').classList.contains('has-update')"))
+        check('après relance : plus d\'avis', pg.evaluate("document.getElementById('update-banner').hidden") is True and not pg.evaluate("document.getElementById('nav-reglages').classList.contains('has-update')"))
         pg.evaluate("switchTab('progression')")
         check('après relance : poids saisi restauré par le brouillon', pg.input_value('#new-weight') == '70.2', pg.input_value('#new-weight'))
         check('aucune erreur JS', not errs, str(errs))

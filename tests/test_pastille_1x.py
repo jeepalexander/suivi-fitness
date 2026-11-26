@@ -26,8 +26,7 @@ with Srv() as base, sync_playwright() as p:
                  ('Choix du périmètre', "openStatsScopeSheet()"),
                  ('Restauration', "closeSheet(); restoreCandidates=[JSON.parse(JSON.stringify(getProgram('lt')))].map(p=>{p.id='zz';p.savedAt=new Date().toISOString();return p}); restoreSelected=new Set(); renderProgramRestoreList()"),
                  ('Créer (choix)', "closeSheet(); openProgramChooser()"),
-                 ('Historique', "closeSheet(); state.history.reduce((a,b)=>new Date(b.date)>new Date(a.date)?b:a).kind='libre'; switchTab('historique'); renderHistory()"),
-                 ('Séance (titre)', "closeSheet(); activateProgram('lt'); switchTab('seance')")]
+                 ('Historique', "closeSheet(); state.history.reduce((a,b)=>new Date(b.date)>new Date(a.date)?b:a).kind='libre'; switchTab('historique'); renderHistory()")]   # 1.8.95 : plus d'icône « 1× » dans le titre de la Séance (flèche retour)
         for name, js in views:
             pg.evaluate(js); pg.wait_for_timeout(400)
             r = pg.evaluate(SCAN)

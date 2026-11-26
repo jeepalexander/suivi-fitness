@@ -1,4 +1,4 @@
-"""Page RÉGLAGES : bouton en haut à droite de l'Historique, contenu déplacé, retour, pastille de mise à jour."""
+"""Page RÉGLAGES : onglet du menu (1.8.95), contenu déplacé de l'Historique, pastille de mise à jour."""
 import sys
 from harness import *
 
@@ -18,54 +18,40 @@ with Srv() as base, sync_playwright() as p:
     ctx, pg, errs = newpage(br, 390, 844, pref='light')
     pg.goto(base + 'index.html'); pg.wait_for_timeout(800)
 
-    pg.evaluate("switchTab('programme')"); pg.wait_for_timeout(200)
-    check('bouton Réglages absent sur « programme »', not pg.evaluate(vis, 'settings-btn'))
-    pg.evaluate("switchTab('seance')"); pg.wait_for_timeout(200)
-    check('1.8.49 : bouton Réglages présent sur « seance »', pg.evaluate(vis, 'settings-btn'))
-
-    # 1.8.36 : roue dentée aussi sur Progression ; Réglages garde l'icône Progression allumée et « Retour » y ramène
-    pg.evaluate("switchTab('progression')"); pg.wait_for_timeout(400)
-    check('bouton Réglages visible sur Progression', pg.evaluate(vis, 'settings-btn'))
-    pg.click('#settings-btn'); pg.wait_for_timeout(300)
-    check('depuis Progression : page Réglages, icône Progression allumée',
-          pg.inner_text('#page-title') == 'Réglages' and pg.evaluate("document.getElementById('nav-progression').classList.contains('active') && !document.getElementById('nav-historique').classList.contains('active')"))
-    check('depuis Progression : « Retour » annoncé vers la progression', pg.evaluate("document.getElementById('settings-back').getAttribute('aria-label')") == 'Retour à la progression')
-    pg.evaluate("switchTab('fond')"); pg.wait_for_timeout(250)
-    check('Fond d\'écran (depuis Progression) : icône Progression toujours allumée', pg.evaluate("document.getElementById('nav-progression').classList.contains('active')"))
-    pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(250)
-    pg.click('#settings-back'); pg.wait_for_timeout(400)
-    check('Retour ramène à la Progression', pg.inner_text('#page-title') == 'Progression', pg.inner_text('#page-title'))
+    # 1.8.95 : Réglages est un onglet du menu (à la place de Séance) ; plus de roue dentée ni de « Retour »
+    nav = pg.evaluate("[...document.querySelectorAll('nav button')].map(b=>b.id)")
+    check('1.8.95 : menu Programmes · Progression · Historique · Réglages', nav == ['nav-programme', 'nav-progression', 'nav-historique', 'nav-reglages'], nav)
+    check('1.8.95 : plus de roue dentée ni de « Retour » dans les en-têtes', not pg.evaluate("!!document.getElementById('settings-btn') || !!document.getElementById('settings-back')"))
+    for t in ('programme', 'seance', 'progression', 'historique'):
+        pg.evaluate(f"switchTab('{t}')"); pg.wait_for_timeout(150)
+        check(f'aucun bouton en haut à droite sur « {t} » hors « + »', not pg.evaluate("[...document.querySelectorAll('header .hdr-btn')].some(b=>b.id!=='add-program-btn' && b.offsetParent!==null)"))
 
     pg.evaluate("switchTab('historique')"); pg.wait_for_timeout(300)
-    check('bouton Réglages visible sur Historique', pg.evaluate(vis, 'settings-btn'))
     check('Apparence et Application ne sont plus dans l\'Historique',
           not pg.evaluate(in_tab, ['theme-choice', 'historique']) and not pg.evaluate(in_tab, ['update-card', 'historique']))
     check('la carte Sauvegarder / Restaurer reste dans l\'Historique', pg.evaluate(in_tab, ['import-file', 'historique']))
-    box = pg.evaluate("(()=>{const r=document.getElementById('settings-btn').getBoundingClientRect();return [r.right,r.top,r.width,r.height]})()")
-    check('1.8.49 : bouton de 36 px en haut à droite, collé au bord droit', box[0] + box[2] > 390 - 30 and box[1] < 30 and box[2] == 36 and box[3] == 36, str(box))
 
-    pg.click('#settings-btn'); pg.wait_for_timeout(300)
+    pg.click('#nav-reglages'); pg.wait_for_timeout(300)
     check('titre de la page : Réglages', pg.inner_text('#page-title') == 'Réglages', pg.inner_text('#page-title'))
     check('page Réglages affichée, Historique masqué',
           pg.evaluate("document.getElementById('tab-reglages').classList.contains('active') && !document.getElementById('tab-historique').classList.contains('active')"))
     check('Apparence et Application dans Réglages',
           pg.evaluate(in_tab, ['theme-choice', 'reglages']) and pg.evaluate(in_tab, ['update-card', 'reglages']))
-    check('bouton Retour visible, roue dentée masquée', pg.evaluate(vis, 'settings-back') and not pg.evaluate(vis, 'settings-btn'))
-    check('l\'icône Historique reste allumée dans la navigation', pg.evaluate("document.getElementById('nav-historique').classList.contains('active')"))
+    check('l\'onglet Réglages est allumé, Historique éteint', pg.evaluate("document.getElementById('nav-reglages').classList.contains('active') && !document.getElementById('nav-historique').classList.contains('active')"))
+    pg.evaluate("switchTab('fond')"); pg.wait_for_timeout(250)
+    check('Fond d\'écran : onglet Réglages toujours allumé', pg.evaluate("document.getElementById('nav-reglages').classList.contains('active')"))
+    pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(250)
 
     pg.click('[data-theme-choice="dark"]'); pg.wait_for_timeout(200)
     check('le choix de thème fonctionne depuis Réglages', pg.evaluate("document.documentElement.getAttribute('data-theme')") == 'dark')
     pg.click('[data-theme-choice="light"]'); pg.wait_for_timeout(200)
 
-    pg.click('#settings-back'); pg.wait_for_timeout(300)
-    check('Retour ramène à l\'Historique', pg.inner_text('#page-title').endswith('séances') and pg.evaluate(vis, 'settings-btn'))
-
-    # pastille de mise à jour sur la roue dentée
+    # pastille de mise à jour sur l'onglet Réglages
     pg.evaluate("runningVersion='1.5.1'; activeVersion='9.9.9'; renderUpdateStatus()"); pg.wait_for_timeout(100)
-    check('pastille sur la roue dentée quand une version est prête',
-          pg.evaluate("document.getElementById('settings-btn').classList.contains('has-update')") and 'mise à jour' in pg.evaluate("document.getElementById('settings-btn').getAttribute('aria-label')"))
+    check('pastille sur l\'onglet Réglages quand une version est prête',
+          pg.evaluate("document.getElementById('nav-reglages').classList.contains('has-update')") and 'mise à jour' in pg.evaluate("document.getElementById('nav-reglages').getAttribute('aria-label')"))
     pg.evaluate("runningVersion='1.5.1'; activeVersion='1.5.1'; renderUpdateStatus()")
-    check('pastille retirée quand tout est à jour', not pg.evaluate("document.getElementById('settings-btn').classList.contains('has-update')"))
+    check('pastille retirée quand tout est à jour', not pg.evaluate("document.getElementById('nav-reglages').classList.contains('has-update')"))
     # textes simplifiés (1.6.35)
     pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(300)
     hints = pg.evaluate("[...document.querySelectorAll('#tab-reglages .theme-hint, .theme-hint')].map(e=>e.textContent.trim())")

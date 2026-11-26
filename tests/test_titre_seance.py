@@ -21,10 +21,11 @@ with Srv() as base, sync_playwright() as p:
         pg.evaluate("switchTab('seance')"); pg.wait_for_timeout(400)
         check(tag + 'titre = nom du programme actif', pg.inner_text('#page-title') == 'Hypertrophie', pg.inner_text('#page-title'))
         check(tag + 'nom de la séance toujours sous le titre', pg.inner_text('#seance-type-title') == 'Presse / Développé')
-        check(tag + "icône du type (cycle, pastille sombre) devant le titre (1.7.41)", pg.is_visible('#seance-prog-ico svg') and 'dark' in pg.get_attribute('#seance-prog-ico', 'class')
-              and pg.evaluate("document.querySelector('#seance-prog-ico').getBoundingClientRect().right") < pg.evaluate("document.querySelector('#page-title').getBoundingClientRect().left"))
+        check(tag + "1.8.95 : flèche retour (44 px) devant le titre, à la place de l'icône du programme", pg.is_visible('#seance-back') and not pg.is_visible('#seance-prog-ico')
+              and pg.evaluate("document.querySelector('#seance-back').getBoundingClientRect().right") < pg.evaluate("document.querySelector('#page-title').getBoundingClientRect().left")
+              and pg.evaluate("document.querySelector('#seance-back').getBoundingClientRect().width") == 44)
         t, b = pg.evaluate(f"({RECT})('#page-title')"), pg.evaluate(f"({RECT})('#timer-btn')")
-        t_prog, ico_prog = t, pg.evaluate(f"({RECT})('#seance-prog-ico')")
+        t_prog, ico_prog = t, pg.evaluate(f"({RECT})('#seance-back')")
         check(tag + 'titre sans chevauchement avec le bouton PAUSE', t['r'] <= b['l'] - 8 or t['t'] >= b['b'] - 4 or t['b'] <= b['t'], f'{t} {b}')
         c = pg.evaluate("(()=>{const r=s=>{const x=s.getBoundingClientRect();return [x.top,x.bottom]};const k=document.querySelector('.workout-counts');return {row:document.getElementById('timer-btn').parentElement.className,a:r(k.children[0]),d:r(k.children[1]),b:r(document.getElementById('timer-btn'))}})()")
         check(tag + "1.7.48 : bouton de pause à droite du compteur ; séries et durée empilées dans sa hauteur, titre en haut (pas de décalage)",
@@ -50,11 +51,9 @@ with Srv() as base, sync_playwright() as p:
         pg.evaluate("""(()=>{const p=JSON.parse(JSON.stringify(state.programs[0]));p.id='lib1';p.kind='libre';p.name='Dorsaux';p.sessions=[Object.assign(p.sessions[0],{key:'',name:'Dorsaux'})];state.programs.push(p);activateProgram('lib1');})()"""); pg.wait_for_timeout(300)
         pg.evaluate("switchTab('seance')"); pg.wait_for_timeout(300)
         check(tag + 'séance libre (1.8.18) : échauffement dans son 1er exercice de force', pg.evaluate("(document.getElementById('warmup-note').closest('.exercise-item')||{dataset:{}}).dataset.ex") == pg.evaluate("[...document.querySelectorAll('#exercises-list .exercise-item')].map(e=>e.dataset.ex).find(n=>!exInfo(n).cardio)") and not pg.evaluate("document.getElementById('warmup-note').hidden"))
-        check(tag + 'séance libre (1.7.42) : titre et icône à la même hauteur que pour un programme', pg.evaluate(f"({RECT})('#page-title')")['t'] == t_prog['t'] and pg.evaluate(f"({RECT})('#seance-prog-ico')")['t'] == ico_prog['t'] and pg.evaluate(f"({RECT})('#seance-prog-ico')")['b'] == ico_prog['b'], f"{t_prog} {ico_prog}")
-        col = pg.evaluate("getComputedStyle(document.getElementById('seance-prog-ico')).color")
-        check(tag + "séance libre (1.8.69) : « 1× » couleur du texte, comme ⇄", col == ('rgb(242, 242, 244)' if scheme == 'dark' else 'rgb(17, 17, 20)'), col)
-        check(tag + 'séance libre : icône 1× + nom en titre, plus de ligne pastille / nom (1.7.41)', pg.inner_text('#page-title') == 'Dorsaux'
-              and pg.inner_text('#seance-prog-ico') == '1×' and not pg.is_visible('#seance-head') and not pg.evaluate(OVERFLOW_JS)['out'])
+        check(tag + 'séance libre : titre et flèche retour à la même hauteur que pour un programme', pg.evaluate(f"({RECT})('#page-title')")['t'] == t_prog['t'] and pg.evaluate(f"({RECT})('#seance-back')")['t'] == ico_prog['t'] and pg.evaluate(f"({RECT})('#seance-back')")['b'] == ico_prog['b'], f"{t_prog} {ico_prog}")
+        check(tag + 'séance libre : flèche retour + nom en titre, plus de ligne pastille / nom (1.7.41, 1.8.95)', pg.inner_text('#page-title') == 'Dorsaux'
+              and pg.is_visible('#seance-back') and not pg.is_visible('#seance-head') and not pg.evaluate(OVERFLOW_JS)['out'])
         pg.evaluate("switchTab('programme')"); pg.wait_for_timeout(200)
         hauteurs = {}
         for tab in ('progression', 'historique', 'reglages', 'seance'):  # 1.7.75 : l'accueil Programmes n'a plus de titre

@@ -27,11 +27,11 @@ def main():
               pg.evaluate("document.getElementById('wallpaper-row-name').textContent") == 'Aucun'
               and pg.evaluate("(()=>{const c=[...document.querySelectorAll('#tab-reglages .card-title')].map(e=>e.textContent);return c.indexOf(\"Fond d'écran\")===c.indexOf('Apparence')+1})()"))
         pg.click('#wallpaper-row'); pg.wait_for_timeout(300)
-        check("la ligne ouvre la page « Fond d'écran », bouton retour visible, Historique allumé dans la barre",
+        check("la ligne ouvre la page « Fond d'écran », bouton retour visible, Réglages allumé dans la barre (1.8.95)",
               pg.evaluate("document.body.dataset.tab") == 'fond'
               and pg.evaluate("document.getElementById('page-title').textContent") == "Fond d'écran"
-              and pg.is_visible('#fond-back') and not pg.is_visible('#settings-back')
-              and pg.evaluate("document.getElementById('nav-historique').classList.contains('active')"))
+              and pg.is_visible('#fond-back')
+              and pg.evaluate("document.getElementById('nav-reglages').classList.contains('active')"))
         opts = pg.evaluate("[...document.querySelectorAll('#wallpaper-grid .wallpaper-opt')].map(b=>[b.dataset.wallpaper,b.getAttribute('aria-checked'),b.textContent.trim()])")
         miss = pg.evaluate("""(()=>{const css=[...document.styleSheets].flatMap(s=>{try{return [...s.cssRules].map(r=>r.cssText)}catch(e){return []}}).join(' ');
           const idx=document.documentElement.outerHTML;return WALLPAPERS.filter(w=>w.id!=='none').filter(w=>!css.includes('data-wallpaper="'+w.id+'"')||!new RegExp('[(|]'+w.id+'[|)]').test(idx)).map(w=>w.id)})()""")

@@ -31,6 +31,8 @@
 // après celui-ci, dans l'ordre du sommaire (index.html). Tout reste global ; le démarrage (17) attend DOMContentLoaded,
 // donc tous les fichiers sont lus avant qu'une fonction soit appelée. Ici restent les sections 1, 2, 4, 5, 6, 14 et 17.
 // Garde-fou : tests/test_decoupage.py (ordre de chargement, cache hors ligne, noms en double, boutons).
+// Saisie rapide (1.8.92) : js/quick_logic.js (calculs, chargé avant ce fichier : tonnageMultiplier s'en sert) et
+// js/quick_input.js (volet du bas sur téléphone, chargé après js/seance.js).
 
 // ============================================================
 // 1. CONSTANTES ET DONNÉES DU PROGRAMME
@@ -832,19 +834,20 @@ if (typeof ResizeObserver !== 'undefined') {
 
 // 1.8.36 : Réglages s'ouvre depuis l'Historique ou la Progression (roue dentée en haut à droite) ;
 // on retient l'onglet d'origine pour l'icône allumée dans la barre du bas et pour « Retour ».
-let settingsFrom = 'historique';
-
+// 1.8.95 (co-auteur : Claude) : la Séance n'a plus d'onglet ; elle s'ouvre depuis Programmes (« C'est parti ») ou depuis
+// l'Historique (modifier une séance), et c'est l'onglet d'origine qui reste allumé. Réglages a son propre onglet.
+let seanceFrom = 'programme';
 function switchTab(tabName) {
-  const prevTab = document.body.dataset.tab;
-  if (tabName === 'reglages' && (prevTab === 'historique' || prevTab === 'progression' || prevTab === 'seance')) settingsFrom = prevTab; // 1.8.49 : Séance aussi
+  if (tabName === 'seance') seanceFrom = editingOriginalId !== null ? 'historique' : 'programme';
   if (tabName === 'reglages') loadGoogleIdentity(); // 1.7.65 : préchargé avant un appui sur « Se connecter »
   if (tabName === 'reglages') { const n = document.getElementById('settings-name'); if (n && typeof userName === 'function') n.value = userName(); } // 1.8.62
   document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
 
   const targetContainer = document.getElementById(`tab-${tabName}`);
-  // « Réglages » est une page secondaire de l'onglet d'où on l'a ouverte (Historique ou Progression) : son icône reste allumée
-  const targetNav = document.getElementById(`nav-${(tabName === 'reglages' || tabName === 'fond') ? settingsFrom : tabName}`);
+  // Fond d'écran est une page de Réglages ; la Séance garde allumé l'onglet d'où elle a été ouverte
+  const navName = tabName === 'fond' ? 'reglages' : tabName === 'seance' ? seanceFrom : tabName;
+  const targetNav = document.getElementById(`nav-${navName}`);
   if(targetContainer) targetContainer.classList.add('active');
   const scroller = document.getElementById('app-scroll');
   if (scroller) scroller.scrollTop = 0;
@@ -860,13 +863,8 @@ function switchTab(tabName) {
   }
 
   document.body.dataset.tab = tabName;
-  const settingsBtn = document.getElementById('settings-btn');
-  if (settingsBtn) settingsBtn.style.display = (tabName === 'historique' || tabName === 'progression' || tabName === 'seance') ? 'flex' : 'none'; // 1.8.49
-  const settingsBack = document.getElementById('settings-back');
-  if (settingsBack) {
-    settingsBack.style.display = tabName === 'reglages' ? 'flex' : 'none';
-    settingsBack.setAttribute('aria-label', settingsFrom === 'progression' ? 'Retour à la progression' : settingsFrom === 'seance' ? 'Retour à la séance' : "Retour à l'historique");
-  }
+  const seanceBack = document.getElementById('seance-back');
+  if (seanceBack) seanceBack.setAttribute('aria-label', seanceFrom === 'historique' ? "Retour à l'historique" : 'Retour aux programmes');
   updateStickyOffsets();
   const pageTitle = document.getElementById('page-title');
   if (pageTitle) pageTitle.innerText = PAGE_TITLES[tabName] || '';
@@ -887,6 +885,16 @@ function switchTab(tabName) {
       syncDriveBackup();  // crée le dossier / envoie la sauvegarde complète si ce n'est pas encore fait
     }
   }
+}
+
+// 1.8.95 : flèche retour de la Séance. La séance en cours continue (chrono qui tourne) ; on y revient par la tuile.
+function leaveSeance() {
+  if (seanceFrom === 'historique') switchTab('historique'); else goProgramsHome();
+}
+// « C'est parti » : la séance s'ouvre et son chrono démarre tout de suite (déjà lancé : il continue).
+function startSeance() {
+  switchTab('seance');
+  if (workoutDef) startWorkoutTimer();
 }
 
 
