@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Jean-Philippe Alexander. Mon Carnet de Salle.
+// SPDX-License-Identifier: PolyForm-Strict-1.0.0 (voir LICENSE et NOTICE)
 // ============================================================
 // PETIT BONHOMME PIXEL (1.8.97, co-auteur : Claude)
 // ============================================================
