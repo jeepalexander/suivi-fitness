@@ -8,6 +8,28 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.92] - 2026-11-26
+### Séance : saisie rapide (co-auteur : Claude)
+- Sur téléphone, un appui sur un champ de série ouvre un volet du bas au lieu du clavier (planches 40 à 40j de la maquette). Sur ordinateur, rien ne change.
+- Un volet adapté au matériel :
+  - barre olympique : demi-barre où l'on pose les disques de chaque côté (1 à 25 kg), poids de la barre au choix (10, 15, 20 ou 25 kg, avec le diamètre du manche), jamais tapé à la main ;
+  - barre courte (Curl barre EZ, Extension triceps couché) : barre droite, EZ, EZ olympique ou triceps, disques de 1 à 15 kg, serre-disque à ressort ;
+  - machine chargée de disques (Presse à cuisses, Hack squat, Mollets assis d'un seul côté) : poids de la machine à vide tapé une fois puis gardé ;
+  - haltères : haltère coloré du vert au rouge selon le poids, « × 2 » pour deux haltères, râtelier de 4 poids ;
+  - machines et poulies, poids du corps (lest, « POIDS DU CORPS SEUL »), répétitions seules, durée, cardio (durée et distance).
+- En tête, le total seul (« 95 kg ») ; le poids de la barre et le poids à vide sont gardés pour chaque exercice.
+- « Remplir la série » remplit la ligne sans la cocher et recopie la charge sur les séries suivantes pas encore cochées.
+- Bouton clavier pour taper la valeur à la main quand on préfère.
+
+### Tonnage : les deux haltères comptent (co-auteur : Claude)
+- Le tonnage compte × 2 les exercices faits avec deux haltères (Développé haltères, Curl biceps, Fentes…), anciennes séances comprises : 12 kg × 10 réps avec deux haltères = 240 kg (120 avant). La série garde le poids d'un haltère : records et courbes de charge ne changent pas.
+
+### Code et tests (co-auteur : Claude)
+- Nouveaux fichiers `js/quick_logic.js` (calculs) et `js/quick_input.js` (volet), ajoutés au cache hors ligne ; styles en fin de `style.css`.
+- Nouveaux tests : `test_saisie_logique.py` (calculs, avec node) et `test_saisie_rapide.py` (77 contrôles : les 10 volets à 390 et 360 px, clair et sombre, remplissage, recopie, mémoire, clavier, tonnage). Suite complète : tous les tests réussis.
+
+---
+
 ## [1.8.91] - 2026-11-25
 ### Design system : nombre d'or, moins de tailles (co-auteur : Claude)
 - Toutes les tailles suivent des échelles courtes, réglées sur le nombre d'or (φ ≈ 1,618) et la suite de Fibonacci (planches 42a à 43j de la maquette) :
