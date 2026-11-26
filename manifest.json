@@ -1,7 +1,7 @@
 {
   "name": "Mon Carnet de Salle",
   "short_name": "Mon Carnet",
-  "version": "1.8.97",
+  "version": "1.8.98",
   "start_url": "./index.html",
   "display": "fullscreen",
   "background_color": "#FFFFFF",

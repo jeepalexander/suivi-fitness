@@ -8,6 +8,18 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.98] - 2026-11-26
+### Programmes : petit bonhomme (co-auteur : Claude)
+- Les portes du petit bonhomme gardent la marge de la page entre elles et le bord de l'écran (26 px, 20 px sur les petits écrans), au lieu de toucher le bord.
+
+### Programmes : post-it du bilan (co-auteur : Claude)
+- Le post-it penché ne dépasse plus de 3 px de sa ligne : il reste exactement à la même place.
+
+### Tests (co-auteur : Claude)
+- `test_bonhomme.py` : 63 contrôles (place des portes, post-it sans débordement).
+
+---
+
 ## [1.8.97] - 2026-11-26
 ### Programmes : petit bonhomme pixel (co-auteur : Claude)
 - Un petit sportif en pixels s'entraîne sur l'accueil, entre le message manuscrit et « Programme actif » : squat à la barre, soulevé de terre, curl biceps, rowing haltères, tractions, relevé de buste, traîneau poussé, traîneau tiré en marche arrière, battle ropes sur toute la largeur de l'écran, burpees, pompes, corde à sauter et sieste. Jamais deux fois la même animation de suite.

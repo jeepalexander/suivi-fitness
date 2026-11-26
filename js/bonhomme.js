@@ -247,7 +247,9 @@ function bhPick() {
 function bhSetSide(right) {
   const B = bonhomme;
   if (bhPostitLeft() !== null) right = false;
-  B.door.side = right ? 1 : -1; B.door.x = right ? B.W - 18 : 18;
+  // 1.8.98 : la porte garde la marge de la page (26 px, 20 sous 380 px) entre elle et le bord de l'écran
+  const g = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gutter')) || 26;
+  B.door.side = right ? 1 : -1; B.door.x = right ? B.W - g - 16 : g + 16;
   B.dv.style.left = (B.door.x - 16) + 'px';
   bhDrawDoor(0);
   return right;

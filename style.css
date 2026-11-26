@@ -1177,7 +1177,7 @@ body[data-tab="seance"] #page-title { overflow-wrap: anywhere; }
 /* ============================================
    BILAN DU MOIS (1.7.50) — maquette, planches 35 et 25
    ============================================ */
-.bilan-postit-row { display: flex; justify-content: flex-end; margin: -8px 8px 13px 0; }
+.bilan-postit-row { display: flex; justify-content: flex-end; margin: -8px 5px 13px 0; padding-right: 3px; } /* 1.8.98 : les 3 px du post-it penché tombent dans la marge intérieure (plus de débordement, même place) */
 /* 1.8.97 : petit bonhomme pixel. La zone entoure le post-it ; le bonhomme marche sur son bas, d'un bord de l'écran à l'autre. */
 .bh-zone { position: relative; }
 .bh-zone.on { min-height: 77px; padding-bottom: 13px; } /* 64 px de piste + 13 px avant « Programme actif » (un seul écart, sans marge) */

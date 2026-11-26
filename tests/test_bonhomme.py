@@ -1,7 +1,7 @@
 """Petit bonhomme pixel (1.8.97, co-auteur : Claude) : sur l'accueil Programmes seulement, entre l'accueil manuscrit et
 « Programme actif » ; piste d'un bord de l'écran à l'autre, sans débordement ; couleur du texte ; interrupteur
 « Petit bonhomme » des Réglages (Affiché / Masqué) ; absent si le téléphone demande moins d'animations ; demi-tour avant
-le post-it du bilan (porte seulement à gauche) ; jamais deux fois la même animation ; humeur déload et record.
+le post-it du bilan (porte seulement à gauche) ; porte à la marge de la page ; jamais deux fois la même animation ; humeur déload et record.
 390 et 360 px, clair et sombre. Captures dans /tmp/bonhomme."""
 import os, sys
 from harness import Srv, sync_playwright, newpage, ouvrir, debordements, Bilan, variantes
@@ -71,9 +71,10 @@ with Srv() as url, sync_playwright() as p:
     pg.wait_for_timeout(2000)
     b.ok('post-it : il fait demi-tour sans passer dessous', pg.evaluate("bonhomme.cx<=bhMaxX()&&bonhomme.dir===-1"), pg.evaluate("[bonhomme.cx,bonhomme.dir,bhMaxX()]"))
     b.ok('post-it : la porte n\'apparaît qu\'à gauche', pg.evaluate("[bhSetSide(true),bonhomme.door.side]") == [False, -1])
-    # le post-it penché de 3° dépasse déjà de 3 px sans le bonhomme (constaté en 1.8.96) : écart ignoré ici
-    autres = [d for d in debordements(pg) if not d.startswith('DIV.bilan-postit-row')]
-    b.ok('post-it au-dessus de la piste, sans autre débordement', not autres, autres)
+    b.ok('porte à gauche : la marge de la page entre la porte et le bord (1.8.98)', pg.evaluate("bonhomme.door.x-16") == 26)
+    pg.evaluate("bilanPostitHtml=()=>'';renderProgramOverview()"); pg.wait_for_timeout(300)
+    b.ok('porte à droite : la marge de la page entre la porte et le bord (1.8.98)', pg.evaluate("[bhSetSide(true),bonhomme.W-(bonhomme.door.x+16)]") == [True, 26])
+    b.ok('post-it au-dessus de la piste, sans débordement (1.8.98 : le post-it penché ne dépasse plus)', not debordements(pg), debordements(pg))
     pg.screenshot(path=f'{OUT}/postit.png')
     b.ok('jamais deux fois la même animation de suite',
          pg.evaluate("(()=>{for(let i=0;i<200;i++){const a=bhPick();if(a===bonhomme.last)return false;bonhomme.last=a}return true})()"))
