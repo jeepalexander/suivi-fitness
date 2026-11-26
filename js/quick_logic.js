@@ -125,13 +125,14 @@ const QuickLogic = (() => {
     const v = parseQuickNum(kg) || 0;
     return v <= 6 ? 44 : v <= 14 ? 56 : v <= 24 ? 70 : 84;
   }
-  // Vert (2 kg) → rouge (60 kg), une teinte par poids pair ; texte blanc ou noir selon la lisibilité.
+  // Vert (2 kg) → rouge (60 kg), une teinte par poids pair (teinte, saturation 62 %, luminosité 40 %, comme la maquette).
   function dumbbellColorFor(kg) {
     const v = Math.min(DUMBBELL_MAX_KG, Math.max(2, evenFloor(parseQuickNum(kg) || 2)));
-    const hue = Math.round(142 - ((v - 2) / (DUMBBELL_MAX_KG - 2)) * 142);
-    const [r, g, b] = hslToRgb(hue, 0.62, 0.45);
+    const h = 142 - ((v - 2) / (DUMBBELL_MAX_KG - 2)) * 142, hue = Math.round(h);
+    const [r, g, b] = hslToRgb(h, 0.62, 0.40);
     const lum = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
-    return { hue, background: `hsl(${hue} 62% 45%)`, text: lum > 0.18 ? '#111114' : '#FFFFFF' };
+    const hex = '#' + [r, g, b].map(c => Math.round(c * 255).toString(16).padStart(2, '0')).join('').toUpperCase();
+    return { hue, background: hex, text: lum > 0.5 ? '#111114' : '#FFFFFF' };   // maquette : 12 kg = #2CA527, texte blanc
   }
   function hslToRgb(h, s, l) {
     const k = n => (n + h / 30) % 12, a = s * Math.min(l, 1 - l);

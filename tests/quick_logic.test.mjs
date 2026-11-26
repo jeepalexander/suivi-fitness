@@ -115,6 +115,8 @@ test('haltères : râtelier, paliers, couleurs', () => {
   assert.equal(Q.dumbbellColorFor(60).hue, 0);
   assert.equal(Q.dumbbellColorFor(13).hue, Q.dumbbellColorFor(12).hue);
   assert.match(Q.dumbbellColorFor(30).text, /^#(111114|FFFFFF)$/);
+  assert.equal(Q.dumbbellColorFor(12).background, '#2CA527');   // couleur de la maquette
+  assert.equal(Q.dumbbellColorFor(12).text, '#FFFFFF');
 });
 
 test('cardio : profils de distance', () => {

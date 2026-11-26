@@ -794,7 +794,7 @@ async function submitWorkout(e) {
       w = Number(wInput.value);
       set = { weight: w, reps: r };
     }
-    const setVolume = w * r;
+    const setVolume = w * r * (mode === 'weight' ? tonnageMultiplier(exName) : 1);   // 1.8.92 : × 2 avec deux haltères
     totalTonnage += setVolume;
     const exLog = logFor(exName, false, occ);
     exLog.sets.push(set);

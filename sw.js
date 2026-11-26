@@ -20,6 +20,7 @@ const ASSETS = [
   './js/chronos.js',
   './js/seance.js',
   './js/quick_logic.js',
+  './js/quick_input.js',
   './js/historique.js',
   './js/graphiques.js',
   './js/analyse.js',

@@ -1392,3 +1392,70 @@ body[data-tab="programme"][data-pview="aide"] header h1 { display: none; }
 /* 1.8.89 : « Avant de commencer » et phrase de rappel sous la proposition */
 .aide-disc p { margin: 0 0 13px; font-size: 15px; line-height: 1.6; color: var(--text); }
 .aide-recall { margin: 13px 0 0; font-size: 13px; line-height: 1.6; color: var(--text-muted); }
+
+/* 1.8.92 (co-auteur : Claude) : saisie rapide (js/quick_input.js), d'après les planches 40 à 40j de la maquette.
+   Volet du bas sur la base de .sheet ; ronds de 56 px gris clair (champ relevé en sombre) ; couleurs des disques,
+   des barres et des haltères reprises de la maquette. */
+:root { --qs-key: var(--fill); }
+:root[data-theme="dark"] { --qs-key: var(--set-field); }
+.sheet.qs { gap: 13px; overflow-x: hidden; }
+.qs-head { display: flex; align-items: center; gap: 13px; min-width: 0; }
+.qs-head .ex-icon-badge { width: 66.55px; height: 66.55px; flex: none; }
+.qs-name { min-width: 0; font-size: 17px; font-weight: 600; line-height: 1.05; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qs-zones { display: grid; grid-template-columns: minmax(0, 1fr) 1px 56px; gap: 13px; align-items: stretch; }
+.qs-zones.one { grid-template-columns: minmax(0, 1fr); }
+.qs-zones:has(> .qs-zone.c:first-child) { grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr); }
+.qs-zones.one:has(> .qs-zone.c:first-child) { grid-template-columns: minmax(0, 1fr); }
+.qs-zone { display: flex; flex-direction: column; gap: 13px; min-width: 0; }
+.qs-zone.c { align-items: center; }
+.qs-zh { display: flex; flex-direction: column; gap: 8px; }
+.qs-zone.c .qs-zh { align-items: center; }
+.qs-sep { width: 1px; background: var(--border); }
+.qs-lbl { font-size: 13px; line-height: 1.05; color: var(--text-muted); }
+.qs-w { display: flex; align-items: baseline; gap: 5px; min-width: 0; white-space: nowrap; line-height: 1.05; }
+.qs-num { font-family: 'Saira Semi Condensed', sans-serif; font-weight: 700; font-size: 28px; letter-spacing: -0.01em; }
+.qs-unit { font-size: 15px; color: var(--text-muted); }
+.qs-col { display: flex; flex-direction: column; gap: 13px; }
+.qs-rb { width: 56px; height: 56px; flex: none; display: flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 50%; background: var(--qs-key); color: var(--text); font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.qs-rb.sm { font-size: 13px; }
+.qs-rb:disabled { opacity: 0.35; cursor: default; }
+.qs-rb:not(:disabled):active { transform: scale(0.94); }
+.qs-g2 { display: grid; grid-template-columns: 56px 56px; gap: 13px; justify-content: center; }
+.qs-g4 { display: grid; grid-template-columns: repeat(4, 56px); gap: 13px 8px; justify-content: space-between; }
+.qs-row4 { display: flex; gap: 13px; justify-content: center; }
+.qs-act { display: grid; grid-template-columns: 56px 1fr 56px; gap: 13px; align-items: center; margin-top: 5px; }
+.qs-act .btn.qs-fill { margin: 0; }
+/* Barre, barre courte et machine : le dessin part du bord gauche de l'écran, la gélule est posée sur le manche */
+.qs-load { position: relative; height: 109px; margin-left: calc(-1 * var(--gutter)); overflow: hidden; }
+.qs-load-svg { display: block; }
+.qs-plate { cursor: pointer; }
+.qs-bar-btn { position: absolute; left: var(--gutter); top: 32.5px; min-width: 58px; height: 44px; padding: 0 13px; border: 0; border-radius: 13px; background: var(--qs-key); color: var(--text); font: inherit; font-size: 15px; font-weight: 600; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18); cursor: pointer; }
+.qs-empty { position: absolute; left: calc(var(--gutter) - 2px); top: 32.5px; width: 96px; height: 44px; box-sizing: border-box; display: flex; align-items: center; gap: 5px; padding: 0 13px; border-radius: 13px; background: var(--qs-key); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35); }
+.qs-empty input { width: 100%; min-width: 0; padding: 0; border: 0; background: transparent; color: var(--text); font: inherit; font-size: 15px; font-weight: 600; outline: none; }
+.qs-empty span { font-size: 13px; color: var(--text-muted); }
+/* Choix du poids de la barre */
+.qs-choices { gap: 8px; }
+.qs-choices .qs-lbl { margin-bottom: 8px; }
+.qs-choice { display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 56px; padding: 0 13px; border: 0; border-radius: 13px; background: var(--qs-key); color: var(--text); font: inherit; cursor: pointer; }
+.qs-choice.tall { height: 64px; }
+.qs-choice.on { box-shadow: 0 0 0 2px var(--text); }
+.qs-choice-t { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; min-width: 0; }
+.qs-choice-kg { font-family: 'Saira Semi Condensed', sans-serif; font-weight: 700; font-size: 17px; line-height: 1.05; }
+.qs-choice-sub { font-size: 13px; line-height: 1.05; color: var(--text-muted); text-align: left; }
+.qs-choice svg { flex: none; }
+.qs-cote { stroke: var(--text-muted); }
+.qs-cote-f { fill: var(--text-muted); }
+.qs-choice text { fill: var(--text-muted); }
+/* Haltères */
+.qs-db { height: 98px; display: flex; align-items: center; justify-content: space-between; }
+.qs-db-pic { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.qs-x2 { font-family: 'Saira Semi Condensed', sans-serif; font-weight: 700; font-size: 17px; line-height: 1.05; color: var(--text-muted); }
+.qs-rack { display: flex; align-items: center; justify-content: space-between; }
+.qs-rack > .qs-rb { width: 44px; height: 44px; background: transparent; }
+/* Écrans étroits (marge de page de 20 px) : écarts resserrés pour garder les ronds de 56 px */
+@media (max-width: 380px) {
+  .qs-zones { gap: 8px; }
+  .qs-g4 { column-gap: 5px; }
+}
+/* Poids du corps seul */
+.qs-pdc { width: 128px; height: 44px; padding: 0; border: 0; border-radius: 999px; background: var(--qs-key); color: var(--text); font: inherit; font-size: 13px; font-weight: 600; line-height: 1.05; cursor: pointer; }

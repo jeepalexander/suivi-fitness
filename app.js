@@ -315,6 +315,10 @@ function clearEditState() {
   selectedSessionIndex = null;
 }
 
+// 1.8.92 (co-auteur : Claude) : tonnage juste avec deux haltères. La série garde le poids d'un haltère (comme sur
+// l'haltère en salle : records et courbes inchangés) ; le tonnage compte les deux (× 2), anciennes séances comprises.
+function tonnageMultiplier(name) { return typeof QuickLogic !== 'undefined' ? QuickLogic.weightMultiplierFor(canonicalExerciseName(String(name || ''))) : 1; }
+
 function recalculateHistoryTonnages() {
   if (!state || !state.history) return;
 
@@ -325,12 +329,13 @@ function recalculateHistoryTonnages() {
       session.exercises.forEach(ex => {
         let exVolume = 0;
         let maxW = 0;
+        const mult = tonnageMultiplier(ex.name);
 
         if (ex.sets && Array.isArray(ex.sets)) {
           ex.sets.forEach(set => {
             const w = parseFloat(set.weight) || 0;
             const r = parseFloat(set.reps) || 0;
-            const setVol = w * r;
+            const setVol = w * r * mult;
 
             exVolume += setVol;
             if (w > maxW) maxW = w;
