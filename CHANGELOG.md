@@ -8,6 +8,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.96] - 2026-11-26
+### Programmes (co-auteur : Claude)
+- L'icône de boîte d'archive devant « En mémoire » prend la couleur du titre : en doré clair, elle se voyait mal sur fond clair.
+
+---
+
 ## [1.8.95] - 2026-11-26
 ### Navigation : la séance se range sous Programmes (co-auteur : Claude)
 - Menu du bas : Programmes · Progression · Historique · Réglages. L'onglet Séance disparaît, Réglages arrive en dernier ; la roue dentée en haut des écrans et le « Retour » des Réglages sont retirés. La pastille « mise à jour disponible » passe sur l'onglet Réglages.

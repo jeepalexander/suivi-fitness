@@ -1467,3 +1467,5 @@ body[data-tab="programme"][data-pview="aide"] header h1 { display: none; }
 .prog-pause-btn svg.archive-ico, .mem-pause-ico svg.archive-ico { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .prog-tile .btn-start.running { gap: 8px; font-variant-numeric: tabular-nums; }
 .prog-tile .btn-start.running svg { width: 20px; height: 20px; }
+/* 1.8.96 : la boîte d'archive devant « En mémoire » prend la couleur du titre (le doré du liseré se voyait mal sur fond clair) */
+.mem-pause-ico { color: var(--text); }
