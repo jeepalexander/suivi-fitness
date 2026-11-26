@@ -163,6 +163,13 @@ with Srv() as url, sync_playwright() as p:
     t = pg.evaluate("""(() => { state.history.push({ id: 'qs', date: new Date().toISOString(), exercises: [{ name: 'Curl biceps', sets: [{ weight: 12, reps: 10 }] }] });
         recalculateHistoryTonnages(); const h = state.history.find(x => x.id === 'qs'); state.history = state.history.filter(x => x.id !== 'qs'); return h.tonnage; })()""")
     b.ok('tonnage recalculé : 12 kg × 10 réps avec deux haltères = 240 kg', t == 240, t)
+    # 1.8.93 : « Mollets » et « Développé militaire » renommés ; l'historique et les dernières charges suivent
+    noms = pg.evaluate("[...new Set(state.history.flatMap(h => (h.exercises || []).map(e => e.name)))]")
+    b.ok('historique : « Mollets machine » et « Développé militaire haltères », plus les anciens noms',
+         'Mollets machine' in noms and 'Développé militaire haltères' in noms and 'Mollets' not in noms and 'Développé militaire' not in noms, noms)
+    b.ok('dernières charges renommées', pg.evaluate("'Développé militaire haltères' in state.lastWeights && !('Développé militaire' in state.lastWeights)"))
+    b.ok('modes : Mollets machine = machine chargée de disques, Développé militaire haltères = deux haltères',
+         pg.evaluate("[QuickLogic.quickMode('Mollets machine', exInfo('Mollets machine')), QuickLogic.weightMultiplierFor('Développé militaire haltères')].join()") == 'platemachine,2')
     b.ok('aucune erreur JavaScript', not errs, errs)
     ctx.close()
 

@@ -8,6 +8,16 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.93] - 2026-11-26
+### Exercices renommés (co-auteur : Claude)
+- « Mollets » devient « Mollets machine » : saisie rapide de la machine chargée de disques (disques de chaque côté, poids à vide gardé). Fiche : debout sous les épaulières de la machine.
+- « Développé militaire » devient « Développé militaire haltères » : saisie rapide avec deux haltères (« × 2 », tonnage compté sur les deux). Fiche réécrite pour les haltères, debout.
+- L'historique, les programmes et les dernières charges passent d'eux-mêmes aux nouveaux noms au démarrage : courbes et records continuent sans coupure.
+- « Avec notre aide » : le développé militaire n'est plus compté parmi les exercices à la barre et devient possible avec des haltères à la maison.
+- Tests : `test_chrono.py` aux nouveaux noms ; `test_saisie_rapide.py` vérifie le changement de nom dans l'historique et les deux nouvelles saisies (80 contrôles).
+
+---
+
 ## [1.8.92] - 2026-11-26
 ### Séance : saisie rapide (co-auteur : Claude)
 - Sur téléphone, un appui sur un champ de série ouvre un volet du bas au lieu du clavier (planches 40 à 40j de la maquette). Sur ordinateur, rien ne change.

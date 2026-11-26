@@ -44,8 +44,8 @@ with Srv() as base, sync_playwright() as p:
 
     # durées attendues (écrites en dur, indépendantes du code)
     # (catalogue 1.7.0 : polyarticulaire lourd 3:00, polyarticulaire 2:00, isolation 1:30)
-    attendu = {'Presse à cuisses': 'PAUSE 2:00', 'Développé couché': 'PAUSE 3:00', 'Développé militaire': 'PAUSE 3:00',
-               'Tirage horizontal': 'PAUSE 2:00', 'Curl biceps': 'PAUSE 1:30', 'Mollets': 'PAUSE 1:30'}
+    attendu = {'Presse à cuisses': 'PAUSE 2:00', 'Développé couché': 'PAUSE 3:00', 'Développé militaire haltères': 'PAUSE 3:00',
+               'Tirage horizontal': 'PAUSE 2:00', 'Curl biceps': 'PAUSE 1:30', 'Mollets machine': 'PAUSE 1:30'}
     vus = {}
     for n in names:
         vus[n] = open_ex(pg, n)
@@ -80,7 +80,7 @@ with Srv() as base, sync_playwright() as p:
     check('arrêt : plus d\'heure de fin mémorisée', pg.evaluate("localStorage.getItem('rest_end_time')") is None)
 
     # fin de décompte : « GO ! » reste affiché si on change d'exercice, puis un appui remet « PAUSE »
-    open_ex(pg, 'Mollets')
+    open_ex(pg, 'Mollets machine')
     pg.evaluate("(()=>{const e=Date.now()+1100;localStorage.setItem('rest_end_time',e);updateTimerDisplay(1);runRestTimer(e)})()")
     pg.wait_for_timeout(1700)
     check('fin de repos : « GO ! » affiché', chrono(pg) == 'GO !', chrono(pg))

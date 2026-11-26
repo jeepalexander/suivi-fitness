@@ -14,7 +14,7 @@ const CAT = Object.fromEntries(ctx.C.map(e => [e.name, e]));
 const memoire = () => { const m = {}; return { getItem: k => (k in m ? m[k] : null), setItem: (k, v) => { m[k] = String(v); } }; };
 
 test('les listes ne nomment que des exercices du catalogue', () => {
-  for (const n of [...Q.BARBELL_EXERCISES, ...Q.SHORT_BAR_EXERCISES, ...Q.DUMBBELL_EXERCISES, 'Presse à cuisses', 'Hack squat', 'Mollets assis'])
+  for (const n of [...Q.BARBELL_EXERCISES, ...Q.SHORT_BAR_EXERCISES, ...Q.DUMBBELL_EXERCISES, 'Presse à cuisses', 'Hack squat', 'Mollets machine', 'Mollets assis'])
     assert.ok(CAT[n], n);
 });
 
@@ -27,6 +27,8 @@ test('classement par matériel', () => {
   assert.equal(mode('Extension triceps couché'), 'shortbar');
   assert.equal(mode('Presse à cuisses'), 'platemachine');
   assert.equal(mode('Mollets assis'), 'platemachine');
+  assert.equal(mode('Mollets machine'), 'platemachine');
+  assert.equal(mode('Développé militaire haltères'), 'dumbbell');
   assert.equal(mode('Hip thrust haltères'), 'dumbbell');
   assert.equal(mode('Fentes'), 'dumbbell');
   assert.equal(mode('Montées sur banc'), 'dumbbell');
@@ -55,6 +57,8 @@ test('× 2 ou × 1', () => {
   assert.equal(Q.weightMultiplierFor('Développé couché'), 1);
   assert.equal(Q.plateMachineSides('Hack squat'), 2);
   assert.equal(Q.plateMachineSides('Mollets assis'), 1);
+  assert.equal(Q.plateMachineSides('Mollets machine'), 2);
+  assert.equal(Q.weightMultiplierFor('Développé militaire haltères'), 2);
   assert.equal(Q.toSetWeightValue(12, 2), 24);
   assert.equal(Q.fromSetWeightValue(24, 2), 12);
   assert.equal(Q.fromSetWeightValue('14', 1), 14);

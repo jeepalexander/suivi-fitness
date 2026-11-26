@@ -236,7 +236,7 @@ const AIDE_FAM = {
   abs: [76, 73, 74, 75, 72, 77, 78, 79],
   cardio: [80, 81, 82, 86, 85, 87, 24, 84, 83]
 };
-const AIDE_BARBELL = new Set([2, 10, 11, 12, 13, 29, 38, 39, 41, 43, 51, 58, 60, 69]);
+const AIDE_BARBELL = new Set([2, 10, 11, 12, 13, 29, 38, 39, 41, 43, 58, 60, 69]);   // 1.8.93 : 51 se fait aux haltères
 const AIDE_EASY = { knee: [4, 2], hip: [13, 11], pushH: [40, 39], pullH: [30, 29], pushV: [52, 51] }; // force, débutant
 const AIDE_ISO = new Set(['lat', 'rear', 'biceps', 'triceps', 'calves', 'quads']);
 // Séances : [famille, variante] dans l'ordre ; la variante choisit le n-ième exercice possible de la famille

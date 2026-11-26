@@ -9,16 +9,16 @@ const QuickLogic = (() => {
 
   // ── Classement ────────────────────────────────────────────────────────────
   const BARBELL_EXERCISES = ['Squat', 'Soulevé de terre', 'Soulevé de terre roumain', 'Soulevé de terre jambes tendues', 'Hip thrust',
-    'Rowing barre', 'Shrugs barre', 'Développé couché', 'Développé incliné', 'Développé décliné', 'Développé militaire'];
+    'Rowing barre', 'Shrugs barre', 'Développé couché', 'Développé incliné', 'Développé décliné'];
   const SHORT_BAR_EXERCISES = ['Curl barre EZ', 'Extension triceps couché'];
   // côtés chargés : 2 = disques de chaque côté, 1 = une seule corne
-  const PLATE_MACHINES = { 'presse a cuisses': 2, 'hack squat': 2, 'mollets assis': 1 };
+  const PLATE_MACHINES = { 'presse a cuisses': 2, 'hack squat': 2, 'mollets machine': 2, 'mollets assis': 1 };   // 1.8.93 : Mollets machine
   const SINGLE_DUMBBELL_EXERCISES = ['Squat goblet', 'Hip thrust haltères', 'Rowing unilatéral', 'Pull-over', 'Curl concentration',
     'Extension triceps haltère', 'Extension triceps en arrière'];
   const PAIR_DUMBBELL_EXERCISES = ['Développé haltères', 'Développé incliné haltères', 'Écarté haltère', 'Écarté incliné haltères',
     'Développé haltères assis', 'Développé rotatif haltères', 'Élévations latérales', 'Élévations frontales', 'Oiseau', 'Curl biceps',
     'Curl incliné', 'Curl marteau', 'Rowing haltères', 'Shrugs haltères', 'Squat haltères', 'Squat bulgare', 'Fentes', 'Fentes marchées',
-    'Mollets haltères', 'Montées sur banc'];
+    'Mollets haltères', 'Montées sur banc', 'Développé militaire haltères'];
   const DUMBBELL_EXERCISES = [...SINGLE_DUMBBELL_EXERCISES, ...PAIR_DUMBBELL_EXERCISES];
   const BARBELL = set(BARBELL_EXERCISES), SHORT = set(SHORT_BAR_EXERCISES), DB = set(DUMBBELL_EXERCISES), DB1 = set(SINGLE_DUMBBELL_EXERCISES);
   const SINGLE_WORDS = ['unilat', 'concentration', 'goblet', '1 bras', 'un bras', '1 main', 'une main', 'a deux mains'];
