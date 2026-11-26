@@ -44,7 +44,8 @@ const EXERCISE_ALIASES = {
   "Oiseau (Arrière d'épaule)": "Oiseau",
   "Mollets / Finition": "Mollets machine",
   "Mollets": "Mollets machine",                          // 1.8.93 : son exercice se fait à la machine chargée de disques
-  "Développé militaire": "Développé militaire haltères", // 1.8.93 : son exercice se fait avec deux haltères
+  "Développé militaire": "Militaire haltères",           // 1.8.93 : son exercice se fait avec deux haltères
+  "Développé militaire haltères": "Militaire haltères",  // 1.8.94 : nom de la 1.8.93, trop long pour tenir sur une ligne
   "Extension triceps à la poulie": "Extension triceps" // 1.7.76 : exercice retiré, déjà couvert par « Extension triceps »
 };
 // Identifiants retirés du catalogue -> identifiant qui les remplace (1.7.76 : 67 « Extension triceps à la poulie » -> 66)
@@ -61,7 +62,7 @@ const ROWER_DEFAULTS = { seconds: 270, meters: 1000 }; // proposés au tout prem
 // Programme fixe A/B/C de l'application jusqu'à 1.6.36 : sert uniquement à créer le programme
 // « Hypertrophie » lors de la migration (voir migrateState), avec le même nombre de séries par exercice.
 const LEGACY_PROGRAM = {
-  A: { title: "Presse / Développé", exercises: [["Rameur", 1], ["Presse à cuisses", 4], ["Développé couché", 4], ["Tirage horizontal", 4], ["Développé militaire haltères", 3], ["Curl biceps", 3], ["Mollets machine", 3]] },
+  A: { title: "Presse / Développé", exercises: [["Rameur", 1], ["Presse à cuisses", 4], ["Développé couché", 4], ["Tirage horizontal", 4], ["Militaire haltères", 3], ["Curl biceps", 3], ["Mollets machine", 3]] },
   B: { title: "Soulevé / Développé", exercises: [["Rameur", 1], ["Soulevé de terre", 4], ["Développé incliné", 4], ["Tirage vertical", 4], ["Tractions", 3], ["Élévations latérales", 3], ["Extension triceps", 3], ["Leg extension", 3]] },
   C: { title: "Fentes / Dips", exercises: [["Rameur", 1], ["Fentes marchées", 4], ["Dips", 4], ["Rowing unilatéral", 3], ["Oiseau", 3], ["Mollets machine", 3], ["Leg curl", 3]] }
 };

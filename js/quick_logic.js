@@ -18,7 +18,7 @@ const QuickLogic = (() => {
   const PAIR_DUMBBELL_EXERCISES = ['Développé haltères', 'Développé incliné haltères', 'Écarté haltère', 'Écarté incliné haltères',
     'Développé haltères assis', 'Développé rotatif haltères', 'Élévations latérales', 'Élévations frontales', 'Oiseau', 'Curl biceps',
     'Curl incliné', 'Curl marteau', 'Rowing haltères', 'Shrugs haltères', 'Squat haltères', 'Squat bulgare', 'Fentes', 'Fentes marchées',
-    'Mollets haltères', 'Montées sur banc', 'Développé militaire haltères'];
+    'Mollets haltères', 'Montées sur banc', 'Militaire haltères'];
   const DUMBBELL_EXERCISES = [...SINGLE_DUMBBELL_EXERCISES, ...PAIR_DUMBBELL_EXERCISES];
   const BARBELL = set(BARBELL_EXERCISES), SHORT = set(SHORT_BAR_EXERCISES), DB = set(DUMBBELL_EXERCISES), DB1 = set(SINGLE_DUMBBELL_EXERCISES);
   const SINGLE_WORDS = ['unilat', 'concentration', 'goblet', '1 bras', 'un bras', '1 main', 'une main', 'a deux mains'];

@@ -3,7 +3,7 @@
 // Catalogue des exercices (v1.2 du 10 novembre 2026, co-auteur : Claude) : 86 exercices, identifiant stable,
 // groupe, mode de saisie et réglages par défaut issus de la littérature (voir CATALOGUE_EXERCICES.md du projet).
 // 1.8.93 (co-auteur : Claude) : « Mollets » devient « Mollets machine » (machine chargée de disques) et « Développé militaire »
-// devient « Développé militaire haltères » (deux haltères, debout) ; anciens noms dans EXERCISE_ALIASES d'app.js.
+// devient « Militaire haltères » (deux haltères, debout) ; anciens noms dans EXERCISE_ALIASES d'app.js.
 //   mode : weight (kg × réps) · bw (poids du corps + lest × réps) · reps (réps seules) · time (durée)
 //          dist (durée + distance) · floors (durée + étages)
 //   rest : repos en secondes (chrono de pause) · cardio : exercice d'endurance continu (une seule ligne)
@@ -62,7 +62,7 @@ const CATALOGUE = [
   {"id": 48, "name": "Écarté incliné haltères", "group": "Pectoraux", "mode": "weight", "sets": 3, "reps": "10–15", "rest": 90, "icon": "icons/incline_dumbbell_fly.png", "gear": ["halteres","banc"]},
   {"id": 49, "name": "Écarté poulie", "group": "Pectoraux", "mode": "weight", "sets": 3, "reps": "10–15", "rest": 90, "icon": "icons/cable_fly.png", "gear": ["salle"]},
   {"id": 50, "name": "Pull-over poulie", "group": "Pectoraux", "mode": "weight", "sets": 3, "reps": "10–15", "rest": 90, "icon": "icons/cable_pullover.png", "gear": ["salle"]},
-  {"id": 51, "name": "Développé militaire haltères", "group": "Épaules", "poly": true, "mode": "weight", "sets": 3, "reps": "6–10", "rest": 180, "icon": "icons/overhead_press.png", "gear": ["halteres"]},
+  {"id": 51, "name": "Militaire haltères", "group": "Épaules", "poly": true, "mode": "weight", "sets": 3, "reps": "6–10", "rest": 180, "icon": "icons/overhead_press.png", "gear": ["halteres"]},
   {"id": 52, "name": "Développé haltères assis", "group": "Épaules", "poly": true, "mode": "weight", "sets": 3, "reps": "8–12", "rest": 120, "icon": "icons/seated_dumbbell_press.png", "gear": ["halteres","banc"]},
   {"id": 53, "name": "Développé rotatif haltères", "group": "Épaules", "poly": true, "mode": "weight", "sets": 3, "reps": "8–12", "rest": 120, "icon": "icons/arnold_press.png", "gear": ["halteres","banc"]},
   {"id": 54, "name": "Développé épaules machine", "group": "Épaules", "poly": true, "mode": "weight", "sets": 3, "reps": "8–12", "rest": 120, "icon": "icons/machine_shoulder_press.png", "gear": ["salle"]},

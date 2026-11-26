@@ -8,6 +8,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.94] - 2026-11-26
+### Exercices renommés (co-auteur : Claude)
+- « Développé militaire haltères » devient « Militaire haltères » : l'ancien nom était trop long et passait sur deux lignes dans Séance, l'éditeur et « Ajouter un exercice ». Historique, programmes et dernières charges suivent (depuis « Développé militaire » comme depuis le nom de la 1.8.93).
+
+### Tests (co-auteur : Claude)
+- `test_saisie_logique.py` lit le résultat de node quelle que soit sa version (il signalait un échec sur GitHub alors que les tests passaient).
+
+---
+
 ## [1.8.93] - 2026-11-26
 ### Exercices renommés (co-auteur : Claude)
 - « Mollets » devient « Mollets machine » : saisie rapide de la machine chargée de disques (disques de chaque côté, poids à vide gardé). Fiche : debout sous les épaulières de la machine.

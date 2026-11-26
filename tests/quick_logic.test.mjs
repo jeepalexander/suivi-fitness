@@ -28,7 +28,7 @@ test('classement par matériel', () => {
   assert.equal(mode('Presse à cuisses'), 'platemachine');
   assert.equal(mode('Mollets assis'), 'platemachine');
   assert.equal(mode('Mollets machine'), 'platemachine');
-  assert.equal(mode('Développé militaire haltères'), 'dumbbell');
+  assert.equal(mode('Militaire haltères'), 'dumbbell');
   assert.equal(mode('Hip thrust haltères'), 'dumbbell');
   assert.equal(mode('Fentes'), 'dumbbell');
   assert.equal(mode('Montées sur banc'), 'dumbbell');
@@ -58,7 +58,7 @@ test('× 2 ou × 1', () => {
   assert.equal(Q.plateMachineSides('Hack squat'), 2);
   assert.equal(Q.plateMachineSides('Mollets assis'), 1);
   assert.equal(Q.plateMachineSides('Mollets machine'), 2);
-  assert.equal(Q.weightMultiplierFor('Développé militaire haltères'), 2);
+  assert.equal(Q.weightMultiplierFor('Militaire haltères'), 2);
   assert.equal(Q.toSetWeightValue(12, 2), 24);
   assert.equal(Q.fromSetWeightValue(24, 2), 12);
   assert.equal(Q.fromSetWeightValue('14', 1), 14);

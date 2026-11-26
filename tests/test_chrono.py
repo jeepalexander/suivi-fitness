@@ -44,7 +44,7 @@ with Srv() as base, sync_playwright() as p:
 
     # durées attendues (écrites en dur, indépendantes du code)
     # (catalogue 1.7.0 : polyarticulaire lourd 3:00, polyarticulaire 2:00, isolation 1:30)
-    attendu = {'Presse à cuisses': 'PAUSE 2:00', 'Développé couché': 'PAUSE 3:00', 'Développé militaire haltères': 'PAUSE 3:00',
+    attendu = {'Presse à cuisses': 'PAUSE 2:00', 'Développé couché': 'PAUSE 3:00', 'Militaire haltères': 'PAUSE 3:00',
                'Tirage horizontal': 'PAUSE 2:00', 'Curl biceps': 'PAUSE 1:30', 'Mollets machine': 'PAUSE 1:30'}
     vus = {}
     for n in names:
