@@ -974,6 +974,7 @@ function openFinishDialog(entry, previous, records) {
       html += `<p class="finish-compare${d > 0 ? ' up' : ''}">${d > 0 ? '+' : d < 0 ? '−' : '±'}${kg(Math.abs(d))} / précédente</p>`;
     }
   }
+  if (records.length && typeof bonhommeNoteRecord === 'function') bonhommeNoteRecord(); // 1.8.97 : le bonhomme fête le record aujourd'hui
   if (records.length) {
     html += `<div class="finish-sep" aria-hidden="true"></div>
       <p class="finish-rec-title"><span>Nouveau record</span>${TROPHY_SVG}</p>

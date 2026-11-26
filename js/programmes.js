@@ -172,7 +172,7 @@ function renderProgramOverview() {
   const others = programs.filter(p => p !== active);
   // Les tuiles sont alignées vers le bas de l'écran, au-dessus de la barre de navigation (maquette)
   let html = programGreetingHtml(active) + '<div class="prog-spacer" aria-hidden="true"></div>';
-  html += bilanPostitHtml(); // 1.7.50 : post-it du bilan du mois, du 1er au 10
+  html += typeof bonhommeZoneHtml === 'function' ? bonhommeZoneHtml(bilanPostitHtml()) : bilanPostitHtml(); // 1.7.50 : post-it du bilan du mois, du 1er au 10 ; 1.8.97 : zone du petit bonhomme autour
   if (active) {
     html += `<div class="prog-status"><span class="prog-dot-slot"><span class="prog-dot on"></span></span>${isLibre(active) ? 'Séance libre active' : 'Programme actif'}</div>`; // 1.7.75 : « Programme actif » ou « Séance libre active »
     html += activeTileHtml(active);
@@ -193,6 +193,7 @@ function renderProgramOverview() {
   html += `<p class="prog-hint"><span class="prog-hint-ico">${INFO_SVG}</span>Astuce : Reste appuyé sur un programme pour entrer en mode édition</p>`; // 1.7.21 : (i) + « Astuce : »
   container.innerHTML = html;
   bindLongPress(container);
+  if (typeof bonhommeAttach === 'function') bonhommeAttach(); // 1.8.97 : petit bonhomme pixel
   if (!tileTimerInterval && document.querySelector('.prog-tile .btn-start.running')) tileTimerInterval = setInterval(tickTileTimer, 1000);
 }
 

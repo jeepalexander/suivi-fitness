@@ -228,6 +228,14 @@
         <svg class="wallpaper-row-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
       </button>
     </div>
+    <div class="card bonhomme-card">
+      <div class="card-title">Petit bonhomme</div>
+      <div class="filter-group seg-group" id="bonhomme-choice" role="radiogroup" aria-label="Petit bonhomme sur l'accueil">
+        <button type="button" class="filter-btn" role="radio" data-bh-choice="on" onclick="setBonhommePreference('on')">Affiché</button>
+        <button type="button" class="filter-btn" role="radio" data-bh-choice="off" onclick="setBonhommePreference('off')">Masqué</button>
+      </div>
+      <p class="theme-hint">Un petit sportif en pixels s'entraîne au-dessus de ton programme. Il ne s'affiche pas si ton téléphone demande moins d'animations.</p>
+    </div>
     <div class="card" id="drive-card">
       <div class="card-title">Sauvegarde Google Drive</div>
       <div class="update-row drive-actions">
@@ -304,6 +312,7 @@
   <script src="js/sauvegarde.js"></script>
   <script src="js/mises-a-jour.js"></script>
   <script src="js/programmes.js"></script>
+  <script src="js/bonhomme.js"></script>
   <script src="js/bilan.js"></script>
   <script src="js/partage.js"></script>
   <script src="js/aide.js"></script>

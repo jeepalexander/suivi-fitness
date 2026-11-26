@@ -54,6 +54,7 @@ FICHIERS = [
     ('js/graphiques.js', ['progression']),
     ('js/analyse.js', ['test_bilan.py', 'test_trophees.py']),
     ('js/programmes.js', ['programmes']),
+    ('js/bonhomme.js', ['test_bonhomme.py', 'test_programmes.py']),
     ('js/partage.js', ['test_partage.py', 'test_scanner_jsqr.py', 'test_recu_seance.py']),
     ('js/bilan.js', ['test_bilan.py', 'test_trophees.py']),
     ('js/catalogue.js', ['seance', 'test_aide.py', 'test_programmes.py']),
