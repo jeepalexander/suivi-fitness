@@ -8,6 +8,19 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.95] - 2026-11-26
+### Navigation : la séance se range sous Programmes (co-auteur : Claude)
+- Menu du bas : Programmes · Progression · Historique · Réglages. L'onglet Séance disparaît, Réglages arrive en dernier ; la roue dentée en haut des écrans et le « Retour » des Réglages sont retirés. La pastille « mise à jour disponible » passe sur l'onglet Réglages.
+- La séance s'ouvre depuis la tuile du programme (« C'est parti »), et son chrono démarre tout de suite. Une flèche retour ronde, à la place de l'icône du programme, ramène à l'accueil ; la séance continue (chrono qui tourne) et Programmes reste allumé.
+- Pendant une séance, le bouton vert de la tuile affiche la durée et une flèche (« 12:34 → ») et ramène dans la séance.
+- Modifier une ancienne séance depuis l'Historique : Historique reste allumé et la flèche y ramène.
+- Mise en mémoire : une boîte d'archive remplace l'icône de pause (sur le bouton de la tuile et devant « En mémoire »), qui faisait croire qu'on arrêtait le chrono.
+
+### Tests (co-auteur : Claude)
+- Nouveau `test_navigation.py` (52 contrôles, 390 et 360 px, clair et sombre) ; tests des Réglages, des mises à jour, du brouillon, du fond d'écran, des couleurs inversées, du plein écran et des titres de Séance adaptés. Suite complète : tous les tests réussis.
+
+---
+
 ## [1.8.94] - 2026-11-26
 ### Exercices renommés (co-auteur : Claude)
 - « Développé militaire haltères » devient « Militaire haltères » : l'ancien nom était trop long et passait sur deux lignes dans Séance, l'éditeur et « Ajouter un exercice ». Historique, programmes et dernières charges suivent (depuis « Développé militaire » comme depuis le nom de la 1.8.93).
