@@ -86,6 +86,7 @@ Un test seul : `python3 tests/test_validation.py` ou `python3 tests/run_tests.py
 | `test_fond_defaut.py` | 19 | Fond « Râtelier » par défaut pour un nouvel usager, usagers existants inchangés, « Aucun » retenu (1.8.29) ; premier lancement : texte en bas sans défilement, couleur du titre, icône + dans le texte, petite flèche vers le bouton + (1.8.33) |
 | `test_soutien.py` | 35 | Réglages › « Soutenir l'app » : place, lien Buy Me a Coffee, allure du bouton, sans script tiers ni débordement (clair, sombre, 390 et 360 px) ; conditions : article « Propriété » (1.8.31) |
 | `test_decoupage.py` | 8 | Découpage du code en fichiers (1.8.90) : chaque script de index.html est dans le cache hors ligne de sw.js, aucun nom global défini dans deux fichiers, ouverture sans erreur JavaScript en clair et en sombre, chaque fonction appelée par un bouton existe. Lancé d'office dès que le code change |
+| `test_saisie_logique.py` | 9 | Saisie rapide, partie calcul (1.8.92) : lance `quick_logic.test.mjs` avec `node --test` (classement par matériel, × 2 / × 1, bornes, barre, barre courte, machine à disques, râtelier et couleurs des haltères, cardio, mémoire par exercice) ; les listes ne nomment que des exercices du catalogue |
 | `test_credits.py` | 26 | Page « Crédits des images » : mêmes fonds que l'app et même ordre, une source par image, vignettes, sans débordement (clair, sombre, 390 et 360 px) ; liens depuis conditions et confidentialité ; NOTICE complet (1.8.70) |
 
 ## Quand les lancer

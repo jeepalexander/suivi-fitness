@@ -19,6 +19,7 @@ const ASSETS = [
   './js/theme.js',
   './js/chronos.js',
   './js/seance.js',
+  './js/quick_logic.js',
   './js/historique.js',
   './js/graphiques.js',
   './js/analyse.js',
