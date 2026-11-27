@@ -109,6 +109,19 @@ with Srv() as url, sync_playwright() as p:
         e = pg.evaluate(f"(()=>{{const e={base};const p=previousSameSession(e);return {{prev:p&&p.id,recs:sessionRecords(e)}}}})()")
         ok(tag + "précédente = dernière séance A du même programme (pas la B)", e['prev'] == -2, e)
         ok(tag + "records : charge (72,5 kg) et allure du rameur (2:05 /500 m, 1.7.89)", e['recs'] == [{'name': 'Développé couché', 'value': '72,5 kg'}, {'name': 'Rameur', 'value': '2:05 /500 m'}], e['recs'])
+        # 1.8.110 : record battu dans un nouveau programme (1re séance), au poids du corps, et séries non faites ignorées
+        r2 = pg.evaluate("""(()=>{const keep=state.history;state.history=[
+            {id:-5,date:'2026-10-01',type:'A',kind:'program',programId:'p0',sessionKey:'A',exercises:[
+              {name:'Développé couché',sets:[{weight:80,reps:5}]},{name:'Tractions',sets:[{weight:70,reps:8,lest:0}]},{name:'Dips',sets:[{weight:75,reps:6,lest:5}]}]}];
+          const e={id:9,date:'2026-11-20',type:'A',kind:'program',programId:'pNEW',sessionKey:'A',exercises:[
+              {name:'Développé couché',sets:[{weight:82.5,reps:3}]},{name:'Tractions',sets:[{weight:70,reps:10,lest:0}]},{name:'Dips',sets:[{weight:75,reps:8,lest:5}]}]};
+          const a=sessionRecords(e);
+          state.history=[{id:-6,date:'2026-10-01',exercises:[{name:'Développé couché',sets:[{weight:90,reps:0}]},{name:'Tractions',sets:[{weight:70,reps:12,lest:0}]}]}];
+          const b=sessionRecords(e); state.history=keep; return {a,b};})()""")
+        ok(tag + "1re séance d'un nouveau programme : records comparés à tout l'historique, poids du corps compris (1.8.110)",
+           r2['a'] == [{'name': 'Développé couché', 'value': '82,5 kg'}, {'name': 'Tractions', 'value': '10 rép.'}, {'name': 'Dips', 'value': '8 rép.'}], r2['a'])
+        ok(tag + "série non faite (0 rép.) ignorée ; pas de record au poids du corps sous l'ancien meilleur (1.8.110)",
+           r2['b'] == [{'name': 'Développé couché', 'value': '82,5 kg'}], r2['b'])
         pg.evaluate(f"(()=>{{const e={base};openFinishDialog(e,previousSameSession(e),sessionRecords(e))}})()")
         txt = pg.inner_text(ov).replace(' ', ' ').replace('\xa0', ' ')
         ok(tag + "hausse : « +300 kg / précédente » en vert", pg.inner_text('.finish-compare').replace(' ', ' ').replace('\xa0', ' ') == '+300 kg / précédente'

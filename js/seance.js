@@ -940,20 +940,38 @@ function previousSameSession(entry) {
 }
 
 // Records battus par cette séance : charge maximale (exercices à charge) ou durée maximale (cardio, gainage),
-// comparées à toutes les séances précédentes. Un exercice jamais fait auparavant ne compte pas.
+// comparées à toutes les séances précédentes, tous programmes confondus. Un exercice jamais fait auparavant ne compte pas.
+// 1.8.110 (co-auteur : Claude) : mêmes règles que les graphiques et le bilan du mois : exercice reconnu par son nom
+// canonique (sameExercise), séries réellement faites seulement, et record au poids du corps (plus de lest, ou plus de
+// répétitions au même lest), qui n'apparaissait jamais dans la fenêtre de fin de séance.
 function sessionRecords(entry) {
   const others = (state.history || []).filter(h => h.id !== entry.id);
+  const performed = sets => (sets || []).filter(st => isPerformedSet(st) || isPerformedCardioSet(st));
+  const betterBw = (x, y) => !y || x.lest > y.lest || (x.lest === y.lest && x.reps > y.reps);
   const out = [];
   mergeExercises(entry.exercises).forEach(ex => {
+    const same = x => x && (sameExercise(x.name, ex.name) || (ex.exId && x.exId === ex.exId));
+    if (exMode(ex.name) === 'bw' && !ex.cardio) {
+      const cur = bestBodyweightSet(performed(ex.sets));
+      if (!cur) return;
+      let prev = null;
+      others.forEach(h => (h.exercises || []).forEach(x => {
+        if (!same(x)) return;
+        const p = bestBodyweightSet(performed(x.sets));
+        if (p && betterBw(p, prev)) prev = p;
+      }));
+      if (prev && betterBw(cur, prev)) out.push({ name: ex.name, value: cur.lest > prev.lest ? lestText(cur.lest) : repsText(cur.reps) });
+      return;
+    }
     const rule = recordRule(ex.name, ex.cardio);   // 1.7.89 : allure ou vitesse pour le cardio, pas la durée
     if (!rule) return;
-    const cur = recordBest(rule, ex.sets);
+    const cur = recordBest(rule, performed(ex.sets));
     if (!cur) return;
     let prevSets = [], seen = false;
     others.forEach(h => (h.exercises || []).forEach(x => {
-      if (x.name !== ex.name && !(ex.exId && x.exId === ex.exId)) return;
+      if (!same(x)) return;
       seen = true;
-      prevSets = prevSets.concat(x.sets || []);
+      prevSets = prevSets.concat(performed(x.sets));
     }));
     const prev = recordBest(rule, prevSets);
     if (seen && recordBeats(rule, cur, prev)) out.push({ name: ex.name, value: rule.kind === 'weight' ? `${cur.toLocaleString('fr-FR')} kg` : recordTexts(ex.name, rule, cur, prev).value });

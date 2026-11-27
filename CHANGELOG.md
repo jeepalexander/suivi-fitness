@@ -8,6 +8,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.110] - 2026-11-27
+### Séance (co-auteur : Claude)
+- Fenêtre de fin de séance : un record battu s'affiche désormais aussi lors de la première séance d'un nouveau programme et pour les exercices au poids du corps (tractions, dips…). Les records sont comparés à tout l'historique, avec les mêmes règles que les graphiques et le bilan du mois (nom d'exercice reconnu même renommé, séries réellement faites seulement).
+
+---
+
 ## [1.8.109] - 2026-11-27
 ### Séance (co-auteur : Claude)
 - En saisie manuelle, la touche « → » (Entrée) du clavier du téléphone n'enregistre plus la séance : elle ouvrait la fenêtre « Séries non cochées » comme le bouton « Valider & Enregistrer la séance ». Elle passe maintenant de Kg à Réps, puis ferme le clavier (`js/seance.js`). Nouveau test `test_entree_clavier.py`.
