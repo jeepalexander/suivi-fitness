@@ -308,12 +308,18 @@ function bhResize() {
   if (W === B.W && B.rc.width === Math.ceil(W / 2)) return;
   B.W = W; B.rc.width = Math.ceil(W / 2); B.rc.style.width = (B.rc.width * 2) + 'px';
 }
-// La piste est posée dans l'onglet (bord à bord), calée sur le bas de la zone
+// La piste est posée dans l'onglet (bord à bord), calée sur le bas de la zone.
+// 1.8.101 : hauteur calculée avec les positions de mise en page (offsetTop), et non les positions à l'écran
+// (getBoundingClientRect), que le zoom de l'interface (110 %) faussait sur certains Chrome : le bonhomme marchait
+// ≈ 20 px trop bas, sur « Programme actif ».
 function bhPlaceLane() {
   const B = bonhomme, host = B.lane && B.lane.parentNode;
   if (!host || !B.zone) return;
+  let y = 0, el = B.zone;
+  while (el && el !== host) { y += el.offsetTop; el = el.offsetParent; }
+  if (el !== host) return;
   const pad = parseFloat(getComputedStyle(B.zone).paddingBottom) || 0;
-  const top = Math.round(B.zone.getBoundingClientRect().bottom - pad - host.getBoundingClientRect().top - 64);
+  const top = Math.round(y + B.zone.offsetHeight - pad - 64);
   if (B.lane.style.top !== top + 'px') B.lane.style.top = top + 'px';
 }
 function bhPlace() {

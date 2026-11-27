@@ -36,6 +36,11 @@ with Srv() as url, sync_playwright() as p:
         b.ok(tag + 'dessiné à la couleur du texte', pg.evaluate(ENCRE)['ink'] > 30, pg.evaluate(ENCRE))
         b.ok(tag + 'sans débordement ni erreur', not debordements(pg) and not errs, (debordements(pg), errs))
         pg.screenshot(path=f'{OUT}/{w}_{theme}_accueil.png')
+        # 1.8.101 : interface agrandie (zoom 110 %, comme sur un téléphone de 412 px) : la piste reste au-dessus du titre
+        pg.evaluate("document.documentElement.style.setProperty('--ui-zoom','1.1'); renderProgramOverview()"); pg.wait_for_timeout(600)
+        b.ok(tag + 'zoom 110 % : la piste reste au-dessus de « Programme actif » (1.8.101)',
+             pg.evaluate("(()=>{const l=document.querySelector('.bh-lane').getBoundingClientRect(),s=document.querySelector('.prog-status').getBoundingClientRect();return l.bottom<=s.top+1&&s.top-l.bottom<30})()"))
+        pg.evaluate("document.documentElement.style.removeProperty('--ui-zoom'); renderProgramOverview()"); pg.wait_for_timeout(300)
         # 1.8.100 : écran « Ajouter » (bouton +) : plus de bonhomme figé par-dessus les cartes, puis il revient sur l'accueil
         pg.evaluate("openProgramChooser()"); pg.wait_for_timeout(300)
         b.ok(tag + 'caché sur « Ajouter » dès l\'ouverture (1.8.100)', pg.evaluate(CACHE))

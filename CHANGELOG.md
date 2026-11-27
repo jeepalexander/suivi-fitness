@@ -8,6 +8,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.101] - 2026-11-27
+### Programmes (co-auteur : Claude)
+- **Petit bonhomme trop bas** : sur téléphone, avec l'interface agrandie (zoom 110 %), il marchait ≈ 20 px trop bas, sur « Programme actif » / « Aucun programme actif ». Sa piste est maintenant placée d'après la mise en page (positions non agrandies), et non d'après les positions à l'écran, que le zoom faussait.
+- Tests : `test_bonhomme.py` force le zoom à 110 % et vérifie que la piste reste au-dessus du titre (l'ancien code la mettait 29 px dedans).
+
+---
+
 ## [1.8.100] - 2026-11-27
 ### Programmes (co-auteur : Claude)
 - **Petit bonhomme figé** : quand il devait se cacher (écran « Ajouter » du bouton +, éditeur, « Avec notre aide », autres onglets, app en arrière-plan), seule sa piste se cachait ; le dessin, forcé « visible », restait affiché, immobile, par-dessus les cartes ou sur « Aucun programme actif ». Il se cache maintenant avec sa piste, et part tout de suite quand on quitte l'accueil.
