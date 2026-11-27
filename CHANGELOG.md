@@ -8,6 +8,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.106] - 2026-11-27
+### Séance (co-auteur : Claude)
+- Saisie rapide : les disques posés à la main sont retrouvés tels quels à la réouverture du volet (10 + 5 + 5 ne redevient plus un disque de 20). L'app retient, pour chaque exercice, les dernières compositions validées par « Remplir la série » ; si la charge du champ correspond à l'une d'elles (même barre ou même poids à vide), elle est reposée, sinon le calcul habituel s'applique. Vaut aussi pour les séries suivantes et après rechargement.
+
+---
+
 ## [1.8.105] - 2026-11-27
 ### Séance (co-auteur : Claude)
 - **Cardio, série validée : la cadence prend la place du chrono** dans la pastille sous la ligne (Allure pour le rameur, le ski et le tapis, Vitesse pour les vélos, Rythme pour le stair climber), chiffre en grand et unité en petit. Décocher la série fait revenir le chrono.

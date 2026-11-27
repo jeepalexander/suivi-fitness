@@ -147,3 +147,26 @@ test('mémoire par exercice : barre et machine à vide', () => {
   m.setItem(Q.BAR_KEY, 'pas du json');
   assert.equal(Q.barWeightFor(m, 'Squat'), 20);
 });
+
+test('mémoire des disques posés : 10 + 5 + 5 ne redevient pas 20 (1.8.105)', () => {
+  const m = memoire();
+  assert.equal(Q.platesFor(m, 'Squat', 60, 20), null);
+  Q.rememberPlates(m, 'Squat', [10, 5, 5]);
+  assert.deepEqual(Q.platesFor(m, 'Squat', 60, 20), [10, 5, 5]);
+  assert.deepEqual(Q.platesFor(m, 'Squat', '60', 20), [10, 5, 5]);
+  assert.equal(Q.platesFor(m, 'Squat', 70, 20), null);            // autre charge : calcul habituel
+  assert.equal(Q.platesFor(m, 'Squat', 60, 15), null);            // autre barre : ne tombe plus juste
+  assert.equal(Q.platesFor(m, 'Soulevé de terre', 60, 20), null); // propre à chaque exercice
+  Q.rememberPlates(m, 'Squat', [20]);
+  assert.deepEqual(Q.platesFor(m, 'Squat', 60, 20), [20]);        // la plus récente gagne
+  Q.rememberPlates(m, 'Squat', [5, 10, 5]);
+  assert.deepEqual(Q.platesFor(m, 'Squat', 60, 20), [5, 10, 5]);
+  assert.equal(JSON.parse(m.getItem(Q.PLATES_KEY)).Squat.length, 2); // même composition : pas de doublon
+  for (let i = 1; i <= 10; i++) Q.rememberPlates(m, 'Squat', [i]);
+  assert.equal(JSON.parse(m.getItem(Q.PLATES_KEY)).Squat.length, 6);
+  assert.deepEqual(Q.platesFor(m, 'Presse', 90, 40, 1), null);
+  Q.rememberPlates(m, 'Presse', [25, 25]);
+  assert.deepEqual(Q.platesFor(m, 'Presse', 90, 40, 1), [25, 25]);
+  m.setItem(Q.PLATES_KEY, 'pas du json');
+  assert.equal(Q.platesFor(m, 'Squat', 60, 20), null);
+});

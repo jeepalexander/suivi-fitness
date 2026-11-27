@@ -184,7 +184,8 @@ const QuickInput = (() => {
       st.sides = mode === 'platemachine' ? Q.plateMachineSides(exName) : 2;
       if (mode === 'platemachine') { st.empty = Q.machineEmptyFor(localStorage, exName); st.base = st.empty || 0; }
       else { st.bar = Q.barWeightFor(localStorage, exName); st.base = Q.baseWeightFor(localStorage, exName, mode); }
-      const d = w > 0 ? Q.computeBarbellLoad(w, st.base, Q.rackFor(mode), st.sides) : { plates: [], rest: 0 };
+      const kept = Q.platesFor(localStorage, exName, w, st.base, st.sides);   // disques posés la dernière fois
+      const d = kept ? { plates: kept, rest: 0 } : w > 0 ? Q.computeBarbellLoad(w, st.base, Q.rackFor(mode), st.sides) : { plates: [], rest: 0 };
       st.plates = d.plates;
       st.override = w > 0 && (d.belowBar || Math.abs(d.rest) > 0.001) ? w : null;
     } else if (mode === 'dumbbell') {
@@ -270,7 +271,10 @@ const QuickInput = (() => {
     const { row, mode } = st;
     const wIn = row.querySelector('.weight-input'), rIn = row.querySelector('.reps-input');
     let w = null;
-    if (mode === 'barbell' || mode === 'shortbar' || mode === 'platemachine') w = String(loadTotal());
+    if (mode === 'barbell' || mode === 'shortbar' || mode === 'platemachine') {
+      w = String(loadTotal());
+      if (st.override == null) Q.rememberPlates(localStorage, st.exName, st.plates);
+    }
     else if (mode === 'dumbbell') w = String(st.unit);
     else if (mode === 'machine') w = String(st.weight);
     else if (mode === 'bw') w = st.lest === 0 ? '' : (st.lest > 0 ? '+' : '-') + Math.abs(st.lest);

@@ -177,6 +177,28 @@ const QuickLogic = (() => {
     if (n == null || n < 0) delete all[name]; else all[name] = round2(Math.min(n, LIMITS.weight[1]));
     write(store, EMPTY_KEY, all);
   }
+  // Disques posés à la main (1.8.105) : 10 + 5 + 5 doit revenir en 10 + 5 + 5, pas en 20.
+  // Par exercice, les dernières compositions (la plus récente d'abord, dans l'ordre d'ajout) ;
+  // à la réouverture, la première qui redonne la charge du champ est reprise.
+  const PLATES_KEY = 'h49_plates', PLATES_KEPT = 6;
+  const samePlates = (a, b) => a.length === b.length && sortedPlates(a).every((p, i) => p === sortedPlates(b)[i]);
+  function platesFor(store, name, total, base, sides = 2) {
+    const t = parseQuickNum(total);
+    if (!(t > 0)) return null;
+    const list = read(store, PLATES_KEY)[name];
+    if (!Array.isArray(list)) return null;
+    const hit = list.find(p => Array.isArray(p) && p.length && p.length <= MAX_PLATES && p.every(x => typeof x === 'number' && x > 0)
+      && Math.abs(totalFromBarPlates(base, p, sides) - t) < 0.001);
+    return hit ? hit.slice() : null;
+  }
+  function rememberPlates(store, name, plates) {
+    if (!Array.isArray(plates) || !plates.length) return;
+    const all = read(store, PLATES_KEY);
+    const list = (Array.isArray(all[name]) ? all[name] : []).filter(p => Array.isArray(p) && !samePlates(p, plates));
+    all[name] = [plates.slice(), ...list].slice(0, PLATES_KEPT);
+    write(store, PLATES_KEY, all);
+  }
+
   // Poids de base sous les disques : barre olympique, barre courte ou machine à vide
   function baseWeightFor(store, name, mode) {
     if (mode === 'shortbar') return shortBar(barWeightFor(store, name)).kg;
@@ -193,6 +215,7 @@ const QuickLogic = (() => {
     DUMBBELL_MAX_KG, computeDumbbellRackStart, shiftDumbbellRackStart, buildDumbbellRack, dumbbellTierFor, dumbbellColorFor,
     toSetWeightValue, fromSetWeightValue, DURATION_STEPS, cardioDistanceProfile,
     BAR_KEY, EMPTY_KEY, barWeightFor, rememberBarWeight, machineEmptyFor, rememberMachineEmpty, baseWeightFor,
+    PLATES_KEY, platesFor, rememberPlates,
   };
 })();
 if (typeof module !== 'undefined' && module.exports) module.exports = QuickLogic;
