@@ -8,6 +8,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.100] - 2026-11-27
+### Programmes (co-auteur : Claude)
+- **Petit bonhomme figé** : quand il devait se cacher (écran « Ajouter » du bouton +, éditeur, « Avec notre aide », autres onglets, app en arrière-plan), seule sa piste se cachait ; le dessin, forcé « visible », restait affiché, immobile, par-dessus les cartes ou sur « Aucun programme actif ». Il se cache maintenant avec sa piste, et part tout de suite quand on quitte l'accueil.
+- Tests : `test_bonhomme.py` vérifie désormais que le dessin lui-même est caché (Ajouter, Progression, séance, Réglages), et qu'au retour sur l'accueil la piste reprend sa place au-dessus du titre.
+
+---
+
 ## [1.8.99] - 2026-11-26
 ### Programmes (co-auteur : Claude)
 - **« En mémoire » repliable** : sur Programmes, la liste des programmes en mémoire est repliée à chaque ouverture de l'app, pour aérer l'écran. Une flèche vers le bas en bout de ligne la déplie (flèche vers le haut une fois ouverte) ; toute la ligne est le bouton.

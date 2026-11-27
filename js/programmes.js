@@ -154,20 +154,23 @@ function programTilesHtml(exercises) {
   }).join('');
 }
 
+// 1.8.100 : en quittant l'accueil (Ajouter, éditeur, « Avec notre aide »), la piste du bonhomme part tout de suite
+function bonhommeLeave() { if (typeof bonhommeAttach === 'function') bonhommeAttach(); }
+
 function renderProgramOverview() {
   const container = document.getElementById('program-overview');
   if (!container || !state) return;
   document.body.dataset.pview = programView;
   updateProgramHeader();
-  if (programView === 'choose') { container.innerHTML = chooserHtml(); return; }
-  if (programView === 'editor' && programDraft) { container.innerHTML = editorHtml(); bindEditor(); return; }
-  if (programView === 'aide' && typeof aideHtml === 'function') { container.innerHTML = aideHtml(); return; } // 1.8.78 : questionnaire « Avec notre aide »
+  if (programView === 'choose') { container.innerHTML = chooserHtml(); bonhommeLeave(); return; }
+  if (programView === 'editor' && programDraft) { container.innerHTML = editorHtml(); bindEditor(); bonhommeLeave(); return; }
+  if (programView === 'aide' && typeof aideHtml === 'function') { container.innerHTML = aideHtml(); bonhommeLeave(); return; } // 1.8.78 : questionnaire « Avec notre aide »
   programView = 'home';
   document.body.dataset.pview = 'home';
   updateProgramHeader();
 
   const programs = getPrograms();
-  if (!programs.length) { container.innerHTML = emptyProgramsHtml(); return; }
+  if (!programs.length) { container.innerHTML = emptyProgramsHtml(); bonhommeLeave(); return; }
 
   const active = getActiveProgram();
   const others = programs.filter(p => p !== active);

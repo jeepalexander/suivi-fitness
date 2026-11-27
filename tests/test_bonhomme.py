@@ -15,6 +15,8 @@ ENCRE = """(()=>{const c=document.querySelector('.bh-man');const d=c.getContext(
 const cnt={};for(let i=0;i<d.length;i+=4){if(d[i+3]<255)continue;const k=d[i]+','+d[i+1]+','+d[i+2];cnt[k]=(cnt[k]||0)+1}
 const t=getComputedStyle(document.documentElement).getPropertyValue('--text').trim();const x=document.createElement('canvas').getContext('2d');x.fillStyle=t;x.fillRect(0,0,1,1);
 const v=x.getImageData(0,0,1,1).data;return {ink:(cnt[v[0]+','+v[1]+','+v[2]]||0)}})()"""
+# 1.8.100 : caché = ni la piste ni le dessin du bonhomme à l'écran (le dessin forçait sa visibilité et restait figé)
+CACHE = "(()=>{const l=document.querySelector('.bh-lane'),m=document.querySelector('.bh-man');if(!l||!l.isConnected||getComputedStyle(l).display==='none')return true;return getComputedStyle(m).visibility!=='visible'})()"
 POSTIT = ("bilanPostitHtml=()=>'<div class=\"bilan-postit-row\"><button type=\"button\" class=\"bilan-postit\">"
           "<span class=\"bilan-postit-text\">Ton bilan<br>du mois<br>d\\'octobre</span></button></div>';renderProgramOverview()")
 
@@ -34,11 +36,19 @@ with Srv() as url, sync_playwright() as p:
         b.ok(tag + 'dessiné à la couleur du texte', pg.evaluate(ENCRE)['ink'] > 30, pg.evaluate(ENCRE))
         b.ok(tag + 'sans débordement ni erreur', not debordements(pg) and not errs, (debordements(pg), errs))
         pg.screenshot(path=f'{OUT}/{w}_{theme}_accueil.png')
+        # 1.8.100 : écran « Ajouter » (bouton +) : plus de bonhomme figé par-dessus les cartes, puis il revient sur l'accueil
+        pg.evaluate("openProgramChooser()"); pg.wait_for_timeout(300)
+        b.ok(tag + 'caché sur « Ajouter » dès l\'ouverture (1.8.100)', pg.evaluate(CACHE))
+        pg.wait_for_timeout(1300)
+        b.ok(tag + 'toujours caché sur « Ajouter » (1.8.100)', pg.evaluate(CACHE))
+        pg.evaluate("setProgramView('home')"); pg.wait_for_timeout(2600)
+        b.ok(tag + 'de retour sur l\'accueil, la piste reprend sa place au-dessus de « Programme actif » (1.8.100)', pg.evaluate(VISIBLE)
+             and pg.evaluate("(()=>{const l=document.querySelector('.bh-lane').getBoundingClientRect(),s=document.querySelector('.prog-status').getBoundingClientRect();return l.bottom<=s.top+1})()"))
         # Autres écrans : caché
         ouvrir(pg, 'progression', 1300)
-        b.ok(tag + 'caché sur Progression', not pg.evaluate(VISIBLE))
+        b.ok(tag + 'caché sur Progression', pg.evaluate(CACHE))
         ouvrir(pg, 'seance', 1300)
-        b.ok(tag + 'caché pendant la séance', not pg.evaluate(VISIBLE))
+        b.ok(tag + 'caché pendant la séance', pg.evaluate(CACHE))
         ouvrir(pg, 'programmes', 1300)
         b.ok(tag + 'revient sur l\'accueil', pg.evaluate(VISIBLE))
         # Réglages : Affiché / Masqué
@@ -50,13 +60,13 @@ with Srv() as url, sync_playwright() as p:
         pg.click('#bonhomme-choice [data-bh-choice="off"]'); pg.wait_for_timeout(200)
         ouvrir(pg, 'programmes', 1300)
         b.ok(tag + 'Masqué : plus de bonhomme ni de zone réservée',
-             not pg.evaluate(VISIBLE) and pg.locator('.bh-zone.on').count() == 0 and pg.evaluate("localStorage.getItem('h49_bonhomme')") == 'off')
+             pg.evaluate(CACHE) and pg.locator('.bh-zone.on').count() == 0 and pg.evaluate("localStorage.getItem('h49_bonhomme')") == 'off')
         ouvrir(pg, 'reglages', 200); pg.click('#bonhomme-choice [data-bh-choice="on"]'); ouvrir(pg, 'programmes', 1300)
         b.ok(tag + 'Affiché : il revient', pg.evaluate(VISIBLE))
         # Moins d'animations : absent
         pg.emulate_media(reduced_motion='reduce'); pg.wait_for_timeout(1300)
         b.ok(tag + 'moins d\'animations : absent, sans zone réservée',
-             not pg.evaluate(VISIBLE) and pg.evaluate("document.querySelector('.bh-zone').getBoundingClientRect().height") < 66)
+             pg.evaluate(CACHE) and pg.evaluate("document.querySelector('.bh-zone').getBoundingClientRect().height") < 66)
         pg.emulate_media(reduced_motion='no-preference'); pg.wait_for_timeout(1300)
         b.ok(tag + 'animations rétablies : il revient', pg.evaluate(VISIBLE))
         ctx.close()

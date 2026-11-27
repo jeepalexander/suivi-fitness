@@ -321,7 +321,7 @@ function bhPlace() {
   bhPlaceLane();
   B.cv.style.left = Math.round(B.cx - 64) + 'px';
   B.cv.style.transform = B.dir < 0 ? 'scaleX(-1)' : 'none';
-  B.cv.style.visibility = B.hidden ? 'hidden' : 'visible';
+  B.cv.style.visibility = B.hidden ? 'hidden' : ''; // 1.8.100 : '' et non 'visible', sinon le bonhomme reste affiché, figé, quand la piste se cache (écran « Ajouter », autres onglets)
   bhDrawRopes();
 }
 function bhTick() {
