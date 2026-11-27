@@ -8,6 +8,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.109] - 2026-11-27
+### Séance (co-auteur : Claude)
+- En saisie manuelle, la touche « → » (Entrée) du clavier du téléphone n'enregistre plus la séance : elle ouvrait la fenêtre « Séries non cochées » comme le bouton « Valider & Enregistrer la séance ». Elle passe maintenant de Kg à Réps, puis ferme le clavier (`js/seance.js`). Nouveau test `test_entree_clavier.py`.
+
+---
+
 ## [1.8.108] - 2026-11-27
 ### Séance (co-auteur : Claude)
 - La coche de validation des séries redevient ronde. Depuis la 1.8.91 (passage de 52 à 56 px), son arrondi de 25 px en faisait un carré arrondi ; elle est maintenant en `border-radius: 50%`.

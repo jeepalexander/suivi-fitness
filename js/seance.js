@@ -1052,6 +1052,19 @@ async function trackHistorySave(id, run) {
   setHistorySaveMark(id, res === 'ok' ? 'done' : 'wait');
 }
 
+// Touche Entrée (« → » du clavier du téléphone) dans un champ de la séance : jamais d'envoi
+// du formulaire (1.8.109) ; elle passe au champ suivant de la série, sinon ferme le clavier.
+document.addEventListener('keydown', function(e) {
+  if (e.key !== 'Enter' || e.defaultPrevented) return;
+  const t = e.target;
+  if (!t || t.tagName !== 'INPUT' || !t.form || t.form.id !== 'workout-form') return;
+  e.preventDefault();
+  const row = t.closest('.set-row');
+  const fields = row ? Array.from(row.querySelectorAll('.set-input')) : [];
+  const next = fields[fields.indexOf(t) + 1];
+  if (next && !next.readOnly) next.focus(); else t.blur();
+});
+
 document.addEventListener('submit', function(e) {
   if (e.target && e.target.id === 'workout-form') submitWorkout(e);
 });
