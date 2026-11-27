@@ -8,6 +8,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.105] - 2026-11-27
+### Séance (co-auteur : Claude)
+- **Cardio, série validée : la cadence prend la place du chrono** dans la pastille sous la ligne (Allure pour le rameur, le ski et le tapis, Vitesse pour les vélos, Rythme pour le stair climber), chiffre en grand et unité en petit. Décocher la série fait revenir le chrono.
+- `test_chrono_cardio.py` passe à 30 contrôles (dont la cadence la plus longue, « 12,5 étages/min », sur un écran de 360 px).
+
+---
+
 ## [1.8.104] - 2026-11-27
 ### Séance (co-auteur : Claude)
 - **Chronomètre des cardios** (rameur, tapis, vélos, ski, stair climber) : la pastille sous la ligne de saisie porte un chrono à lancer au début de l'exercice. Petit cadran dont l'arc et l'aiguille font un tour par minute, temps en grand, icône ▶ pour lancer ou reprendre, ❚❚ pour la pause. Il continue écran éteint ou après un rechargement.

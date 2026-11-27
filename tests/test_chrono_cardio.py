@@ -43,6 +43,12 @@ with Srv() as base, sync_playwright() as p:
         pg.click(f'{it} .btn-check-set'); pg.wait_for_timeout(300)
         check(tag + 'validation : 1:45 reporté dans Durée', pg.input_value(dur) == '1:45', pg.input_value(dur))
         check(tag + 'validation : chrono effacé, retour à 0:00', pg.evaluate("localStorage.getItem('cardio_chrono')") is None and pg.inner_text(f'{btn} b') == '0:00')
+        # 1.8.105 : série validée, la cadence prend la place du chrono ; décochée, le chrono revient
+        pg.evaluate("manualOpenExercise=0;refreshExerciseStates()"); pg.wait_for_timeout(300)
+        check(tag + 'validée : cadence « Allure 0:53 /500 m » (1:45 pour 1 000 m) à la place du chrono', not pg.is_visible(btn) and pg.is_visible(f'{it} .cardio-cadence') and ' '.join(pg.inner_text(f'{it} .cardio-cadence').split()) == 'Allure 0:53 /500 m', pg.inner_text(f'{it} .cardio-cadence'))
+        pg.click(f'{it} .btn-check-set'); pg.wait_for_timeout(200)
+        check(tag + 'décochée : le chrono revient', pg.is_visible(btn) and not pg.is_visible(f'{it} .cardio-cadence'))
+        pg.click(f'{it} .btn-check-set'); pg.wait_for_timeout(200)
         # enregistrement : 105 s
         pg.evaluate("document.getElementById('workout-form').requestSubmit()"); pg.wait_for_timeout(400)
         if pg.is_visible('.finish-ok'): pg.click('.finish-ok')
@@ -53,6 +59,14 @@ with Srv() as base, sync_playwright() as p:
         pg.evaluate("switchTab('seance')"); pg.wait_for_timeout(400)
         pg.fill(dur, '4:10'); pg.click(f'{it} .btn-check-set'); pg.wait_for_timeout(200)
         check(tag + 'sans chrono : la durée saisie (4:10) est gardée', pg.input_value(dur) == '4:10')
+        # cadence la plus longue (stair climber, 12,5 étages/min) sur un écran de 360 px : rien ne déborde
+        pg.set_viewport_size({'width': 360, 'height': 800}); pg.wait_for_timeout(200)
+        over = pg.evaluate("""(()=>{const it=document.querySelector('#exercises-list .exercise-item');const d=document.createElement('div');
+          d.className='exercise-item open';d.dataset.ex='Stair climber';d.innerHTML='<div class="sets-grid">'+setRowHtml('Stair climber',1,'2:24','30',true)+'</div>';
+          it.parentElement.insertBefore(d,it);refreshCardioChrono();const p=d.querySelector('.cardio-pace'),c=d.querySelector('.cardio-cadence');
+          const r=[p.getBoundingClientRect(),c.getBoundingClientRect(),c.querySelector('b').getBoundingClientRect()];const t=c.innerText;d.remove();
+          return {t:t.replace(/\\s+/g,' '),ok:r[2].right<=r[0].right-5&&c.scrollWidth<=c.clientWidth+1}})()""")
+        check(tag + 'stair climber à 360 px : « Rythme 12,5 étages/min » tient dans la pastille', over['ok'] and over['t'] == 'Rythme 12,5 étages/min', over)
         check(tag + 'aucune erreur JavaScript', not errs, errs)
         ctx.close()
     br.close()

@@ -251,7 +251,7 @@ function cardioChronoKeyOf(el) {
   return `${items.indexOf(item)}|${Array.from(item.querySelectorAll('.set-row')).indexOf(row)}`;
 }
 function cardioChronoHtml() {
-  return `<button type="button" class="cardio-chrono" aria-label="Lancer le chronomètre" aria-pressed="false" onclick="toggleCardioChrono(this)"><i>${CHRONO_SVG}</i><b class="zero">0:00</b><span class="chrono-action">${CHRONO_PLAY_SVG}</span></button>`;
+  return `<button type="button" class="cardio-chrono" aria-label="Lancer le chronomètre" aria-pressed="false" onclick="toggleCardioChrono(this)"><i>${CHRONO_SVG}</i><b class="zero">0:00</b><span class="chrono-action">${CHRONO_PLAY_SVG}</span></button><div class="cardio-cadence"><span></span><b></b></div>`;
 }
 function toggleCardioChrono(btn) {
   const key = cardioChronoKeyOf(btn);
@@ -264,6 +264,16 @@ function toggleCardioChrono(btn) {
 // Remet chaque bouton à jour ; l'intervalle ne tourne que si un chrono est lancé
 function refreshCardioChrono() {
   const c = readCardioChrono();
+  // Série validée : la cadence (allure, vitesse ou rythme) prend la place du chrono (style.css : .set-row.done + .cardio-pace)
+  document.querySelectorAll('#exercises-list .cardio-cadence').forEach(el => {
+    const row = el.closest('.cardio-pace').previousElementSibling, ex = el.closest('.exercise-item');
+    const u = ex ? cardioUnit(ex.dataset.ex) : null;
+    el.closest('.cardio-pace').classList.toggle('no-cadence', !u);
+    if (!u || !row) return;
+    const v = u.value(parseDurationInput(row.querySelector('.weight-input').value), parseCardioAmount(ex.dataset.ex, row.querySelector('.reps-input').value));
+    el.querySelector('span').textContent = u.label;
+    el.querySelector('b').innerHTML = v > 0 ? `${escapeHtml(u.fmt(v))} <small>${escapeHtml(u.suffix)}</small>` : '–'; // chiffre en grand, unité en petit
+  });
   document.querySelectorAll('#exercises-list .cardio-chrono').forEach(btn => {
     const mine = c && cardioChronoKeyOf(btn) === c.key;
     const sec = mine ? cardioChronoSeconds(c) : 0, run = !!(mine && c.start);

@@ -710,7 +710,8 @@ function onCardioInput(el) {
   const row = el.closest('.set-row');
   const dEl = row.querySelector('.weight-input');
   if (el === dEl) dEl.value = formatDurationDigits(dEl.value);
-  // 1.8.103 : la pastille sous la ligne porte le chronomètre (js/chronos.js), plus l'allure
+  // 1.8.104 : la pastille sous la ligne porte le chronomètre, puis la cadence une fois la série validée (js/chronos.js)
+  refreshCardioChrono();
 }
 
 function isPerformedCardioSet(set) {
