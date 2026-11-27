@@ -62,6 +62,21 @@ with Srv() as url, sync_playwright() as p:
         leg = pg.inner_text('#exercise-legend')
         ok(tag + "légende visible : « Charge max 82 kg » et « 1RM estimé 101,5 kg »", pg.is_visible('#exercise-legend') and 'Charge max' in leg and '82 kg' in leg and '101,5 kg' in leg, leg)
         ok(tag + "phrase d'explication visible", pg.is_visible('#exercise-rm-note') and 'Epley' in pg.inner_text('#exercise-rm-note'))
+        # 1.8.111 : courbe limitée au programme choisi, records calculés sur tout l'historique
+        r = pg.evaluate("""(()=>{const keep=state.history, keepScope=statsScope;
+          state.history=[
+            {id:'a1',date:'2026-09-01',type:'A',programId:'pOLD',exercises:[{name:'Développé couché',sets:[{weight:90,reps:5}]}]},
+            {id:'n1',date:'2026-11-01',type:'A',programId:'pNEW',exercises:[{name:'Développé couché',sets:[{weight:80,reps:5}]}]},
+            {id:'n2',date:'2026-11-08',type:'A',programId:'pNEW',exercises:[{name:'Développé couché',sets:[{weight:85,reps:5}]}]}];
+          statsScope='pNEW'; renderExerciseChart();
+          const a={data:exerciseChart.data.datasets[0].data, idx:exerciseChart.recordIdx.max, leg:document.getElementById('exercise-legend-max').textContent};
+          state.history[2].exercises[0].sets[0].weight=92.5; renderExerciseChart();
+          const b={data:exerciseChart.data.datasets[0].data, idx:exerciseChart.recordIdx.max, leg:document.getElementById('exercise-legend-max').textContent};
+          state.history=keep; statsScope=keepScope; renderExerciseChart(); return {a,b};})()""")
+        ok(tag + "programme choisi : seulement ses séances ; record de 90 kg d'un autre programme : pas de coupe (1.8.111)",
+           r['a']['data'] == [80, 85] and r['a']['idx'] == -1 and '90' in r['a']['leg'], r['a'])
+        ok(tag + "record battu dans le programme choisi : coupe sur sa séance, légende 92,5 kg (1.8.111)",
+           r['b']['data'] == [80, 92.5] and r['b']['idx'] == 1 and '92,5' in r['b']['leg'], r['b'])
         pg.evaluate("document.getElementById('exerciseChart').scrollIntoView({block:'center'})"); pg.wait_for_timeout(300)
         ov = pg.evaluate(OVERFLOW_JS)
         ok(tag + "Progression : rien ne déborde", ov['docW'] <= ov['vw'] and not ov['out'], ov)

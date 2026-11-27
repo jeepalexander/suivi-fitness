@@ -8,6 +8,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.111] - 2026-11-27
+### Progression (co-auteur : Claude)
+- Progression par exercice : la courbe ne montre plus que les séances du programme (ou de la séance) choisi. Les records restent calculés sur tout l'historique, tous programmes confondus : la coupe et l'étoile ne se posent que sur une séance qui a battu le record global, et la légende (« Charge max », « 1RM estimé », « Record ») donne le record de tout l'historique. « Tous les programmes » montre toujours toutes les séances.
+
+---
+
 ## [1.8.110] - 2026-11-27
 ### Séance (co-auteur : Claude)
 - Fenêtre de fin de séance : un record battu s'affiche désormais aussi lors de la première séance d'un nouveau programme et pour les exercices au poids du corps (tractions, dips…). Les records sont comparés à tout l'historique, avec les mêmes règles que les graphiques et le bilan du mois (nom d'exercice reconnu même renommé, séries réellement faites seulement).

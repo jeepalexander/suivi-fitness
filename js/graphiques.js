@@ -471,52 +471,55 @@ function renderExerciseChart() {
   const selectEl = document.getElementById('exercise-filter');
   const selectedEx = selectEl ? selectEl.value : '';
   const isSelected = name => canonicalExerciseName(name) === selectedEx;
-  let labels = [];
-  let chartData = [];
-  let dates = [];
   // 1.7.34 : 1RM estimé (Epley : charge × (1 + reps / 30)), meilleure série de 10 répétitions ou moins de la séance ;
   // seulement en « Charge max » et pour les exercices saisis en kg × répétitions
   const showRm = currentExMetricMode !== 'volume' && exInfo(selectedEx).mode === 'weight';
-  const rmData = [];
   // 1.7.35 : exercice au poids du corps → « Répétitions » (meilleure série de la séance) au lieu d'une charge plate
   const isBw = exInfo(selectedEx).mode === 'bw';
   const repsMode = isBw && currentExMetricMode !== 'volume';
+  // 1.8.111 (co-auteur : Claude) : la courbe ne montre que les séances du programme (ou de la séance) choisi,
+  // mais les records (coupe, étoile, légende) se calculent sur tout l'historique, tous programmes confondus.
   const lestData = [];
   const exDeload = []; // 1.8.0 : séances de déload (plume sous le point)
   const maxBtn = document.getElementById('btn-mode-max');
   if (maxBtn) maxBtn.textContent = isBw ? 'Répétitions' : 'Charge max';
 
-  // 1.8.46 : séance choisie dans la tuile → seulement ses passages (programme affiché, même lettre)
-  const exHist = statsFocusHistory() || state.history; // 1.8.48 : séance libre choisie aussi
-  exHist.forEach(h => {
-    if (h.exercises) {
+  const exSeries = (list, full) => {
+    const out = { labels: [], dates: [], ids: [], data: [], rm: [] };
+    (list || []).forEach(h => {
+      if (!h.exercises) return;
       const exData = mergeExercises(h.exercises).find(e => isSelected(e.name));
-
       // On ignore les séances où l'exercice n'a pas été réellement fait (séries à 0 kg / 0 rép.)
       // pour ne pas tracer de faux creux à 0 dans la progression.
       const performedSets = (exData && Array.isArray(exData.sets)) ? exData.sets.filter(isPerformedSet) : null;
       const wasPerformed = performedSets ? performedSets.length > 0 : !!(exData && (exData.maxWeight || 0) > 0);
-
-      if (exData && wasPerformed) {
-        labels.push(`${h.type} (${formatDate(h.date)})`);
-        dates.push(h.date);
+      if (!exData || !wasPerformed) return;
+      out.ids.push(h.id);
+      if (full) {
+        out.labels.push(`${h.type} (${formatDate(h.date)})`);
+        out.dates.push(h.date);
         exDeload.push(!!h.isDeload);
-        if (currentExMetricMode === 'volume') {
-          chartData.push(exData.totalVolume || 0);
-        } else if (repsMode) {
-          const best = bestBodyweightSet(performedSets || []);
-          chartData.push(best ? best.reps : 0);
-          lestData.push(best ? best.lest : 0);
-        } else {
-          // Charge max calculée sur les séries réellement faites uniquement
-          chartData.push(performedSets
-            ? Math.max(...performedSets.map(s => parseFloat(s.weight) || 0))
-            : (exData.maxWeight || 0));
-          if (showRm) rmData.push(estimateOneRepMax(performedSets));
-        }
       }
-    }
-  });
+      if (currentExMetricMode === 'volume') {
+        out.data.push(exData.totalVolume || 0);
+      } else if (repsMode) {
+        const best = bestBodyweightSet(performedSets || []);
+        out.data.push(best ? best.reps : 0);
+        if (full) lestData.push(best ? best.lest : 0);
+      } else {
+        // Charge max calculée sur les séries réellement faites uniquement
+        out.data.push(performedSets
+          ? Math.max(...performedSets.map(s => parseFloat(s.weight) || 0))
+          : (exData.maxWeight || 0));
+        if (showRm) out.rm.push(estimateOneRepMax(performedSets));
+      }
+    });
+    return out;
+  };
+  // 1.8.46 : séance choisie dans la tuile → seulement ses passages ; 1.8.111 : sinon le programme choisi
+  const shown = exSeries(statsFocusHistory() || statsHistory(), true);
+  const whole = exSeries(state.history, false);
+  const labels = shown.labels, chartData = shown.data, dates = shown.dates, rmData = shown.rm;
 
   // Bande ambre : séances du palier en cours pour cet exercice (règle des 4 dernières séances)
   let plateauStart = -1;
@@ -543,11 +546,12 @@ function renderExerciseChart() {
 
   const hasRm = showRm && rmData.some(v => v !== null);
   // 1.8.11 : records de l'exercice (charge max et meilleur 1RM estimé de tout l'historique), dernier en date si égalité
-  const recMaxW = chartData.length ? Math.max(...chartData) : null;
-  const recMaxIdx = hasRm ? chartData.lastIndexOf(recMaxW) : -1;
-  const recRmAll = rmData.filter(v => v !== null);
+  // 1.8.111 : records de tout l'historique ; la marque ne se pose que si la séance du record est affichée
+  const recMaxW = whole.data.length ? Math.max(...whole.data) : null;
+  const recMaxIdx = hasRm ? shown.ids.indexOf(whole.ids[whole.data.lastIndexOf(recMaxW)]) : -1;
+  const recRmAll = whole.rm.filter(v => v !== null);
   const recRm = recRmAll.length ? Math.max(...recRmAll) : null;
-  const recRmIdx = hasRm ? rmData.lastIndexOf(recRm) : -1;
+  const recRmIdx = hasRm ? shown.ids.indexOf(whole.ids[whole.rm.lastIndexOf(recRm)]) : -1;
   const hasReps = repsMode && chartData.length > 0;
   const legend = document.getElementById('exercise-legend');
   const rmNote = document.getElementById('exercise-rm-note');
@@ -566,7 +570,7 @@ function renderExerciseChart() {
       document.getElementById('exercise-legend-max-label').textContent = 'Meilleure série';
       document.getElementById('exercise-legend-rm-label').textContent = 'Record';
       document.getElementById('exercise-legend-max').textContent = repsText(chartData[chartData.length - 1]);
-      document.getElementById('exercise-legend-rm').textContent = repsText(Math.max(...chartData));
+      document.getElementById('exercise-legend-rm').textContent = repsText(Math.max(...whole.data)); // 1.8.111 : record de tout l'historique
     }
   }
   if (rmNote) rmNote.hidden = !hasRm;
@@ -616,6 +620,7 @@ function renderExerciseChart() {
     },
     plugins: [bandPlugin, deloadMarksPlugin(exDeload, CHART_COLORS.warn), recordMarksPlugin(recMaxIdx, recRmIdx, CHART_COLORS.trophy)]
   });
+  exerciseChart.recordIdx = { max: recMaxIdx, rm: recRmIdx }; // 1.8.111 : pour les tests
 }
 
 function addWeight() {
