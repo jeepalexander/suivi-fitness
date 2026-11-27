@@ -710,9 +710,7 @@ function onCardioInput(el) {
   const row = el.closest('.set-row');
   const dEl = row.querySelector('.weight-input');
   if (el === dEl) dEl.value = formatDurationDigits(dEl.value);
-  const pace = row.nextElementSibling;
-  const rEl = row.querySelector('.reps-input');
-  if (pace && pace.classList.contains('cardio-pace')) pace.querySelector('b').textContent = cardioRowText(dEl.dataset.ex, dEl.value, rEl ? rEl.value : '');
+  // 1.8.103 : la pastille sous la ligne porte le chronomètre (js/chronos.js), plus l'allure
 }
 
 function isPerformedCardioSet(set) {

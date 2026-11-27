@@ -62,7 +62,8 @@ Un test seul : `python3 tests/test_validation.py` ou `python3 tests/run_tests.py
 | `test_fiches.py` | 48 | Fiches d'exercice : une par exercice, appui long sur l'image (Séance, Ajouter un exercice), toucher simple inchangé, au-dessus d'un volet, Fermer / Échap / toucher à côté (390 et 360 px, clair et sombre) ; aucune pastille en double, « Cardio » une seule fois (1.8.88) |
 | `test_fond_ecran.py` | 20 | Réglages › Fond d'écran : ligne sous Apparence, page avec 18 choix (17 images + « Aucun », vignettes chargées au défilement), application immédiate sur toutes les pages, mémorisé et posé avant le premier affichage, voile sombre en thème sombre, « Aucun », valeur inconnue ignorée, hors des données sauvegardées, images en cache |
 | `test_mise_en_page.py` | 12 | À 360 et 390 px, thèmes clair et sombre : aucun débordement sur les 5 pages, noms d'exercice sur une ligne, aucune erreur JavaScript |
-| `test_rameur.py` | 28 | Rameur : exercice durée + distance sur une ligne en tête de séance, allure /500 m |
+| `test_rameur.py` | 28 | Rameur : exercice durée + distance sur une ligne en tête de séance (allure /500 m dans l'historique) |
+| `test_chrono_cardio.py` | 24 | 1.8.103 : chronomètre dans la pastille sous un cardio (lancer, pause, rechargement), temps reporté dans Durée à la validation, pastille pas plus large que le champ Distance |
 | `test_drive_reset.py` | 10 | Réinitialisation locale : la sauvegarde Google Drive n'est jamais écrasée par des données vides |
 | `test_progression_jours.py` | 23 | Progression : bascule « par jour » du graphique global (écarts entre séances, défilement horizontal) |
 | `test_modifier_pause.py` | 11 | Modification depuis l'Historique d'une séance d'un programme en pause : programme, séance et valeurs de la séance gardés (pas le programme en cours), même après un aller-retour d'onglet ; « Annuler » revient à la séance en cours ; message au tutoiement |

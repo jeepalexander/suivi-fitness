@@ -115,6 +115,7 @@ function toggleSetDone(btn) {
   row.classList.toggle('done');
   const done = row.classList.contains('done');
   btn.setAttribute('aria-pressed', done ? 'true' : 'false');
+  if (done) takeCardioChrono(row); // 1.8.103 : temps du chrono cardio reporté dans Durée
 
   // Exercice ouvert à la main et terminé : on repasse en automatique (passage au suivant)
   if (done) {
@@ -183,7 +184,6 @@ function setRowHtml(exName, number, weightVal, repsVal, done = false) {
     const d = dur(weightVal);
     const km = distanceInKm(exName);
     const amountLabel = e.mode === 'floors' ? 'Étages montés' : (km ? 'Distance en kilomètres' : 'Distance en mètres');
-    const u = cardioUnit(exName);
     return `
     <div class="set-row${done ? ' done' : ''}">
       <span class="set-label">${number}</span>
@@ -191,7 +191,7 @@ function setRowHtml(exName, number, weightVal, repsVal, done = false) {
       <input type="text" inputmode="${km ? 'decimal' : 'numeric'}" class="set-input reps-input" data-ex="${ex}" aria-label="${amountLabel}" placeholder="${e.mode === 'floors' ? 'étages' : (km ? 'km' : 'm')}" value="${escapeHtml(repsVal)}" oninput="onCardioInput(this); markInputActive(this)">
       ${check(`Valider : ${ex}`)}
     </div>
-    ${u ? `<div class="cardio-pace"><span>${u.label}</span><b>${cardioRowText(exName, d, repsVal)}</b></div>` : ''}
+    <div class="cardio-pace">${cardioChronoHtml()}</div>
   `;
   }
   if (e.mode === 'time') {
@@ -287,6 +287,7 @@ function updateSetsProgress() {
   const barEl = document.getElementById('sets-progress-bar');
   if (barEl) barEl.style.width = totalRows ? `${Math.round((doneRows / totalRows) * 100)}%` : '0%';
   refreshExerciseStates();
+  refreshCardioChrono(); // 1.8.103 : chronos cardio redessinés avec la liste
 }
 
 // Texte de la ligne repliée : « 4 séries · 32.5 → 55 kg · 2/4 faites » (ou « Terminé · 4 séries »)

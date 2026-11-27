@@ -221,6 +221,85 @@ function getFormattedWorkoutDuration() {
   return `${m} min`;
 }
 
+// ------------------------------------------------------------
+// 1.8.103 (co-auteur : Claude) : chronomètre d'un cardio, dans la pastille sous la ligne (rameur, tapis, vélos…).
+// Lancé par l'usager au début de l'exercice ; le toucher le met en pause ou le relance. En validant la série (✓),
+// le temps passé est reporté dans le champ Durée. Un seul chrono à la fois, gardé dans localStorage (écran éteint,
+// rechargement) : { key: « n° d'exercice|n° de série », acc: secondes déjà comptées, start: début du tour en cours ou null }.
+// ------------------------------------------------------------
+const CARDIO_CHRONO_KEY = 'cardio_chrono';
+const CHRONO_PLAY_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>';
+const CHRONO_PAUSE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5.5" y="4.5" width="4.5" height="15" rx="1.2"/><rect x="14" y="4.5" width="4.5" height="15" rx="1.2"/></svg>';
+// Cadran du chronomètre : l'arc et l'aiguille font un tour par minute, calés sur le temps compté
+// (animation CSS de 60 s décalée de --d, en pause quand le chrono est arrêté)
+const CHRONO_SVG = '<svg class="dial" viewBox="0 0 44 44" aria-hidden="true"><circle class="track" cx="22" cy="22" r="19"/><circle class="arc" cx="22" cy="22" r="19" pathLength="60" transform="rotate(-90 22 22)"/><path class="ticks" d="M36.5 22h-2.5M22 36.5v-2.5M7.5 22h2.5"/><path class="hand" d="M22 22V11"/><circle class="pin" cx="22" cy="22" r="2.2"/></svg>';
+let cardioChronoInterval = null;
+
+function readCardioChrono() {
+  try { const c = JSON.parse(localStorage.getItem(CARDIO_CHRONO_KEY)); if (c && c.key) return c; } catch (e) {}
+  return null;
+}
+function cardioChronoSeconds(c) {
+  if (!c) return 0;
+  return Math.max(0, Math.floor((Number(c.acc) || 0) + (c.start ? (Date.now() - c.start) / 1000 : 0)));
+}
+// Place d'une pastille dans la séance : « 0|0 » = 1er exercice, 1re série
+function cardioChronoKeyOf(el) {
+  const item = el.closest('.exercise-item'), row = el.closest('.cardio-pace') ? el.closest('.cardio-pace').previousElementSibling : el.closest('.set-row');
+  if (!item || !row) return '';
+  const items = Array.from(document.querySelectorAll('#exercises-list .exercise-item'));
+  return `${items.indexOf(item)}|${Array.from(item.querySelectorAll('.set-row')).indexOf(row)}`;
+}
+function cardioChronoHtml() {
+  return `<button type="button" class="cardio-chrono" aria-label="Lancer le chronomètre" aria-pressed="false" onclick="toggleCardioChrono(this)"><i>${CHRONO_SVG}</i><b class="zero">0:00</b><span class="chrono-action">${CHRONO_PLAY_SVG}</span></button>`;
+}
+function toggleCardioChrono(btn) {
+  const key = cardioChronoKeyOf(btn);
+  let c = readCardioChrono();
+  if (!c || c.key !== key) c = { key, acc: 0, start: null }; // un autre cardio prend la main : l'ancien chrono est oublié
+  if (c.start) { c.acc = cardioChronoSeconds(c); c.start = null; } else { c.start = Date.now(); startWorkoutTimer(); }
+  try { localStorage.setItem(CARDIO_CHRONO_KEY, JSON.stringify(c)); } catch (e) {}
+  refreshCardioChrono();
+}
+// Remet chaque bouton à jour ; l'intervalle ne tourne que si un chrono est lancé
+function refreshCardioChrono() {
+  const c = readCardioChrono();
+  document.querySelectorAll('#exercises-list .cardio-chrono').forEach(btn => {
+    const mine = c && cardioChronoKeyOf(btn) === c.key;
+    const sec = mine ? cardioChronoSeconds(c) : 0, run = !!(mine && c.start);
+    btn.classList.toggle('running', run);
+    btn.setAttribute('aria-pressed', run ? 'true' : 'false');
+    btn.setAttribute('aria-label', run ? 'Mettre le chronomètre en pause' : (sec ? 'Relancer le chronomètre' : 'Lancer le chronomètre'));
+    const dial = btn.querySelector('i');
+    if (dial && (run ? dial.dataset.run !== 'true' : dial.style.getPropertyValue('--d') !== `-${sec % 60}s`)) {
+      dial.style.setProperty('--d', `-${sec % 60}s`); dial.dataset.run = String(run);
+    }
+    const act = btn.querySelector('.chrono-action'); // ▶ pour lancer ou reprendre, ❚❚ pour la pause
+    if (act && act.dataset.run !== String(run)) { act.innerHTML = run ? CHRONO_PAUSE_SVG : CHRONO_PLAY_SVG; act.dataset.run = String(run); }
+    const b = btn.querySelector('b');
+    b.textContent = formatDurationMS(sec);
+    b.classList.toggle('zero', !sec);
+  });
+  const running = !!(c && c.start);
+  if (running && !cardioChronoInterval) cardioChronoInterval = setInterval(refreshCardioChrono, 500);
+  if (!running && cardioChronoInterval) { clearInterval(cardioChronoInterval); cardioChronoInterval = null; }
+}
+// Série cardio validée : le temps du chrono (s'il a tourné) va dans le champ Durée, puis le chrono s'efface
+function takeCardioChrono(row) {
+  const c = readCardioChrono();
+  if (!c || cardioChronoKeyOf(row) !== c.key) return;
+  const sec = cardioChronoSeconds(c);
+  if (sec > 0) {
+    const dEl = row.querySelector('.weight-input');
+    if (dEl) { dEl.value = formatDurationMS(sec); dEl.classList.add('active-input'); }
+  }
+  resetCardioChrono();
+}
+function resetCardioChrono() {
+  try { localStorage.removeItem(CARDIO_CHRONO_KEY); } catch (e) {}
+  refreshCardioChrono();
+}
+
 // ============================================================
 // 8. BROUILLON DE SÉANCE
 // ============================================================
@@ -234,6 +313,7 @@ function readDraft() {
 
 function clearDraft() {
   try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+  resetCardioChrono(); // 1.8.103 : séance finie, annulée ou remplacée : le chrono cardio repart de zéro
 }
 
 function saveDraft() {
@@ -260,7 +340,7 @@ function saveDraft() {
   });
 
   // Formulaire intact : rien à conserver (et on n'écrase pas d'éventuelles nouvelles suggestions)
-  if (!dirty) { clearDraft(); return; }
+  if (!dirty) { try { localStorage.removeItem(DRAFT_KEY); } catch (e) {} return; } // pas clearDraft : le chrono cardio continue
 
   const draft = {
     v: 1,

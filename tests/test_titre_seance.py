@@ -31,16 +31,16 @@ with Srv() as base, sync_playwright() as p:
         check(tag + "1.7.48 : bouton de pause à droite du compteur ; séries et durée empilées dans sa hauteur, titre en haut (pas de décalage)",
               c['row'] == 'workout-progress-row' and c['a'][0] >= c['b'][0] - 0.5 and c['d'][1] <= c['b'][1] + 0.5 and c['a'][1] <= c['d'][0] and t['t'] < 50, c)
 
-        # allure : remontée sous la ligne en cours, qui passe au-dessus (ombre)
+        # pastille cardio (chrono depuis 1.8.103) : remontée sous la ligne en cours, qui passe au-dessus (ombre)
         row = pg.evaluate(f"({RECT})('#exercises-list .exercise-item .set-row')")
         pace = pg.evaluate(f"({RECT})('#exercises-list .exercise-item .cardio-pace')")
         z = pg.evaluate("[...document.querySelectorAll('#exercises-list .exercise-item:first-of-type .set-row, #exercises-list .exercise-item:first-of-type .cardio-pace')].map(e=>getComputedStyle(e).zIndex).join(',')")
-        check(tag + "allure glissée sous la ligne de saisie (chevauchement) et dessous à l'empilement", pace['t'] < row['b'] - 10 and z == '1,0', f'{row} {pace} {z}')
-        check(tag + "texte de l'allure sous la ligne, lisible", pg.evaluate("(()=>{const b=document.querySelector('#exercises-list .exercise-item .cardio-pace span').getBoundingClientRect();return b.top})()") >= row['b'], '')
+        check(tag + "pastille glissée sous la ligne de saisie (chevauchement) et dessous à l'empilement", pace['t'] < row['b'] - 10 and z == '1,0', f'{row} {pace} {z}')
+        check(tag + "chrono de la pastille sous la ligne, lisible", pg.evaluate("(()=>{const b=document.querySelector('#exercises-list .exercise-item .cardio-pace .cardio-chrono i').getBoundingClientRect();return b.top})()") >= row['b'] - 1, '')
         pg.evaluate("document.querySelector('#exercises-list .exercise-item .set-row').classList.remove('current')"); pg.wait_for_timeout(100)
         pace2 = pg.evaluate(f"({RECT})('#exercises-list .exercise-item .cardio-pace')")
         row2 = pg.evaluate(f"({RECT})('#exercises-list .exercise-item .set-row')")
-        check(tag + "ligne qui n'est plus en cours : allure de nouveau détachée", pace2['t'] >= row2['b'], f'{row2} {pace2}')
+        check(tag + "ligne qui n'est plus en cours : pastille de nouveau détachée", pace2['t'] >= row2['b'], f'{row2} {pace2}')
 
         # nom long : le titre descend sous le bouton
         pg.evaluate("switchTab('seance'); getProgram('hypertrophie').name='Force printemps haut du corps'; initWorkoutForm()"); pg.wait_for_timeout(300)

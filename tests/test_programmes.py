@@ -169,7 +169,7 @@ with Srv() as base, sync_playwright() as p:
     check('Vélo elliptique : colonnes Durée | Distance (km), vide la première fois', heads == 'Série|Durée|Distance (km)|' and pg.input_value('#exercises-list .exercise-item[data-ex="Vélo elliptique"] .weight-input') == '', heads)
     vel = '#exercises-list .exercise-item[data-ex="Vélo elliptique"]'
     pg.type(f'{vel} .weight-input', '2000'); pg.fill(f'{vel} .reps-input', '5,5'); pg.dispatch_event(f'{vel} .reps-input', 'input'); pg.wait_for_timeout(100)
-    check('Vélo elliptique : vitesse calculée (5,5 km en 20:00 = 16,5 km/h)', '16,5 km/h' in pg.inner_text(f'{vel} .cardio-pace'), pg.inner_text(f'{vel} .cardio-pace'))
+    check('Vélo elliptique : pastille du chrono sous la saisie (1.8.103)', pg.is_visible(f'{vel} .cardio-pace .cardio-chrono'))
     pg.click(f'{vel} .btn-check-set'); pg.wait_for_timeout(100)
     pl = '#exercises-list .exercise-item[data-ex="Planche"]'
     check('Planche : un seul champ Durée', pg.evaluate(f"document.querySelector('{pl} .sets-head').classList.contains('single')") and pg.input_value(f'{pl} .weight-input') == '0:30', pg.input_value(f'{pl} .weight-input'))

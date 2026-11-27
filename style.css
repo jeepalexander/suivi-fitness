@@ -697,12 +697,28 @@ button.ed-add { background: none; color: var(--text); text-shadow: 0 1px 2px rgb
 #modal-session-pill { display: flex; justify-content: center; }
 #modal-session-pill .type-pill { width: 56px; height: 56px; font-size: 28px; }
 
-/* Rameur : allure calculée sous la saisie */
-.cardio-pace { display: flex; justify-content: space-between; align-items: center; margin: 8px 8px 2px 40px; padding: 13px 13px; border-radius: 13px; background: var(--fill); font-size: 13px; color: var(--text-muted); }
+/* Cardio : pastille sous la saisie. 1.8.103 : elle porte le chronomètre (plus l'allure) et ne dépasse plus le champ de droite */
+.cardio-pace { display: flex; align-items: center; margin: 8px 73px 2px 40px; padding: 8px 13px 8px 8px; border-radius: 13px; background: var(--fill); font-size: 13px; color: var(--text-muted); }
+.cardio-chrono { display: flex; flex: 1; align-items: center; gap: 13px; min-width: 0; min-height: 44px; margin: -5px 0; padding: 0; border: none; background: none; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.cardio-chrono i { display: grid; flex: none; place-items: center; width: 44px; height: 44px; border-radius: 999px; transition: background var(--t-normal) ease, color var(--t-normal) ease; }
+.cardio-chrono .dial { width: 44px; height: 44px; fill: none; stroke: currentColor; stroke-linecap: round; }
+.dial .track { stroke-width: 2; opacity: .3; }
+.cardio-chrono.running .dial .track { opacity: .45; }
+.dial .ticks { stroke-width: 1.6; opacity: .6; }
+.dial .pin { fill: currentColor; stroke: none; }
+.dial .arc, .dial .hand { animation-duration: 60s; animation-timing-function: linear; animation-iteration-count: infinite; animation-delay: var(--d, 0s); animation-play-state: paused; }
+.dial .arc { stroke-width: 3.5; stroke-dasharray: 60; stroke-dashoffset: 60; animation-name: chrono-arc; }
+.dial .hand { stroke-width: 2.4; transform-origin: 22px 22px; animation-name: chrono-hand; }
+.cardio-chrono.running .dial :is(.arc, .hand) { animation-play-state: running; }
+@keyframes chrono-hand { to { transform: rotate(360deg); } }
+@keyframes chrono-arc { to { stroke-dashoffset: 0; } }
+.cardio-chrono b { min-width: 3ch; color: var(--text); font-family: var(--font-display); font-variant-numeric: tabular-nums; font-size: 22px; }
+.cardio-chrono b.zero { color: var(--text-muted); }
+.cardio-chrono .chrono-action { display: grid; place-items: center; margin-left: auto; color: var(--text); }
+.cardio-chrono .chrono-action svg { width: 24px; height: 24px; fill: currentColor; stroke: none; }
 /* 1.7.40 : l'allure remonte juste sous la saisie en cours et passe sous son ombre */
 .set-row.current { position: relative; z-index: 1; }
-.set-row.current + .cardio-pace { position: relative; z-index: 0; margin-top: -21px; padding-top: 34px; }
-.cardio-pace b { color: var(--text); font-family: var(--font-display); font-variant-numeric: tabular-nums; font-size: 15px; }
+.set-row.current + .cardio-pace { position: relative; z-index: 0; margin-top: -21px; padding-top: 29px; }
 
 /* Message d'information non bloquant (showToast) */
 .toast { position: fixed; left: 16px; right: 16px; bottom: calc(110px + var(--safe-bottom)); max-width: 420px; margin: 0 auto; padding: 13px 21px; border-radius: 21px; background: var(--text); color: var(--bg); font-size: 15px; line-height: 1.6; box-shadow: var(--sh-toast); z-index: var(--z-toast); opacity: 0; transform: translateY(12px); pointer-events: none; transition: opacity var(--t-normal) ease, transform var(--t-normal) ease; }

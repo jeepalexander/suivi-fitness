@@ -8,6 +8,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.104] - 2026-11-27
+### Séance (co-auteur : Claude)
+- **Chronomètre des cardios** (rameur, tapis, vélos, ski, stair climber) : la pastille sous la ligne de saisie porte un chrono à lancer au début de l'exercice. Petit cadran dont l'arc et l'aiguille font un tour par minute, temps en grand, icône ▶ pour lancer ou reprendre, ❚❚ pour la pause. Il continue écran éteint ou après un rechargement.
+- **En validant la série (✓), le temps du chrono est reporté dans le champ Durée** (sans chrono lancé, la durée saisie reste).
+- La pastille s'arrête au bord du champ Distance (elle passait sous la coche) ; l'allure n'y est plus affichée (toujours visible dans l'historique et la progression).
+- Nouveau test `test_chrono_cardio.py` (24 contrôles).
+
+---
+
 ## [1.8.103] - 2026-11-27
 ### Programmes : petit bonhomme (co-auteur : Claude)
 - **Plus de longues marches sans rien faire** : entre deux exercices, il ne parcourt plus que 18 à 36 px ; il ne traverse plus l'écran pour aller faire les battle ropes.
