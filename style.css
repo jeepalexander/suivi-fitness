@@ -500,7 +500,7 @@ select.filter-select { -webkit-appearance: none; appearance: none; padding-right
 .set-row.current .set-input { color: var(--text); }
 .set-row.done .set-input { background: transparent; box-shadow: none; color: var(--text-muted); }
 
-.btn-check-set { width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; padding: 0; background: var(--set-field); box-shadow: var(--set-field-ring); border: none; border-radius: var(--radius-field); color: var(--text-muted); cursor: pointer; transition: background var(--t-normal) ease, border-color var(--t-normal) ease, color var(--t-normal) ease; }
+.btn-check-set { width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; padding: 0; background: var(--set-field); box-shadow: var(--set-field-ring); border: none; border-radius: 50%; color: var(--text-muted); cursor: pointer; transition: background var(--t-normal) ease, border-color var(--t-normal) ease, color var(--t-normal) ease; }
 .btn-check-set svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .set-row.current .btn-check-set { background: var(--surface); color: var(--text); box-shadow: inset 0 0 0 2px var(--text); }
 .set-row.done .btn-check-set { background: var(--success); color: var(--on-success); box-shadow: none; }

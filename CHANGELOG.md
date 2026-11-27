@@ -8,6 +8,12 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.108] - 2026-11-27
+### Séance (co-auteur : Claude)
+- La coche de validation des séries redevient ronde. Depuis la 1.8.91 (passage de 52 à 56 px), son arrondi de 25 px en faisait un carré arrondi ; elle est maintenant en `border-radius: 50%`.
+
+---
+
 ## [1.8.107] - 2026-11-27
 ### Séance (co-auteur : Claude)
 - Saisie rapide : la mémoire par exercice (poids de barre choisi, poids à vide des machines, disques posés) va maintenant dans la sauvegarde, sur le téléphone comme sur Google Drive (`state.quickMemory`). Au démarrage, ce que le téléphone savait déjà y est repris ; une sauvegarde restaurée la recopie dans le téléphone, et une ancienne sauvegarde qui n'en a pas garde celle du téléphone.
