@@ -325,6 +325,8 @@
         navigator.serviceWorker.register('./sw.js').catch((err) => {
           console.warn("Échec de l'enregistrement du service worker :", err);
         });
+        // 1.8.102 : icônes et fonds pas encore en cache téléchargés en arrière-plan (voir sw.js)
+        navigator.serviceWorker.ready.then((reg) => { if (reg.active) reg.active.postMessage({ type: 'COMPLETER_CACHE' }); }).catch(() => {});
       });
     }
   </script>

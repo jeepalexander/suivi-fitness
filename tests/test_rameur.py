@@ -87,7 +87,7 @@ with Srv() as base, sync_playwright() as p:
     check('Suivi cardio : valeurs = allure aux 500 m (4:15 pour 1 050 m = 121,4 s)', pg.evaluate("cardioChart.data.datasets[0].data[0]") == 121.4, str(pg.evaluate("cardioChart.data.datasets[0].data")))
     pg.evaluate("switchTab('programme'); toggleProgramDetail()"); pg.wait_for_timeout(300)
     check('Programme : plus de mention « Au programme » ni d\'échauffement', 'Au programme' not in pg.inner_text('#tab-programme') and 'Échauffement' not in pg.inner_text('#tab-programme'))
-    check('Programme : icône du rameur = fichier rower.png', pg.evaluate("[...document.querySelectorAll('#tab-programme .ex-tile img')].some(i=>i.getAttribute('src')==='icons/rower.png')"))
+    check('Programme : icône du rameur = fichier rower.webp', pg.evaluate("[...document.querySelectorAll('#tab-programme .ex-tile img')].some(i=>i.getAttribute('src')==='icons/rower.webp')"))
     check('aucune erreur JS', not errs, str(errs))
     br.close()
 

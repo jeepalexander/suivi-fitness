@@ -124,6 +124,13 @@ def ecrire_versions(nouvelle, ancienne, notes_md, rubrique):
     i = c.index('## [')
     cl.write_text(c[:i] + entree_changelog(v, notes_md, rubrique) + c[i:], encoding='utf-8')
     print(f'  {a} -> {v} : manifest.json, sw.js, badge du README, CHANGELOG')
+    print('  ' + empreintes_sw())  # manifest.json vient de changer
+
+
+def empreintes_sw():
+    sys.path.insert(0, str(REPO / 'tools'))
+    import empreintes
+    return 'sw.js : empreintes ' + ('mises à jour' if empreintes.ecrire() else 'déjà à jour')
 
 
 def suivre_publication(sha, depart, minutes=6):
@@ -224,6 +231,10 @@ def main():
 
     etape('Déclaration des tests')
     verifier_declarations()
+
+    etape('Empreintes des fichiers (mises à jour partielles, 1.8.102)')
+    if not args.essai:
+        print('  ' + empreintes_sw())
 
     etape('Tests')
     lancer_tests(args.tests, args.j, args.essai)

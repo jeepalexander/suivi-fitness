@@ -8,6 +8,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.102] - 2026-11-27
+### Mises à jour et installation (co-auteur : Claude)
+- **Mises à jour plus courtes** : seuls les fichiers nouveaux ou modifiés sont téléchargés ; les autres sont repris de la version précédente déjà sur le téléphone (empreinte de chaque fichier dans `sw.js`, écrite par `tools/empreintes.py` à chaque release). Une mise à jour ordinaire passe d'environ 20,8 Mo à quelques centaines de Ko. Cette version-ci est la dernière téléchargée en entier.
+- **Première installation plus rapide** : l'app n'attend plus que l'essentiel (code, styles, polices, fond « Bienvenue », ≈ 1,7 Mo) ; icônes d'exercices et autres fonds se téléchargent ensuite en arrière-plan, pendant le film d'accueil, 4 à la fois pour ne pas gêner le film. La page relance la demande à chaque ouverture tant que tout n'est pas là (hors ligne complet ensuite).
+- **Icônes d'exercices en WebP** : même taille (512 px), même rendu, 16,1 Mo → 2,6 Mo pour les 85 icônes. Total mis en cache : 20,8 Mo → 7,3 Mo.
+- Nouveau test `test_telechargements.py` (serveur qui note chaque fichier demandé) ; `test_mise_a_jour.py` recalcule les empreintes comme une vraie release.
+
+---
+
 ## [1.8.101] - 2026-11-27
 ### Programmes (co-auteur : Claude)
 - **Petit bonhomme trop bas** : sur téléphone, avec l'interface agrandie (zoom 110 %), il marchait ≈ 20 px trop bas, sur « Programme actif » / « Aucun programme actif ». Sa piste est maintenant placée d'après la mise en page (positions non agrandies), et non d'après les positions à l'écran, que le zoom faussait.

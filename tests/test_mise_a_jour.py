@@ -66,6 +66,8 @@ try:
         (tmp / 'sw.js').write_text(sw, encoding='utf-8')
         mf = (tmp / 'manifest.json').read_text(encoding='utf-8').replace(f'"version": "{version}"', '"version": "9.9.9"')
         (tmp / 'manifest.json').write_text(mf, encoding='utf-8')
+        # 1.8.102 : comme release.py, recalculer les empreintes (sinon l'ancien manifest.json est repris du cache)
+        subprocess.run([sys.executable, str(tmp / 'tools' / 'empreintes.py')], check=True, capture_output=True)
 
         pg.evaluate("switchTab('reglages')"); pg.wait_for_timeout(200)
         pg.click('.update-check')
