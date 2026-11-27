@@ -8,6 +8,15 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.103] - 2026-11-27
+### Programmes : petit bonhomme (co-auteur : Claude)
+- **Plus de longues marches sans rien faire** : entre deux exercices, il ne parcourt plus que 18 à 36 px ; il ne traverse plus l'écran pour aller faire les battle ropes.
+- **Il reste plus longtemps** : il fait deux allers-retours de l'écran, en s'entraînant tout du long, avant de repartir, et toujours par la porte d'où il est venu.
+- **Il ne revient pas tout de suite** : après son départ, il reste absent au moins 60 s (60 à 90 s).
+- Tests : `test_bonhomme.py` (86 contrôles) vérifie la longueur des trajets, les deux allers-retours, la porte de départ et l'absence.
+
+---
+
 ## [1.8.102] - 2026-11-27
 ### Mises à jour et installation (co-auteur : Claude)
 - **Mises à jour plus courtes** : seuls les fichiers nouveaux ou modifiés sont téléchargés ; les autres sont repris de la version précédente déjà sur le téléphone (empreinte de chaque fichier dans `sw.js`, écrite par `tools/empreintes.py` à chaque release). Une mise à jour ordinaire passe d'environ 20,8 Mo à quelques centaines de Ko. Cette version-ci est la dernière téléchargée en entier.

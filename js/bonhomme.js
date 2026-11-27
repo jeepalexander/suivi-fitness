@@ -9,6 +9,8 @@
 // - 13 exercices, jamais deux fois le même de suite ; sieste, corde ou curl pendant un déload ; saut de joie, squat ou
 //   soulevé de terre le jour d'un record ;
 // - il arrive et repart par une porte, seulement aux bords de l'écran : bloc plein qui apparaît en fondu, s'ouvre en clair ;
+// - 1.8.103 : de courts trajets entre deux exercices ; il fait deux allers-retours de l'écran avant de repartir par la porte
+//   d'où il est venu, puis reste absent au moins 60 s ;
 // - il fait demi-tour avant le post-it du bilan (la porte n'apparaît alors qu'à gauche) ;
 // - absent si le téléphone demande moins d'animations ; interrupteur « Petit bonhomme » dans les Réglages.
 // Rien n'est enregistré dans les données exportées : préférences de l'appareil seulement (comme le thème).
@@ -125,7 +127,11 @@ const bonhomme = {
   ink: '#111114', bg: '#ffffff', W: 390,
   cx: 60, dir: 1, mode: 'q', left: 0, act: null, last: null, step: 0, queue: [], hidden: true, fi: 0,
   ropes: null, door: { x: 18, side: -1, open: 0, on: false }, timer: null, started: false, zone: null,
+  home: -1, lastEdge: -1, legs: 0, backAt: 0,   // 1.8.103 : porte d'arrivée, dernier bord touché, bords touchés, retour
 };
+const BH_TOURS = 2;          // allers-retours de l'écran avant de repartir (1.8.103)
+const BH_AWAY_MS = 60000;    // absence minimale entre deux visites (1.8.103), plus 0 à 30 s au hasard
+const BH_STEPS = () => 6 + Math.floor(Math.random() * 7);   // trajet entre deux exercices : 6 à 12 pas (18 à 36 px)
 const BH_K = 1.2, BHX = x => Math.round(32 + (x - 12) * BH_K), BHY = y => Math.round(30 - (19 - y) * BH_K);
 
 function bhRect(x, y, w, h, col) { const c = bonhomme.c; c.fillStyle = col; c.fillRect(x, y, w, h); }
@@ -244,6 +250,9 @@ function bhPick() {
   const mood = bhMood();
   let pool = mood === 'D' ? ['Sieste', 'Corde', 'Curl biceps'] : mood === 'R' ? ['Fête', 'Squat barre', 'Soulevé de terre'] : BH.ALL;
   pool = pool.filter(a => a !== bonhomme.last);
+  // 1.8.103 : pas de long trajet pour aller faire un exercice à sa place (battle ropes, à gauche)
+  const near = pool.filter(a => BH.ACT[a].at === undefined || Math.abs(bonhomme.cx - BH.ACT[a].at) <= 45);
+  if (near.length) pool = near;
   return pool[Math.floor(Math.random() * pool.length)];
 }
 function bhSetSide(right) {
@@ -267,18 +276,27 @@ function bhWalkTo(target, then) {
   };
   B.queue.push(f);
 }
+// 1.8.103 : un bord touché (1 droite, -1 gauche) ; vrai quand les allers-retours sont faits et qu'il est revenu du côté de sa porte
+function bhEdge(side) {
+  const B = bonhomme;
+  if (side !== B.lastEdge) { B.lastEdge = side; B.legs++; }
+  return B.legs >= BH_TOURS * 2 && side === B.home;
+}
+function bhNearHome() {
+  const B = bonhomme;
+  return B.legs >= BH_TOURS * 2 && B.lastEdge === B.home && Math.abs(B.cx - (B.home > 0 ? bhMaxX() : BH_MIN)) <= 30;
+}
 function bhLeave() {
-  const B = bonhomme; B.mode = 'q'; let right = B.dir > 0;
+  const B = bonhomme; B.mode = 'q'; let right = B.home > 0;   // 1.8.103 : il repart par la porte d'où il est venu
   B.queue.push(() => { right = bhSetSide(right); bhDraw(BH.S); });
   bhDoorIn();
   bhWalkTo(() => B.door.x, () => { B.hidden = true; });
   bhDoorOut();
-  for (let i = 0; i < 12; i++) B.queue.push(() => {});
-  bhComeBack();
+  B.queue.push(() => { B.mode = 'away'; B.backAt = Date.now() + BH_AWAY_MS + Math.floor(Math.random() * 30000); });
 }
 function bhComeBack() {
   const B = bonhomme; B.mode = 'q'; let right = Math.random() < 0.5;
-  B.queue.push(() => { right = bhSetSide(right); });
+  B.queue.push(() => { right = bhSetSide(right); B.home = right ? 1 : -1; B.lastEdge = B.home; B.legs = 0; });
   bhDoorIn();
   B.queue.push(() => { B.cx = B.door.x; B.dir = right ? -1 : 1; B.hidden = false; bhDraw(BH.S); });
   for (let i = 0; i < 10; i++) B.queue.push(() => { B.cx += 3 * B.dir; bhDraw(BH.WALK[i % 4]); });
@@ -337,21 +355,27 @@ function bhTick() {
   B.lane.style.visibility = 'visible';
   bhResize(); bhColors();
   if (!B.started) { B.started = true; B.hidden = true; B.cx = 60; B.queue = []; bhComeBack(); }
+  if (B.mode === 'away') {   // 1.8.103 : absent au moins 60 s avant de revenir
+    if (Date.now() < B.backAt) { B.timer = setTimeout(bhTick, 1000); return; }
+    bhComeBack();
+  }
   B.fi++;
   let delay = 260;
   if (B.mode === 'q' && B.queue.length) { B.queue.shift()(); delay = 200; }
   else if (B.mode === 'walk') {
     bhDraw(BH.WALK[B.step % 4]); B.step++; B.cx += 3 * B.dir;
     const mx = bhMaxX();
-    if (B.cx > mx) { B.cx = mx; B.dir = -1; } if (B.cx < BH_MIN) { B.cx = BH_MIN; B.dir = 1; }
-    if (--B.left <= 0) bhStart(bhPick());
+    let edge = 0;
+    if (B.cx > mx) { B.cx = mx; B.dir = -1; edge = 1; } if (B.cx < BH_MIN) { B.cx = BH_MIN; B.dir = 1; edge = -1; }
+    if (edge && bhEdge(edge)) bhLeave();
+    else if (--B.left <= 0) bhStart(bhPick());
   } else if (B.mode === 'act') {
     const a = BH.ACT[B.act], i = B.step % a.f.length;
     bhDraw(a.f[i], a.sp);
-    if (a.mv) { B.cx += a.mv * B.dir; const mx = bhMaxX(); if (B.cx > mx || B.cx < BH_MIN) { B.dir = -B.dir; B.cx = Math.max(BH_MIN, Math.min(mx, B.cx)); } }
+    if (a.mv) { B.cx += a.mv * B.dir; const mx = bhMaxX(); if (B.cx > mx || B.cx < BH_MIN) { bhEdge(B.cx > mx ? 1 : -1); B.dir = -B.dir; B.cx = Math.max(BH_MIN, Math.min(mx, B.cx)); } }
     B.step++;
     if (a.slow) delay = 420; if (a.fast) delay = 180;
-    if (--B.left <= 0) { B.ropes = null; if (Math.random() < 0.3) bhLeave(); else { B.mode = 'walk'; B.step = 0; B.left = 8 + Math.floor(Math.random() * 10); } }
+    if (--B.left <= 0) { B.ropes = null; if (bhNearHome()) bhLeave(); else { B.mode = 'walk'; B.step = 0; B.left = BH_STEPS(); } }
   } else { B.mode = 'walk'; B.left = 6; }
   bhPlace();
   B.timer = setTimeout(bhTick, delay);

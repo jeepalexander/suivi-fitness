@@ -89,6 +89,22 @@ with Srv() as url, sync_playwright() as p:
     b.ok('porte à gauche : la marge de la page entre la porte et le bord (1.8.98)', pg.evaluate("bonhomme.door.x-16") == 26)
     pg.evaluate("bilanPostitHtml=()=>'';renderProgramOverview()"); pg.wait_for_timeout(300)
     b.ok('porte à droite : la marge de la page entre la porte et le bord (1.8.98)', pg.evaluate("[bhSetSide(true),bonhomme.W-(bonhomme.door.x+16)]") == [True, 26])
+    # 1.8.103 : courts trajets, deux allers-retours, départ par la porte d'arrivée, absence d'au moins 60 s
+    pg.evaluate("clearTimeout(bonhomme.timer);bonhomme.timer=1")
+    b.ok('trajet entre deux exercices : 6 à 12 pas (36 px au plus)',
+         pg.evaluate("(()=>{for(let i=0;i<300;i++){const n=BH_STEPS();if(n<6||n>12)return false}return true})()"))
+    b.ok('pas de long trajet pour aller aux battle ropes',
+         pg.evaluate("(()=>{bonhomme.cx=bhMaxX();for(let i=0;i<300;i++){const a=bhPick();bonhomme.last=a;if(a==='Battle ropes')return false}return true})()"))
+    b.ok('deux allers-retours avant de repartir, retour du côté de sa porte',
+         pg.evaluate("(()=>{const B=bonhomme;B.home=-1;B.lastEdge=-1;B.legs=0;return [bhEdge(1),bhEdge(1),bhEdge(-1),bhEdge(1),bhEdge(-1)].join()})()") == 'false,false,false,false,true')
+    pg.evaluate("(()=>{const B=bonhomme;B.home=1;B.lastEdge=1;B.legs=4;B.hidden=false;B.cx=bhMaxX();B.queue=[];bhLeave();let g=0;while(B.queue.length&&g++<500)B.queue.shift()()})()")
+    b.ok('il repart par la porte d\'où il est venu (à droite)', pg.evaluate("bonhomme.door.side") == 1)
+    wait = pg.evaluate("bonhomme.mode==='away'&&bonhomme.hidden?bonhomme.backAt-Date.now():-1")
+    b.ok('il reste absent au moins 60 s', 59000 <= wait <= 90500, wait)
+    pg.evaluate("bhTick();clearTimeout(bonhomme.timer);bonhomme.timer=1")
+    b.ok('pendant l\'absence, il ne revient pas', pg.evaluate("bonhomme.mode==='away'&&bonhomme.hidden"))
+    pg.evaluate("bonhomme.backAt=0;bhTick();clearTimeout(bonhomme.timer);bonhomme.timer=1")
+    b.ok('après l\'absence, une porte s\'ouvre pour son retour', pg.evaluate("bonhomme.mode==='q'&&bonhomme.queue.length>0"))
     b.ok('post-it au-dessus de la piste, sans débordement (1.8.98 : le post-it penché ne dépasse plus)', not debordements(pg), debordements(pg))
     pg.screenshot(path=f'{OUT}/postit.png')
     b.ok('jamais deux fois la même animation de suite',
