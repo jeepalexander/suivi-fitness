@@ -6,6 +6,10 @@
 // Calculs dans js/quick_logic.js ; dessins repris de la maquette (planches 40 à 40j) ; spec : SPEC_SAISIE_RAPIDE.md du projet.
 const QuickInput = (() => {
   const Q = QuickLogic;
+  // Mémoire par exercice (barre, machine à vide, disques) : dans l'état, donc dans la sauvegarde (1.8.107)
+  const mem = Q.memoryStore(() => (typeof state !== 'undefined' ? state : null),
+    typeof localStorage !== 'undefined' ? localStorage : { getItem: () => null, setItem() {} },
+    () => { if (typeof saveState === 'function') saveState(); });
   const ROWS = {"bar": [["0 0 132 40", "<rect x=\"42\" y=\"17.5\" width=\"54\" height=\"5\" fill=\"url(#qs-chr)\"></rect><rect x=\"48\" y=\"17.5\" width=\"42\" height=\"5\" fill=\"url(#qs-knurl)\"></rect><rect x=\"96\" y=\"12\" width=\"5\" height=\"16\" rx=\"1\" fill=\"url(#qs-chr)\"></rect><rect x=\"101\" y=\"13\" width=\"31\" height=\"14\" rx=\"2\" fill=\"url(#qs-chr)\"></rect>"], ["0 0 132 40", "<rect x=\"30\" y=\"17.5\" width=\"66\" height=\"5\" fill=\"url(#qs-chr)\"></rect><rect x=\"36\" y=\"17.5\" width=\"54\" height=\"5\" fill=\"url(#qs-knurl)\"></rect><rect x=\"96\" y=\"12\" width=\"5\" height=\"16\" rx=\"1\" fill=\"url(#qs-chr)\"></rect><rect x=\"101\" y=\"13\" width=\"31\" height=\"14\" rx=\"2\" fill=\"url(#qs-chr)\"></rect>"], ["0 0 132 40", "<rect x=\"18\" y=\"16.0\" width=\"78\" height=\"8\" fill=\"url(#qs-chr)\"></rect><rect x=\"24\" y=\"16.0\" width=\"66\" height=\"8\" fill=\"url(#qs-knurl)\"></rect><rect x=\"96\" y=\"12\" width=\"5\" height=\"16\" rx=\"1\" fill=\"url(#qs-chr)\"></rect><rect x=\"101\" y=\"13\" width=\"31\" height=\"14\" rx=\"2\" fill=\"url(#qs-chr)\"></rect>"], ["0 0 132 40", "<rect x=\"18\" y=\"14.5\" width=\"78\" height=\"11\" fill=\"url(#qs-chr)\"></rect><rect x=\"24\" y=\"14.5\" width=\"66\" height=\"11\" fill=\"url(#qs-knurl)\"></rect><rect x=\"96\" y=\"12\" width=\"5\" height=\"16\" rx=\"1\" fill=\"url(#qs-chr)\"></rect><rect x=\"101\" y=\"13\" width=\"31\" height=\"14\" rx=\"2\" fill=\"url(#qs-chr)\"></rect>"]], "short": [["0 0 132 46", "<rect x=\"26.0\" y=\"13\" width=\"80.0\" height=\"4\" fill=\"url(#qs-chr)\"></rect><rect x=\"40.0\" y=\"13\" width=\"52.0\" height=\"4\" fill=\"url(#qs-knurl)\"></rect><rect x=\"6.0\" y=\"11.5\" width=\"17\" height=\"7\" rx=\"1.5\" fill=\"url(#qs-chr)\"></rect><rect x=\"23.0\" y=\"9.5\" width=\"3\" height=\"11\" rx=\"1\" fill=\"url(#qs-chr)\"></rect><rect x=\"109.0\" y=\"11.5\" width=\"17\" height=\"7\" rx=\"1.5\" fill=\"url(#qs-chr)\"></rect><rect x=\"106.0\" y=\"9.5\" width=\"3\" height=\"11\" rx=\"1\" fill=\"url(#qs-chr)\"></rect><path d=\"M6.0 27 V39 M126.0 27 V39 M6.0 33 H45.0 M87.0 33 H126.0\" class=\"qs-cote\" stroke-width=\"1\" fill=\"none\"></path><path d=\"M6.0 33 l4 -2.5 v5 z M126.0 33 l-4 -2.5 v5 z\" class=\"qs-cote-f\"></path><text x=\"66.0\" y=\"37.5\" text-anchor=\"middle\" font-family=\"Figtree, sans-serif\" font-size=\"13\" font-weight=\"600\" class=\"qs-cote-f\">120 cm</text>"], ["0 0 132 46", "<path d=\"M26.0 15 L40.4 15 L46.8 10 L54.8 20 L61.2 15 L70.8 15 L77.2 20 L85.2 10 L91.6 15 L106.0 15\" fill=\"none\" stroke=\"#5C5C66\" stroke-width=\"4.6\" stroke-linejoin=\"round\"></path><path d=\"M26.0 15 L40.4 15 L46.8 10 L54.8 20 L61.2 15 L70.8 15 L77.2 20 L85.2 10 L91.6 15 L106.0 15\" fill=\"none\" stroke=\"#C9C9CF\" stroke-width=\"2.6\" stroke-linejoin=\"round\"></path><path d=\"M26.0 15 L40.4 15 L46.8 10 L54.8 20 L61.2 15 L70.8 15 L77.2 20 L85.2 10 L91.6 15 L106.0 15\" fill=\"none\" stroke=\"#FFFFFF\" stroke-width=\"0.8\" stroke-linejoin=\"round\" transform=\"translate(0 -0.8)\" opacity=\"0.8\"></path><rect x=\"6.0\" y=\"11.5\" width=\"17\" height=\"7\" rx=\"1.5\" fill=\"url(#qs-chr)\"></rect><rect x=\"23.0\" y=\"9.5\" width=\"3\" height=\"11\" rx=\"1\" fill=\"url(#qs-chr)\"></rect><rect x=\"109.0\" y=\"11.5\" width=\"17\" height=\"7\" rx=\"1.5\" fill=\"url(#qs-chr)\"></rect><rect x=\"106.0\" y=\"9.5\" width=\"3\" height=\"11\" rx=\"1\" fill=\"url(#qs-chr)\"></rect><path d=\"M6.0 27 V39 M126.0 27 V39 M6.0 33 H45.0 M87.0 33 H126.0\" class=\"qs-cote\" stroke-width=\"1\" fill=\"none\"></path><path d=\"M6.0 33 l4 -2.5 v5 z M126.0 33 l-4 -2.5 v5 z\" class=\"qs-cote-f\"></path><text x=\"66.0\" y=\"37.5\" text-anchor=\"middle\" font-family=\"Figtree, sans-serif\" font-size=\"13\" font-weight=\"600\" class=\"qs-cote-f\">120 cm</text>"], ["0 0 132 46", "<path d=\"M26.0 15 L40.4 15 L46.8 10 L54.8 20 L61.2 15 L70.8 15 L77.2 20 L85.2 10 L91.6 15 L106.0 15\" fill=\"none\" stroke=\"#5C5C66\" stroke-width=\"4.6\" stroke-linejoin=\"round\"></path><path d=\"M26.0 15 L40.4 15 L46.8 10 L54.8 20 L61.2 15 L70.8 15 L77.2 20 L85.2 10 L91.6 15 L106.0 15\" fill=\"none\" stroke=\"#C9C9CF\" stroke-width=\"2.6\" stroke-linejoin=\"round\"></path><path d=\"M26.0 15 L40.4 15 L46.8 10 L54.8 20 L61.2 15 L70.8 15 L77.2 20 L85.2 10 L91.6 15 L106.0 15\" fill=\"none\" stroke=\"#FFFFFF\" stroke-width=\"0.8\" stroke-linejoin=\"round\" transform=\"translate(0 -0.8)\" opacity=\"0.8\"></path><rect x=\"6.0\" y=\"9.0\" width=\"17\" height=\"12\" rx=\"1.5\" fill=\"url(#qs-chr)\"></rect><rect x=\"23.0\" y=\"7.0\" width=\"3\" height=\"16\" rx=\"1\" fill=\"url(#qs-chr)\"></rect><rect x=\"109.0\" y=\"9.0\" width=\"17\" height=\"12\" rx=\"1.5\" fill=\"url(#qs-chr)\"></rect><rect x=\"106.0\" y=\"7.0\" width=\"3\" height=\"16\" rx=\"1\" fill=\"url(#qs-chr)\"></rect><path d=\"M6.0 27 V39 M126.0 27 V39 M6.0 33 H45.0 M87.0 33 H126.0\" class=\"qs-cote\" stroke-width=\"1\" fill=\"none\"></path><path d=\"M6.0 33 l4 -2.5 v5 z M126.0 33 l-4 -2.5 v5 z\" class=\"qs-cote-f\"></path><text x=\"66.0\" y=\"37.5\" text-anchor=\"middle\" font-family=\"Figtree, sans-serif\" font-size=\"13\" font-weight=\"600\" class=\"qs-cote-f\">120 cm</text>"], ["0 0 132 46", "<rect x=\"43.0\" y=\"6\" width=\"46.0\" height=\"18\" rx=\"3\" fill=\"none\" stroke=\"#5C5C66\" stroke-width=\"3.6\"></rect><rect x=\"43.0\" y=\"6\" width=\"46.0\" height=\"18\" rx=\"3\" fill=\"none\" stroke=\"#C9C9CF\" stroke-width=\"1.8\"></rect><rect x=\"57.56\" y=\"6\" width=\"4\" height=\"18\" fill=\"url(#qs-chr)\"></rect><rect x=\"57.56\" y=\"9\" width=\"4\" height=\"12\" fill=\"url(#qs-knurl)\"></rect><rect x=\"70.44\" y=\"6\" width=\"4\" height=\"18\" fill=\"url(#qs-chr)\"></rect><rect x=\"70.44\" y=\"9\" width=\"4\" height=\"12\" fill=\"url(#qs-knurl)\"></rect><rect x=\"23.0\" y=\"11.5\" width=\"17\" height=\"7\" rx=\"1.5\" fill=\"url(#qs-chr)\"></rect><rect x=\"40.0\" y=\"9.5\" width=\"3\" height=\"11\" rx=\"1\" fill=\"url(#qs-chr)\"></rect><rect x=\"92.0\" y=\"11.5\" width=\"17\" height=\"7\" rx=\"1.5\" fill=\"url(#qs-chr)\"></rect><rect x=\"89.0\" y=\"9.5\" width=\"3\" height=\"11\" rx=\"1\" fill=\"url(#qs-chr)\"></rect><path d=\"M23.0 27 V39 M109.0 27 V39 M23.0 33 H45.0 M87.0 33 H109.0\" class=\"qs-cote\" stroke-width=\"1\" fill=\"none\"></path><path d=\"M23.0 33 l4 -2.5 v5 z M109.0 33 l-4 -2.5 v5 z\" class=\"qs-cote-f\"></path><text x=\"66.0\" y=\"37.5\" text-anchor=\"middle\" font-family=\"Figtree, sans-serif\" font-size=\"13\" font-weight=\"600\" class=\"qs-cote-f\">86 cm</text>"]]};
   let st = null;                       // état du volet ouvert
   const $ = id => document.getElementById(id);
@@ -182,9 +186,9 @@ const QuickInput = (() => {
     const w = Math.max(0, num(wIn && wIn.value) || 0);
     if (mode === 'barbell' || mode === 'shortbar' || mode === 'platemachine') {
       st.sides = mode === 'platemachine' ? Q.plateMachineSides(exName) : 2;
-      if (mode === 'platemachine') { st.empty = Q.machineEmptyFor(localStorage, exName); st.base = st.empty || 0; }
-      else { st.bar = Q.barWeightFor(localStorage, exName); st.base = Q.baseWeightFor(localStorage, exName, mode); }
-      const kept = Q.platesFor(localStorage, exName, w, st.base, st.sides);   // disques posés la dernière fois
+      if (mode === 'platemachine') { st.empty = Q.machineEmptyFor(mem, exName); st.base = st.empty || 0; }
+      else { st.bar = Q.barWeightFor(mem, exName); st.base = Q.baseWeightFor(mem, exName, mode); }
+      const kept = Q.platesFor(mem, exName, w, st.base, st.sides);   // disques posés la dernière fois
       const d = kept ? { plates: kept, rest: 0 } : w > 0 ? Q.computeBarbellLoad(w, st.base, Q.rackFor(mode), st.sides) : { plates: [], rest: 0 };
       st.plates = d.plates;
       st.override = w > 0 && (d.belowBar || Math.abs(d.rest) > 0.001) ? w : null;
@@ -217,7 +221,7 @@ const QuickInput = (() => {
   function onEmptyInput(e) {
     if (!st || !e.target.closest('.qs-empty')) return;
     const n = Q.parseQuickNum(e.target.value);
-    Q.rememberMachineEmpty(localStorage, st.exName, e.target.value);
+    Q.rememberMachineEmpty(mem, st.exName, e.target.value);
     st.empty = n != null && n >= 0 ? n : null; st.base = st.empty || 0; st.override = null;
     $('quick-sheet').querySelector('.qs-num').textContent = fr(loadTotal());
   }
@@ -245,8 +249,8 @@ const QuickInput = (() => {
       case 'chooser': st.chooser = true; break;
       case 'pick-bar': {
         const val = st.mode === 'shortbar' ? v : n;
-        Q.rememberBarWeight(localStorage, st.exName, val);
-        st.bar = val; st.base = Q.baseWeightFor(localStorage, st.exName, st.mode); st.chooser = false;
+        Q.rememberBarWeight(mem, st.exName, val);
+        st.bar = val; st.base = Q.baseWeightFor(mem, st.exName, st.mode); st.chooser = false;
         if (st.override != null) { const d = Q.computeBarbellLoad(st.override, st.base, Q.rackFor(st.mode), st.sides); if (!d.belowBar && !(Math.abs(d.rest) > 0.001)) { st.plates = d.plates; st.override = null; } }
         break;
       }
@@ -273,7 +277,7 @@ const QuickInput = (() => {
     let w = null;
     if (mode === 'barbell' || mode === 'shortbar' || mode === 'platemachine') {
       w = String(loadTotal());
-      if (st.override == null) Q.rememberPlates(localStorage, st.exName, st.plates);
+      if (st.override == null) Q.rememberPlates(mem, st.exName, st.plates);
     }
     else if (mode === 'dumbbell') w = String(st.unit);
     else if (mode === 'machine') w = String(st.weight);

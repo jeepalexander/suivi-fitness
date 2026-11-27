@@ -584,6 +584,7 @@ function normalizePrograms() {
   mergeRemovedExercises();
   if (!Array.isArray(state.programs)) state.programs = [];
   if (!state.deload || typeof state.deload !== 'object') state.deload = { shift: 0, postponedAt: null };
+  try { QuickLogic.adoptMemory(state, localStorage); } catch (e) { /* mémoire de la saisie rapide : facultative */ }
   let seenActive = false;
   state.programs.forEach(p => {
     if (!Array.isArray(p.sessions)) p.sessions = [];

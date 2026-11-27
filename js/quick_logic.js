@@ -199,6 +199,39 @@ const QuickLogic = (() => {
     write(store, PLATES_KEY, all);
   }
 
+  // Mémoire de la saisie rapide dans la sauvegarde (1.8.107) : barre choisie, poids à vide des machines et disques
+  // posés vont dans state.quickMemory (sauvegarde téléphone et Drive) et sont recopiés dans localStorage.
+  // adoptMemory : au démarrage et après une restauration, complète state.quickMemory avec ce que le téléphone
+  // savait déjà (anciennes versions, ou sauvegarde qui n'en a pas) et recopie dans le téléphone ce qu'elle apporte.
+  const MEMORY_KEYS = [BAR_KEY, EMPTY_KEY, PLATES_KEY];
+  const isObj = v => !!v && typeof v === 'object' && !Array.isArray(v);
+  function adoptMemory(s, store) {
+    if (!isObj(s)) return;
+    const q = isObj(s.quickMemory) ? s.quickMemory : {};
+    MEMORY_KEYS.forEach(k => {
+      if (isObj(q[k])) write(store, k, q[k]);
+      else { delete q[k]; const v = read(store, k); if (isObj(v) && Object.keys(v).length) q[k] = v; }
+    });
+    if (Object.keys(q).length) s.quickMemory = q; else delete s.quickMemory;
+  }
+  // « store » pour les fonctions ci-dessus : lit dans l'état, écrit dans l'état (puis onSave) et dans le téléphone
+  function memoryStore(getState, mirror, onSave) {
+    return {
+      getItem(k) {
+        const s = getState(), q = s && s.quickMemory;
+        return q && isObj(q[k]) ? JSON.stringify(q[k]) : mirror.getItem(k);
+      },
+      setItem(k, v) {
+        mirror.setItem(k, v);
+        const s = getState();
+        if (!isObj(s)) return;
+        if (!isObj(s.quickMemory)) s.quickMemory = {};
+        s.quickMemory[k] = JSON.parse(v);
+        if (onSave) onSave();
+      },
+    };
+  }
+
   // Poids de base sous les disques : barre olympique, barre courte ou machine à vide
   function baseWeightFor(store, name, mode) {
     if (mode === 'shortbar') return shortBar(barWeightFor(store, name)).kg;
@@ -215,7 +248,7 @@ const QuickLogic = (() => {
     DUMBBELL_MAX_KG, computeDumbbellRackStart, shiftDumbbellRackStart, buildDumbbellRack, dumbbellTierFor, dumbbellColorFor,
     toSetWeightValue, fromSetWeightValue, DURATION_STEPS, cardioDistanceProfile,
     BAR_KEY, EMPTY_KEY, barWeightFor, rememberBarWeight, machineEmptyFor, rememberMachineEmpty, baseWeightFor,
-    PLATES_KEY, platesFor, rememberPlates,
+    PLATES_KEY, platesFor, rememberPlates, MEMORY_KEYS, adoptMemory, memoryStore,
   };
 })();
 if (typeof module !== 'undefined' && module.exports) module.exports = QuickLogic;

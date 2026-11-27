@@ -127,6 +127,19 @@ with Srv() as url, sync_playwright() as p:
     ouvre(pg, 'Développé couché')
     b.ok('après rechargement : disques 10 + 5 + 5 gardés', pg.evaluate("JSON.stringify(QuickInput.state().plates)") == '[10,5,5]', pg.evaluate("QuickInput.state().plates"))
     act(pg, 'close')
+    # Dans la sauvegarde (1.8.107) : l'état exporté porte la mémoire ; une restauration sur un téléphone vierge la rend
+    sauv = pg.evaluate("JSON.stringify(state)")
+    b.ok('sauvegarde : disques et barre dans l\'état exporté', '"h49_plates"' in sauv and '"h49_bar_weights"' in sauv)
+    pg.evaluate("['h49_plates','h49_bar_weights','h49_machine_empty'].forEach(k => localStorage.removeItem(k)); delete state.quickMemory")
+    pg.evaluate("s => importData({ target: { files: [new File([s], 'sauvegarde.json', { type: 'application/json' })], value: '' } })", sauv)
+    pg.wait_for_timeout(800)
+    pg.evaluate("document.querySelectorAll('.app-dialog .btn, .sheet .btn').forEach(x => { if (/OK/.test(x.textContent)) x.click(); })")
+    b.ok('restauration : mémoire recopiée dans le téléphone', pg.evaluate("JSON.parse(localStorage.getItem('h49_plates') || '{}')['Développé couché']") is not None)
+    ouvrir(pg, SEANCE, 600)
+    c = champ(pg, 'Développé couché'); c.evaluate("(el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }", total.replace('kg', ''))
+    ouvre(pg, 'Développé couché')
+    b.ok('restauration : disques 10 + 5 + 5 retrouvés', pg.evaluate("JSON.stringify(QuickInput.state().plates)") == '[10,5,5]', pg.evaluate("QuickInput.state().plates"))
+    act(pg, 'close')
     # Haltères : × 2 sous l'haltère, 24 kg en tête, la série garde 12
     ouvre(pg, 'Curl biceps')
     act(pg, 'db-set', 12) if pg.locator('#quick-sheet [data-act="db-set"][data-v="12"]').count() else None
@@ -135,6 +148,12 @@ with Srv() as url, sync_playwright() as p:
     b.ok('haltères : « × 2 » affiché et 24 kg en tête', pg.locator('#quick-sheet .qs-x2').count() == 1 and entete(pg) == '24kg', entete(pg))
     act(pg, 'fill')
     b.ok('haltères : la série garde le poids d\'un haltère (12)', champ(pg, 'Curl biceps').input_value() == '12', champ(pg, 'Curl biceps').input_value())
+    ouvre(pg, 'Curl biceps')
+    b.ok('haltères : réouverture sur le même haltère (12 kg, 24 en tête)', pg.evaluate("QuickInput.state().unit") == 12 and entete(pg) == '24kg', (pg.evaluate("QuickInput.state().unit"), entete(pg)))
+    act(pg, 'close')
+    ouvre(pg, 'Curl biceps', 1)
+    b.ok('haltères : série suivante sur le même haltère', pg.evaluate("QuickInput.state().unit") == 12, pg.evaluate("QuickInput.state().unit"))
+    act(pg, 'close')
     # Machine chargée de disques : poids à vide gardé, inclus dans le total ; Mollets assis d'un seul côté
     ouvre(pg, 'Presse à cuisses')
     while pg.locator('#quick-sheet [data-act="unplate"]:not([disabled])').count():

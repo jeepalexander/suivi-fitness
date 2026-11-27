@@ -148,6 +148,36 @@ test('mémoire par exercice : barre et machine à vide', () => {
   assert.equal(Q.barWeightFor(m, 'Squat'), 20);
 });
 
+test('mémoire de la saisie rapide dans la sauvegarde (1.8.107)', () => {
+  const tel = memoire();
+  Q.rememberBarWeight(tel, 'Squat', 15);
+  Q.rememberPlates(tel, 'Squat', [10, 5, 5]);
+  const s = { history: [] };
+  Q.adoptMemory(s, tel);                                          // le téléphone savait déjà : repris dans l'état
+  assert.equal(s.quickMemory[Q.BAR_KEY].Squat, 15);
+  assert.deepEqual(s.quickMemory[Q.PLATES_KEY].Squat, [[10, 5, 5]]);
+  assert.equal(Q.EMPTY_KEY in s.quickMemory, false);
+  const vide = { history: [] };
+  Q.adoptMemory(vide, memoire());
+  assert.equal('quickMemory' in vide, false);                      // rien à garder : pas de clé ajoutée
+  // sauvegarde restaurée sur un autre téléphone : elle apporte sa mémoire, recopiée dans le téléphone
+  const autre = memoire(), r = JSON.parse(JSON.stringify(s));
+  Q.adoptMemory(r, autre);
+  assert.equal(Q.barWeightFor(autre, 'Squat'), 15);
+  assert.deepEqual(Q.platesFor(autre, 'Squat', 55, 15), [10, 5, 5]);
+  // écriture : dans l'état (puis sauvegarde) et dans le téléphone
+  let saves = 0;
+  const etat = { history: [] }, tel2 = memoire();
+  const mem = Q.memoryStore(() => etat, tel2, () => saves++);
+  assert.equal(Q.barWeightFor(mem, 'Squat'), 20);
+  Q.rememberPlates(mem, 'Squat', [20]);
+  assert.deepEqual(etat.quickMemory[Q.PLATES_KEY].Squat, [[20]]);
+  assert.deepEqual(Q.platesFor(tel2, 'Squat', 60, 20), [20]);
+  assert.equal(saves, 1);
+  const sansEtat = Q.memoryStore(() => null, tel2, () => saves++);  // état pas encore chargé : téléphone seul
+  assert.deepEqual(Q.platesFor(sansEtat, 'Squat', 60, 20), [20]);
+});
+
 test('mémoire des disques posés : 10 + 5 + 5 ne redevient pas 20 (1.8.105)', () => {
   const m = memoire();
   assert.equal(Q.platesFor(m, 'Squat', 60, 20), null);

@@ -8,6 +8,13 @@ et ce projet respecte [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 ---
 ---
 
+## [1.8.107] - 2026-11-27
+### Séance (co-auteur : Claude)
+- Saisie rapide : la mémoire par exercice (poids de barre choisi, poids à vide des machines, disques posés) va maintenant dans la sauvegarde, sur le téléphone comme sur Google Drive (`state.quickMemory`). Au démarrage, ce que le téléphone savait déjà y est repris ; une sauvegarde restaurée la recopie dans le téléphone, et une ancienne sauvegarde qui n'en a pas garde celle du téléphone.
+- Haltères : vérifié qu'à la réouverture du volet, l'haltère choisi est bien repris (même série et séries suivantes) ; contrôles ajoutés.
+
+---
+
 ## [1.8.106] - 2026-11-27
 ### Séance (co-auteur : Claude)
 - Saisie rapide : les disques posés à la main sont retrouvés tels quels à la réouverture du volet (10 + 5 + 5 ne redevient plus un disque de 20). L'app retient, pour chaque exercice, les dernières compositions validées par « Remplir la série » ; si la charge du champ correspond à l'une d'elles (même barre ou même poids à vide), elle est reposée, sinon le calcul habituel s'applique. Vaut aussi pour les séries suivantes et après rechargement.
